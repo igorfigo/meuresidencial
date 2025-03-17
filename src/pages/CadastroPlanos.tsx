@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -170,7 +169,8 @@ export const CadastroPlanos = () => {
     try {
       const formattedData = {
         ...data,
-        codigo: data.codigo.toUpperCase()
+        codigo: data.codigo.toUpperCase(),
+        valor: data.valor.replace(',', '.')
       };
       
       let oldPlan = null;
@@ -264,11 +264,7 @@ export const CadastroPlanos = () => {
   };
 
   const formatCurrency = (value: string) => {
-    // Convert any period to comma for display
-    const valueWithComma = value.replace('.', ',');
-    
-    // Format without changing the comma to period
-    return `R$ ${valueWithComma}`;
+    return `R$ ${value}`;
   };
 
   const formatDate = (isoDate: string) => {

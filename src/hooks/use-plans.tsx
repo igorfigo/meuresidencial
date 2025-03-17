@@ -27,7 +27,14 @@ export const usePlans = () => {
         .order('nome', { ascending: true });
 
       if (fetchError) throw new Error(fetchError.message);
-      setPlans(data || []);
+      
+      // Convert decimal points to commas for the Brazilian currency format
+      const formattedData = data?.map(plan => ({
+        ...plan,
+        valor: plan.valor.replace('.', ',')
+      })) || [];
+      
+      setPlans(formattedData);
     } catch (err) {
       console.error('Error fetching plans:', err);
       setError(err instanceof Error ? err : new Error('Unknown error fetching plans'));
