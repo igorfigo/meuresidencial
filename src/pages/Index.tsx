@@ -7,7 +7,7 @@ const Index = () => {
   
   useEffect(() => {
     // Redirect to the login page
-    navigate('/login');
+    navigate('/login', { replace: true });
   }, [navigate]);
 
   return null;
