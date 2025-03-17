@@ -76,6 +76,34 @@ export default {
 					900: '#0a456f',
 					950: '#072b49',
 				},
+				// New materialize theme colors
+				materialize: {
+					purple: {
+						DEFAULT: '#7B68EE',
+						dark: '#1A1F2C',
+						darker: '#161B28',
+						light: '#9B87F5',
+						accent: '#8B5CF6',
+					},
+					blue: {
+						DEFAULT: '#5B8AF0',
+						light: '#7BA1FF',
+					},
+					green: {
+						DEFAULT: '#48BB78',
+						light: '#86F4B1',
+					},
+					yellow: {
+						DEFAULT: '#F6E05E',
+						accent: '#FFC107',
+					},
+					gray: {
+						dark: '#2A3042',
+						DEFAULT: '#4B5563',
+						light: '#9CA3AF',
+						lighter: '#F3F4F6',
+					},
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

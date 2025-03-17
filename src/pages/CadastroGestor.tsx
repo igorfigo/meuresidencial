@@ -15,7 +15,6 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { useAuth } from '@/lib/auth';
 
 type FormFields = {
   matricula: string;
@@ -68,7 +67,6 @@ const CadastroGestor = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
-  const { user } = useAuth();
 
   const form = useForm<FormFields>({
     defaultValues: {
@@ -280,7 +278,7 @@ const CadastroGestor = () => {
 
     setIsSubmitting(true);
     try {
-      await saveCondominiumData(formattedData, user?.email || null);
+      await saveCondominiumData(formattedData);
       toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
       
       if (matriculaSearch === data.matricula) {
@@ -426,7 +424,7 @@ const CadastroGestor = () => {
       <div className="animate-fade-in">
         <header className="mb-6">
           <div className="flex items-center">
-            <Building className="h-6 w-6 mr-2 text-brand-600" />
+            <Building className="h-6 w-6 mr-2 text-materialize-purple-light" />
             <h1 className="text-3xl font-bold">Cadastro Gestor</h1>
           </div>
           <p className="text-muted-foreground mt-1">
@@ -450,7 +448,7 @@ const CadastroGestor = () => {
                   type="button" 
                   onClick={handleMatriculaSearch} 
                   disabled={isSearching} 
-                  className="bg-brand-600 hover:bg-brand-700">
+                  className="bg-materialize-purple-light hover:bg-materialize-purple-accent">
                   {isSearching ? "Buscando..." : <Search className="h-4 w-4 mr-2" />}
                   {isSearching ? "" : "Buscar"}
                 </Button>
@@ -503,7 +501,7 @@ const CadastroGestor = () => {
                       type="button" 
                       onClick={handleCepSearch}
                       disabled={isLoadingCep}
-                      className="bg-brand-600 hover:bg-brand-700"
+                      className="bg-materialize-purple-light hover:bg-materialize-purple-accent"
                     >
                       {isLoadingCep ? "Buscando..." : <Search className="h-4 w-4" />}
                     </Button>
@@ -814,7 +812,7 @@ const CadastroGestor = () => {
               <Button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="bg-brand-600 hover:bg-brand-700"
+                className="bg-materialize-purple-light hover:bg-materialize-purple-accent"
                 size="lg"
               >
                 <Save className="h-4 w-4 mr-2" />
@@ -827,7 +825,7 @@ const CadastroGestor = () => {
         {filteredChangeLogs.length > 0 && (
           <Card className="mt-8 mb-8 p-6">
             <div className="flex items-center mb-4">
-              <History className="h-5 w-5 mr-2 text-brand-600" />
+              <History className="h-5 w-5 mr-2 text-materialize-purple-light" />
               <h2 className="text-xl font-semibold">Histórico de Alterações</h2>
             </div>
             
@@ -913,3 +911,4 @@ const CadastroGestor = () => {
 };
 
 export default CadastroGestor;
+
