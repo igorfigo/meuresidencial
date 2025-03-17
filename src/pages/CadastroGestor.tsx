@@ -14,6 +14,7 @@ import { saveCondominiumData, getCondominiumByMatricula, getCondominiumChangeLog
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 type FormFields = {
   matricula: string;
@@ -60,8 +61,12 @@ const CadastroGestor = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [matriculaSearch, setMatriculaSearch] = useState('');
   const [changeLogs, setChangeLogs] = useState<ChangeLogEntry[]>([]);
+  const [filteredChangeLogs, setFilteredChangeLogs] = useState<ChangeLogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [isExistingRecord, setIsExistingRecord] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const form = useForm<FormFields>({
     defaultValues: {
@@ -141,6 +146,23 @@ const CadastroGestor = () => {
       setIsLoadingCep(false);
     }
   };
+
+  useEffect(() => {
+    if (changeLogs.length > 0) {
+      const validChanges = changeLogs.filter(log => {
+        if (log.valor_anterior === null && log.valor_novo === null) return false;
+        if (log.valor_anterior === log.valor_novo) return false;
+        return true;
+      });
+      
+      setFilteredChangeLogs(validChanges);
+      setTotalPages(Math.max(1, Math.ceil(validChanges.length / ITEMS_PER_PAGE)));
+      setCurrentPage(1);
+    } else {
+      setFilteredChangeLogs([]);
+      setTotalPages(1);
+    }
+  }, [changeLogs]);
 
   const loadChangeLogs = async (matricula: string) => {
     if (!matricula) return;
@@ -361,6 +383,40 @@ const CadastroGestor = () => {
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
     return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
+  };
+
+  const getCurrentItems = () => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredChangeLogs.slice(startIndex, endIndex);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 3;
+    
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+      const endPage = Math.min(startPage + maxPagesToShow - 1, totalPages);
+      
+      if (endPage - startPage + 1 < maxPagesToShow) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+    }
+    
+    return pageNumbers;
   };
 
   return (
@@ -766,7 +822,7 @@ const CadastroGestor = () => {
           </form>
         </Form>
         
-        {changeLogs.length > 0 && (
+        {filteredChangeLogs.length > 0 && (
           <Card className="mt-8 mb-8 p-6">
             <div className="flex items-center mb-4">
               <History className="h-5 w-5 mr-2 text-brand-600" />
@@ -788,7 +844,7 @@ const CadastroGestor = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {changeLogs.map((log) => (
+                  {getCurrentItems().map((log) => (
                     <TableRow key={log.id}>
                       <TableCell>{formatDate(log.data_alteracao)}</TableCell>
                       <TableCell className="font-medium">{log.campo}</TableCell>
@@ -800,6 +856,53 @@ const CadastroGestor = () => {
                 </TableBody>
               </Table>
             </ScrollArea>
+            
+            {totalPages > 1 && (
+              <div className="mt-4">
+                <Pagination>
+                  <PaginationContent>
+                    {currentPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          href="#" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(currentPage - 1);
+                          }} 
+                        />
+                      </PaginationItem>
+                    )}
+                    
+                    {getPageNumbers().map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink 
+                          href="#" 
+                          isActive={page === currentPage}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(page);
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    
+                    {currentPage < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext 
+                          href="#" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(currentPage + 1);
+                          }} 
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </Card>
         )}
       </div>
