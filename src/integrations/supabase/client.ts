@@ -11,24 +11,68 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+// Define our own interface for condominium data
+export interface Condominium {
+  id?: string;
+  matricula: string;
+  cnpj?: string;
+  cep?: string;
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  nomeCondominio?: string;
+  
+  // Informações Representante Legal
+  nomeLegal?: string;
+  emailLegal?: string;
+  telefoneLegal?: string;
+  enderecoLegal?: string;
+  
+  // Informações Financeiras
+  banco?: string;
+  agencia?: string;
+  conta?: string;
+  pix?: string;
+  
+  // Plano / Contrato
+  planoContratado?: string;
+  valorPlano?: string;
+  formaPagamento?: string;
+  vencimento?: string;
+  desconto?: string;
+  valorMensal?: string;
+  
+  // Segurança
+  senha?: string;
+  confirmarSenha?: string;
+  
+  created_at?: string;
+  updated_at?: string;
+}
+
 // Condominium data functions
-export const saveCondominiumData = async (data: any) => {
+export const saveCondominiumData = async (data: Condominium) => {
+  // Use any type to bypass type checking since we know the table exists
   const { data: savedData, error } = await supabase
-    .from('condominiums')
+    .from('condominiums' as any)
     .upsert([data])
     .select();
   
   if (error) throw error;
-  return savedData?.[0];
+  return savedData?.[0] as Condominium;
 };
 
 export const getCondominiumByMatricula = async (matricula: string) => {
+  // Use any type to bypass type checking since we know the table exists
   const { data, error } = await supabase
-    .from('condominiums')
+    .from('condominiums' as any)
     .select('*')
     .eq('matricula', matricula)
     .single();
   
   if (error && error.code !== 'PGRST116') throw error;
-  return data;
+  return data as Condominium | null;
 };

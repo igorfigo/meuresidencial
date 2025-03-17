@@ -9,7 +9,102 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      condominiums: {
+        Row: {
+          agencia: string | null
+          bairro: string | null
+          banco: string | null
+          cep: string | null
+          cidade: string | null
+          cnpj: string | null
+          complemento: string | null
+          confirmarsenha: string | null
+          conta: string | null
+          created_at: string | null
+          desconto: string | null
+          emaillegal: string | null
+          enderecolegal: string | null
+          estado: string | null
+          formapagamento: string | null
+          id: string
+          matricula: string
+          nomecondominio: string | null
+          nomelegal: string | null
+          numero: string | null
+          pix: string | null
+          planocontratado: string | null
+          rua: string | null
+          senha: string | null
+          telefonelegal: string | null
+          updated_at: string | null
+          valormensal: string | null
+          valorplano: string | null
+          vencimento: string | null
+        }
+        Insert: {
+          agencia?: string | null
+          bairro?: string | null
+          banco?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          complemento?: string | null
+          confirmarsenha?: string | null
+          conta?: string | null
+          created_at?: string | null
+          desconto?: string | null
+          emaillegal?: string | null
+          enderecolegal?: string | null
+          estado?: string | null
+          formapagamento?: string | null
+          id?: string
+          matricula: string
+          nomecondominio?: string | null
+          nomelegal?: string | null
+          numero?: string | null
+          pix?: string | null
+          planocontratado?: string | null
+          rua?: string | null
+          senha?: string | null
+          telefonelegal?: string | null
+          updated_at?: string | null
+          valormensal?: string | null
+          valorplano?: string | null
+          vencimento?: string | null
+        }
+        Update: {
+          agencia?: string | null
+          bairro?: string | null
+          banco?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          complemento?: string | null
+          confirmarsenha?: string | null
+          conta?: string | null
+          created_at?: string | null
+          desconto?: string | null
+          emaillegal?: string | null
+          enderecolegal?: string | null
+          estado?: string | null
+          formapagamento?: string | null
+          id?: string
+          matricula?: string
+          nomecondominio?: string | null
+          nomelegal?: string | null
+          numero?: string | null
+          pix?: string | null
+          planocontratado?: string | null
+          rua?: string | null
+          senha?: string | null
+          telefonelegal?: string | null
+          updated_at?: string | null
+          valormensal?: string | null
+          valorplano?: string | null
+          vencimento?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
