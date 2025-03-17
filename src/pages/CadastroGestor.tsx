@@ -17,6 +17,7 @@ const CadastroGestor = () => {
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [matriculaSearch, setMatriculaSearch] = useState('');
 
   const form = useForm({
     defaultValues: {
@@ -58,7 +59,7 @@ const CadastroGestor = () => {
     }
   });
 
-  const { watch, setValue, getValues } = form;
+  const { watch, setValue, register } = form;
   
   const cep = watch('cep');
   const numero = watch('numero');
@@ -83,7 +84,7 @@ const CadastroGestor = () => {
   }, [valorPlano, desconto, setValue]);
 
   const handleCepSearch = async () => {
-    const cepValue = getValues('cep').replace(/\D/g, '');
+    const cepValue = form.getValues('cep').replace(/\D/g, '');
     if (cepValue.length !== 8) {
       toast.error('CEP inválido. Digite um CEP válido com 8 dígitos.');
       return;
@@ -109,16 +110,18 @@ const CadastroGestor = () => {
   };
 
   const handleMatriculaSearch = async () => {
-    const matricula = getValues('matricula');
-    if (!matricula) {
+    if (!matriculaSearch) {
       toast.error('Por favor, informe uma matrícula para buscar.');
       return;
     }
 
     setIsSearching(true);
     try {
-      const data = await getCondominiumByMatricula(matricula);
+      const data = await getCondominiumByMatricula(matriculaSearch);
       if (data) {
+        // Reset form to default values
+        form.reset();
+        
         // Populate all form fields with the retrieved data
         Object.entries(data).forEach(([key, value]) => {
           if (value !== null && form.getValues(key as any) !== undefined) {
@@ -148,6 +151,8 @@ const CadastroGestor = () => {
     try {
       await saveCondominiumData(data);
       toast.success('Cadastro realizado com sucesso!');
+      // Clear form after successful save
+      form.reset();
     } catch (error) {
       console.error('Error saving condominium data:', error);
       toast.error('Erro ao salvar dados. Tente novamente mais tarde.');
@@ -231,8 +236,8 @@ const CadastroGestor = () => {
                 <Input 
                   id="matriculaSearch" 
                   placeholder="Digite a matrícula para buscar" 
-                  value={form.getValues('matricula')} 
-                  onChange={(e) => setValue('matricula', e.target.value)}
+                  value={matriculaSearch}
+                  onChange={(e) => setMatriculaSearch(e.target.value)}
                   className="flex-1" 
                 />
                 <Button 
@@ -248,383 +253,363 @@ const CadastroGestor = () => {
           </div>
         </Card>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-8">
-          {/* Informações Condomínio */}
-          <Card className="form-section p-6">
-            <h2 className="text-xl font-semibold mb-4">Informações Condomínio</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="matricula">Matrícula</Label>
-                <Input
-                  id="matricula"
-                  name="matricula"
-                  value={form.getValues('matricula')}
-                  readOnly
-                  disabled
-                  className="bg-gray-100"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Este campo é gerado automaticamente após preencher CEP e Número.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cnpj">CNPJ</Label>
-                <Input
-                  id="cnpj"
-                  name="cnpj"
-                  value={form.getValues('cnpj')}
-                  onChange={handleInputChange}
-                  placeholder="00.000.000/0001-00"
-                />
-              </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-8">
+            {/* Informações Condomínio */}
+            <Card className="form-section p-6">
+              <h2 className="text-xl font-semibold mb-4">Informações Condomínio</h2>
               
-              <div className="space-y-2">
-                <Label htmlFor="cep">CEP</Label>
-                <div className="flex space-x-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="matricula">Matrícula</Label>
                   <Input
-                    id="cep"
-                    name="cep"
-                    value={form.getValues('cep')}
-                    onChange={handleInputChange}
-                    placeholder="00000-000"
-                    className="flex-1"
+                    id="matricula"
+                    {...register('matricula')}
+                    readOnly
+                    disabled
+                    className="bg-gray-100"
                   />
-                  <Button 
-                    type="button" 
-                    onClick={handleCepSearch}
-                    disabled={isLoadingCep}
-                    className="bg-brand-600 hover:bg-brand-700"
-                  >
-                    {isLoadingCep ? "Buscando..." : <Search className="h-4 w-4" />}
-                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Este campo é gerado automaticamente após preencher CEP e Número.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cnpj">CNPJ</Label>
+                  <Input
+                    id="cnpj"
+                    {...register('cnpj')}
+                    onChange={handleInputChange}
+                    placeholder="00.000.000/0001-00"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cep">CEP</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      id="cep"
+                      {...register('cep')}
+                      onChange={handleInputChange}
+                      placeholder="00000-000"
+                      className="flex-1"
+                    />
+                    <Button 
+                      type="button" 
+                      onClick={handleCepSearch}
+                      disabled={isLoadingCep}
+                      className="bg-brand-600 hover:bg-brand-700"
+                    >
+                      {isLoadingCep ? "Buscando..." : <Search className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="nomeCondominio">Nome do Condomínio</Label>
+                  <Input
+                    id="nomeCondominio"
+                    {...register('nomeCondominio')}
+                    onChange={handleInputChange}
+                    placeholder="Nome do Condomínio"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="rua">Rua</Label>
+                  <Input
+                    id="rua"
+                    {...register('rua')}
+                    onChange={handleInputChange}
+                    placeholder="Rua / Avenida"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="numero">Número</Label>
+                  <Input
+                    id="numero"
+                    {...register('numero')}
+                    onChange={handleInputChange}
+                    placeholder="Número"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="complemento">Complemento</Label>
+                  <Input
+                    id="complemento"
+                    {...register('complemento')}
+                    onChange={handleInputChange}
+                    placeholder="Complemento"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bairro">Bairro</Label>
+                  <Input
+                    id="bairro"
+                    {...register('bairro')}
+                    onChange={handleInputChange}
+                    placeholder="Bairro"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cidade">Cidade</Label>
+                  <Input
+                    id="cidade"
+                    {...register('cidade')}
+                    onChange={handleInputChange}
+                    placeholder="Cidade"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="estado">Estado</Label>
+                  <Input
+                    id="estado"
+                    {...register('estado')}
+                    onChange={handleInputChange}
+                    placeholder="Estado"
+                  />
                 </div>
               </div>
+            </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="nomeCondominio">Nome do Condomínio</Label>
-                <Input
-                  id="nomeCondominio"
-                  name="nomeCondominio"
-                  value={form.getValues('nomeCondominio')}
-                  onChange={handleInputChange}
-                  placeholder="Nome do Condomínio"
-                />
-              </div>
+            {/* Informações Representante Legal */}
+            <Card className="form-section p-6">
+              <h2 className="text-xl font-semibold mb-4">Informações Representante Legal</h2>
               
-              <div className="space-y-2">
-                <Label htmlFor="rua">Rua</Label>
-                <Input
-                  id="rua"
-                  name="rua"
-                  value={form.getValues('rua')}
-                  onChange={handleInputChange}
-                  placeholder="Rua / Avenida"
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nomeLegal">Nome Completo</Label>
+                  <Input
+                    id="nomeLegal"
+                    {...register('nomeLegal')}
+                    onChange={handleInputChange}
+                    placeholder="Nome completo do representante"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="numero">Número</Label>
-                <Input
-                  id="numero"
-                  name="numero"
-                  value={form.getValues('numero')}
-                  onChange={handleInputChange}
-                  placeholder="Número"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="emailLegal">E-mail</Label>
+                  <Input
+                    id="emailLegal"
+                    {...register('emailLegal')}
+                    type="email"
+                    onChange={handleInputChange}
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="telefoneLegal">Número de Telefone</Label>
+                  <Input
+                    id="telefoneLegal"
+                    {...register('telefoneLegal')}
+                    onChange={handleInputChange}
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="enderecoLegal">Endereço Residencial</Label>
+                  <Input
+                    id="enderecoLegal"
+                    {...register('enderecoLegal')}
+                    onChange={handleInputChange}
+                    placeholder="Endereço completo"
+                  />
+                </div>
               </div>
+            </Card>
+
+            {/* Informações Financeiras */}
+            <Card className="form-section p-6">
+              <h2 className="text-xl font-semibold mb-4">Informações Financeiras</h2>
               
-              <div className="space-y-2">
-                <Label htmlFor="complemento">Complemento</Label>
-                <Input
-                  id="complemento"
-                  name="complemento"
-                  value={form.getValues('complemento')}
-                  onChange={handleInputChange}
-                  placeholder="Complemento"
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="banco">Banco</Label>
+                  <Select 
+                    value={form.getValues('banco')}
+                    onValueChange={(value) => setValue('banco', value)}
+                  >
+                    <SelectTrigger id="banco">
+                      <SelectValue placeholder="Selecione o banco" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {bancos.map((banco) => (
+                          <SelectItem key={banco} value={banco}>
+                            {banco}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="bairro">Bairro</Label>
-                <Input
-                  id="bairro"
-                  name="bairro"
-                  value={form.getValues('bairro')}
-                  onChange={handleInputChange}
-                  placeholder="Bairro"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="agencia">Agência</Label>
+                  <Input
+                    id="agencia"
+                    {...register('agencia')}
+                    onChange={handleInputChange}
+                    placeholder="Número da agência"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="conta">Conta</Label>
+                  <Input
+                    id="conta"
+                    {...register('conta')}
+                    onChange={handleInputChange}
+                    placeholder="Número da conta"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pix">PIX</Label>
+                  <Input
+                    id="pix"
+                    {...register('pix')}
+                    onChange={handleInputChange}
+                    placeholder="Chave PIX"
+                  />
+                </div>
               </div>
+            </Card>
+
+            {/* Plano / Contrato */}
+            <Card className="form-section p-6">
+              <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
               
-              <div className="space-y-2">
-                <Label htmlFor="cidade">Cidade</Label>
-                <Input
-                  id="cidade"
-                  name="cidade"
-                  value={form.getValues('cidade')}
-                  onChange={handleInputChange}
-                  placeholder="Cidade"
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="planoContratado">Plano Contratado</Label>
+                  <Input
+                    id="planoContratado"
+                    value="Plano Standard"
+                    readOnly
+                    className="bg-gray-100"
+                  />
+                  <input type="hidden" {...register('planoContratado')} value="standard" />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="estado">Estado</Label>
-                <Input
-                  id="estado"
-                  name="estado"
-                  value={form.getValues('estado')}
-                  onChange={handleInputChange}
-                  placeholder="Estado"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="valorPlano">Valor do Plano (R$)</Label>
+                  <Input
+                    id="valorPlano"
+                    {...register('valorPlano')}
+                    type="number"
+                    onChange={handleInputChange}
+                    placeholder="0,00"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
+                  <Input
+                    id="formaPagamento"
+                    value="PIX"
+                    readOnly
+                    className="bg-gray-100"
+                  />
+                  <input type="hidden" {...register('formaPagamento')} value="pix" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="vencimento">Vencimento</Label>
+                  <Select 
+                    value={form.getValues('vencimento')}
+                    onValueChange={(value) => setValue('vencimento', value)}
+                  >
+                    <SelectTrigger id="vencimento">
+                      <SelectValue placeholder="Dia do vencimento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {Array.from({ length: 28 }, (_, i) => i + 1).map(day => (
+                          <SelectItem key={day} value={day.toString()}>
+                            Dia {day}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="desconto">Desconto (R$)</Label>
+                  <Input
+                    id="desconto"
+                    {...register('desconto')}
+                    type="number"
+                    onChange={handleInputChange}
+                    placeholder="0,00"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="valorMensal">Valor Mensal (R$)</Label>
+                  <Input
+                    id="valorMensal"
+                    {...register('valorMensal')}
+                    readOnly
+                    className="bg-gray-100"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Valor do plano menos o desconto.
+                  </p>
+                </div>
               </div>
+            </Card>
+
+            {/* Segurança */}
+            <Card className="form-section p-6">
+              <h2 className="text-xl font-semibold mb-4">Segurança</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="senha">Senha</Label>
+                  <Input
+                    id="senha"
+                    {...register('senha')}
+                    type="password"
+                    onChange={handleInputChange}
+                    placeholder="Digite uma senha segura"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
+                  <Input
+                    id="confirmarSenha"
+                    {...register('confirmarSenha')}
+                    type="password"
+                    onChange={handleInputChange}
+                    placeholder="Confirme sua senha"
+                  />
+                </div>
+              </div>
+            </Card>
+
+            <div className="flex justify-end">
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="bg-brand-600 hover:bg-brand-700"
+                size="lg"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {isSubmitting ? 'Salvando...' : 'Salvar Cadastro'}
+              </Button>
             </div>
-          </Card>
-
-          {/* Informações Representante Legal */}
-          <Card className="form-section p-6">
-            <h2 className="text-xl font-semibold mb-4">Informações Representante Legal</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="nomeLegal">Nome Completo</Label>
-                <Input
-                  id="nomeLegal"
-                  name="nomeLegal"
-                  value={form.getValues('nomeLegal')}
-                  onChange={handleInputChange}
-                  placeholder="Nome completo do representante"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="emailLegal">E-mail</Label>
-                <Input
-                  id="emailLegal"
-                  name="emailLegal"
-                  type="email"
-                  value={form.getValues('emailLegal')}
-                  onChange={handleInputChange}
-                  placeholder="email@exemplo.com"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="telefoneLegal">Número de Telefone</Label>
-                <Input
-                  id="telefoneLegal"
-                  name="telefoneLegal"
-                  value={form.getValues('telefoneLegal')}
-                  onChange={handleInputChange}
-                  placeholder="(00) 00000-0000"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="enderecoLegal">Endereço Residencial</Label>
-                <Input
-                  id="enderecoLegal"
-                  name="enderecoLegal"
-                  value={form.getValues('enderecoLegal')}
-                  onChange={handleInputChange}
-                  placeholder="Endereço completo"
-                />
-              </div>
-            </div>
-          </Card>
-
-          {/* Informações Financeiras */}
-          <Card className="form-section p-6">
-            <h2 className="text-xl font-semibold mb-4">Informações Financeiras</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="banco">Banco</Label>
-                <Select 
-                  value={form.getValues('banco')}
-                  onValueChange={(value) => setValue('banco', value)}
-                >
-                  <SelectTrigger id="banco">
-                    <SelectValue placeholder="Selecione o banco" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {bancos.map((banco) => (
-                        <SelectItem key={banco} value={banco}>
-                          {banco}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="agencia">Agência</Label>
-                <Input
-                  id="agencia"
-                  name="agencia"
-                  value={form.getValues('agencia')}
-                  onChange={handleInputChange}
-                  placeholder="Número da agência"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="conta">Conta</Label>
-                <Input
-                  id="conta"
-                  name="conta"
-                  value={form.getValues('conta')}
-                  onChange={handleInputChange}
-                  placeholder="Número da conta"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="pix">PIX</Label>
-                <Input
-                  id="pix"
-                  name="pix"
-                  value={form.getValues('pix')}
-                  onChange={handleInputChange}
-                  placeholder="Chave PIX"
-                />
-              </div>
-            </div>
-          </Card>
-
-          {/* Plano / Contrato */}
-          <Card className="form-section p-6">
-            <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="planoContratado">Plano Contratado</Label>
-                <Input
-                  id="planoContratado"
-                  value="Plano Standard"
-                  readOnly
-                  className="bg-gray-100"
-                />
-                <input type="hidden" name="planoContratado" value="standard" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="valorPlano">Valor do Plano (R$)</Label>
-                <Input
-                  id="valorPlano"
-                  name="valorPlano"
-                  type="number"
-                  value={form.getValues('valorPlano')}
-                  onChange={handleInputChange}
-                  placeholder="0,00"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
-                <Input
-                  id="formaPagamento"
-                  value="PIX"
-                  readOnly
-                  className="bg-gray-100"
-                />
-                <input type="hidden" name="formaPagamento" value="pix" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="vencimento">Vencimento</Label>
-                <Select 
-                  value={form.getValues('vencimento')}
-                  onValueChange={(value) => setValue('vencimento', value)}
-                >
-                  <SelectTrigger id="vencimento">
-                    <SelectValue placeholder="Dia do vencimento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {Array.from({ length: 28 }, (_, i) => i + 1).map(day => (
-                        <SelectItem key={day} value={day.toString()}>
-                          Dia {day}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="desconto">Desconto (R$)</Label>
-                <Input
-                  id="desconto"
-                  name="desconto"
-                  type="number"
-                  value={form.getValues('desconto')}
-                  onChange={handleInputChange}
-                  placeholder="0,00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="valorMensal">Valor Mensal (R$)</Label>
-                <Input
-                  id="valorMensal"
-                  name="valorMensal"
-                  value={form.getValues('valorMensal')}
-                  readOnly
-                  className="bg-gray-100"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Valor do plano menos o desconto.
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Segurança */}
-          <Card className="form-section p-6">
-            <h2 className="text-xl font-semibold mb-4">Segurança</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="senha">Senha</Label>
-                <Input
-                  id="senha"
-                  name="senha"
-                  type="password"
-                  value={form.getValues('senha')}
-                  onChange={handleInputChange}
-                  placeholder="Digite uma senha segura"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
-                <Input
-                  id="confirmarSenha"
-                  name="confirmarSenha"
-                  type="password"
-                  value={form.getValues('confirmarSenha')}
-                  onChange={handleInputChange}
-                  placeholder="Confirme sua senha"
-                />
-              </div>
-            </div>
-          </Card>
-
-          <div className="flex justify-end">
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="bg-brand-600 hover:bg-brand-700"
-              size="lg"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {isSubmitting ? 'Salvando...' : 'Salvar Cadastro'}
-            </Button>
-          </div>
-        </form>
+          </form>
+        </Form>
       </div>
     </DashboardLayout>
   );
