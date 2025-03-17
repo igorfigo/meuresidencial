@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { save, Package, Search, History, Trash } from 'lucide-react';
+import { Save, Package, Search, History, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,7 +58,6 @@ export const CadastroPlanos = () => {
 
   const { reset, handleSubmit } = form;
 
-  // Carregar todos os planos para exibição na tabela
   const fetchPlans = async () => {
     try {
       const { data, error } = await supabase
@@ -79,7 +77,6 @@ export const CadastroPlanos = () => {
     fetchPlans();
   }, []);
 
-  // Buscar plano por código
   const handleCodigoSearch = async () => {
     if (!codigoSearch) {
       toast.error('Por favor, informe um código para buscar.');
@@ -127,7 +124,6 @@ export const CadastroPlanos = () => {
     }
   };
 
-  // Carregar logs de alterações
   const loadChangeLogs = async (codigo: string) => {
     if (!codigo) return;
     
@@ -166,9 +162,8 @@ export const CadastroPlanos = () => {
     }
   }, [changeLogs]);
 
-  // Registrar alterações no log
   const registerChangeLog = async (oldPlan: Plan | null, newPlan: Plan) => {
-    if (!oldPlan) return; // Se for um novo registro, não há alterações para registrar
+    if (!oldPlan) return;
     
     const changes = [];
     
@@ -202,7 +197,6 @@ export const CadastroPlanos = () => {
       });
     }
     
-    // Inserir logs de alterações
     for (const change of changes) {
       await supabase
         .from('plan_change_logs')
@@ -210,9 +204,7 @@ export const CadastroPlanos = () => {
     }
   };
 
-  // Salvar ou atualizar plano
   const onSubmit = async (data: FormFields) => {
-    // Validar valor do plano
     const valorPattern = /^\d+(\,\d{1,2})?$/;
     if (!valorPattern.test(data.valor)) {
       toast.error('O valor do plano deve seguir o formato 000,00');
@@ -221,13 +213,11 @@ export const CadastroPlanos = () => {
 
     setIsSubmitting(true);
     try {
-      // Converter código para maiúsculo
       const formattedData = {
         ...data,
         codigo: data.codigo.toUpperCase()
       };
       
-      // Verificar se o plano já existe
       let oldPlan = null;
       if (isExistingRecord) {
         const { data: existingPlan } = await supabase
@@ -239,7 +229,6 @@ export const CadastroPlanos = () => {
         oldPlan = existingPlan;
       }
       
-      // Inserir ou atualizar o plano
       const { error } = await supabase
         .from('plans')
         .upsert({
@@ -254,7 +243,6 @@ export const CadastroPlanos = () => {
 
       if (error) throw error;
       
-      // Registrar alterações no log se for uma atualização
       if (isExistingRecord && oldPlan) {
         await registerChangeLog(oldPlan, formattedData as Plan);
       }
@@ -267,9 +255,7 @@ export const CadastroPlanos = () => {
         reset();
       }
       
-      // Recarregar a lista de planos
       fetchPlans();
-      
     } catch (error) {
       console.error('Erro ao salvar plano:', error);
       toast.error('Erro ao salvar plano. Tente novamente mais tarde.');
@@ -278,7 +264,6 @@ export const CadastroPlanos = () => {
     }
   };
 
-  // Excluir plano
   const handleDeletePlan = async (codigo: string) => {
     if (window.confirm(`Tem certeza que deseja excluir o plano ${codigo}?`)) {
       try {
@@ -292,7 +277,6 @@ export const CadastroPlanos = () => {
         toast.success('Plano excluído com sucesso!');
         fetchPlans();
         
-        // Limpar formulário se o plano excluído for o atual
         if (form.getValues().codigo === codigo) {
           reset({
             codigo: '',
@@ -310,7 +294,6 @@ export const CadastroPlanos = () => {
     }
   };
 
-  // Editar plano (carrega os dados no formulário)
   const handleEditPlan = async (plan: Plan) => {
     setCodigoSearch(plan.codigo);
     reset({
@@ -323,7 +306,6 @@ export const CadastroPlanos = () => {
     await loadChangeLogs(plan.codigo);
   };
 
-  // Formatar valor monetário
   const formatCurrency = (value: string) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -331,13 +313,11 @@ export const CadastroPlanos = () => {
     }).format(parseFloat(value.replace(',', '.')));
   };
 
-  // Formatar data
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
     return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
   };
 
-  // Paginação de logs
   const getCurrentItems = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -464,7 +444,7 @@ export const CadastroPlanos = () => {
                   disabled={isSubmitting}
                   className="w-full bg-brand-600 hover:bg-brand-700"
                 >
-                  <save className="h-4 w-4 mr-2" />
+                  <Save className="h-4 w-4 mr-2" />
                   {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Plano' : 'Salvar Plano')}
                 </Button>
               </form>
