@@ -146,6 +146,74 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_change_logs: {
+        Row: {
+          campo: string
+          codigo: string
+          data_alteracao: string | null
+          id: string
+          usuario: string | null
+          valor_anterior: string | null
+          valor_novo: string | null
+        }
+        Insert: {
+          campo: string
+          codigo: string
+          data_alteracao?: string | null
+          id?: string
+          usuario?: string | null
+          valor_anterior?: string | null
+          valor_novo?: string | null
+        }
+        Update: {
+          campo?: string
+          codigo?: string
+          data_alteracao?: string | null
+          id?: string
+          usuario?: string | null
+          valor_anterior?: string | null
+          valor_novo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_change_logs_codigo_fkey"
+            columns: ["codigo"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          codigo: string
+          created_at: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+          valor: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          updated_at?: string | null
+          valor: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
+          valor?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

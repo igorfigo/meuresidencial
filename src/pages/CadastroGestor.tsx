@@ -16,6 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useApp } from '@/contexts/AppContext';
+import { usePlans } from '@/hooks/use-plans';
 
 type FormFields = {
   matricula: string;
@@ -58,6 +59,7 @@ type ChangeLogEntry = {
 
 const CadastroGestor = () => {
   const { user } = useApp();
+  const { plans, isLoading: isLoadingPlans, getPlanValue } = usePlans();
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -90,7 +92,7 @@ const CadastroGestor = () => {
       agencia: '',
       conta: '',
       pix: '',
-      planoContratado: 'standard',
+      planoContratado: 'STANDARD',
       valorPlano: '',
       formaPagamento: 'pix',
       vencimento: '',
@@ -105,7 +107,7 @@ const CadastroGestor = () => {
   
   const cep = watch('cep');
   const numero = watch('numero');
-  const valorPlano = watch('valorPlano');
+  const planoContratado = watch('planoContratado');
   const desconto = watch('desconto');
   
   useEffect(() => {
@@ -116,12 +118,19 @@ const CadastroGestor = () => {
   }, [cep, numero, setValue]);
 
   useEffect(() => {
-    const planoValue = parseFloat(valorPlano.replace(',', '.')) || 0;
+    if (planoContratado) {
+      const valor = getPlanValue(planoContratado);
+      setValue('valorPlano', valor);
+    }
+  }, [planoContratado, plans, setValue, getPlanValue]);
+
+  useEffect(() => {
+    const planoValue = parseFloat(watch('valorPlano').replace(',', '.')) || 0;
     const descontoValue = parseFloat(desconto.replace(',', '.')) || 0;
     const valorMensal = (planoValue - descontoValue).toFixed(2).replace('.', ',');
     
     setValue('valorMensal', valorMensal);
-  }, [valorPlano, desconto, setValue]);
+  }, [watch, desconto, setValue]);
 
   const handleCepSearch = async () => {
     const cepValue = form.getValues('cep').replace(/\D/g, '');
@@ -701,13 +710,30 @@ const CadastroGestor = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="planoContratado">Plano Contratado</Label>
-                  <Input
-                    id="planoContratado"
-                    value="Plano Standard"
-                    readOnly
-                    className="bg-gray-100"
-                  />
-                  <input type="hidden" {...register('planoContratado')} value="standard" />
+                  <Select 
+                    value={form.watch('planoContratado')}
+                    onValueChange={(value) => setValue('planoContratado', value)}
+                    disabled={isLoadingPlans}
+                  >
+                    <SelectTrigger id="planoContratado">
+                      <SelectValue placeholder="Selecione o plano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {isLoadingPlans ? (
+                          <SelectItem value="loading" disabled>Carregando planos...</SelectItem>
+                        ) : plans.length === 0 ? (
+                          <SelectItem value="empty" disabled>Nenhum plano disponível</SelectItem>
+                        ) : (
+                          plans.map((plan) => (
+                            <SelectItem key={plan.codigo} value={plan.codigo}>
+                              {plan.nome}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -715,20 +741,29 @@ const CadastroGestor = () => {
                   <Input
                     id="valorPlano"
                     {...register('valorPlano')}
-                    onChange={handleInputChange}
-                    placeholder="0,00"
+                    readOnly
+                    className="bg-gray-100"
                   />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
-                  <Input
-                    id="formaPagamento"
-                    value="PIX"
-                    readOnly
-                    className="bg-gray-100"
-                  />
-                  <input type="hidden" {...register('formaPagamento')} value="pix" />
+                  <Select 
+                    value={form.watch('formaPagamento')}
+                    onValueChange={(value) => setValue('formaPagamento', value)}
+                  >
+                    <SelectTrigger id="formaPagamento">
+                      <SelectValue placeholder="Forma de Pagamento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="pix">PIX</SelectItem>
+                        <SelectItem value="boleto">Boleto</SelectItem>
+                        <SelectItem value="cartao">Cartão de Crédito</SelectItem>
+                        <SelectItem value="transferencia">Transferência Bancária</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">

@@ -1,7 +1,16 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Plan } from '@/pages/CadastroPlanos';
+
+export interface Plan {
+  id?: string;
+  codigo: string;
+  nome: string;
+  descricao?: string;
+  valor: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export const usePlans = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
