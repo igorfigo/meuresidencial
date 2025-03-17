@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -651,7 +652,7 @@ const CadastroGestor = () => {
                     onValueChange={(value) => setValue('vencimento', value)}
                   >
                     <SelectTrigger id="vencimento">
-                      <SelectValue placeholder="Dia do vencimento" />
+                      <SelectValue placeholder="Vencimento" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>

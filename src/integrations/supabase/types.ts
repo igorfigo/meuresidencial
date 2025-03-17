@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      condominium_change_logs: {
+        Row: {
+          campo: string
+          data_alteracao: string
+          id: string
+          matricula: string
+          usuario: string | null
+          valor_anterior: string | null
+          valor_novo: string | null
+        }
+        Insert: {
+          campo: string
+          data_alteracao?: string
+          id?: string
+          matricula: string
+          usuario?: string | null
+          valor_anterior?: string | null
+          valor_novo?: string | null
+        }
+        Update: {
+          campo?: string
+          data_alteracao?: string
+          id?: string
+          matricula?: string
+          usuario?: string | null
+          valor_anterior?: string | null
+          valor_novo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condominium_change_logs_matricula_fkey"
+            columns: ["matricula"]
+            isOneToOne: false
+            referencedRelation: "condominiums"
+            referencedColumns: ["matricula"]
+          },
+        ]
+      }
       condominiums: {
         Row: {
           agencia: string | null
