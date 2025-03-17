@@ -850,7 +850,7 @@ const CadastroGestor = () => {
                       <TableCell className="font-medium">{log.campo}</TableCell>
                       <TableCell>{log.valor_anterior || '-'}</TableCell>
                       <TableCell>{log.valor_novo || '-'}</TableCell>
-                      <TableCell>{log.usuario || 'Sistema'}</TableCell>
+                      <TableCell>{log.usuario || '-'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
