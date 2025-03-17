@@ -581,7 +581,7 @@ const CadastroGestor = () => {
                       <SelectGroup>
                         {Array.from({ length: 28 }, (_, i) => i + 1).map(day => (
                           <SelectItem key={day} value={day.toString()}>
-                            Dia {day}
+                            {day}
                           </SelectItem>
                         ))}
                       </SelectGroup>

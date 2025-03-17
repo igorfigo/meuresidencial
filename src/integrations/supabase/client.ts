@@ -271,7 +271,7 @@ export const getCondominiumByMatricula = async (matricula: string) => {
     
     // Faz a consulta direta para verificar se a tabela existe
     const tableCheck = await supabase
-      .from('condominiums' as any)
+      .from('condominiums')
       .select('count')
       .limit(1);
       
@@ -279,14 +279,14 @@ export const getCondominiumByMatricula = async (matricula: string) => {
     
     // Consulta todos para depuração
     const allCondominiums = await supabase
-      .from('condominiums' as any)
+      .from('condominiums')
       .select('matricula');
       
     console.log("Todas as matrículas disponíveis:", allCondominiums);
     
     // Usa eq para igualdade exata
     const { data, error } = await supabase
-      .from('condominiums' as any)
+      .from('condominiums')
       .select('*')
       .eq('matricula', cleanMatricula);
     
@@ -303,11 +303,9 @@ export const getCondominiumByMatricula = async (matricula: string) => {
       return null;
     }
     
-    // Pega o primeiro item se existir e verifica que não é um erro
+    // Pega o primeiro item se existir
     if (Array.isArray(data) && data.length > 0) {
-      // Converte para unknown primeiro antes de converter para CondominiumRow
-      // para evitar erros de TypeScript
-      const condominiumData = data[0] as unknown as CondominiumRow;
+      const condominiumData = data[0];
       console.log("Dados do condomínio encontrado:", condominiumData);
       
       if (!condominiumData) {
