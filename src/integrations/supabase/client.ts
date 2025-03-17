@@ -264,7 +264,7 @@ export const sendWelcomeEmail = async (condominiumData: Condominium) => {
 };
 
 // Condominium data functions
-export const saveCondominiumData = async (data: Condominium) => {
+export const saveCondominiumData = async (data: Condominium, userEmail?: string) => {
   console.log("Saving condominium data:", data);
   
   try {
@@ -303,7 +303,7 @@ export const saveCondominiumData = async (data: Condominium) => {
               valor_anterior: change.oldValue,
               valor_novo: change.newValue,
               data_alteracao: new Date().toISOString(),
-              usuario: 'Sistema' // Pode ser substituído pelo usuário atual quando houver autenticação
+              usuario: userEmail || null // Use the provided user email instead of 'Sistema'
             }));
         }
       }

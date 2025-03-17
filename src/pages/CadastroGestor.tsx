@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -278,7 +279,10 @@ const CadastroGestor = () => {
 
     setIsSubmitting(true);
     try {
-      await saveCondominiumData(formattedData);
+      // Pass the user email (in this case, we use the email of the current legal representative)
+      const userEmail = data.emailLegal;
+      
+      await saveCondominiumData(formattedData, userEmail);
       toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
       
       if (matriculaSearch === data.matricula) {
