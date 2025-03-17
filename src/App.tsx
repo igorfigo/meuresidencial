@@ -13,21 +13,23 @@ import { AppProvider } from './contexts/AppContext';
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppProvider>
-        <AuthProvider>
-          <Toaster closeButton position="top-right" />
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/cadastro-gestor" element={<CadastroGestor />} />
-            <Route path="/pagina-em-construcao" element={<UnderConstruction />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </AppProvider>
-    </BrowserRouter>
+    <div className="w-full h-full">
+      <BrowserRouter>
+        <AppProvider>
+          <AuthProvider>
+            <Toaster closeButton position="top-right" />
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/cadastro-gestor" element={<CadastroGestor />} />
+              <Route path="/pagina-em-construcao" element={<UnderConstruction />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </AppProvider>
+      </BrowserRouter>
+    </div>
   );
 }
 
