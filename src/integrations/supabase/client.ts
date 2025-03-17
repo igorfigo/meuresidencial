@@ -147,10 +147,43 @@ export const saveCondominiumData = async (data: Condominium) => {
     
     console.log("Saved data:", savedData);
     
-    // Use proper type conversion with a null check
+    // Ensure we have data before accessing it
     if (!savedData || savedData.length === 0) {
       throw new Error('No data returned from insert operation');
     }
+
+    // Type assertion to ensure TypeScript knows this is an array with our DB structure
+    const typedSavedData = savedData as Array<{
+      id: string;
+      matricula: string;
+      cnpj?: string;
+      cep?: string;
+      rua?: string;
+      numero?: string;
+      complemento?: string;
+      bairro?: string;
+      cidade?: string;
+      estado?: string;
+      nomecondominio?: string;
+      nomelegal?: string;
+      emaillegal?: string;
+      telefonelegal?: string;
+      enderecolegal?: string;
+      banco?: string;
+      agencia?: string;
+      conta?: string;
+      pix?: string;
+      planocontratado?: string;
+      valorplano?: string;
+      formapagamento?: string;
+      vencimento?: string;
+      desconto?: string;
+      valormensal?: string;
+      senha?: string;
+      created_at?: string;
+      updated_at?: string;
+      welcome_email_sent?: boolean;
+    }>;
 
     // Se for um novo condomínio e tiver e-mail, envia e-mail de boas-vindas
     if (isNewCondominium && data.emailLegal) {
@@ -170,36 +203,36 @@ export const saveCondominiumData = async (data: Condominium) => {
     }
     
     // Map the data back to our client-side model
-    const result = {
-      id: savedData[0].id,
-      matricula: savedData[0].matricula,
-      cnpj: savedData[0].cnpj,
-      cep: savedData[0].cep,
-      rua: savedData[0].rua,
-      numero: savedData[0].numero,
-      complemento: savedData[0].complemento,
-      bairro: savedData[0].bairro,
-      cidade: savedData[0].cidade,
-      estado: savedData[0].estado,
-      nomeCondominio: savedData[0].nomecondominio,
-      nomeLegal: savedData[0].nomelegal,
-      emailLegal: savedData[0].emaillegal,
-      telefoneLegal: savedData[0].telefonelegal,
-      enderecoLegal: savedData[0].enderecolegal,
-      banco: savedData[0].banco,
-      agencia: savedData[0].agencia,
-      conta: savedData[0].conta,
-      pix: savedData[0].pix,
-      planoContratado: savedData[0].planocontratado,
-      valorPlano: savedData[0].valorplano,
-      formaPagamento: savedData[0].formapagamento,
-      vencimento: savedData[0].vencimento,
-      desconto: savedData[0].desconto,
-      valorMensal: savedData[0].valormensal,
-      senha: savedData[0].senha,
-      created_at: savedData[0].created_at,
-      updated_at: savedData[0].updated_at,
-      welcome_email_sent: savedData[0].welcome_email_sent
+    const result: Condominium = {
+      id: typedSavedData[0].id,
+      matricula: typedSavedData[0].matricula,
+      cnpj: typedSavedData[0].cnpj,
+      cep: typedSavedData[0].cep,
+      rua: typedSavedData[0].rua,
+      numero: typedSavedData[0].numero,
+      complemento: typedSavedData[0].complemento,
+      bairro: typedSavedData[0].bairro,
+      cidade: typedSavedData[0].cidade,
+      estado: typedSavedData[0].estado,
+      nomeCondominio: typedSavedData[0].nomecondominio,
+      nomeLegal: typedSavedData[0].nomelegal,
+      emailLegal: typedSavedData[0].emaillegal,
+      telefoneLegal: typedSavedData[0].telefonelegal,
+      enderecoLegal: typedSavedData[0].enderecolegal,
+      banco: typedSavedData[0].banco,
+      agencia: typedSavedData[0].agencia,
+      conta: typedSavedData[0].conta,
+      pix: typedSavedData[0].pix,
+      planoContratado: typedSavedData[0].planocontratado,
+      valorPlano: typedSavedData[0].valorplano,
+      formaPagamento: typedSavedData[0].formapagamento,
+      vencimento: typedSavedData[0].vencimento,
+      desconto: typedSavedData[0].desconto,
+      valorMensal: typedSavedData[0].valormensal,
+      senha: typedSavedData[0].senha,
+      created_at: typedSavedData[0].created_at,
+      updated_at: typedSavedData[0].updated_at,
+      welcome_email_sent: typedSavedData[0].welcome_email_sent
     };
     
     return result;
@@ -232,37 +265,70 @@ export const getCondominiumByMatricula = async (matricula: string) => {
     // Return null if no data was found instead of trying to cast it
     if (!data) return null;
     
+    // Type assertion to inform TypeScript about the expected structure
+    const typedData = data as {
+      id: string;
+      matricula: string;
+      cnpj?: string;
+      cep?: string;
+      rua?: string;
+      numero?: string;
+      complemento?: string;
+      bairro?: string;
+      cidade?: string;
+      estado?: string;
+      nomecondominio?: string;
+      nomelegal?: string;
+      emaillegal?: string;
+      telefonelegal?: string;
+      enderecolegal?: string;
+      banco?: string;
+      agencia?: string;
+      conta?: string;
+      pix?: string;
+      planocontratado?: string;
+      valorplano?: string;
+      formapagamento?: string;
+      vencimento?: string;
+      desconto?: string;
+      valormensal?: string;
+      senha?: string;
+      created_at?: string;
+      updated_at?: string;
+      welcome_email_sent?: boolean;
+    };
+    
     // Map the data back to our client-side model
     return {
-      id: data.id,
-      matricula: data.matricula,
-      cnpj: data.cnpj,
-      cep: data.cep,
-      rua: data.rua,
-      numero: data.numero,
-      complemento: data.complemento,
-      bairro: data.bairro,
-      cidade: data.cidade,
-      estado: data.estado,
-      nomeCondominio: data.nomecondominio,
-      nomeLegal: data.nomelegal,
-      emailLegal: data.emaillegal,
-      telefoneLegal: data.telefonelegal,
-      enderecoLegal: data.enderecolegal,
-      banco: data.banco,
-      agencia: data.agencia,
-      conta: data.conta,
-      pix: data.pix,
-      planoContratado: data.planocontratado,
-      valorPlano: data.valorplano,
-      formaPagamento: data.formapagamento,
-      vencimento: data.vencimento,
-      desconto: data.desconto,
-      valorMensal: data.valormensal,
-      senha: data.senha,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      welcome_email_sent: data.welcome_email_sent
+      id: typedData.id,
+      matricula: typedData.matricula,
+      cnpj: typedData.cnpj,
+      cep: typedData.cep,
+      rua: typedData.rua,
+      numero: typedData.numero,
+      complemento: typedData.complemento,
+      bairro: typedData.bairro,
+      cidade: typedData.cidade,
+      estado: typedData.estado,
+      nomeCondominio: typedData.nomecondominio,
+      nomeLegal: typedData.nomelegal,
+      emailLegal: typedData.emaillegal,
+      telefoneLegal: typedData.telefonelegal,
+      enderecoLegal: typedData.enderecolegal,
+      banco: typedData.banco,
+      agencia: typedData.agencia,
+      conta: typedData.conta,
+      pix: typedData.pix,
+      planoContratado: typedData.planocontratado,
+      valorPlano: typedData.valorplano,
+      formaPagamento: typedData.formapagamento,
+      vencimento: typedData.vencimento,
+      desconto: typedData.desconto,
+      valorMensal: typedData.valormensal,
+      senha: typedData.senha,
+      created_at: typedData.created_at,
+      updated_at: typedData.updated_at,
+      welcome_email_sent: typedData.welcome_email_sent
     };
   } catch (error) {
     console.error("Error in getCondominiumByMatricula:", error);
