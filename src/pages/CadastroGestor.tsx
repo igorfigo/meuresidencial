@@ -449,8 +449,12 @@ const CadastroGestor = () => {
                   onClick={handleMatriculaSearch} 
                   disabled={isSearching} 
                   className="bg-brand-600 hover:bg-brand-700">
-                  {isSearching ? "Buscando..." : <Search className="h-4 w-4 mr-2" />}
-                  {isSearching ? "Buscando..." : "Buscar"}
+                  {isSearching ? "Buscando..." : (
+                    <>
+                      <Search className="h-4 w-4 mr-2" />
+                      Buscar
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
