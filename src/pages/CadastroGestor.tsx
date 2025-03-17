@@ -207,23 +207,31 @@ const CadastroGestor = () => {
   };
 
   const formatCurrency = (value: string) => {
+    // Remove anything that's not a digit or comma
     let formattedValue = value.replace(/[^\d,]/g, '');
     
+    // If there are multiple commas, keep only the first one
     const commaCount = (formattedValue.match(/,/g) || []).length;
     if (commaCount > 1) {
       const parts = formattedValue.split(',');
       formattedValue = parts[0] + ',' + parts.slice(1).join('');
     }
     
-    if (!formattedValue.includes(',') && formattedValue !== '') {
-      formattedValue = formattedValue;
-    }
-    
+    // If there's a comma, ensure only two digits after it
     if (formattedValue.includes(',')) {
       const [integerPart, decimalPart] = formattedValue.split(',');
       if (decimalPart && decimalPart.length > 2) {
         formattedValue = integerPart + ',' + decimalPart.slice(0, 2);
+      } else if (decimalPart && decimalPart.length === 1) {
+        // If there's only one digit after comma, add a zero
+        formattedValue = integerPart + ',' + decimalPart + '0';
+      } else if (decimalPart === '') {
+        // If there's a comma but nothing after it, add "00"
+        formattedValue = integerPart + ',00';
       }
+    } else if (formattedValue !== '') {
+      // If there's no comma but there is a value, add ",00"
+      formattedValue = formattedValue + ',00';
     }
     
     return formattedValue;
