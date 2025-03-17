@@ -15,6 +15,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { useAuth } from '@/lib/auth';
 
 type FormFields = {
   matricula: string;
@@ -67,6 +68,7 @@ const CadastroGestor = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
+  const { user } = useAuth();
 
   const form = useForm<FormFields>({
     defaultValues: {
@@ -278,7 +280,7 @@ const CadastroGestor = () => {
 
     setIsSubmitting(true);
     try {
-      await saveCondominiumData(formattedData);
+      await saveCondominiumData(formattedData, user?.email || null);
       toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
       
       if (matriculaSearch === data.matricula) {
@@ -450,7 +452,7 @@ const CadastroGestor = () => {
                   disabled={isSearching} 
                   className="bg-brand-600 hover:bg-brand-700">
                   {isSearching ? "Buscando..." : <Search className="h-4 w-4 mr-2" />}
-                  {isSearching ? "Buscando..." : "Buscar"}
+                  {isSearching ? "" : "Buscar"}
                 </Button>
               </div>
             </div>
