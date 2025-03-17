@@ -62,6 +62,7 @@ const CadastroGestor = () => {
   const [matriculaSearch, setMatriculaSearch] = useState('');
   const [changeLogs, setChangeLogs] = useState<ChangeLogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [isExistingRecord, setIsExistingRecord] = useState(false);
 
   const form = useForm<FormFields>({
     defaultValues: {
@@ -208,10 +209,15 @@ const CadastroGestor = () => {
         
         reset(formValues);
         
+        // Set state to indicate this is an existing record
+        setIsExistingRecord(true);
+        
         toast.success('Condomínio encontrado com sucesso!');
         
         await loadChangeLogs(matriculaSearch);
       } else {
+        // Not an existing record
+        setIsExistingRecord(false);
         toast.error('Nenhum condomínio encontrado com esta matrícula.');
       }
     } catch (error) {
@@ -223,7 +229,20 @@ const CadastroGestor = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
-    if (data.senha !== data.confirmarSenha) {
+    // Only validate passwords on new records
+    if (!isExistingRecord) {
+      // This is a new record, so password is required
+      if (!data.senha) {
+        toast.error('Senha é obrigatória para novos cadastros.');
+        return;
+      }
+      
+      if (data.senha !== data.confirmarSenha) {
+        toast.error('As senhas não conferem. Por favor, verifique.');
+        return;
+      }
+    } else if (data.senha && data.senha !== data.confirmarSenha) {
+      // If updating an existing record and password provided, make sure they match
       toast.error('As senhas não conferem. Por favor, verifique.');
       return;
     }
@@ -238,13 +257,17 @@ const CadastroGestor = () => {
     setIsSubmitting(true);
     try {
       await saveCondominiumData(formattedData);
-      toast.success('Cadastro realizado com sucesso!');
+      toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
       
       if (matriculaSearch === data.matricula) {
         await loadChangeLogs(data.matricula);
       }
       
-      reset();
+      // Only reset the form for new records
+      if (!isExistingRecord) {
+        reset();
+        setIsExistingRecord(false);
+      }
     } catch (error) {
       console.error('Error saving condominium data:', error);
       toast.error('Erro ao salvar dados. Tente novamente mais tarde.');
@@ -696,24 +719,35 @@ const CadastroGestor = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="senha">Senha</Label>
+                  <Label htmlFor="senha">
+                    Senha {!isExistingRecord && <span className="text-red-500">*</span>}
+                  </Label>
                   <Input
                     id="senha"
                     {...register('senha')}
                     type="password"
                     onChange={handleInputChange}
-                    placeholder="Digite uma senha segura"
+                    placeholder={isExistingRecord ? "Digite para alterar a senha (opcional)" : "Digite uma senha segura"}
+                    required={!isExistingRecord}
                   />
+                  {isExistingRecord && (
+                    <p className="text-xs text-muted-foreground">
+                      Preencha apenas se desejar alterar a senha.
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
+                  <Label htmlFor="confirmarSenha">
+                    Confirmar Senha {!isExistingRecord && <span className="text-red-500">*</span>}
+                  </Label>
                   <Input
                     id="confirmarSenha"
                     {...register('confirmarSenha')}
                     type="password"
                     onChange={handleInputChange}
-                    placeholder="Confirme sua senha"
+                    placeholder={isExistingRecord ? "Confirme a nova senha (opcional)" : "Confirme sua senha"}
+                    required={!isExistingRecord}
                   />
                 </div>
               </div>
@@ -727,7 +761,7 @@ const CadastroGestor = () => {
                 size="lg"
               >
                 <Save className="h-4 w-4 mr-2" />
-                {isSubmitting ? 'Salvando...' : 'Salvar Cadastro'}
+                {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Cadastro' : 'Salvar Cadastro')}
               </Button>
             </div>
           </form>
