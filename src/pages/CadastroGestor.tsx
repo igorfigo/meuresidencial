@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { useApp } from '@/contexts/AppContext';
 
 type FormFields = {
   matricula: string;
@@ -57,6 +57,7 @@ type ChangeLogEntry = {
 };
 
 const CadastroGestor = () => {
+  const { user } = useApp();
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -279,8 +280,7 @@ const CadastroGestor = () => {
 
     setIsSubmitting(true);
     try {
-      // Pass the user email (in this case, we use the email of the current legal representative)
-      const userEmail = data.emailLegal;
+      const userEmail = user ? user.email : null;
       
       await saveCondominiumData(formattedData, userEmail);
       toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
