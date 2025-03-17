@@ -309,11 +309,24 @@ export const saveCondominiumData = async (data: Condominium) => {
       }
     }
     
-    // Use any type to bypass type checking since we know the table exists
-    const { data: savedData, error } = await supabase
-      .from('condominiums' as any)
-      .upsert([dataToSave])
-      .select();
+    let savedData;
+    let error;
+    
+    // Fix: Use update instead of upsert for existing condominium to avoid duplicated key error
+    if (isNewCondominium) {
+      // For new condominiums, use insert
+      ({ data: savedData, error } = await supabase
+        .from('condominiums' as any)
+        .insert([dataToSave])
+        .select());
+    } else {
+      // For existing condominiums, use update with the matricula as the filter
+      ({ data: savedData, error } = await supabase
+        .from('condominiums' as any)
+        .update(dataToSave)
+        .eq('matricula', data.matricula)
+        .select());
+    }
     
     if (error) {
       console.error("Error saving to Supabase:", error);
@@ -324,7 +337,7 @@ export const saveCondominiumData = async (data: Condominium) => {
     
     // Ensure we have data before accessing it
     if (!savedData || savedData.length === 0) {
-      throw new Error('No data returned from insert operation');
+      throw new Error('No data returned from insert/update operation');
     }
 
     // Safely cast the data to the correct type
