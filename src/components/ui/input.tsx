@@ -1,9 +1,33 @@
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+interface InputProps extends React.ComponentPropsWithoutRef<"input"> {
+  type?: string;
+  numberOnly?: boolean;
+}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, numberOnly, ...props }, ref) => {
+    // Handle keydown for number-only inputs
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (numberOnly) {
+        // Allow only numbers, arrows, backspace, delete, tab
+        const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+        const isNumber = /^[0-9]$/i.test(e.key);
+        
+        if (!isNumber && !allowedKeys.includes(e.key)) {
+          e.preventDefault();
+        }
+      }
+      
+      // Call the original onKeyDown handler if provided
+      if (props.onKeyDown) {
+        props.onKeyDown(e);
+      }
+    };
+
     return (
       <input
         type={type}
@@ -12,6 +36,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
+        onKeyDown={handleKeyDown}
         {...props}
       />
     )
