@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -170,7 +171,7 @@ export const CadastroPlanos = () => {
       const formattedData = {
         ...data,
         codigo: data.codigo.toUpperCase(),
-        valor: data.valor.replace(',', '.')
+        valor: data.valor.replace(',', '.') // Convert comma to dot for database storage
       };
       
       let oldPlan = null;
