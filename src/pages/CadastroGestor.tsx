@@ -12,7 +12,6 @@ import { fetchAddressByCep } from '@/services/cepService';
 import { useForm } from 'react-hook-form';
 import { saveCondominiumData, getCondominiumByMatricula } from '@/integrations/supabase/client';
 
-// Define the form field names to ensure type safety
 type FormFields = {
   matricula: string;
   cnpj: string;
@@ -50,7 +49,6 @@ const CadastroGestor = () => {
 
   const form = useForm<FormFields>({
     defaultValues: {
-      // Informações Condomínio
       matricula: '',
       cnpj: '',
       cep: '',
@@ -61,28 +59,20 @@ const CadastroGestor = () => {
       cidade: '',
       estado: '',
       nomeCondominio: '',
-      
-      // Informações Representante Legal
       nomeLegal: '',
       emailLegal: '',
       telefoneLegal: '',
       enderecoLegal: '',
-      
-      // Informações Financeiras
       banco: '',
       agencia: '',
       conta: '',
       pix: '',
-      
-      // Plano / Contrato
       planoContratado: 'standard',
       valorPlano: '',
       formaPagamento: 'pix',
       vencimento: '',
       desconto: '',
       valorMensal: '',
-      
-      // Segurança
       senha: '',
       confirmarSenha: ''
     }
@@ -95,7 +85,6 @@ const CadastroGestor = () => {
   const valorPlano = watch('valorPlano');
   const desconto = watch('desconto');
   
-  // Compute matricula whenever CEP or number changes
   useEffect(() => {
     if (cep && numero) {
       const cleanCep = cep.replace(/\D/g, '');
@@ -103,7 +92,6 @@ const CadastroGestor = () => {
     }
   }, [cep, numero, setValue]);
 
-  // Calculate valorMensal
   useEffect(() => {
     const planoValue = parseFloat(valorPlano.replace(',', '.')) || 0;
     const descontoValue = parseFloat(desconto.replace(',', '.')) || 0;
@@ -148,14 +136,10 @@ const CadastroGestor = () => {
     try {
       const data = await getCondominiumByMatricula(matriculaSearch);
       if (data) {
-        // Reset form to default values first
         reset();
         
-        // Populate all form fields with the retrieved data
         Object.entries(data).forEach(([key, value]) => {
-          // Only set value if the field exists in our form and has a value
           if (value !== null && key in form.getValues()) {
-            // Type assertion to ensure key is valid for setValue
             setValue(key as keyof FormFields, value.toString());
           }
         });
@@ -172,13 +156,11 @@ const CadastroGestor = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
-    // Validation
     if (data.senha !== data.confirmarSenha) {
       toast.error('As senhas não conferem. Por favor, verifique.');
       return;
     }
 
-    // Convert comma to dot for number values that need calculation
     const formattedData = {
       ...data,
       valorPlano: data.valorPlano.replace(',', '.'),
@@ -190,7 +172,6 @@ const CadastroGestor = () => {
     try {
       await saveCondominiumData(formattedData);
       toast.success('Cadastro realizado com sucesso!');
-      // Clear form after successful save
       reset();
     } catch (error) {
       console.error('Error saving condominium data:', error);
@@ -200,7 +181,6 @@ const CadastroGestor = () => {
     }
   };
 
-  // Format input values
   const formatCnpj = (value: string) => {
     return value
       .replace(/\D/g, '')
@@ -226,29 +206,23 @@ const CadastroGestor = () => {
       .slice(0, 15);
   };
 
-  // Função aprimorada para formatação de valores monetários
   const formatCurrency = (value: string) => {
-    // Remove caracteres não numéricos, exceto vírgula
     let formattedValue = value.replace(/[^\d,]/g, '');
     
-    // Substitui pontos por vírgula
     formattedValue = formattedValue.replace(/\./g, ',');
     
-    // Garante que haja apenas uma vírgula
     const parts = formattedValue.split(',');
     if (parts.length > 2) {
       formattedValue = parts[0] + ',' + parts[1];
     }
     
-    // Limita casas decimais a 2
     if (parts.length > 1 && parts[1].length > 2) {
       formattedValue = parts[0] + ',' + parts[1].substring(0, 2);
     }
     
-    // Se não houver vírgula e tiver valor, adiciona automaticamente
     if (!formattedValue.includes(',') && formattedValue.length > 0) {
       if (formattedValue.length === 1) {
-        formattedValue = '0,' + formattedValue + '0';
+        formattedValue = '0,0' + formattedValue;
       } else if (formattedValue.length === 2) {
         formattedValue = '0,' + formattedValue;
       } else {
@@ -256,6 +230,12 @@ const CadastroGestor = () => {
         const decimalPart = formattedValue.slice(-2);
         formattedValue = integerPart + ',' + decimalPart;
       }
+    }
+    
+    if (formattedValue.endsWith(',')) {
+      formattedValue += '00';
+    } else if (formattedValue.match(/,\d$/)) {
+      formattedValue += '0';
     }
     
     return formattedValue;
@@ -271,7 +251,17 @@ const CadastroGestor = () => {
     } else if (name === 'telefoneLegal') {
       setValue(name as keyof FormFields, formatPhone(value));
     } else if (name === 'valorPlano' || name === 'desconto') {
-      setValue(name as keyof FormFields, formatCurrency(value));
+      const formattedValue = formatCurrency(value);
+      setValue(name as keyof FormFields, formattedValue);
+      
+      if (name === 'valorPlano' || name === 'desconto') {
+        const planoValue = parseFloat(formattedValue.replace(',', '.')) || 0;
+        const descontoAtual = name === 'desconto' ? planoValue : parseFloat(watch('desconto').replace(',', '.')) || 0;
+        const planoAtual = name === 'valorPlano' ? planoValue : parseFloat(watch('valorPlano').replace(',', '.')) || 0;
+        
+        const valorMensal = Math.max(0, planoAtual - descontoAtual).toFixed(2).replace('.', ',');
+        setValue('valorMensal', valorMensal);
+      }
     } else {
       setValue(name as keyof FormFields, value);
     }
@@ -303,7 +293,6 @@ const CadastroGestor = () => {
           </p>
         </header>
 
-        {/* Search bar */}
         <Card className="mb-6 p-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -331,7 +320,6 @@ const CadastroGestor = () => {
 
         <Form {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-8">
-            {/* Informações Condomínio */}
             <Card className="form-section p-6">
               <h2 className="text-xl font-semibold mb-4">Informações Condomínio</h2>
               
@@ -453,7 +441,6 @@ const CadastroGestor = () => {
               </div>
             </Card>
 
-            {/* Informações Representante Legal */}
             <Card className="form-section p-6">
               <h2 className="text-xl font-semibold mb-4">Informações Representante Legal</h2>
               
@@ -501,7 +488,6 @@ const CadastroGestor = () => {
               </div>
             </Card>
 
-            {/* Informações Financeiras */}
             <Card className="form-section p-6">
               <h2 className="text-xl font-semibold mb-4">Informações Financeiras</h2>
               
@@ -562,7 +548,6 @@ const CadastroGestor = () => {
               </div>
             </Card>
 
-            {/* Plano / Contrato */}
             <Card className="form-section p-6">
               <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
               
@@ -645,7 +630,6 @@ const CadastroGestor = () => {
               </div>
             </Card>
 
-            {/* Segurança */}
             <Card className="form-section p-6">
               <h2 className="text-xl font-semibold mb-4">Segurança</h2>
               
