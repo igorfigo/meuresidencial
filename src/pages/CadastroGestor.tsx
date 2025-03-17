@@ -209,33 +209,21 @@ const CadastroGestor = () => {
   const formatCurrency = (value: string) => {
     let formattedValue = value.replace(/[^\d,]/g, '');
     
-    formattedValue = formattedValue.replace(/\./g, ',');
-    
-    const parts = formattedValue.split(',');
-    if (parts.length > 2) {
-      formattedValue = parts[0] + ',' + parts[1];
+    const commaCount = (formattedValue.match(/,/g) || []).length;
+    if (commaCount > 1) {
+      const parts = formattedValue.split(',');
+      formattedValue = parts[0] + ',' + parts.slice(1).join('');
     }
     
-    if (parts.length > 1 && parts[1].length > 2) {
-      formattedValue = parts[0] + ',' + parts[1].substring(0, 2);
+    if (!formattedValue.includes(',') && formattedValue !== '') {
+      formattedValue = formattedValue;
     }
     
-    if (!formattedValue.includes(',') && formattedValue.length > 0) {
-      if (formattedValue.length === 1) {
-        formattedValue = '0,0' + formattedValue;
-      } else if (formattedValue.length === 2) {
-        formattedValue = '0,' + formattedValue;
-      } else {
-        const integerPart = formattedValue.slice(0, -2);
-        const decimalPart = formattedValue.slice(-2);
-        formattedValue = integerPart + ',' + decimalPart;
+    if (formattedValue.includes(',')) {
+      const [integerPart, decimalPart] = formattedValue.split(',');
+      if (decimalPart && decimalPart.length > 2) {
+        formattedValue = integerPart + ',' + decimalPart.slice(0, 2);
       }
-    }
-    
-    if (formattedValue.endsWith(',')) {
-      formattedValue += '00';
-    } else if (formattedValue.match(/,\d$/)) {
-      formattedValue += '0';
     }
     
     return formattedValue;
