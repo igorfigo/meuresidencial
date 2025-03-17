@@ -53,6 +53,7 @@ const PaginationLink = ({
         variant: isActive ? "default" : "ghost",
         size,
       }),
+      isActive && "bg-materialize-purple-light text-white pointer-events-none",
       className
     )}
     {...props}
