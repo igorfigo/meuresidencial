@@ -89,7 +89,7 @@ const CadastroGestor = () => {
     }
   });
 
-  const { watch, setValue, register, reset, getValues } = form;
+  const { watch, setValue, register, reset, formState, getValues } = form;
   
   const cep = watch('cep');
   const numero = watch('numero');
@@ -149,8 +149,8 @@ const CadastroGestor = () => {
     try {
       const data = await getCondominiumByMatricula(matriculaSearch);
       if (data) {
-        // Reset form to default values
-        reset();
+        // Reset form to default values first
+        form.reset();
         
         // Populate all form fields with the retrieved data
         Object.entries(data).forEach(([key, value]) => {
@@ -344,8 +344,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="cnpj">CNPJ</Label>
                   <Input
                     id="cnpj"
-                    name="cnpj"
-                    value={form.getValues('cnpj') || ''}
+                    {...register('cnpj')}
+                    value={form.getValues('cnpj')}
                     onChange={handleInputChange}
                     placeholder="00.000.000/0001-00"
                   />
@@ -356,8 +356,8 @@ const CadastroGestor = () => {
                   <div className="flex space-x-2">
                     <Input
                       id="cep"
-                      name="cep"
-                      value={form.getValues('cep') || ''}
+                      {...register('cep')}
+                      value={form.getValues('cep')}
                       onChange={handleInputChange}
                       placeholder="00000-000"
                       className="flex-1"
@@ -377,8 +377,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="nomeCondominio">Nome do Condomínio</Label>
                   <Input
                     id="nomeCondominio"
-                    name="nomeCondominio"
-                    value={form.getValues('nomeCondominio') || ''}
+                    {...register('nomeCondominio')}
+                    value={form.getValues('nomeCondominio')}
                     onChange={handleInputChange}
                     placeholder="Nome do Condomínio"
                   />
@@ -388,8 +388,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="rua">Rua</Label>
                   <Input
                     id="rua"
-                    name="rua"
-                    value={form.getValues('rua') || ''}
+                    {...register('rua')}
+                    value={form.getValues('rua')}
                     onChange={handleInputChange}
                     placeholder="Rua / Avenida"
                   />
@@ -399,8 +399,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="numero">Número</Label>
                   <Input
                     id="numero"
-                    name="numero"
-                    value={form.getValues('numero') || ''}
+                    {...register('numero')}
+                    value={form.getValues('numero')}
                     onChange={handleInputChange}
                     placeholder="Número"
                   />
@@ -410,8 +410,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="complemento">Complemento</Label>
                   <Input
                     id="complemento"
-                    name="complemento"
-                    value={form.getValues('complemento') || ''}
+                    {...register('complemento')}
+                    value={form.getValues('complemento')}
                     onChange={handleInputChange}
                     placeholder="Complemento"
                   />
@@ -421,8 +421,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="bairro">Bairro</Label>
                   <Input
                     id="bairro"
-                    name="bairro"
-                    value={form.getValues('bairro') || ''}
+                    {...register('bairro')}
+                    value={form.getValues('bairro')}
                     onChange={handleInputChange}
                     placeholder="Bairro"
                   />
@@ -432,8 +432,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="cidade">Cidade</Label>
                   <Input
                     id="cidade"
-                    name="cidade"
-                    value={form.getValues('cidade') || ''}
+                    {...register('cidade')}
+                    value={form.getValues('cidade')}
                     onChange={handleInputChange}
                     placeholder="Cidade"
                   />
@@ -443,8 +443,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="estado">Estado</Label>
                   <Input
                     id="estado"
-                    name="estado"
-                    value={form.getValues('estado') || ''}
+                    {...register('estado')}
+                    value={form.getValues('estado')}
                     onChange={handleInputChange}
                     placeholder="Estado"
                   />
@@ -461,8 +461,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="nomeLegal">Nome Completo</Label>
                   <Input
                     id="nomeLegal"
-                    name="nomeLegal"
-                    value={form.getValues('nomeLegal') || ''}
+                    {...register('nomeLegal')}
+                    value={form.getValues('nomeLegal')}
                     onChange={handleInputChange}
                     placeholder="Nome completo do representante"
                   />
@@ -472,9 +472,9 @@ const CadastroGestor = () => {
                   <Label htmlFor="emailLegal">E-mail</Label>
                   <Input
                     id="emailLegal"
-                    name="emailLegal"
+                    {...register('emailLegal')}
                     type="email"
-                    value={form.getValues('emailLegal') || ''}
+                    value={form.getValues('emailLegal')}
                     onChange={handleInputChange}
                     placeholder="email@exemplo.com"
                   />
@@ -484,8 +484,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="telefoneLegal">Número de Telefone</Label>
                   <Input
                     id="telefoneLegal"
-                    name="telefoneLegal"
-                    value={form.getValues('telefoneLegal') || ''}
+                    {...register('telefoneLegal')}
+                    value={form.getValues('telefoneLegal')}
                     onChange={handleInputChange}
                     placeholder="(00) 00000-0000"
                   />
@@ -495,8 +495,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="enderecoLegal">Endereço Residencial</Label>
                   <Input
                     id="enderecoLegal"
-                    name="enderecoLegal"
-                    value={form.getValues('enderecoLegal') || ''}
+                    {...register('enderecoLegal')}
+                    value={form.getValues('enderecoLegal')}
                     onChange={handleInputChange}
                     placeholder="Endereço completo"
                   />
@@ -512,7 +512,7 @@ const CadastroGestor = () => {
                 <div className="space-y-2">
                   <Label htmlFor="banco">Banco</Label>
                   <Select 
-                    defaultValue={form.getValues('banco')}
+                    value={form.getValues('banco')}
                     onValueChange={(value) => setValue('banco', value)}
                   >
                     <SelectTrigger id="banco">
@@ -534,8 +534,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="agencia">Agência</Label>
                   <Input
                     id="agencia"
-                    name="agencia"
-                    value={form.getValues('agencia') || ''}
+                    {...register('agencia')}
+                    value={form.getValues('agencia')}
                     onChange={handleInputChange}
                     placeholder="Número da Agência (Somente Números)"
                     numberOnly
@@ -546,8 +546,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="conta">Conta</Label>
                   <Input
                     id="conta"
-                    name="conta"
-                    value={form.getValues('conta') || ''}
+                    {...register('conta')}
+                    value={form.getValues('conta')}
                     onChange={handleInputChange}
                     placeholder="Número da Conta (Somente Números)"
                     numberOnly
@@ -558,8 +558,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="pix">PIX</Label>
                   <Input
                     id="pix"
-                    name="pix"
-                    value={form.getValues('pix') || ''}
+                    {...register('pix')}
+                    value={form.getValues('pix')}
                     onChange={handleInputChange}
                     placeholder="Chave PIX (Somente Números)"
                     numberOnly
@@ -588,8 +588,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="valorPlano">Valor do Plano (R$)</Label>
                   <Input
                     id="valorPlano"
-                    name="valorPlano"
-                    value={form.getValues('valorPlano') || ''}
+                    {...register('valorPlano')}
+                    value={form.getValues('valorPlano')}
                     onChange={handleInputChange}
                     placeholder="0,00"
                   />
@@ -609,7 +609,7 @@ const CadastroGestor = () => {
                 <div className="space-y-2">
                   <Label htmlFor="vencimento">Vencimento</Label>
                   <Select 
-                    defaultValue={form.getValues('vencimento')}
+                    value={form.getValues('vencimento')}
                     onValueChange={(value) => setValue('vencimento', value)}
                   >
                     <SelectTrigger id="vencimento">
@@ -631,8 +631,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="desconto">Desconto (R$)</Label>
                   <Input
                     id="desconto"
-                    name="desconto"
-                    value={form.getValues('desconto') || ''}
+                    {...register('desconto')}
+                    value={form.getValues('desconto')}
                     onChange={handleInputChange}
                     placeholder="0,00"
                   />
@@ -642,8 +642,8 @@ const CadastroGestor = () => {
                   <Label htmlFor="valorMensal">Valor Mensal (R$)</Label>
                   <Input
                     id="valorMensal"
-                    name="valorMensal"
-                    value={form.getValues('valorMensal') || ''}
+                    {...register('valorMensal')}
+                    value={form.getValues('valorMensal')}
                     readOnly
                     className="bg-gray-100"
                   />
@@ -663,9 +663,9 @@ const CadastroGestor = () => {
                   <Label htmlFor="senha">Senha</Label>
                   <Input
                     id="senha"
-                    name="senha"
+                    {...register('senha')}
                     type="password"
-                    value={form.getValues('senha') || ''}
+                    value={form.getValues('senha')}
                     onChange={handleInputChange}
                     placeholder="Digite uma senha segura"
                   />
@@ -675,9 +675,9 @@ const CadastroGestor = () => {
                   <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
                   <Input
                     id="confirmarSenha"
-                    name="confirmarSenha"
+                    {...register('confirmarSenha')}
                     type="password"
-                    value={form.getValues('confirmarSenha') || ''}
+                    value={form.getValues('confirmarSenha')}
                     onChange={handleInputChange}
                     placeholder="Confirme sua senha"
                   />
