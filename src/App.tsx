@@ -8,6 +8,7 @@ import { AppProvider, useApp } from "@/contexts/AppContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import CadastroGestor from "./pages/CadastroGestor";
+import CadastroPlanos from "./pages/CadastroPlanos";
 import UnderConstruction from "./pages/UnderConstruction";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
@@ -103,6 +104,14 @@ const App = () => (
               <AnimationController>
                 <ProtectedRoute>
                   <CadastroGestor />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/cadastro-planos" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <CadastroPlanos />
                 </ProtectedRoute>
               </AnimationController>
             } />

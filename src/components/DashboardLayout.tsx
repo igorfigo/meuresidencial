@@ -11,6 +11,7 @@ import {
   Menu, 
   Settings, 
   User,
+  Package
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -36,6 +37,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const menuItems = [
     { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
+    { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
   ];
 
   return (
