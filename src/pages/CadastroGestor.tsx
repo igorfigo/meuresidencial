@@ -136,13 +136,45 @@ const CadastroGestor = () => {
     try {
       const data = await getCondominiumByMatricula(matriculaSearch);
       if (data) {
-        reset();
+        reset({
+          matricula: '',
+          cnpj: '',
+          cep: '',
+          rua: '',
+          numero: '',
+          complemento: '',
+          bairro: '',
+          cidade: '',
+          estado: '',
+          nomeCondominio: '',
+          nomeLegal: '',
+          emailLegal: '',
+          telefoneLegal: '',
+          enderecoLegal: '',
+          banco: '',
+          agencia: '',
+          conta: '',
+          pix: '',
+          planoContratado: 'standard',
+          valorPlano: '',
+          formaPagamento: 'pix',
+          vencimento: '',
+          desconto: '',
+          valorMensal: '',
+          senha: '',
+          confirmarSenha: ''
+        });
+        
+        const formValues: any = {};
         
         Object.entries(data).forEach(([key, value]) => {
-          if (value !== null && key in form.getValues()) {
-            setValue(key as keyof FormFields, value.toString());
+          if (value !== null && value !== undefined && key in form.getValues()) {
+            formValues[key] = value.toString();
           }
         });
+        
+        reset(formValues);
+        
         toast.success('Condomínio encontrado com sucesso!');
       } else {
         toast.error('Nenhum condomínio encontrado com esta matrícula.');
