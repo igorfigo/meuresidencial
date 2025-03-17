@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -203,20 +202,22 @@ const CadastroGestor = () => {
         
         Object.entries(data).forEach(([key, value]) => {
           if (value !== null && value !== undefined && key in form.getValues()) {
-            formValues[key] = value.toString();
+            if (key !== 'senha' && key !== 'confirmarSenha') {
+              formValues[key] = value.toString();
+            } else {
+              formValues[key] = ''; // Set password fields to empty
+            }
           }
         });
         
         reset(formValues);
         
-        // Set state to indicate this is an existing record
         setIsExistingRecord(true);
         
         toast.success('Condomínio encontrado com sucesso!');
         
         await loadChangeLogs(matriculaSearch);
       } else {
-        // Not an existing record
         setIsExistingRecord(false);
         toast.error('Nenhum condomínio encontrado com esta matrícula.');
       }
@@ -229,9 +230,7 @@ const CadastroGestor = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
-    // Only validate passwords on new records
     if (!isExistingRecord) {
-      // This is a new record, so password is required
       if (!data.senha) {
         toast.error('Senha é obrigatória para novos cadastros.');
         return;
@@ -241,10 +240,11 @@ const CadastroGestor = () => {
         toast.error('As senhas não conferem. Por favor, verifique.');
         return;
       }
-    } else if (data.senha && data.senha !== data.confirmarSenha) {
-      // If updating an existing record and password provided, make sure they match
-      toast.error('As senhas não conferem. Por favor, verifique.');
-      return;
+    } else if (data.senha || data.confirmarSenha) {
+      if (data.senha !== data.confirmarSenha) {
+        toast.error('As senhas não conferem. Por favor, verifique.');
+        return;
+      }
     }
 
     const formattedData = {
@@ -263,7 +263,6 @@ const CadastroGestor = () => {
         await loadChangeLogs(data.matricula);
       }
       
-      // Only reset the form for new records
       if (!isExistingRecord) {
         reset();
         setIsExistingRecord(false);
