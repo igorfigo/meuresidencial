@@ -5,90 +5,98 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Building, Save, Search } from 'lucide-react';
 import { fetchAddressByCep } from '@/services/cepService';
+import { useForm } from 'react-hook-form';
+import { saveCondominiumData, getCondominiumByMatricula } from '@/integrations/supabase/client';
 
 const CadastroGestor = () => {
-  const [formData, setFormData] = useState({
-    // Informações Condomínio
-    matricula: '',
-    cnpj: '',
-    cep: '',
-    rua: '',
-    numero: '',
-    complemento: '',
-    bairro: '',
-    cidade: '',
-    estado: '',
-    nomeCondominio: '',
-    
-    // Informações Representante Legal
-    nomeLegal: '',
-    emailLegal: '',
-    telefoneLegal: '',
-    enderecoLegal: '',
-    
-    // Informações Financeiras
-    banco: '',
-    agencia: '',
-    conta: '',
-    
-    // Plano / Contrato
-    planoContratado: '',
-    valorPlano: '',
-    formaPagamento: '',
-    vencimento: '',
-    desconto: '',
-    valorMensal: '',
-    
-    // Segurança
-    senha: '',
-    confirmarSenha: ''
-  });
-
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
+  const form = useForm({
+    defaultValues: {
+      // Informações Condomínio
+      matricula: '',
+      cnpj: '',
+      cep: '',
+      rua: '',
+      numero: '',
+      complemento: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      nomeCondominio: '',
+      
+      // Informações Representante Legal
+      nomeLegal: '',
+      emailLegal: '',
+      telefoneLegal: '',
+      enderecoLegal: '',
+      
+      // Informações Financeiras
+      banco: '',
+      agencia: '',
+      conta: '',
+      pix: '',
+      
+      // Plano / Contrato
+      planoContratado: 'standard',
+      valorPlano: '',
+      formaPagamento: 'pix',
+      vencimento: '',
+      desconto: '',
+      valorMensal: '',
+      
+      // Segurança
+      senha: '',
+      confirmarSenha: ''
+    }
+  });
+
+  const { watch, setValue, getValues } = form;
+  
+  const cep = watch('cep');
+  const numero = watch('numero');
+  const valorPlano = watch('valorPlano');
+  const desconto = watch('desconto');
+  
   // Compute matricula whenever CEP or number changes
   useEffect(() => {
-    if (formData.cep && formData.numero) {
-      const cleanCep = formData.cep.replace(/\D/g, '');
-      setFormData(prev => ({
-        ...prev,
-        matricula: `${cleanCep}${formData.numero}`
-      }));
+    if (cep && numero) {
+      const cleanCep = cep.replace(/\D/g, '');
+      setValue('matricula', `${cleanCep}${numero}`);
     }
-  }, [formData.cep, formData.numero]);
+  }, [cep, numero, setValue]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  // Calculate valorMensal
+  useEffect(() => {
+    const planoValue = parseFloat(valorPlano) || 0;
+    const descontoValue = parseFloat(desconto) || 0;
+    const valorMensal = (planoValue - descontoValue).toFixed(2);
+    
+    setValue('valorMensal', valorMensal);
+  }, [valorPlano, desconto, setValue]);
 
   const handleCepSearch = async () => {
-    const cep = formData.cep.replace(/\D/g, '');
-    if (cep.length !== 8) {
+    const cepValue = getValues('cep').replace(/\D/g, '');
+    if (cepValue.length !== 8) {
       toast.error('CEP inválido. Digite um CEP válido com 8 dígitos.');
       return;
     }
 
     setIsLoadingCep(true);
     try {
-      const addressData = await fetchAddressByCep(cep);
+      const addressData = await fetchAddressByCep(cepValue);
       if (addressData) {
-        setFormData(prev => ({
-          ...prev,
-          rua: addressData.logradouro,
-          bairro: addressData.bairro,
-          cidade: addressData.localidade,
-          estado: addressData.uf
-        }));
+        setValue('rua', addressData.logradouro);
+        setValue('bairro', addressData.bairro);
+        setValue('cidade', addressData.localidade);
+        setValue('estado', addressData.uf);
         toast.success('Endereço encontrado com sucesso!');
       } else {
         toast.error('CEP não encontrado. Verifique e tente novamente.');
@@ -100,48 +108,52 @@ const CadastroGestor = () => {
     }
   };
 
-  const calculateValorMensal = () => {
-    const valorPlano = parseFloat(formData.valorPlano) || 0;
-    const desconto = parseFloat(formData.desconto) || 0;
-    const valorMensal = (valorPlano - desconto).toFixed(2);
-    
-    setFormData(prev => ({ ...prev, valorMensal }));
+  const handleMatriculaSearch = async () => {
+    const matricula = getValues('matricula');
+    if (!matricula) {
+      toast.error('Por favor, informe uma matrícula para buscar.');
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const data = await getCondominiumByMatricula(matricula);
+      if (data) {
+        // Populate all form fields with the retrieved data
+        Object.entries(data).forEach(([key, value]) => {
+          if (value !== null && form.getValues(key as any) !== undefined) {
+            setValue(key as any, value);
+          }
+        });
+        toast.success('Condomínio encontrado com sucesso!');
+      } else {
+        toast.error('Nenhum condomínio encontrado com esta matrícula.');
+      }
+    } catch (error) {
+      console.error('Error searching for condominium:', error);
+      toast.error('Erro ao buscar condomínio. Tente novamente mais tarde.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  useEffect(() => {
-    calculateValorMensal();
-  }, [formData.valorPlano, formData.desconto]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const onSubmit = async (data: any) => {
     // Validation
-    if (formData.senha !== formData.confirmarSenha) {
+    if (data.senha !== data.confirmarSenha) {
       toast.error('As senhas não conferem. Por favor, verifique.');
       return;
     }
 
-    // Check for required fields (simplified validation)
-    const requiredFields = [
-      'cnpj', 'cep', 'rua', 'numero', 'bairro', 'cidade', 'estado', 'nomeCondominio',
-      'nomeLegal', 'emailLegal', 'telefoneLegal', 'planoContratado', 'valorPlano',
-      'formaPagamento', 'vencimento', 'senha'
-    ];
-
-    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
-    if (missingFields.length > 0) {
-      toast.error('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
-
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await saveCondominiumData(data);
       toast.success('Cadastro realizado com sucesso!');
+    } catch (error) {
+      console.error('Error saving condominium data:', error);
+      toast.error('Erro ao salvar dados. Tente novamente mais tarde.');
+    } finally {
       setIsSubmitting(false);
-      // In a real app, you would redirect or clear the form here
-    }, 1500);
+    }
   };
 
   // Format input values
@@ -170,6 +182,33 @@ const CadastroGestor = () => {
       .slice(0, 15);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'cnpj') {
+      setValue('cnpj', formatCnpj(value));
+    } else if (name === 'cep') {
+      setValue('cep', formatCep(value));
+    } else if (name === 'telefoneLegal') {
+      setValue('telefoneLegal', formatPhone(value));
+    } else {
+      setValue(name as any, value);
+    }
+  };
+
+  const bancos = [
+    "Itaú Unibanco",
+    "Banco do Brasil",
+    "Bradesco",
+    "Caixa Econômica Federal",
+    "Santander Brasil",
+    "BTG Pactual",
+    "Banco Safra",
+    "Sicredi",
+    "Sicoob",
+    "Citibank"
+  ];
+
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
@@ -183,10 +222,36 @@ const CadastroGestor = () => {
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-6 pb-8">
+        {/* Search bar */}
+        <Card className="mb-6 p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <Label htmlFor="matriculaSearch">Buscar por Matrícula</Label>
+              <div className="flex space-x-2 mt-1">
+                <Input 
+                  id="matriculaSearch" 
+                  placeholder="Digite a matrícula para buscar" 
+                  value={form.getValues('matricula')} 
+                  onChange={(e) => setValue('matricula', e.target.value)}
+                  className="flex-1" 
+                />
+                <Button 
+                  type="button" 
+                  onClick={handleMatriculaSearch} 
+                  disabled={isSearching} 
+                  className="bg-brand-600 hover:bg-brand-700">
+                  {isSearching ? "Buscando..." : <Search className="h-4 w-4 mr-2" />}
+                  {isSearching ? "Buscando..." : "Buscar"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-8">
           {/* Informações Condomínio */}
-          <Card className="form-section">
-            <h2 className="form-section-title">Informações Condomínio</h2>
+          <Card className="form-section p-6">
+            <h2 className="text-xl font-semibold mb-4">Informações Condomínio</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -194,7 +259,7 @@ const CadastroGestor = () => {
                 <Input
                   id="matricula"
                   name="matricula"
-                  value={formData.matricula}
+                  value={form.getValues('matricula')}
                   readOnly
                   disabled
                   className="bg-gray-100"
@@ -209,8 +274,8 @@ const CadastroGestor = () => {
                 <Input
                   id="cnpj"
                   name="cnpj"
-                  value={formData.cnpj}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cnpj: formatCnpj(e.target.value) }))}
+                  value={form.getValues('cnpj')}
+                  onChange={handleInputChange}
                   placeholder="00.000.000/0001-00"
                 />
               </div>
@@ -221,8 +286,8 @@ const CadastroGestor = () => {
                   <Input
                     id="cep"
                     name="cep"
-                    value={formData.cep}
-                    onChange={(e) => setFormData(prev => ({ ...prev, cep: formatCep(e.target.value) }))}
+                    value={form.getValues('cep')}
+                    onChange={handleInputChange}
                     placeholder="00000-000"
                     className="flex-1"
                   />
@@ -242,8 +307,8 @@ const CadastroGestor = () => {
                 <Input
                   id="nomeCondominio"
                   name="nomeCondominio"
-                  value={formData.nomeCondominio}
-                  onChange={handleChange}
+                  value={form.getValues('nomeCondominio')}
+                  onChange={handleInputChange}
                   placeholder="Nome do Condomínio"
                 />
               </div>
@@ -253,8 +318,8 @@ const CadastroGestor = () => {
                 <Input
                   id="rua"
                   name="rua"
-                  value={formData.rua}
-                  onChange={handleChange}
+                  value={form.getValues('rua')}
+                  onChange={handleInputChange}
                   placeholder="Rua / Avenida"
                 />
               </div>
@@ -264,8 +329,8 @@ const CadastroGestor = () => {
                 <Input
                   id="numero"
                   name="numero"
-                  value={formData.numero}
-                  onChange={handleChange}
+                  value={form.getValues('numero')}
+                  onChange={handleInputChange}
                   placeholder="Número"
                 />
               </div>
@@ -275,8 +340,8 @@ const CadastroGestor = () => {
                 <Input
                   id="complemento"
                   name="complemento"
-                  value={formData.complemento}
-                  onChange={handleChange}
+                  value={form.getValues('complemento')}
+                  onChange={handleInputChange}
                   placeholder="Complemento"
                 />
               </div>
@@ -286,8 +351,8 @@ const CadastroGestor = () => {
                 <Input
                   id="bairro"
                   name="bairro"
-                  value={formData.bairro}
-                  onChange={handleChange}
+                  value={form.getValues('bairro')}
+                  onChange={handleInputChange}
                   placeholder="Bairro"
                 />
               </div>
@@ -297,8 +362,8 @@ const CadastroGestor = () => {
                 <Input
                   id="cidade"
                   name="cidade"
-                  value={formData.cidade}
-                  onChange={handleChange}
+                  value={form.getValues('cidade')}
+                  onChange={handleInputChange}
                   placeholder="Cidade"
                 />
               </div>
@@ -308,8 +373,8 @@ const CadastroGestor = () => {
                 <Input
                   id="estado"
                   name="estado"
-                  value={formData.estado}
-                  onChange={handleChange}
+                  value={form.getValues('estado')}
+                  onChange={handleInputChange}
                   placeholder="Estado"
                 />
               </div>
@@ -317,8 +382,8 @@ const CadastroGestor = () => {
           </Card>
 
           {/* Informações Representante Legal */}
-          <Card className="form-section">
-            <h2 className="form-section-title">Informações Representante Legal</h2>
+          <Card className="form-section p-6">
+            <h2 className="text-xl font-semibold mb-4">Informações Representante Legal</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -326,8 +391,8 @@ const CadastroGestor = () => {
                 <Input
                   id="nomeLegal"
                   name="nomeLegal"
-                  value={formData.nomeLegal}
-                  onChange={handleChange}
+                  value={form.getValues('nomeLegal')}
+                  onChange={handleInputChange}
                   placeholder="Nome completo do representante"
                 />
               </div>
@@ -338,8 +403,8 @@ const CadastroGestor = () => {
                   id="emailLegal"
                   name="emailLegal"
                   type="email"
-                  value={formData.emailLegal}
-                  onChange={handleChange}
+                  value={form.getValues('emailLegal')}
+                  onChange={handleInputChange}
                   placeholder="email@exemplo.com"
                 />
               </div>
@@ -349,8 +414,8 @@ const CadastroGestor = () => {
                 <Input
                   id="telefoneLegal"
                   name="telefoneLegal"
-                  value={formData.telefoneLegal}
-                  onChange={(e) => setFormData(prev => ({ ...prev, telefoneLegal: formatPhone(e.target.value) }))}
+                  value={form.getValues('telefoneLegal')}
+                  onChange={handleInputChange}
                   placeholder="(00) 00000-0000"
                 />
               </div>
@@ -360,8 +425,8 @@ const CadastroGestor = () => {
                 <Input
                   id="enderecoLegal"
                   name="enderecoLegal"
-                  value={formData.enderecoLegal}
-                  onChange={handleChange}
+                  value={form.getValues('enderecoLegal')}
+                  onChange={handleInputChange}
                   placeholder="Endereço completo"
                 />
               </div>
@@ -369,19 +434,29 @@ const CadastroGestor = () => {
           </Card>
 
           {/* Informações Financeiras */}
-          <Card className="form-section">
-            <h2 className="form-section-title">Informações Financeiras</h2>
+          <Card className="form-section p-6">
+            <h2 className="text-xl font-semibold mb-4">Informações Financeiras</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="banco">Banco</Label>
-                <Input
-                  id="banco"
-                  name="banco"
-                  value={formData.banco}
-                  onChange={handleChange}
-                  placeholder="Nome do banco"
-                />
+                <Select 
+                  value={form.getValues('banco')}
+                  onValueChange={(value) => setValue('banco', value)}
+                >
+                  <SelectTrigger id="banco">
+                    <SelectValue placeholder="Selecione o banco" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {bancos.map((banco) => (
+                        <SelectItem key={banco} value={banco}>
+                          {banco}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -389,8 +464,8 @@ const CadastroGestor = () => {
                 <Input
                   id="agencia"
                   name="agencia"
-                  value={formData.agencia}
-                  onChange={handleChange}
+                  value={form.getValues('agencia')}
+                  onChange={handleInputChange}
                   placeholder="Número da agência"
                 />
               </div>
@@ -400,36 +475,39 @@ const CadastroGestor = () => {
                 <Input
                   id="conta"
                   name="conta"
-                  value={formData.conta}
-                  onChange={handleChange}
+                  value={form.getValues('conta')}
+                  onChange={handleInputChange}
                   placeholder="Número da conta"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pix">PIX</Label>
+                <Input
+                  id="pix"
+                  name="pix"
+                  value={form.getValues('pix')}
+                  onChange={handleInputChange}
+                  placeholder="Chave PIX"
                 />
               </div>
             </div>
           </Card>
 
           {/* Plano / Contrato */}
-          <Card className="form-section">
-            <h2 className="form-section-title">Plano / Contrato</h2>
+          <Card className="form-section p-6">
+            <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="planoContratado">Plano Contratado</Label>
-                <Select 
-                  value={formData.planoContratado}
-                  onValueChange={(value) => handleSelectChange('planoContratado', value)}
-                >
-                  <SelectTrigger id="planoContratado">
-                    <SelectValue placeholder="Selecione o plano" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="basico">Plano Básico</SelectItem>
-                      <SelectItem value="standard">Plano Standard</SelectItem>
-                      <SelectItem value="premium">Plano Premium</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="planoContratado"
+                  value="Plano Standard"
+                  readOnly
+                  className="bg-gray-100"
+                />
+                <input type="hidden" name="planoContratado" value="standard" />
               </div>
 
               <div className="space-y-2">
@@ -438,37 +516,28 @@ const CadastroGestor = () => {
                   id="valorPlano"
                   name="valorPlano"
                   type="number"
-                  value={formData.valorPlano}
-                  onChange={handleChange}
+                  value={form.getValues('valorPlano')}
+                  onChange={handleInputChange}
                   placeholder="0,00"
                 />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
-                <Select 
-                  value={formData.formaPagamento}
-                  onValueChange={(value) => handleSelectChange('formaPagamento', value)}
-                >
-                  <SelectTrigger id="formaPagamento">
-                    <SelectValue placeholder="Selecione a forma de pagamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="cartao">Cartão de Crédito</SelectItem>
-                      <SelectItem value="boleto">Boleto Bancário</SelectItem>
-                      <SelectItem value="pix">PIX</SelectItem>
-                      <SelectItem value="transferencia">Transferência Bancária</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="formaPagamento"
+                  value="PIX"
+                  readOnly
+                  className="bg-gray-100"
+                />
+                <input type="hidden" name="formaPagamento" value="pix" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="vencimento">Vencimento</Label>
                 <Select 
-                  value={formData.vencimento}
-                  onValueChange={(value) => handleSelectChange('vencimento', value)}
+                  value={form.getValues('vencimento')}
+                  onValueChange={(value) => setValue('vencimento', value)}
                 >
                   <SelectTrigger id="vencimento">
                     <SelectValue placeholder="Dia do vencimento" />
@@ -491,8 +560,8 @@ const CadastroGestor = () => {
                   id="desconto"
                   name="desconto"
                   type="number"
-                  value={formData.desconto}
-                  onChange={handleChange}
+                  value={form.getValues('desconto')}
+                  onChange={handleInputChange}
                   placeholder="0,00"
                 />
               </div>
@@ -502,7 +571,7 @@ const CadastroGestor = () => {
                 <Input
                   id="valorMensal"
                   name="valorMensal"
-                  value={formData.valorMensal}
+                  value={form.getValues('valorMensal')}
                   readOnly
                   className="bg-gray-100"
                 />
@@ -514,8 +583,8 @@ const CadastroGestor = () => {
           </Card>
 
           {/* Segurança */}
-          <Card className="form-section">
-            <h2 className="form-section-title">Segurança</h2>
+          <Card className="form-section p-6">
+            <h2 className="text-xl font-semibold mb-4">Segurança</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -524,8 +593,8 @@ const CadastroGestor = () => {
                   id="senha"
                   name="senha"
                   type="password"
-                  value={formData.senha}
-                  onChange={handleChange}
+                  value={form.getValues('senha')}
+                  onChange={handleInputChange}
                   placeholder="Digite uma senha segura"
                 />
               </div>
@@ -536,8 +605,8 @@ const CadastroGestor = () => {
                   id="confirmarSenha"
                   name="confirmarSenha"
                   type="password"
-                  value={formData.confirmarSenha}
-                  onChange={handleChange}
+                  value={form.getValues('confirmarSenha')}
+                  onChange={handleInputChange}
                   placeholder="Confirme sua senha"
                 />
               </div>

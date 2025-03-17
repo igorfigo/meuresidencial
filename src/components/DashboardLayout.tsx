@@ -10,13 +10,7 @@ import {
   LogOut, 
   Menu, 
   Settings, 
-  User, 
-  Users, 
-  PieChart, 
-  Calendar, 
-  Wallet, 
-  Bell, 
-  Star
+  User,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -42,13 +36,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const menuItems = [
     { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
-    { name: 'Moradores', icon: <Users className="h-5 w-5" />, path: '/moradores' },
-    { name: 'Financeiro', icon: <Wallet className="h-5 w-5" />, path: '/financeiro' },
-    { name: 'Relatórios', icon: <PieChart className="h-5 w-5" />, path: '/relatorios' },
-    { name: 'Agenda', icon: <Calendar className="h-5 w-5" />, path: '/agenda' },
-    { name: 'Notificações', icon: <Bell className="h-5 w-5" />, path: '/notificacoes' },
-    { name: 'Avaliações', icon: <Star className="h-5 w-5" />, path: '/avaliacoes' },
-    { name: 'Configurações', icon: <Settings className="h-5 w-5" />, path: '/configuracoes' },
   ];
 
   return (
@@ -79,7 +66,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
           <div className="flex items-center space-x-2">
             <Building className="h-6 w-6 text-white" />
-            <span className="text-white font-display text-xl">ResidencialPro</span>
+            <span className="text-white font-display text-xl">MeuResidencial</span>
           </div>
           <Button 
             variant="ghost" 
@@ -152,7 +139,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <>
               <div className="flex items-center">
                 <Building className="h-6 w-6 text-white" />
-                <span className="ml-2 font-display text-white text-xl">ResidencialPro</span>
+                <span className="ml-2 font-display text-white text-xl">MeuResidencial</span>
               </div>
               <Button 
                 variant="ghost" 

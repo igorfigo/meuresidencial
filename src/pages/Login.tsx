@@ -38,7 +38,7 @@ const Login = () => {
           <div className="mb-8 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start mb-4">
               <Building className="h-8 w-8 text-brand-600" />
-              <h1 className="text-3xl font-bold text-gray-800 ml-2 font-display">ResidencialPro</h1>
+              <h1 className="text-3xl font-bold text-gray-800 ml-2 font-display">MeuResidencial</h1>
             </div>
             <h2 className="text-2xl font-semibold text-gray-700 mb-1">Seja bem-vindo!</h2>
             <p className="text-gray-500">Faça login para acessar sua conta de síndico</p>
