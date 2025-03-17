@@ -7,10 +7,13 @@ import { Card } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Building, Save, Search } from 'lucide-react';
+import { Building, Save, Search, History } from 'lucide-react';
 import { fetchAddressByCep } from '@/services/cepService';
 import { useForm } from 'react-hook-form';
-import { saveCondominiumData, getCondominiumByMatricula } from '@/integrations/supabase/client';
+import { saveCondominiumData, getCondominiumByMatricula, getCondominiumChangeLogs } from '@/integrations/supabase/client';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 type FormFields = {
   matricula: string;
@@ -41,11 +44,23 @@ type FormFields = {
   confirmarSenha: string;
 };
 
+type ChangeLogEntry = {
+  id: string;
+  matricula: string;
+  campo: string;
+  valor_anterior: string | null;
+  valor_novo: string | null;
+  data_alteracao: string;
+  usuario: string | null;
+};
+
 const CadastroGestor = () => {
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [matriculaSearch, setMatriculaSearch] = useState('');
+  const [changeLogs, setChangeLogs] = useState<ChangeLogEntry[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
 
   const form = useForm<FormFields>({
     defaultValues: {
@@ -126,6 +141,21 @@ const CadastroGestor = () => {
     }
   };
 
+  const loadChangeLogs = async (matricula: string) => {
+    if (!matricula) return;
+    
+    setIsLoadingLogs(true);
+    try {
+      const logs = await getCondominiumChangeLogs(matricula);
+      setChangeLogs(logs || []);
+    } catch (error) {
+      console.error('Error loading change logs:', error);
+      toast.error('Erro ao carregar histórico de alterações.');
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
+
   const handleMatriculaSearch = async () => {
     if (!matriculaSearch) {
       toast.error('Por favor, informe uma matrícula para buscar.');
@@ -133,38 +163,40 @@ const CadastroGestor = () => {
     }
 
     setIsSearching(true);
+    setChangeLogs([]);
     try {
       const data = await getCondominiumByMatricula(matriculaSearch);
+      
+      reset({
+        matricula: '',
+        cnpj: '',
+        cep: '',
+        rua: '',
+        numero: '',
+        complemento: '',
+        bairro: '',
+        cidade: '',
+        estado: '',
+        nomeCondominio: '',
+        nomeLegal: '',
+        emailLegal: '',
+        telefoneLegal: '',
+        enderecoLegal: '',
+        banco: '',
+        agencia: '',
+        conta: '',
+        pix: '',
+        planoContratado: 'standard',
+        valorPlano: '',
+        formaPagamento: 'pix',
+        vencimento: '',
+        desconto: '',
+        valorMensal: '',
+        senha: '',
+        confirmarSenha: ''
+      });
+      
       if (data) {
-        reset({
-          matricula: '',
-          cnpj: '',
-          cep: '',
-          rua: '',
-          numero: '',
-          complemento: '',
-          bairro: '',
-          cidade: '',
-          estado: '',
-          nomeCondominio: '',
-          nomeLegal: '',
-          emailLegal: '',
-          telefoneLegal: '',
-          enderecoLegal: '',
-          banco: '',
-          agencia: '',
-          conta: '',
-          pix: '',
-          planoContratado: 'standard',
-          valorPlano: '',
-          formaPagamento: 'pix',
-          vencimento: '',
-          desconto: '',
-          valorMensal: '',
-          senha: '',
-          confirmarSenha: ''
-        });
-        
         const formValues: any = {};
         
         Object.entries(data).forEach(([key, value]) => {
@@ -176,6 +208,8 @@ const CadastroGestor = () => {
         reset(formValues);
         
         toast.success('Condomínio encontrado com sucesso!');
+        
+        await loadChangeLogs(matriculaSearch);
       } else {
         toast.error('Nenhum condomínio encontrado com esta matrícula.');
       }
@@ -204,6 +238,11 @@ const CadastroGestor = () => {
     try {
       await saveCondominiumData(formattedData);
       toast.success('Cadastro realizado com sucesso!');
+      
+      if (matriculaSearch === data.matricula) {
+        await loadChangeLogs(data.matricula);
+      }
+      
       reset();
     } catch (error) {
       console.error('Error saving condominium data:', error);
@@ -296,6 +335,11 @@ const CadastroGestor = () => {
     "Citibank"
   ];
 
+  const formatDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
+  };
+
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
@@ -335,7 +379,7 @@ const CadastroGestor = () => {
         </Card>
 
         <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <Card className="form-section p-6">
               <h2 className="text-xl font-semibold mb-4">Informações Condomínio</h2>
               
@@ -687,6 +731,43 @@ const CadastroGestor = () => {
             </div>
           </form>
         </Form>
+        
+        {changeLogs.length > 0 && (
+          <Card className="mt-8 mb-8 p-6">
+            <div className="flex items-center mb-4">
+              <History className="h-5 w-5 mr-2 text-brand-600" />
+              <h2 className="text-xl font-semibold">Histórico de Alterações</h2>
+            </div>
+            
+            <Separator className="mb-4" />
+            
+            <ScrollArea className="h-80 rounded-md border">
+              <Table>
+                <TableCaption>Histórico de alterações para a matrícula {matriculaSearch}</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data e Hora</TableHead>
+                    <TableHead>Campo</TableHead>
+                    <TableHead>Valor Anterior</TableHead>
+                    <TableHead>Novo Valor</TableHead>
+                    <TableHead>Usuário</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {changeLogs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell>{formatDate(log.data_alteracao)}</TableCell>
+                      <TableCell className="font-medium">{log.campo}</TableCell>
+                      <TableCell>{log.valor_anterior || '-'}</TableCell>
+                      <TableCell>{log.valor_novo || '-'}</TableCell>
+                      <TableCell>{log.usuario || 'Sistema'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
