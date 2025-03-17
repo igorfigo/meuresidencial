@@ -185,13 +185,13 @@ export const saveCondominiumData = async (data: Condominium) => {
       throw new Error('No data returned from insert operation');
     }
 
-    // Safely cast the data
+    // Safely cast the data to the correct type
     // First check that we actually have an array with objects
     if (!Array.isArray(savedData)) {
       throw new Error('Expected array of data but got something else');
     }
     
-    // Now explicitly cast it to the correct type
+    // Type assertion for the saved data
     const typedSavedData = savedData as unknown as CondominiumRow[];
     
     // Se for um novo condomínio e tiver e-mail, envia e-mail de boas-vindas
@@ -255,24 +255,41 @@ export const getCondominiumByMatricula = async (matricula: string) => {
   try {
     console.log("Fetching condominium by matricula:", matricula);
     
+    // Adiciona logs para debug
+    console.log("Matricula sendo buscada:", matricula);
+    console.log("Tipo da matrícula:", typeof matricula);
+    console.log("Matrícula é vazia?", !matricula);
+    
+    if (!matricula || matricula.trim() === '') {
+      console.log("Matrícula vazia, retornando null");
+      return null;
+    }
+    
     // Use any type to bypass type checking since we know the table exists
     const { data, error } = await supabase
       .from('condominiums' as any)
       .select('*')
-      .eq('matricula', matricula)
-      .maybeSingle();
+      .eq('matricula', matricula.trim())
+      .single();
     
     if (error) {
-      console.error("Error fetching condominium:", error);
-      if (error.code !== 'PGRST116') {
-        throw error;
+      // Se o erro for PGRST116 (not found), não é um erro real, apenas não encontrou dados
+      if (error.code === 'PGRST116') {
+        console.log("Nenhum condomínio encontrado com a matrícula:", matricula);
+        return null;
       }
+      
+      console.error("Error fetching condominium:", error);
+      throw error;
     }
     
     console.log("Fetched condominium data:", data);
     
-    // Return null if no data was found instead of trying to cast it
-    if (!data) return null;
+    // Return null if no data was found
+    if (!data) {
+      console.log("Nenhum dado encontrado para a matrícula:", matricula);
+      return null;
+    }
     
     // Safely cast the data to the correct type
     const typedData = data as unknown as CondominiumRow;
