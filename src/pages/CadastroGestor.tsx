@@ -209,30 +209,20 @@ const CadastroGestor = () => {
   const formatCurrency = (value: string) => {
     let formattedValue = value.replace(/[^\d,]/g, '');
     
-    const commaCount = (formattedValue.match(/,/g) || []).length;
-    if (commaCount > 1) {
-      const parts = formattedValue.split(',');
-      formattedValue = parts[0] + ',' + parts.slice(1).join('');
-    }
-    
-    let integerPart = '';
-    let decimalPart = '00';
-    
     if (formattedValue.includes(',')) {
-      [integerPart, decimalPart] = formattedValue.split(',');
+      let [integerPart, decimalPart] = formattedValue.split(',');
+      
       if (decimalPart.length > 2) {
-        decimalPart = decimalPart.slice(0, 2);
-      } 
-      else if (decimalPart.length < 2) {
+        integerPart = integerPart + decimalPart.slice(0, decimalPart.length - 2);
+        decimalPart = decimalPart.slice(decimalPart.length - 2);
+      } else if (decimalPart.length < 2) {
         decimalPart = decimalPart.padEnd(2, '0');
       }
+      
+      return `${integerPart || '0'},${decimalPart}`;
     } else {
-      integerPart = formattedValue;
+      return `${formattedValue || '0'},00`;
     }
-    
-    integerPart = integerPart || '0';
-    
-    return `${integerPart},${decimalPart}`;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
