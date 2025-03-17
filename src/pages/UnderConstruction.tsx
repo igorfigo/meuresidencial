@@ -1,7 +1,7 @@
 
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Building, Tool } from 'lucide-react';
+import { Building, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ const UnderConstruction = () => {
         <div className="relative mb-6">
           <Building className="h-16 w-16 text-brand-600" />
           <div className="absolute -top-2 -right-2 bg-brand-100 rounded-full p-1">
-            <Tool className="h-5 w-5 text-brand-600" />
+            <Wrench className="h-5 w-5 text-brand-600" />
           </div>
         </div>
         
