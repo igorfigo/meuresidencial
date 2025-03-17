@@ -13,13 +13,43 @@ import { fetchAddressByCep } from '@/services/cepService';
 import { useForm } from 'react-hook-form';
 import { saveCondominiumData, getCondominiumByMatricula } from '@/integrations/supabase/client';
 
+// Define the form field names to ensure type safety
+type FormFields = {
+  matricula: string;
+  cnpj: string;
+  cep: string;
+  rua: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  nomeCondominio: string;
+  nomeLegal: string;
+  emailLegal: string;
+  telefoneLegal: string;
+  enderecoLegal: string;
+  banco: string;
+  agencia: string;
+  conta: string;
+  pix: string;
+  planoContratado: string;
+  valorPlano: string;
+  formaPagamento: string;
+  vencimento: string;
+  desconto: string;
+  valorMensal: string;
+  senha: string;
+  confirmarSenha: string;
+};
+
 const CadastroGestor = () => {
   const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [matriculaSearch, setMatriculaSearch] = useState('');
 
-  const form = useForm({
+  const form = useForm<FormFields>({
     defaultValues: {
       // Informações Condomínio
       matricula: '',
@@ -124,8 +154,10 @@ const CadastroGestor = () => {
         
         // Populate all form fields with the retrieved data
         Object.entries(data).forEach(([key, value]) => {
-          if (value !== null && getValues(key as any) !== undefined) {
-            setValue(key as any, value);
+          // Only set value if the field exists in our form and has a value
+          if (value !== null && key in form.getValues()) {
+            // Type assertion to ensure key is valid for setValue
+            setValue(key as keyof FormFields, value as string);
           }
         });
         toast.success('Condomínio encontrado com sucesso!');
@@ -140,7 +172,7 @@ const CadastroGestor = () => {
     }
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormFields) => {
     // Validation
     if (data.senha !== data.confirmarSenha) {
       toast.error('As senhas não conferem. Por favor, verifique.');
@@ -220,18 +252,18 @@ const CadastroGestor = () => {
     const { name, value } = e.target;
     
     if (name === 'cnpj') {
-      setValue(name, formatCnpj(value));
+      setValue(name as keyof FormFields, formatCnpj(value));
     } else if (name === 'cep') {
-      setValue(name, formatCep(value));
+      setValue(name as keyof FormFields, formatCep(value));
     } else if (name === 'telefoneLegal') {
-      setValue(name, formatPhone(value));
+      setValue(name as keyof FormFields, formatPhone(value));
     } else if (name === 'valorPlano' || name === 'desconto') {
-      setValue(name, formatCurrency(value));
+      setValue(name as keyof FormFields, formatCurrency(value));
     } else if (name === 'agencia' || name === 'conta' || name === 'pix') {
       // Only allow numbers for these fields
-      setValue(name, value.replace(/\D/g, ''));
+      setValue(name as keyof FormFields, value.replace(/\D/g, ''));
     } else {
-      setValue(name, value);
+      setValue(name as keyof FormFields, value);
     }
   };
 
@@ -506,6 +538,7 @@ const CadastroGestor = () => {
                     value={form.getValues('agencia') || ''}
                     onChange={handleInputChange}
                     placeholder="Número da Agência (Somente Números)"
+                    numberOnly
                   />
                 </div>
                 
@@ -517,6 +550,7 @@ const CadastroGestor = () => {
                     value={form.getValues('conta') || ''}
                     onChange={handleInputChange}
                     placeholder="Número da Conta (Somente Números)"
+                    numberOnly
                   />
                 </div>
 
@@ -528,6 +562,7 @@ const CadastroGestor = () => {
                     value={form.getValues('pix') || ''}
                     onChange={handleInputChange}
                     placeholder="Chave PIX (Somente Números)"
+                    numberOnly
                   />
                 </div>
               </div>
