@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ import { useForm } from 'react-hook-form';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { Plan } from '@/hooks/use-plans';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type FormFields = {
   codigo: string;
@@ -36,8 +38,6 @@ interface PlanChangeLog {
 export const CadastroPlanos = () => {
   const { user } = useApp();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [codigoSearch, setCodigoSearch] = useState('');
   const [changeLogs, setChangeLogs] = useState<PlanChangeLog[]>([]);
   const [filteredChangeLogs, setFilteredChangeLogs] = useState<PlanChangeLog[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
@@ -46,6 +46,8 @@ export const CadastroPlanos = () => {
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [selectedPlanForLogs, setSelectedPlanForLogs] = useState<string | null>(null);
+  const [isLogDialogOpen, setIsLogDialogOpen] = useState(false);
 
   const form = useForm<FormFields>({
     defaultValues: {
@@ -76,53 +78,6 @@ export const CadastroPlanos = () => {
   useEffect(() => {
     fetchPlans();
   }, []);
-
-  const handleCodigoSearch = async () => {
-    if (!codigoSearch) {
-      toast.error('Por favor, informe um código para buscar.');
-      return;
-    }
-
-    setIsSearching(true);
-    setChangeLogs([]);
-    try {
-      const { data, error } = await supabase
-        .from('plans')
-        .select('*')
-        .eq('codigo', codigoSearch.toUpperCase())
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          toast.error('Nenhum plano encontrado com este código.');
-          reset({
-            codigo: '',
-            nome: '',
-            descricao: '',
-            valor: ''
-          });
-          setIsExistingRecord(false);
-        } else {
-          throw error;
-        }
-      } else {
-        reset({
-          codigo: data.codigo,
-          nome: data.nome,
-          descricao: data.descricao || '',
-          valor: data.valor
-        });
-        setIsExistingRecord(true);
-        toast.success('Plano encontrado com sucesso!');
-        await loadChangeLogs(data.codigo);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar plano:', error);
-      toast.error('Erro ao buscar plano. Tente novamente mais tarde.');
-    } finally {
-      setIsSearching(false);
-    }
-  };
 
   const loadChangeLogs = async (codigo: string) => {
     if (!codigo) return;
@@ -249,9 +204,7 @@ export const CadastroPlanos = () => {
       
       toast.success(isExistingRecord ? 'Plano atualizado com sucesso!' : 'Plano cadastrado com sucesso!');
       
-      if (isExistingRecord) {
-        await loadChangeLogs(formattedData.codigo);
-      } else {
+      if (!isExistingRecord) {
         reset();
       }
       
@@ -295,7 +248,6 @@ export const CadastroPlanos = () => {
   };
 
   const handleEditPlan = async (plan: Plan) => {
-    setCodigoSearch(plan.codigo);
     reset({
       codigo: plan.codigo,
       nome: plan.nome,
@@ -303,14 +255,20 @@ export const CadastroPlanos = () => {
       valor: plan.valor
     });
     setIsExistingRecord(true);
-    await loadChangeLogs(plan.codigo);
+  };
+
+  const handleViewLogs = async (codigo: string) => {
+    setSelectedPlanForLogs(codigo);
+    await loadChangeLogs(codigo);
+    setIsLogDialogOpen(true);
   };
 
   const formatCurrency = (value: string) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(parseFloat(value.replace(',', '.')));
+    // Convert any period to comma for display
+    const valueWithComma = value.replace('.', ',');
+    
+    // Format without changing the comma to period
+    return `R$ ${valueWithComma}`;
   };
 
   const formatDate = (isoDate: string) => {
@@ -364,35 +322,6 @@ export const CadastroPlanos = () => {
             Cadastre e gerencie os planos disponíveis para os condomínios.
           </p>
         </header>
-
-        <Card className="mb-6 p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <Label htmlFor="codigoSearch">Buscar por Código</Label>
-              <div className="flex space-x-2 mt-1">
-                <Input 
-                  id="codigoSearch" 
-                  placeholder="Digite o código para buscar" 
-                  value={codigoSearch}
-                  onChange={(e) => setCodigoSearch(e.target.value.toUpperCase())}
-                  className="flex-1" 
-                />
-                <Button 
-                  type="button" 
-                  onClick={handleCodigoSearch} 
-                  disabled={isSearching} 
-                  className="bg-brand-600 hover:bg-brand-700">
-                  {isSearching ? "Buscando..." : (
-                    <>
-                      <Search className="h-4 w-4 mr-2" />
-                      Buscar
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
@@ -486,6 +415,13 @@ export const CadastroPlanos = () => {
                               >
                                 Editar
                               </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewLogs(plan.codigo)}
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
                               <Button 
                                 variant="destructive" 
                                 size="sm" 
@@ -502,92 +438,101 @@ export const CadastroPlanos = () => {
                 </Table>
               </ScrollArea>
             </Card>
-            
-            {filteredChangeLogs.length > 0 && (
-              <Card className="mt-6 p-6">
-                <div className="flex items-center mb-4">
-                  <History className="h-5 w-5 mr-2 text-brand-600" />
-                  <h2 className="text-xl font-semibold">Histórico de Alterações</h2>
-                </div>
-                
-                <Separator className="mb-4" />
-                
-                <ScrollArea className="h-80 rounded-md border">
-                  <Table>
-                    <TableCaption>Histórico de alterações para o código {codigoSearch}</TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Data e Hora</TableHead>
-                        <TableHead>Campo</TableHead>
-                        <TableHead>Valor Anterior</TableHead>
-                        <TableHead>Novo Valor</TableHead>
-                        <TableHead>Usuário</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {getCurrentItems().map((log) => (
-                        <TableRow key={log.id}>
-                          <TableCell>{formatDate(log.data_alteracao)}</TableCell>
-                          <TableCell className="font-medium">{log.campo}</TableCell>
-                          <TableCell>{log.valor_anterior || '-'}</TableCell>
-                          <TableCell>{log.valor_novo || '-'}</TableCell>
-                          <TableCell>{log.usuario || '-'}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-                
-                {totalPages > 1 && (
-                  <div className="mt-4">
-                    <Pagination>
-                      <PaginationContent>
-                        {currentPage > 1 && (
-                          <PaginationItem>
-                            <PaginationPrevious 
-                              href="#" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handlePageChange(currentPage - 1);
-                              }} 
-                            />
-                          </PaginationItem>
-                        )}
-                        
-                        {getPageNumbers().map((page) => (
-                          <PaginationItem key={page}>
-                            <PaginationLink 
-                              href="#" 
-                              isActive={page === currentPage}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handlePageChange(page);
-                              }}
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        
-                        {currentPage < totalPages && (
-                          <PaginationItem>
-                            <PaginationNext 
-                              href="#" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handlePageChange(currentPage + 1);
-                              }} 
-                            />
-                          </PaginationItem>
-                        )}
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </Card>
-            )}
           </div>
         </div>
+        
+        <Dialog open={isLogDialogOpen} onOpenChange={setIsLogDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <History className="h-5 w-5 mr-2 text-brand-600" />
+                Histórico de Alterações - {selectedPlanForLogs}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="flex-1 overflow-auto">
+              {isLoadingLogs ? (
+                <div className="py-8 text-center">Carregando histórico...</div>
+              ) : filteredChangeLogs.length === 0 ? (
+                <div className="py-8 text-center">Nenhuma alteração registrada para este plano.</div>
+              ) : (
+                <>
+                  <ScrollArea className="h-[50vh] rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Data e Hora</TableHead>
+                          <TableHead>Campo</TableHead>
+                          <TableHead>Valor Anterior</TableHead>
+                          <TableHead>Novo Valor</TableHead>
+                          <TableHead>Usuário</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {getCurrentItems().map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell>{formatDate(log.data_alteracao)}</TableCell>
+                            <TableCell className="font-medium">{log.campo}</TableCell>
+                            <TableCell>{log.valor_anterior || '-'}</TableCell>
+                            <TableCell>{log.valor_novo || '-'}</TableCell>
+                            <TableCell>{log.usuario || '-'}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                  
+                  {totalPages > 1 && (
+                    <div className="mt-4">
+                      <Pagination>
+                        <PaginationContent>
+                          {currentPage > 1 && (
+                            <PaginationItem>
+                              <PaginationPrevious 
+                                href="#" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(currentPage - 1);
+                                }} 
+                              />
+                            </PaginationItem>
+                          )}
+                          
+                          {getPageNumbers().map((page) => (
+                            <PaginationItem key={page}>
+                              <PaginationLink 
+                                href="#" 
+                                isActive={page === currentPage}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(page);
+                                }}
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          
+                          {currentPage < totalPages && (
+                            <PaginationItem>
+                              <PaginationNext 
+                                href="#" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(currentPage + 1);
+                                }} 
+                              />
+                            </PaginationItem>
+                          )}
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
