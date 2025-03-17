@@ -141,11 +141,12 @@ export const getCondominiumChangeLogs = async (matricula: string): Promise<Chang
     }
     
     // Busca os registros de alteração ordenados pelo mais recente
-    const { data, error } = await supabase
-      .from('condominium_change_logs')
+    // Use type assertion to bypass strict type checking
+    const { data, error } = await (supabase
+      .from('condominium_change_logs' as any)
       .select('*')
       .eq('matricula', matricula)
-      .order('data_alteracao', { ascending: false });
+      .order('data_alteracao', { ascending: false }));
     
     console.log("Resultado da consulta de logs:", { data, error });
     
@@ -160,7 +161,8 @@ export const getCondominiumChangeLogs = async (matricula: string): Promise<Chang
       return [];
     }
     
-    return data as ChangeLog[];
+    // Explicitly cast the data to ChangeLog[] type
+    return data as unknown as ChangeLog[];
   } catch (error) {
     console.error("Erro em getCondominiumChangeLogs:", error);
     return null;
@@ -293,8 +295,8 @@ export const saveCondominiumData = async (data: Condominium) => {
         console.log("Changes detected, adding to change logs:", changes);
         
         for (const change of changes) {
-          await supabase
-            .from('condominium_change_logs')
+          await (supabase
+            .from('condominium_change_logs' as any)
             .insert({
               matricula: data.matricula,
               campo: change.field,
@@ -302,7 +304,7 @@ export const saveCondominiumData = async (data: Condominium) => {
               valor_novo: change.newValue,
               data_alteracao: new Date().toISOString(),
               usuario: 'Sistema' // Pode ser substituído pelo usuário atual quando houver autenticação
-            });
+            }));
         }
       }
     }
@@ -412,7 +414,7 @@ export const getCondominiumByMatricula = async (matricula: string) => {
     
     // Verificando que a tabela existe
     const { data: tableData, error: tableError } = await supabase
-      .from('condominiums')
+      .from('condominiums' as any)
       .select('count')
       .limit(1);
       
@@ -425,7 +427,7 @@ export const getCondominiumByMatricula = async (matricula: string) => {
     
     // Consulta todos para depuração
     const { data: allCondominiums, error: allError } = await supabase
-      .from('condominiums')
+      .from('condominiums' as any)
       .select('matricula');
       
     console.log("Todas as matrículas disponíveis:", { data: allCondominiums, error: allError });
@@ -437,7 +439,7 @@ export const getCondominiumByMatricula = async (matricula: string) => {
     
     // Busca exata pela matrícula
     const { data, error } = await supabase
-      .from('condominiums')
+      .from('condominiums' as any)
       .select('*')
       .eq('matricula', cleanMatricula);
     
@@ -454,7 +456,7 @@ export const getCondominiumByMatricula = async (matricula: string) => {
       
       // Buscar usando like para tentar encontrar correspondências parciais
       const { data: similarData, error: similarError } = await supabase
-        .from('condominiums')
+        .from('condominiums' as any)
         .select('*')
         .ilike('matricula', `%${cleanMatricula}%`);
         
