@@ -24,6 +24,7 @@ const Login = () => {
     }
     
     setLoading(true);
+    // Não converter email para minúsculas aqui, isso será feito no contexto
     const success = await login(email, password);
     if (success) {
       navigate('/dashboard');

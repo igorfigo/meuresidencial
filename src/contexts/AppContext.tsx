@@ -38,8 +38,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Hardcoded admin credentials as specified
-      if (email === 'meuresidencialcom@gmail.com' && password === 'Bigdream@2025') {
+      // Verificar as credenciais do administrador
+      if (email.toLowerCase() === 'meuresidencialcom@gmail.com' && password === 'Bigdream@2025') {
         const adminUser = {
           nome: 'IGOR COSTA ALVES',
           email: 'meuresidencialcom@gmail.com',
@@ -52,8 +52,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
-      // In a real app, you would make an API call here
-      // For now, just simulate a failed login
+      // Simulação de falha no login
       toast.error("Credenciais inválidas. Tente novamente.");
       return false;
     } catch (error) {
