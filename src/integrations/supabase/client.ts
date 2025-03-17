@@ -51,14 +51,47 @@ export interface Condominium {
   
   created_at?: string;
   updated_at?: string;
+  welcome_email_sent?: boolean;
 }
+
+// Função para enviar e-mail de boas-vindas
+export const sendWelcomeEmail = async (condominiumData: Condominium) => {
+  try {
+    const response = await supabase.functions.invoke('send-welcome-email', {
+      body: {
+        emailLegal: condominiumData.emailLegal,
+        matricula: condominiumData.matricula,
+        senha: condominiumData.senha,
+        nomeCondominio: condominiumData.nomeCondominio,
+        nomelegal: condominiumData.nomeLegal
+      }
+    });
+    
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao enviar e-mail de boas-vindas:', error);
+    throw error;
+  }
+};
 
 // Condominium data functions
 export const saveCondominiumData = async (data: Condominium) => {
+  // Verificar se o condomínio já existe
+  const existingCondominium = await getCondominiumByMatricula(data.matricula);
+  const isNewCondominium = !existingCondominium;
+  
   // Use any type to bypass type checking since we know the table exists
   const { data: savedData, error } = await supabase
     .from('condominiums' as any)
-    .upsert([data])
+    .upsert([{
+      ...data,
+      // Se for novo cadastro, define welcome_email_sent como false
+      welcome_email_sent: existingCondominium?.welcome_email_sent || false
+    }])
     .select();
   
   if (error) throw error;
@@ -66,6 +99,23 @@ export const saveCondominiumData = async (data: Condominium) => {
   // Use proper type conversion with a null check
   if (!savedData || savedData.length === 0) {
     throw new Error('No data returned from insert operation');
+  }
+
+  // Se for um novo condomínio e tiver e-mail, envia e-mail de boas-vindas
+  if (isNewCondominium && data.emailLegal) {
+    try {
+      await sendWelcomeEmail(data);
+      
+      // Atualiza o flag de e-mail enviado
+      await supabase
+        .from('condominiums' as any)
+        .update({ welcome_email_sent: true })
+        .eq('matricula', data.matricula);
+        
+    } catch (emailError) {
+      console.error('Erro ao enviar e-mail de boas-vindas:', emailError);
+      // Não interrompe o fluxo principal se o envio de e-mail falhar
+    }
   }
   
   return savedData[0] as unknown as Condominium;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -227,22 +226,36 @@ const CadastroGestor = () => {
       .slice(0, 15);
   };
 
+  // Função aprimorada para formatação de valores monetários
   const formatCurrency = (value: string) => {
-    // Remove any non-numeric characters except comma
+    // Remove caracteres não numéricos, exceto vírgula
     let formattedValue = value.replace(/[^\d,]/g, '');
     
-    // Replace any dot with comma
+    // Substitui pontos por vírgula
     formattedValue = formattedValue.replace(/\./g, ',');
     
-    // Ensure only one comma exists
+    // Garante que haja apenas uma vírgula
     const parts = formattedValue.split(',');
     if (parts.length > 2) {
       formattedValue = parts[0] + ',' + parts[1];
     }
     
-    // Limit decimal places to 2
+    // Limita casas decimais a 2
     if (parts.length > 1 && parts[1].length > 2) {
       formattedValue = parts[0] + ',' + parts[1].substring(0, 2);
+    }
+    
+    // Se não houver vírgula e tiver valor, adiciona automaticamente
+    if (!formattedValue.includes(',') && formattedValue.length > 0) {
+      if (formattedValue.length === 1) {
+        formattedValue = '0,' + formattedValue + '0';
+      } else if (formattedValue.length === 2) {
+        formattedValue = '0,' + formattedValue;
+      } else {
+        const integerPart = formattedValue.slice(0, -2);
+        const decimalPart = formattedValue.slice(-2);
+        formattedValue = integerPart + ',' + decimalPart;
+      }
     }
     
     return formattedValue;

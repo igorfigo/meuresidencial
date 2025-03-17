@@ -40,6 +40,7 @@ export type Database = {
           valormensal: string | null
           valorplano: string | null
           vencimento: string | null
+          welcome_email_sent: boolean | null
         }
         Insert: {
           agencia?: string | null
@@ -71,6 +72,7 @@ export type Database = {
           valormensal?: string | null
           valorplano?: string | null
           vencimento?: string | null
+          welcome_email_sent?: boolean | null
         }
         Update: {
           agencia?: string | null
@@ -102,6 +104,7 @@ export type Database = {
           valormensal?: string | null
           valorplano?: string | null
           vencimento?: string | null
+          welcome_email_sent?: boolean | null
         }
         Relationships: []
       }
