@@ -424,7 +424,7 @@ const CadastroGestor = () => {
       <div className="animate-fade-in">
         <header className="mb-6">
           <div className="flex items-center">
-            <Building className="h-6 w-6 mr-2 text-materialize-purple-light" />
+            <Building className="h-6 w-6 mr-2 text-brand-600" />
             <h1 className="text-3xl font-bold">Cadastro Gestor</h1>
           </div>
           <p className="text-muted-foreground mt-1">
@@ -448,9 +448,9 @@ const CadastroGestor = () => {
                   type="button" 
                   onClick={handleMatriculaSearch} 
                   disabled={isSearching} 
-                  className="bg-materialize-purple-light hover:bg-materialize-purple-accent">
+                  className="bg-brand-600 hover:bg-brand-700">
                   {isSearching ? "Buscando..." : <Search className="h-4 w-4 mr-2" />}
-                  {isSearching ? "" : "Buscar"}
+                  {isSearching ? "Buscando..." : "Buscar"}
                 </Button>
               </div>
             </div>
@@ -501,7 +501,7 @@ const CadastroGestor = () => {
                       type="button" 
                       onClick={handleCepSearch}
                       disabled={isLoadingCep}
-                      className="bg-materialize-purple-light hover:bg-materialize-purple-accent"
+                      className="bg-brand-600 hover:bg-brand-700"
                     >
                       {isLoadingCep ? "Buscando..." : <Search className="h-4 w-4" />}
                     </Button>
@@ -812,7 +812,7 @@ const CadastroGestor = () => {
               <Button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="bg-materialize-purple-light hover:bg-materialize-purple-accent"
+                className="bg-brand-600 hover:bg-brand-700"
                 size="lg"
               >
                 <Save className="h-4 w-4 mr-2" />
@@ -825,7 +825,7 @@ const CadastroGestor = () => {
         {filteredChangeLogs.length > 0 && (
           <Card className="mt-8 mb-8 p-6">
             <div className="flex items-center mb-4">
-              <History className="h-5 w-5 mr-2 text-materialize-purple-light" />
+              <History className="h-5 w-5 mr-2 text-brand-600" />
               <h2 className="text-xl font-semibold">Histórico de Alterações</h2>
             </div>
             
@@ -911,4 +911,3 @@ const CadastroGestor = () => {
 };
 
 export default CadastroGestor;
-
