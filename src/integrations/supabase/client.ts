@@ -62,7 +62,13 @@ export const saveCondominiumData = async (data: Condominium) => {
     .select();
   
   if (error) throw error;
-  return savedData?.[0] as Condominium;
+  
+  // Use proper type conversion with a null check
+  if (!savedData || savedData.length === 0) {
+    throw new Error('No data returned from insert operation');
+  }
+  
+  return savedData[0] as unknown as Condominium;
 };
 
 export const getCondominiumByMatricula = async (matricula: string) => {
@@ -71,8 +77,12 @@ export const getCondominiumByMatricula = async (matricula: string) => {
     .from('condominiums' as any)
     .select('*')
     .eq('matricula', matricula)
-    .single();
+    .maybeSingle();
   
   if (error && error.code !== 'PGRST116') throw error;
-  return data as Condominium | null;
+  
+  // Return null if no data was found instead of trying to cast it
+  if (!data) return null;
+  
+  return data as unknown as Condominium;
 };
