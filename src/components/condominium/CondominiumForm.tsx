@@ -32,19 +32,6 @@ export const CondominiumForm = ({
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {isExistingRecord && (
-          <div className="flex justify-end">
-            <Button 
-              type="button" 
-              onClick={toggleAtivoStatus}
-              variant={ativo ? "destructive" : "default"}
-              className={ativo ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
-            >
-              {ativo ? 'Desativar Usuário' : 'Ativar Usuário'}
-            </Button>
-          </div>
-        )}
-        
         <InfoCondominio handleInputChange={handleInputChange} />
         <InfoRepresentante handleInputChange={handleInputChange} />
         <InfoFinanceira handleInputChange={handleInputChange} />
@@ -54,7 +41,18 @@ export const CondominiumForm = ({
           isExistingRecord={isExistingRecord}
         />
         
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-4">
+          {isExistingRecord && (
+            <Button 
+              type="button" 
+              onClick={toggleAtivoStatus}
+              variant={ativo ? "destructive" : "default"}
+              className={ativo ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
+            >
+              {ativo ? 'Desativar Usuário' : 'Ativar Usuário'}
+            </Button>
+          )}
+          
           <Button 
             type="submit" 
             disabled={isSubmitting}

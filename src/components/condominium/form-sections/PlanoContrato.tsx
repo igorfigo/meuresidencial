@@ -120,11 +120,10 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {Array.from({ length: 28 }, (_, i) => i + 1).map(day => (
-                  <SelectItem key={day} value={day.toString()}>
-                    {day}
-                  </SelectItem>
-                ))}
+                {/* Only show options 5, 7, and 10 */}
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="7">7</SelectItem>
+                <SelectItem value="10">10</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -152,6 +151,24 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
           <p className="text-xs text-muted-foreground">
             Valor do plano menos o desconto.
           </p>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="tipoDocumento">Nota Fiscal / Recibo</Label>
+          <Select 
+            value={watch('tipoDocumento')}
+            onValueChange={(value) => setValue('tipoDocumento', value)}
+          >
+            <SelectTrigger id="tipoDocumento">
+              <SelectValue placeholder="Selecione o tipo de documento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="notaFiscal">Nota Fiscal</SelectItem>
+                <SelectItem value="recibo">Recibo</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </Card>

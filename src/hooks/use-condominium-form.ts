@@ -31,6 +31,7 @@ export type FormFields = {
   vencimento: string;
   desconto: string;
   valorMensal: string;
+  tipoDocumento: string;
   senha: string;
   confirmarSenha: string;
   ativo: boolean;
@@ -85,6 +86,7 @@ export const useCondominiumForm = () => {
       vencimento: '',
       desconto: '',
       valorMensal: '',
+      tipoDocumento: 'recibo',
       senha: '',
       confirmarSenha: '',
       ativo: true
