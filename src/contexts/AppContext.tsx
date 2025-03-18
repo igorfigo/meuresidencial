@@ -8,6 +8,7 @@ interface User {
   email: string;
   isAdmin: boolean;
   matricula?: string;
+  nomeCondominio?: string; // Added to store the condominium name
 }
 
 interface AppContextType {
@@ -74,10 +75,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const condoData = condominium as any;
         
         const condoUser = {
-          nome: condoData.nomecondominio || condoData.matricula,
+          nome: condoData.nomelegal || condoData.matricula,
           email: condoData.emaillegal || '',
           isAdmin: false,
-          matricula: condoData.matricula
+          matricula: condoData.matricula,
+          nomeCondominio: condoData.nomecondominio || 'Condomínio'
         };
         
         setUser(condoUser);

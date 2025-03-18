@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -116,7 +115,7 @@ const App = () => (
               </AnimationController>
             } />
             
-            {/* Routes for pages that are not implemented yet */}
+            {/* Gestor Menu Routes */}
             <Route path="/moradores" element={
               <AnimationController>
                 <ProtectedRoute>
@@ -125,6 +124,7 @@ const App = () => (
               </AnimationController>
             } />
             
+            {/* Financeiro Main and Submenu Routes */}
             <Route path="/financeiro" element={
               <AnimationController>
                 <ProtectedRoute>
@@ -133,7 +133,7 @@ const App = () => (
               </AnimationController>
             } />
             
-            <Route path="/relatorios" element={
+            <Route path="/financeiro/receitas-despesas" element={
               <AnimationController>
                 <ProtectedRoute>
                   <UnderConstruction />
@@ -141,7 +141,7 @@ const App = () => (
               </AnimationController>
             } />
             
-            <Route path="/agenda" element={
+            <Route path="/financeiro/dashboard" element={
               <AnimationController>
                 <ProtectedRoute>
                   <UnderConstruction />
@@ -149,7 +149,7 @@ const App = () => (
               </AnimationController>
             } />
             
-            <Route path="/notificacoes" element={
+            <Route path="/financeiro/inadimplencias" element={
               <AnimationController>
                 <ProtectedRoute>
                   <UnderConstruction />
@@ -157,7 +157,7 @@ const App = () => (
               </AnimationController>
             } />
             
-            <Route path="/avaliacoes" element={
+            <Route path="/financeiro/prestacao-contas" element={
               <AnimationController>
                 <ProtectedRoute>
                   <UnderConstruction />
@@ -165,7 +165,48 @@ const App = () => (
               </AnimationController>
             } />
             
-            <Route path="/configuracoes" element={
+            {/* Other Gestor Menu Routes */}
+            <Route path="/boletos" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/documentos" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/reservas" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/servicos" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/assembleias" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/dedetizacoes" element={
               <AnimationController>
                 <ProtectedRoute>
                   <UnderConstruction />

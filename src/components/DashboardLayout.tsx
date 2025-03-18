@@ -11,7 +11,18 @@ import {
   Menu, 
   Settings, 
   User,
-  Package
+  Package,
+  Users,
+  PiggyBank,
+  FileText,
+  Receipt,
+  BarChart,
+  CreditCard,
+  FileIcon,
+  CalendarDays,
+  Briefcase,
+  Vote,
+  Bug
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -20,25 +31,135 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+interface MenuItem {
+  name: string;
+  icon: React.ReactNode;
+  path: string;
+  submenu?: MenuItem[];
+}
+
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, logout } = useApp();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
+  const toggleSubmenu = (name: string) => {
+    setExpandedSubmenu(expandedSubmenu === name ? null : name);
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
-  const menuItems = [
+  // Admin menu items
+  const adminMenuItems: MenuItem[] = [
     { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
   ];
+
+  // Manager menu items
+  const managerMenuItems: MenuItem[] = [
+    { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
+    { name: 'Moradores', icon: <Users className="h-5 w-5" />, path: '/moradores' },
+    { 
+      name: 'Financeiro', 
+      icon: <PiggyBank className="h-5 w-5" />, 
+      path: '/financeiro',
+      submenu: [
+        { name: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" />, path: '/financeiro/receitas-despesas' },
+        { name: 'Dashboard', icon: <BarChart className="h-5 w-5" />, path: '/financeiro/dashboard' },
+        { name: 'Inadimplências', icon: <CreditCard className="h-5 w-5" />, path: '/financeiro/inadimplencias' },
+        { name: 'Prestação de Contas', icon: <FileText className="h-5 w-5" />, path: '/financeiro/prestacao-contas' },
+      ] 
+    },
+    { name: 'Gestão de Boletos', icon: <Receipt className="h-5 w-5" />, path: '/boletos' },
+    { name: 'Documentos do Condomínio', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
+    { name: 'Reservas de Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/reservas' },
+    { name: 'Contratar Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
+    { name: 'Assembléias', icon: <Vote className="h-5 w-5" />, path: '/assembleias' },
+    { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
+  ];
+
+  // Choose the appropriate menu items based on user role
+  const menuItems = user?.isAdmin ? adminMenuItems : managerMenuItems;
+
+  // Render a menu item, handling submenu rendering if needed
+  const renderMenuItem = (item: MenuItem) => {
+    const hasSubmenu = item.submenu && item.submenu.length > 0;
+    const isSubmenuExpanded = expandedSubmenu === item.name;
+
+    return (
+      <div key={item.path} className="w-full">
+        {hasSubmenu ? (
+          <>
+            <button
+              onClick={() => toggleSubmenu(item.name)}
+              className={cn(
+                "flex items-center w-full px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "text-sidebar-foreground hover:bg-sidebar-accent/50",
+                isSubmenuExpanded && "bg-sidebar-accent/70"
+              )}
+            >
+              {item.icon}
+              {(sidebarOpen || mobileMenuOpen) && (
+                <>
+                  <span className="ml-3 flex-1 text-left">{item.name}</span>
+                  <ChevronRight className={cn(
+                    "h-4 w-4 transition-transform", 
+                    isSubmenuExpanded && "transform rotate-90"
+                  )} />
+                </>
+              )}
+            </button>
+            {isSubmenuExpanded && (sidebarOpen || mobileMenuOpen) && (
+              <div className="ml-4 pl-2 border-l border-sidebar-border space-y-1 mt-1">
+                {item.submenu?.map(subItem => (
+                  <NavLink
+                    key={subItem.path}
+                    to={subItem.path}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-sidebar-accent text-white"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                      )
+                    }
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {subItem.icon}
+                    <span className="ml-3">{subItem.name}</span>
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <NavLink
+            to={item.path}
+            className={({ isActive }) =>
+              cn(
+                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-sidebar-accent text-white"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+              )
+            }
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {item.icon}
+            <span className={cn("ml-3", !sidebarOpen && "lg:hidden")}>{item.name}</span>
+          </NavLink>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
@@ -81,24 +202,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
 
         <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-sidebar-accent text-white"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                )
-              }
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {item.icon}
-              <span className="ml-3">{item.name}</span>
-            </NavLink>
-          ))}
+          {menuItems.map(item => renderMenuItem(item))}
         </div>
 
         <div className="p-4 border-t border-sidebar-border">
@@ -165,25 +269,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
         
         <div className="flex-1 bg-sidebar overflow-y-auto py-4 px-3 space-y-1">
-          {menuItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center rounded-md transition-colors",
-                  sidebarOpen ? "px-3 py-2" : "p-2 justify-center",
-                  isActive
-                    ? "bg-sidebar-accent text-white"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                )
-              }
-              title={sidebarOpen ? undefined : item.name}
-            >
-              {item.icon}
-              {sidebarOpen && <span className="ml-3 text-sm">{item.name}</span>}
-            </NavLink>
-          ))}
+          {menuItems.map(item => {
+            // If sidebar is collapsed and item has submenu, just render a simple button
+            if (!sidebarOpen && item.submenu && item.submenu.length > 0) {
+              return (
+                <div 
+                  key={item.path}
+                  className="flex justify-center p-2 rounded-md cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  title={item.name}
+                >
+                  {item.icon}
+                </div>
+              );
+            }
+            return renderMenuItem(item);
+          })}
         </div>
         
         <div className={cn(
