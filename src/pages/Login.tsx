@@ -9,7 +9,7 @@ import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -18,14 +18,13 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!identifier || !password) {
       toast.error('Por favor, preencha todos os campos');
       return;
     }
     
     setLoading(true);
-    // Não converter email para minúsculas aqui, isso será feito no contexto
-    const success = await login(email, password);
+    const success = await login(identifier, password);
     if (success) {
       navigate('/dashboard');
     }
@@ -42,21 +41,21 @@ const Login = () => {
               <h1 className="text-3xl font-bold text-gray-800 ml-2 font-display">MeuResidencial</h1>
             </div>
             <h2 className="text-2xl font-semibold text-gray-700 mb-1">Seja bem-vindo!</h2>
-            <p className="text-gray-500">Faça login para acessar sua conta de síndico</p>
+            <p className="text-gray-500">Faça login para acessar sua conta</p>
           </div>
           
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="identifier">Email ou Matrícula</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
+                  id="identifier"
+                  type="text"
+                  placeholder="seu@email.com ou matrícula"
                   className="pl-9"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
                 />
               </div>

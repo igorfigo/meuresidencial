@@ -54,11 +54,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
-      // Verificar se é uma tentativa de login com matrícula
+      // Verificar se é uma tentativa de login com matrícula ou email
       const { data: condominium, error: condoError } = await supabase
         .from('condominiums' as any)
         .select('*')
-        .eq('matricula', emailOrMatricula)
+        .or(`matricula.eq.${emailOrMatricula},emaillegal.eq.${emailOrMatricula}`)
         .eq('senha', password)
         .eq('ativo', true)
         .single();
