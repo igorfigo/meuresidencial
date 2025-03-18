@@ -146,9 +146,15 @@ Atenciosamente, Administração do Condomínio`
         // Delete files from storage
         if (attachments && attachments.length > 0) {
           for (const attachment of attachments) {
-            await supabase.storage
-              .from('announcement-attachments')
-              .remove([attachment.file_path]);
+            try {
+              const { error } = await supabase.storage
+                .from('announcement-attachments')
+                .remove([attachment.file_path]);
+                
+              if (error) throw error;
+            } catch (err) {
+              console.error('Error removing file from storage:', err);
+            }
           }
         }
         
@@ -197,10 +203,11 @@ Atenciosamente, Administração do Condomínio`
   // Function to get file URL
   const getFileUrl = async (path: string) => {
     try {
-      const { data } = await supabase.storage
+      const { data, error } = await supabase.storage
         .from('announcement-attachments')
         .createSignedUrl(path, 60);
       
+      if (error) throw error;
       return data?.signedUrl || '';
     } catch (error) {
       console.error('Error creating signed URL:', error);
@@ -293,10 +300,7 @@ Atenciosamente, Administração do Condomínio`
                 
                 // Delete from database using RPC
                 await supabase
-                  .rpc('delete_attachment', { p_attachment_id: attId })
-                  .then(({ error }) => {
-                    if (error) throw error;
-                  });
+                  .rpc('delete_attachment', { p_attachment_id: attId });
               } catch (error) {
                 console.error('Error deleting attachment:', error);
               }
@@ -330,9 +334,6 @@ Atenciosamente, Administração do Condomínio`
                 p_file_name: file.name,
                 p_file_path: fileName,
                 p_file_type: file.type
-              })
-              .then(({ error }) => {
-                if (error) throw error;
               });
             
             // Update progress
