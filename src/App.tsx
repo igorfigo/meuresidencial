@@ -10,6 +10,7 @@ import CadastroGestor from "./pages/CadastroGestor";
 import CadastroPlanos from "./pages/CadastroPlanos";
 import UnderConstruction from "./pages/UnderConstruction";
 import NotFound from "./pages/NotFound";
+import Moradores from "./pages/Moradores";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -119,7 +120,7 @@ const App = () => (
             <Route path="/moradores" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <Moradores />
                 </ProtectedRoute>
               </AnimationController>
             } />

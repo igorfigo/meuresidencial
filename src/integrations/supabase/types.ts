@@ -220,6 +220,53 @@ export type Database = {
         }
         Relationships: []
       }
+      residents: {
+        Row: {
+          cpf: string
+          created_at: string
+          email: string | null
+          id: string
+          matricula: string
+          nome_completo: string
+          telefone: string | null
+          unidade: string
+          updated_at: string
+          valor_condominio: string | null
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          matricula: string
+          nome_completo: string
+          telefone?: string | null
+          unidade: string
+          updated_at?: string
+          valor_condominio?: string | null
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          matricula?: string
+          nome_completo?: string
+          telefone?: string | null
+          unidade?: string
+          updated_at?: string
+          valor_condominio?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "residents_matricula_fkey"
+            columns: ["matricula"]
+            isOneToOne: false
+            referencedRelation: "condominiums"
+            referencedColumns: ["matricula"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
