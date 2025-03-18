@@ -1,99 +1,75 @@
 
-/**
- * Formats a number or string to Brazilian currency format (R$ 1.234,56)
- * @param value - Number or string to format
- * @returns Formatted currency string
- */
-export const formatToBRL = (value: string | number): string => {
-  // Convert to number and handle invalid inputs
-  const numericValue = typeof value === 'string' ? 
-    Number(value.replace(/\D/g, '')) / 100 : 
-    value;
+// Functions for formatting and parsing monetary values
 
-  if (isNaN(numericValue)) return 'R$ 0,00';
-
-  // Format to Brazilian currency
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(numericValue);
+// Format a number to BRL format (Brazilian Real)
+export const formatToBRL = (value: number | string): string => {
+  const numValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
+  
+  if (isNaN(numValue)) return '';
+  
+  // Format with 2 decimal places and use comma as separator
+  return numValue.toFixed(2).replace('.', ',');
 };
 
-/**
- * Converts Brazilian currency format to number format for calculations
- * @param value - Currency string (R$ 1.234,56)
- * @returns Number format (1234.56)
- */
+// Convert from BRL format (with comma) to number
 export const BRLToNumber = (value: string): number => {
-  if (!value) return 0;
+  if (!value || value === '') return 0;
   
-  // Remove R$ and spaces, replace dots, replace comma with dot
-  const cleaned = value
-    .replace(/R\$\s*/g, '')
-    .replace(/\./g, '')
-    .replace(',', '.');
+  // Replace comma with dot for proper number parsing
+  const normalizedValue = value.replace(/\./g, '').replace(',', '.');
+  const parsedValue = parseFloat(normalizedValue);
   
-  const number = Number(cleaned);
-  return isNaN(number) ? 0 : number;
+  return isNaN(parsedValue) ? 0 : parsedValue;
 };
 
-/**
- * Formats input value to Brazilian currency format while typing
- * @param value - Current input value
- * @returns Formatted value for display
- */
-export const formatCurrencyInput = (value: string): string => {
-  // Remove all non-digits
-  let numbers = value.replace(/\D/g, '');
-  
-  // Convert to number with 2 decimal places
-  const amount = Number(numbers) / 100;
-  
-  // Format to Brazilian currency without the currency symbol
-  return amount.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
-
-/**
- * Formats a string to CNPJ format
- * @param value - String to format
- * @returns Formatted CNPJ string
- */
+// Format CNPJ: XX.XXX.XXX/XXXX-XX
 export const formatCnpj = (value: string): string => {
-  return value
-    .replace(/\D/g, '')
-    .replace(/^(\d{2})(\d)/, '$1.$2')
-    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+  if (!value) return '';
+  
+  // Remove non-numeric characters
+  const digits = value.replace(/\D/g, '');
+  
+  // Apply CNPJ mask
+  return digits
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
     .replace(/(\d{4})(\d)/, '$1-$2')
-    .slice(0, 18);
+    .replace(/(-\d{2})\d+?$/, '$1');
 };
 
-/**
- * Formats a string to CEP format
- * @param value - String to format
- * @returns Formatted CEP string
- */
+// Format CEP: XXXXX-XXX
 export const formatCep = (value: string): string => {
-  return value
-    .replace(/\D/g, '')
-    .replace(/^(\d{5})(\d)/, '$1-$2')
-    .slice(0, 9);
+  if (!value) return '';
+  
+  // Remove non-numeric characters
+  const digits = value.replace(/\D/g, '');
+  
+  // Apply CEP mask
+  return digits
+    .replace(/(\d{5})(\d)/, '$1-$2')
+    .replace(/(-\d{3})\d+?$/, '$1');
 };
 
-/**
- * Formats a string to phone format
- * @param value - String to format
- * @returns Formatted phone string
- */
+// Format phone: (XX) XXXXX-XXXX or (XX) XXXX-XXXX
 export const formatPhone = (value: string): string => {
-  return value
-    .replace(/\D/g, '')
-    .replace(/^(\d{2})(\d)/g, '($1) $2')
-    .replace(/(\d)(\d{4})$/, '$1-$2')
-    .slice(0, 15);
+  if (!value) return '';
+  
+  // Remove non-numeric characters
+  const digits = value.replace(/\D/g, '');
+  
+  // Apply phone mask based on length
+  if (digits.length <= 10) {
+    // (XX) XXXX-XXXX
+    return digits
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{4})(\d)/, '$1-$2')
+      .replace(/(-\d{4})\d+?$/, '$1');
+  } else {
+    // (XX) XXXXX-XXXX
+    return digits
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{5})(\d)/, '$1-$2')
+      .replace(/(-\d{4})\d+?$/, '$1');
+  }
 };

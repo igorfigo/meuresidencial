@@ -50,6 +50,7 @@ export type Database = {
       condominiums: {
         Row: {
           agencia: string | null
+          ativo: boolean | null
           bairro: string | null
           banco: string | null
           cep: string | null
@@ -82,6 +83,7 @@ export type Database = {
         }
         Insert: {
           agencia?: string | null
+          ativo?: boolean | null
           bairro?: string | null
           banco?: string | null
           cep?: string | null
@@ -114,6 +116,7 @@ export type Database = {
         }
         Update: {
           agencia?: string | null
+          ativo?: boolean | null
           bairro?: string | null
           banco?: string | null
           cep?: string | null

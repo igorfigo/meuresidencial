@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { getCondominiumByMatricula, saveCondominiumData, getCondominiumChangeLogs } from '@/integrations/supabase/client';
@@ -91,11 +91,43 @@ export const useCondominiumForm = () => {
     }
   });
 
+  // Format values when form data changes
+  useEffect(() => {
+    // Watch for changes in valorPlano and desconto
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'valorPlano' || name === 'desconto') {
+        calculateValorMensal();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
+  // Calculate valor mensal based on valorPlano and desconto
+  const calculateValorMensal = () => {
+    const valorPlano = BRLToNumber(form.getValues('valorPlano') || '0');
+    const desconto = BRLToNumber(form.getValues('desconto') || '0');
+    
+    const valorMensal = Math.max(0, valorPlano - desconto);
+    
+    form.setValue('valorMensal', formatToBRL(valorMensal));
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Regular form fields
-    form.setValue(name as keyof FormFields, value);
+    // Format currency fields
+    if (name === 'valorPlano' || name === 'desconto') {
+      // Format to BRL
+      const formattedValue = formatToBRL(BRLToNumber(value));
+      form.setValue(name as keyof FormFields, formattedValue);
+      
+      // Recalculate valorMensal
+      calculateValorMensal();
+    } else {
+      // Regular form fields
+      form.setValue(name as keyof FormFields, value);
+    }
   };
 
   const toggleAtivoStatus = () => {
@@ -107,9 +139,9 @@ export const useCondominiumForm = () => {
     setIsLoadingLogs(true);
     try {
       const logs = await getCondominiumChangeLogs(matricula);
-      setChangeLogs(logs);
-      setFilteredChangeLogs(logs);
-      setTotalPages(Math.ceil(logs.length / ITEMS_PER_PAGE));
+      setChangeLogs(logs || []);
+      setFilteredChangeLogs(logs || []);
+      setTotalPages(Math.ceil((logs?.length || 0) / ITEMS_PER_PAGE));
     } catch (error) {
       console.error('Error loading change logs:', error);
       toast.error('Erro ao carregar histórico de alterações.');
@@ -130,7 +162,15 @@ export const useCondominiumForm = () => {
     try {
       const data = await getCondominiumByMatricula(matriculaSearch);
       if (data) {
-        form.reset(data);
+        // Format currency values before setting form data
+        const formattedData = {
+          ...data,
+          valorPlano: data.valorPlano ? formatToBRL(Number(data.valorPlano)) : '',
+          desconto: data.desconto ? formatToBRL(Number(data.desconto)) : '',
+          valorMensal: data.valorMensal ? formatToBRL(Number(data.valorMensal)) : ''
+        };
+        
+        form.reset(formattedData);
         setIsExistingRecord(true);
         await loadChangeLogs(matriculaSearch);
         toast.success('Dados encontrados com sucesso!');
@@ -168,9 +208,9 @@ export const useCondominiumForm = () => {
 
     const formattedData = {
       ...data,
-      valorPlano: data.valorPlano.replace(',', '.'),
-      desconto: data.desconto.replace(',', '.'),
-      valorMensal: data.valorMensal.replace(',', '.')
+      valorPlano: BRLToNumber(data.valorPlano).toString(),
+      desconto: BRLToNumber(data.desconto).toString(),
+      valorMensal: BRLToNumber(data.valorMensal).toString()
     };
 
     setIsSubmitting(true);

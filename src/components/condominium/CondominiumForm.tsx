@@ -37,7 +37,7 @@ export const CondominiumForm = ({
             <Button 
               type="button" 
               onClick={toggleAtivoStatus}
-              variant={ativo ? "destructive" : "success"}
+              variant={ativo ? "destructive" : "default"}
               className={ativo ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
             >
               {ativo ? 'Desativar Usuário' : 'Ativar Usuário'}
