@@ -6,11 +6,13 @@ import { Users, FileText, MapPin } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 // Define type for the location stats
 interface LocationStats {
   states: [string, number][];
-  cities: [string, number][];
+  cities: Record<string, [string, number][]>;
   neighborhoods: [string, number][];
 }
 
@@ -24,13 +26,15 @@ interface DashboardStats {
 const Dashboard = () => {
   const { user } = useApp();
   const firstName = user?.nome?.split(' ')[0] || 'Usuário';
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
     invoicePreference: 0,
     locationStats: {
       states: [],
-      cities: [],
+      cities: {},
       neighborhoods: []
     }
   });
@@ -63,16 +67,27 @@ const Dashboard = () => {
         
         // Process location data
         const stateCount: Record<string, number> = {};
-        const cityCount: Record<string, number> = {};
+        const cityByState: Record<string, Record<string, number>> = {};
         const neighborhoodCount: Record<string, number> = {};
         
         locationData.forEach(item => {
           if (item.estado) {
             stateCount[item.estado] = (stateCount[item.estado] || 0) + 1;
+            
+            // Organize cities by state
+            if (item.cidade) {
+              if (!cityByState[item.estado]) {
+                cityByState[item.estado] = {};
+              }
+              cityByState[item.estado][item.cidade] = (cityByState[item.estado][item.cidade] || 0) + 1;
+            }
           }
+          
           if (item.cidade) {
-            cityCount[item.cidade] = (cityCount[item.cidade] || 0) + 1;
+            // This still tracks all cities regardless of state
+            // for backward compatibility
           }
+          
           if (item.bairro) {
             neighborhoodCount[item.bairro] = (neighborhoodCount[item.bairro] || 0) + 1;
           }
@@ -80,13 +95,14 @@ const Dashboard = () => {
         
         // Sort and get top locations
         const topStates = Object.entries(stateCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5);
+          .sort((a, b) => b[1] - a[1]);
           
-        const topCities = Object.entries(cityCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5);
-          
+        // Convert cityByState to the format we need
+        const citiesByState: Record<string, [string, number][]> = {};
+        Object.entries(cityByState).forEach(([state, cities]) => {
+          citiesByState[state] = Object.entries(cities).sort((a, b) => b[1] - a[1]);
+        });
+        
         const topNeighborhoods = Object.entries(neighborhoodCount)
           .sort((a, b) => b[1] - a[1])
           .slice(0, 5);
@@ -96,7 +112,7 @@ const Dashboard = () => {
           invoicePreference: invoiceCount || 0,
           locationStats: {
             states: topStates,
-            cities: topCities,
+            cities: citiesByState,
             neighborhoods: topNeighborhoods
           }
         });
@@ -107,6 +123,11 @@ const Dashboard = () => {
     
     fetchDashboardData();
   }, []);
+
+  const handleStateClick = (state: string) => {
+    setSelectedState(state);
+    setIsStateDetailOpen(true);
+  };
 
   return (
     <DashboardLayout>
@@ -155,42 +176,47 @@ const Dashboard = () => {
               <MapPin className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-lg font-medium">Principais Localizações</div>
-              
-              {stats.locationStats.states && stats.locationStats.states.length > 0 ? (
-                <div className="mt-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Por Estado</h4>
-                  <ul className="text-sm mt-1">
-                    {stats.locationStats.states.map(([state, count]) => (
-                      <li key={state} className="flex justify-between items-center">
-                        <span>{state}</span>
-                        <span className="font-medium">{count}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground mt-1">Sem dados de estados</p>
-              )}
-              
-              {stats.locationStats.cities && stats.locationStats.cities.length > 0 ? (
-                <div className="mt-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Por Cidade</h4>
-                  <ul className="text-sm mt-1">
-                    {stats.locationStats.cities.map(([city, count]) => (
-                      <li key={city} className="flex justify-between items-center">
-                        <span>{city}</span>
-                        <span className="font-medium">{count}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground mt-1">Sem dados de cidades</p>
-              )}
+              <div className="mt-2">
+                <h4 className="text-sm font-medium text-muted-foreground">Por Estado</h4>
+                <ul className="text-sm mt-1">
+                  {stats.locationStats.states.map(([state, count]) => (
+                    <li 
+                      key={state} 
+                      className="flex justify-between items-center py-1 px-2 hover:bg-gray-100 rounded cursor-pointer"
+                      onClick={() => handleStateClick(state)}
+                    >
+                      <span>{state}</span>
+                      <span className="font-medium">{count}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </CardContent>
           </Card>
         </section>
+
+        {/* Sheet for displaying cities when a state is clicked */}
+        <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>Cidades em {selectedState}</SheetTitle>
+            </SheetHeader>
+            <div className="mt-6">
+              {selectedState && stats.locationStats.cities[selectedState] ? (
+                <ul className="space-y-2">
+                  {stats.locationStats.cities[selectedState].map(([city, count]) => (
+                    <li key={city} className="flex justify-between items-center py-2 border-b">
+                      <span>{city}</span>
+                      <span className="font-medium">{count}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground">Sem dados de cidades para este estado.</p>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </DashboardLayout>
   );
