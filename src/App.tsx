@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +12,7 @@ import CadastroPlanos from "./pages/CadastroPlanos";
 import UnderConstruction from "./pages/UnderConstruction";
 import NotFound from "./pages/NotFound";
 import Moradores from "./pages/Moradores";
+import Dedetizacoes from "./pages/Dedetizacoes";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -210,7 +212,7 @@ const App = () => (
             <Route path="/dedetizacoes" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <Dedetizacoes />
                 </ProtectedRoute>
               </AnimationController>
             } />
