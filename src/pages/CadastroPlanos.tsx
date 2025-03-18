@@ -168,6 +168,7 @@ export const CadastroPlanos = () => {
 
     setIsSubmitting(true);
     try {
+      // Ensure the valor is using comma format for UI and convert to dot for database
       const formattedData = {
         ...data,
         codigo: data.codigo.toUpperCase(),
@@ -183,6 +184,11 @@ export const CadastroPlanos = () => {
           .single();
         
         oldPlan = existingPlan;
+        
+        // Make sure the old plan value is in comma format for comparison
+        if (oldPlan && oldPlan.valor) {
+          oldPlan.valor = oldPlan.valor.replace('.', ',');
+        }
       }
       
       const { error } = await supabase
@@ -191,7 +197,7 @@ export const CadastroPlanos = () => {
           codigo: formattedData.codigo,
           nome: formattedData.nome,
           descricao: formattedData.descricao,
-          valor: formattedData.valor,
+          valor: formattedData.valor, // This is now with dot format for database
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'codigo'
@@ -200,7 +206,9 @@ export const CadastroPlanos = () => {
       if (error) throw error;
       
       if (isExistingRecord && oldPlan) {
-        await registerChangeLog(oldPlan, formattedData as Plan);
+        // Use the comma value for the form data when registering change log
+        const formDataWithComma = {...data, codigo: data.codigo.toUpperCase()};
+        await registerChangeLog(oldPlan, formDataWithComma as Plan);
       }
       
       toast.success(isExistingRecord ? 'Plano atualizado com sucesso!' : 'Plano cadastrado com sucesso!');
@@ -265,6 +273,7 @@ export const CadastroPlanos = () => {
   };
 
   const formatCurrency = (value: string) => {
+    // Simply add the R$ prefix, as the value should already be in comma format
     return `R$ ${value}`;
   };
 
