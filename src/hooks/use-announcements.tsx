@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -11,28 +10,11 @@ import {
   getAnnouncementAttachments,
   createAnnouncement,
   updateAnnouncement,
-  deleteAnnouncement
+  deleteAnnouncement,
+  Announcement,
+  AnnouncementAttachment
 } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
-
-export interface AnnouncementAttachment {
-  id: string;
-  announcement_id: string;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  created_at: string;
-}
-
-export interface Announcement {
-  id?: string;
-  matricula: string;
-  data: string;
-  finalidade: string;
-  descricao: string;
-  created_at?: string;
-  updated_at?: string;
-}
 
 // Form validation schema
 const announcementSchema = z.object({
@@ -43,6 +25,8 @@ const announcementSchema = z.object({
 });
 
 export type AnnouncementFormValues = z.infer<typeof announcementSchema>;
+
+export { Announcement, AnnouncementAttachment };
 
 export function useAnnouncements() {
   const { toast } = useToast();
@@ -242,7 +226,7 @@ Atenciosamente, Administração do Condomínio`
   const fetchAttachments = async (announcementId: string) => {
     try {
       const data = await getAnnouncementAttachments(announcementId);
-      setExistingAttachments(data as AnnouncementAttachment[]);
+      setExistingAttachments(data);
     } catch (error) {
       console.error('Error fetching attachments:', error);
       toast({
@@ -292,7 +276,7 @@ Atenciosamente, Administração do Condomínio`
         // Delete attachments marked for deletion
         if (attachmentsToDelete.length > 0) {
           for (const attId of attachmentsToDelete) {
-            // Get the attachment details using the stored procedure
+            // Get the attachment details
             const attData = await getAnnouncementAttachments(attId);
             
             if (attData && attData.length > 0) {
