@@ -21,13 +21,30 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     const valorPlano = watch('valorPlano');
     const descontoValue = watch('desconto');
     
+    // Convert values to numbers for calculation
     const planoNumber = BRLToNumber(valorPlano);
     const descontoNumber = BRLToNumber(descontoValue);
     
+    // Calculate total value ensuring it's not negative
     const valorMensal = formatToBRL(Math.max(0, planoNumber - descontoNumber));
     
     setValue('valorMensal', valorMensal);
   }, [watch('valorPlano'), watch('desconto'), setValue]);
+
+  const handleDescontoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Get the raw value
+    const value = e.target.value.replace(/\D/g, '');
+    
+    // Format to currency with R$ prefix
+    const formattedValue = value ? formatToBRL(Number(value) / 100) : formatToBRL(0);
+    
+    setValue('desconto', formattedValue);
+    
+    // Apply the general input change handler for other effects
+    if (handleInputChange) {
+      handleInputChange(e);
+    }
+  };
 
   return (
     <Card className="form-section p-6">
@@ -118,8 +135,9 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
           <Input
             id="desconto"
             {...register('desconto')}
-            onChange={handleInputChange}
-            placeholder="0,00"
+            onChange={handleDescontoChange}
+            placeholder="R$ 0,00"
+            isCurrency
           />
         </div>
 
