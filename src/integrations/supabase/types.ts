@@ -75,6 +75,7 @@ export type Database = {
           rua: string | null
           senha: string | null
           telefonelegal: string | null
+          tipodocumento: string | null
           updated_at: string | null
           valormensal: string | null
           valorplano: string | null
@@ -108,6 +109,7 @@ export type Database = {
           rua?: string | null
           senha?: string | null
           telefonelegal?: string | null
+          tipodocumento?: string | null
           updated_at?: string | null
           valormensal?: string | null
           valorplano?: string | null
@@ -141,6 +143,7 @@ export type Database = {
           rua?: string | null
           senha?: string | null
           telefonelegal?: string | null
+          tipodocumento?: string | null
           updated_at?: string | null
           valormensal?: string | null
           valorplano?: string | null

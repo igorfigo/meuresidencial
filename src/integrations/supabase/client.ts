@@ -93,7 +93,7 @@ const mapToDatabaseColumns = (data: Partial<Condominium>) => {
     vencimento: data.vencimento,
     desconto: data.desconto,
     valormensal: data.valorMensal,
-    tipoDocumento: data.tipoDocumento,
+    tipodocumento: data.tipoDocumento,
     senha: data.senha,
     ativo: data.ativo,
     welcome_email_sent: data.welcome_email_sent
@@ -127,6 +127,7 @@ type CondominiumRow = {
   vencimento?: string | null;
   desconto?: string | null;
   valormensal?: string | null;
+  tipodocumento?: string | null;
   senha?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -421,6 +422,7 @@ export const saveCondominiumData = async (data: Condominium, userEmail?: string)
       vencimento: typedSavedData[0].vencimento || undefined,
       desconto: typedSavedData[0].desconto || undefined,
       valorMensal: typedSavedData[0].valormensal || undefined,
+      tipoDocumento: typedSavedData[0].tipodocumento || undefined,
       created_at: typedSavedData[0].created_at || undefined,
       updated_at: typedSavedData[0].updated_at || undefined,
       welcome_email_sent: typedSavedData[0].welcome_email_sent || undefined
@@ -565,6 +567,7 @@ function mapRowToCondominium(row: any): Condominium {
     vencimento: row.vencimento || undefined,
     desconto: row.desconto || undefined,
     valorMensal: row.valormensal || undefined,
+    tipoDocumento: row.tipodocumento || undefined,
     ativo: row.ativo !== undefined ? row.ativo : true, // Default para true se não definido
     created_at: row.created_at || undefined,
     updated_at: row.updated_at || undefined,

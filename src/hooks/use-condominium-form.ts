@@ -170,6 +170,7 @@ export const useCondominiumForm = () => {
           valorPlano: data.valorPlano ? formatToBRL(Number(data.valorPlano)) : '',
           desconto: data.desconto ? formatToBRL(Number(data.desconto)) : '',
           valorMensal: data.valorMensal ? formatToBRL(Number(data.valorMensal)) : '',
+          tipoDocumento: data.tipoDocumento || 'recibo', // Ensure tipoDocumento is set
           // Reset password fields to empty strings
           senha: '',
           confirmarSenha: ''
