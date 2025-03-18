@@ -50,11 +50,11 @@ const Dashboard = () => {
         
         if (activeError) throw activeError;
         
-        // Fetch invoice preference count
+        // Fetch invoice preference count - FIXED: changed to look for "notaFiscal" in tipodocumento
         const { count: invoiceCount, error: invoiceError } = await supabase
           .from('condominiums')
           .select('*', { count: 'exact', head: true })
-          .eq('tipodocumento', 'nota_fiscal');
+          .eq('tipodocumento', 'notaFiscal');
         
         if (invoiceError) throw invoiceError;
         
