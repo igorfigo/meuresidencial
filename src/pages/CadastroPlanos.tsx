@@ -314,12 +314,12 @@ export const CadastroPlanos = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    if (name === 'valor') {
+    if (name === 'valor' as keyof FormFields) {
       const numericValue = value.replace(/\D/g, '');
       const formattedValue = formatCurrencyInput(numericValue);
-      setValue(name, `R$ ${formattedValue}`);
+      setValue(name as keyof FormFields, `R$ ${formattedValue}`);
     } else {
-      setValue(name, value);
+      setValue(name as keyof FormFields, value);
     }
   };
 
