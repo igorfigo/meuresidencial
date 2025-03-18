@@ -110,10 +110,20 @@ export const useResidents = () => {
   // Mutation to create a new resident
   const createMutation = useMutation({
     mutationFn: async (values: ResidentFormValues) => {
-      // Fixed: This line had the type error - we need to pass an object, not an array of objects
+      // Fixed: Ensure the values submitted match the required field structure
+      const resident: Resident = {
+        matricula: values.matricula,
+        nome_completo: values.nome_completo,
+        cpf: values.cpf,
+        telefone: values.telefone,
+        email: values.email,
+        unidade: values.unidade,
+        valor_condominio: values.valor_condominio
+      };
+      
       const { data, error } = await supabase
         .from('residents')
-        .insert(values) // Changed from [values] to values
+        .insert(resident)
         .select();
       
       if (error) {
@@ -146,9 +156,20 @@ export const useResidents = () => {
       
       const { id, ...updateData } = values;
       
+      // Fixed: Ensure required fields are properly typed
+      const resident: Omit<Resident, 'id'> = {
+        matricula: updateData.matricula,
+        nome_completo: updateData.nome_completo,
+        cpf: updateData.cpf,
+        telefone: updateData.telefone,
+        email: updateData.email,
+        unidade: updateData.unidade,
+        valor_condominio: updateData.valor_condominio
+      };
+      
       const { data, error } = await supabase
         .from('residents')
-        .update(updateData)
+        .update(resident)
         .eq('id', id)
         .select();
       
