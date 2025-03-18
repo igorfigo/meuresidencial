@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Copy, Save } from 'lucide-react';
 import { Announcement } from '@/hooks/use-announcements';
 import { useToast } from '@/hooks/use-toast';
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -91,7 +92,6 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
   const isNewAnnouncement = !announcement?.id;
 
@@ -100,52 +100,19 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
     if (announcement) {
       setTitle(announcement.title);
       setContent(announcement.content);
-      
-      // Initialize the iframe content after it loads
-      const initializeIframe = () => {
-        if (iframeRef.current?.contentDocument) {
-          const doc = iframeRef.current.contentDocument;
-          doc.body.innerHTML = announcement.content.replace(/\n/g, '<br>');
-          doc.body.style.fontFamily = 'Arial, sans-serif';
-          doc.body.style.padding = '10px';
-          doc.body.style.margin = '0';
-          doc.body.style.minHeight = '300px';
-          doc.body.contentEditable = 'true';
-          doc.designMode = 'on';
-        }
-      };
-      
-      if (iframeRef.current?.contentDocument?.readyState === 'complete') {
-        initializeIframe();
-      } else {
-        iframeRef.current?.addEventListener('load', initializeIframe);
-      }
-      
-      return () => {
-        iframeRef.current?.removeEventListener('load', initializeIframe);
-      };
     }
   }, [announcement, open]);
-
-  // Get the current content from the iframe
-  const getIframeContent = () => {
-    if (iframeRef.current?.contentDocument) {
-      return iframeRef.current.contentDocument.body.innerHTML.replace(/<br>/g, '\n');
-    }
-    return content;
-  };
 
   // Handle title selection change
   const handleTitleChange = (selectedTitle: string) => {
     setTitle(selectedTitle);
     const newContent = ANNOUNCEMENT_TEMPLATES[selectedTitle as keyof typeof ANNOUNCEMENT_TEMPLATES];
     setContent(newContent);
-    
-    // Update iframe content
-    if (iframeRef.current?.contentDocument) {
-      const doc = iframeRef.current.contentDocument;
-      doc.body.innerHTML = newContent.replace(/\n/g, '<br>');
-    }
+  };
+
+  // Handle content change
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
   };
 
   // Handle save action
@@ -155,15 +122,11 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
     setIsSaving(true);
     
     try {
-      const updatedContent = getIframeContent();
       await onSave({
         ...announcement,
         title,
-        content: updatedContent
+        content
       });
-      
-      // Update the content state with the iframe content
-      setContent(updatedContent);
       
       onOpenChange(false);
     } catch (error) {
@@ -175,8 +138,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
 
   // Handle copy to clipboard
   const handleCopy = () => {
-    const text = getIframeContent();
-    navigator.clipboard.writeText(text).then(
+    navigator.clipboard.writeText(content).then(
       () => {
         toast({
           title: "Copiado!",
@@ -228,15 +190,14 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
           </div>
           
           <div className="flex-1 overflow-hidden">
-            <Label>Conteúdo</Label>
-            <div className="border rounded-md h-[calc(100%-30px)] overflow-hidden">
-              <iframe
-                ref={iframeRef}
-                title="Editor de comunicado"
-                className="w-full h-full border-0"
-                sandbox="allow-same-origin"
-              />
-            </div>
+            <Label htmlFor="content">Conteúdo</Label>
+            <Textarea
+              id="content"
+              value={content}
+              onChange={handleContentChange}
+              placeholder="Conteúdo do comunicado"
+              className="h-[400px] resize-none"
+            />
           </div>
         </div>
         
