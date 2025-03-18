@@ -1,15 +1,16 @@
 
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
+import { formatCurrencyInput } from "@/utils/currency";
 
 interface InputProps extends React.ComponentPropsWithoutRef<"input"> {
   type?: string;
   numberOnly?: boolean;
+  isCurrency?: boolean;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, numberOnly, ...props }, ref) => {
+  ({ className, type, numberOnly, isCurrency, onChange, ...props }, ref) => {
     // Handle keydown for number-only inputs
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (numberOnly) {
@@ -28,6 +29,19 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       }
     };
 
+    // Handle change for currency inputs
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (isCurrency) {
+        const value = e.target.value.replace(/\D/g, '');
+        const formattedValue = formatCurrencyInput(value);
+        e.target.value = `R$ ${formattedValue}`;
+      }
+      
+      if (onChange) {
+        onChange(e);
+      }
+    };
+
     return (
       <input
         type={type}
@@ -37,6 +51,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         ref={ref}
         onKeyDown={handleKeyDown}
+        onChange={handleChange}
         {...props}
       />
     )

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { Plan } from '@/hooks/use-plans';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { formatToBRL, BRLToNumber, formatCurrencyInput } from '@/utils/currency';
 
 type FormFields = {
   codigo: string;
@@ -58,7 +58,7 @@ export const CadastroPlanos = () => {
     }
   });
 
-  const { reset, handleSubmit } = form;
+  const { reset, handleSubmit, setValue } = form;
 
   const fetchPlans = async () => {
     try {
@@ -160,19 +160,18 @@ export const CadastroPlanos = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
-    const valorPattern = /^\d+(\,\d{1,2})?$/;
+    const valorPattern = /^R\$\s*\d{1,3}(\.\d{3})*,\d{2}$/;
     if (!valorPattern.test(data.valor)) {
-      toast.error('O valor do plano deve seguir o formato 000,00');
+      toast.error('O valor do plano deve seguir o formato R$ 0.000,00');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Ensure the valor is using comma format for UI and convert to dot for database
       const formattedData = {
         ...data,
         codigo: data.codigo.toUpperCase(),
-        valor: data.valor.replace(',', '.') // Convert comma to dot for database storage
+        valor: BRLToNumber(data.valor).toString() // Convert to number format for storage
       };
       
       let oldPlan = null;
@@ -184,11 +183,6 @@ export const CadastroPlanos = () => {
           .single();
         
         oldPlan = existingPlan;
-        
-        // Make sure the old plan value is in comma format for comparison
-        if (oldPlan && oldPlan.valor) {
-          oldPlan.valor = oldPlan.valor.replace('.', ',');
-        }
       }
       
       const { error } = await supabase
@@ -197,7 +191,7 @@ export const CadastroPlanos = () => {
           codigo: formattedData.codigo,
           nome: formattedData.nome,
           descricao: formattedData.descricao,
-          valor: formattedData.valor, // This is now with dot format for database
+          valor: formattedData.valor,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'codigo'
@@ -206,9 +200,11 @@ export const CadastroPlanos = () => {
       if (error) throw error;
       
       if (isExistingRecord && oldPlan) {
-        // Use the comma value for the form data when registering change log
-        const formDataWithComma = {...data, codigo: data.codigo.toUpperCase()};
-        await registerChangeLog(oldPlan, formDataWithComma as Plan);
+        await registerChangeLog(oldPlan, {
+          ...data,
+          codigo: data.codigo.toUpperCase(),
+          valor: data.valor // Keep the formatted value for the change log
+        } as Plan);
       }
       
       toast.success(isExistingRecord ? 'Plano atualizado com sucesso!' : 'Plano cadastrado com sucesso!');
@@ -316,6 +312,16 @@ export const CadastroPlanos = () => {
     return pageNumbers;
   };
 
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === 'valor') {
+      const formattedValue = formatCurrencyInput(value);
+      setValue(name, `R$ ${formattedValue}`);
+    } else {
+      setValue(name, value);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
@@ -371,6 +377,7 @@ export const CadastroPlanos = () => {
                     id="valor"
                     placeholder="000,00"
                     {...form.register('valor', { required: true })}
+                    onChange={handleInputChange}
                   />
                 </div>
                 

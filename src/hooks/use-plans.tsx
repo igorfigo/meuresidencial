@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatToBRL, BRLToNumber } from '@/utils/currency';
 
 export interface Plan {
   id?: string;
@@ -28,10 +29,10 @@ export const usePlans = () => {
 
       if (fetchError) throw new Error(fetchError.message);
       
-      // Convert decimal points to commas for the Brazilian currency format
+      // Format the values to Brazilian currency format
       const formattedData = data?.map(plan => ({
         ...plan,
-        valor: plan.valor.replace('.', ',')
+        valor: formatToBRL(plan.valor)
       })) || [];
       
       setPlans(formattedData);
@@ -45,7 +46,7 @@ export const usePlans = () => {
 
   const getPlanValue = (codigo: string): string => {
     const plan = plans.find(p => p.codigo === codigo);
-    return plan?.valor || '';
+    return plan?.valor || 'R$ 0,00';
   };
 
   // Load plans on component mount
