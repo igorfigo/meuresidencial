@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { formatToBRL, BRLToNumber } from '@/utils/currency';
+import { formatToBRL } from '@/utils/currency';
 
 export interface Plan {
   id?: string;
@@ -49,7 +48,6 @@ export const usePlans = () => {
     return plan?.valor || 'R$ 0,00';
   };
 
-  // Load plans on component mount
   useEffect(() => {
     fetchPlans();
   }, []);

@@ -171,7 +171,7 @@ export const CadastroPlanos = () => {
       const formattedData = {
         ...data,
         codigo: data.codigo.toUpperCase(),
-        valor: BRLToNumber(data.valor).toString() // Convert to number format for storage
+        valor: BRLToNumber(data.valor).toString()
       };
       
       let oldPlan = null;
@@ -203,8 +203,8 @@ export const CadastroPlanos = () => {
         await registerChangeLog(oldPlan, {
           ...data,
           codigo: data.codigo.toUpperCase(),
-          valor: data.valor // Keep the formatted value for the change log
-        } as Plan);
+          valor: data.valor
+        });
       }
       
       toast.success(isExistingRecord ? 'Plano atualizado com sucesso!' : 'Plano cadastrado com sucesso!');
@@ -269,7 +269,6 @@ export const CadastroPlanos = () => {
   };
 
   const formatCurrency = (value: string) => {
-    // Simply add the R$ prefix, as the value should already be in comma format
     return `R$ ${value}`;
   };
 
@@ -312,10 +311,12 @@ export const CadastroPlanos = () => {
     return pageNumbers;
   };
 
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
     if (name === 'valor') {
-      const formattedValue = formatCurrencyInput(value);
+      const numericValue = value.replace(/\D/g, '');
+      const formattedValue = formatCurrencyInput(numericValue);
       setValue(name, `R$ ${formattedValue}`);
     } else {
       setValue(name, value);
