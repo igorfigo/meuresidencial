@@ -15,7 +15,7 @@ export const pestControlSchema = z.object({
   empresa: z.string().min(1, "Nome da empresa é obrigatório"),
   data: z.string().min(1, "Data é obrigatória"),
   finalidade: z.array(z.string()).min(1, "Selecione pelo menos uma finalidade"),
-  observacoes: z.string().optional(),
+  observacoes: z.string().min(1, "Observações são obrigatórias"),
 });
 
 export type PestControlFormValues = z.infer<typeof pestControlSchema>;

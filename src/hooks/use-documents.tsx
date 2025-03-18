@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { useToast } from './use-toast';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 export interface DocumentAttachment {
   id: string;
@@ -25,11 +27,14 @@ export interface Document {
   updated_at?: string;
 }
 
-export interface DocumentFormValues {
-  id?: string;
-  tipo: string;
-  observacoes?: string;
-}
+// Form validation schema
+const documentSchema = z.object({
+  id: z.string().optional(),
+  tipo: z.string().min(1, "Tipo do documento é obrigatório"),
+  observacoes: z.string().min(1, "Observações são obrigatórias"),
+});
+
+export type DocumentFormValues = z.infer<typeof documentSchema>;
 
 export function useDocuments() {
   const { toast } = useToast();
@@ -47,6 +52,7 @@ export function useDocuments() {
   const [existingAttachments, setExistingAttachments] = useState<DocumentAttachment[]>([]);
   
   const form = useForm<DocumentFormValues>({
+    resolver: zodResolver(documentSchema),
     defaultValues: {
       tipo: '',
       observacoes: '',
@@ -130,6 +136,16 @@ export function useDocuments() {
   // Submit form
   const onSubmit = async (data: DocumentFormValues) => {
     if (!matricula) return;
+    
+    // Check if there are either new attachments or existing attachments (for edit)
+    if (attachments.length === 0 && existingAttachments.length === 0) {
+      toast({
+        title: "Erro ao salvar documento",
+        description: "É necessário anexar pelo menos um arquivo.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     setUploadProgress(0);

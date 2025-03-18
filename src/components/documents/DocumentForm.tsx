@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -142,7 +143,11 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
 
         <div className="space-y-4">
           <div>
-            <FormLabel>Anexos</FormLabel>
+            <div className="flex items-center">
+              <FormLabel>Anexos</FormLabel>
+              <span className="text-sm text-red-500 ml-1">*</span>
+              <span className="text-sm text-muted-foreground ml-2">(Obrigatório)</span>
+            </div>
             <div className="mt-2 flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <input
