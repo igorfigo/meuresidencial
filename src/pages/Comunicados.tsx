@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Plus, Megaphone } from 'lucide-react';
-import { useAnnouncements, AnnouncementAttachment } from '@/hooks/use-announcements';
+import { Plus } from 'lucide-react';
+import { useAnnouncements, AnnouncementAttachment, Announcement } from '@/hooks/use-announcements';
 import { AnnouncementForm } from '@/components/announcements/AnnouncementForm';
 import { AnnouncementsList } from '@/components/announcements/AnnouncementsList';
 import { 
@@ -58,7 +58,7 @@ const Comunicados = () => {
     setShowForm(true);
   };
 
-  const handleEditAnnouncement = (announcement: any) => {
+  const handleEditAnnouncement = (announcement: Announcement) => {
     resetForm(announcement);
     setShowForm(true);
   };

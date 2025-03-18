@@ -274,7 +274,13 @@ Atenciosamente, Administração do Condomínio`
           descricao: data.descricao
         });
         
-        announcementId = newAnnouncement?.[0]?.id;
+        // Use safe access for newAnnouncement
+        announcementId = newAnnouncement && newAnnouncement[0] ? newAnnouncement[0].id : undefined;
+        
+        // Check if we have a valid ID before proceeding
+        if (!announcementId) {
+          throw new Error("Failed to create announcement: No ID returned");
+        }
       } else {
         // Update existing announcement
         await updateAnnouncement(announcementId, {
@@ -286,9 +292,8 @@ Atenciosamente, Administração do Condomínio`
         // Delete attachments marked for deletion
         if (attachmentsToDelete.length > 0) {
           for (const attId of attachmentsToDelete) {
-            // Get the attachment details
-            const { data: attData, error: attError } = await supabase
-              .rpc('get_attachment_by_id', { p_attachment_id: attId });
+            // Get the attachment details using the stored procedure
+            const attData = await getAnnouncementAttachments(attId);
             
             if (attData && attData.length > 0) {
               // Delete from storage
@@ -296,7 +301,7 @@ Atenciosamente, Administração do Condomínio`
                 .from('announcement-attachments')
                 .remove([attData[0].file_path]);
               
-              // Delete from database
+              // Delete from database using RPC
               await supabase
                 .rpc('delete_attachment', { p_attachment_id: attId });
             }
@@ -321,7 +326,7 @@ Atenciosamente, Administração do Condomínio`
           
           if (uploadError) throw uploadError;
           
-          // Save attachment metadata
+          // Save attachment metadata using RPC
           await supabase
             .rpc('add_attachment', {
               p_announcement_id: announcementId,
@@ -362,7 +367,7 @@ Atenciosamente, Administração do Condomínio`
   };
   
   // Delete announcement
-  const deleteAnnouncement = (id: string) => {
+  const handleDeleteAnnouncement = (id: string) => {
     deleteAnnouncementMutation.mutate(id);
   };
   
@@ -378,7 +383,7 @@ Atenciosamente, Administração do Condomínio`
     existingAttachments,
     resetForm,
     onSubmit,
-    deleteAnnouncement,
+    deleteAnnouncement: handleDeleteAnnouncement,
     handleFileChange,
     removeFile,
     removeExistingAttachment,
