@@ -217,6 +217,14 @@ const App = () => (
               </AnimationController>
             } />
             
+            <Route path="/comunicados" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>

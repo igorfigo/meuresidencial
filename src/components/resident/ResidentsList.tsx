@@ -35,7 +35,7 @@ export const ResidentsList = ({
             <TableHead>Unidade</TableHead>
             <TableHead>Telefone</TableHead>
             <TableHead>E-mail</TableHead>
-            <TableHead>Valor</TableHead>
+            <TableHead>Valor Condomínio</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
