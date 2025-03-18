@@ -1,0 +1,54 @@
+
+import React from 'react';
+import { FormProvider } from 'react-hook-form';
+import { Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { InfoCondominio } from './form-sections/InfoCondominio';
+import { InfoRepresentante } from './form-sections/InfoRepresentante';
+import { InfoFinanceira } from './form-sections/InfoFinanceira';
+import { PlanoContrato } from './form-sections/PlanoContrato';
+import { Seguranca } from './form-sections/Seguranca';
+import type { FormFields } from '@/hooks/use-condominium-form';
+
+interface CondominiumFormProps {
+  form: any;
+  onSubmit: (data: FormFields) => void;
+  isSubmitting: boolean;
+  isExistingRecord: boolean;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export const CondominiumForm = ({
+  form,
+  onSubmit,
+  isSubmitting,
+  isExistingRecord,
+  handleInputChange
+}: CondominiumFormProps) => {
+  return (
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <InfoCondominio handleInputChange={handleInputChange} />
+        <InfoRepresentante handleInputChange={handleInputChange} />
+        <InfoFinanceira handleInputChange={handleInputChange} />
+        <PlanoContrato handleInputChange={handleInputChange} />
+        <Seguranca 
+          handleInputChange={handleInputChange}
+          isExistingRecord={isExistingRecord}
+        />
+        
+        <div className="flex justify-end">
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="bg-brand-600 hover:bg-brand-700"
+            size="lg"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Cadastro' : 'Salvar Cadastro')}
+          </Button>
+        </div>
+      </form>
+    </FormProvider>
+  );
+};
