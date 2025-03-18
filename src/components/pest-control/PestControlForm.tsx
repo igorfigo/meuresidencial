@@ -136,13 +136,13 @@ export const PestControlForm: React.FC<PestControlFormProps> = ({
                         >
                           <FormControl>
                             <Checkbox
-                              checked={field.value?.includes(option.id as any)}
+                              checked={field.value?.includes(option.id)}
                               onCheckedChange={(checked) => {
                                 const finalidades = [...field.value];
                                 if (checked) {
-                                  finalidades.push(option.id as any);
+                                  finalidades.push(option.id);
                                 } else {
-                                  const index = finalidades.indexOf(option.id as any);
+                                  const index = finalidades.indexOf(option.id);
                                   if (index !== -1) {
                                     finalidades.splice(index, 1);
                                   }

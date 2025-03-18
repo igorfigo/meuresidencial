@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -12,9 +12,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 export const pestControlSchema = z.object({
   id: z.string().optional(),
   matricula: z.string(),
-  empresa: z.string().min(1, "Empresa é obrigatória"),
+  empresa: z.string().min(1, "Nome da empresa é obrigatório"),
   data: z.string().min(1, "Data é obrigatória"),
-  finalidade: z.array(z.enum(['insetos', 'ratos', 'cupim'])).min(1, "Selecione pelo menos uma finalidade"),
+  finalidade: z.array(z.string()).min(1, "Selecione pelo menos uma finalidade"),
   observacoes: z.string().optional(),
 });
 
@@ -32,25 +32,26 @@ export interface PestControl {
   updated_at?: string;
 }
 
-// Interface for attachments
+// Interface for attachment data
 export interface PestControlAttachment {
   id: string;
   pest_control_id: string;
   file_name: string;
-  file_type: string;
   file_path: string;
+  file_type: string;
   created_at?: string;
 }
 
 export const usePestControl = () => {
   const { user } = useApp();
   const matricula = user?.matricula || '';
-  const [editingPestControl, setEditingPestControl] = useState<PestControl | null>(null);
+  const queryClient = useQueryClient();
+  
+  // File handling state
   const [attachments, setAttachments] = useState<File[]>([]);
   const [existingAttachments, setExistingAttachments] = useState<PestControlAttachment[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const queryClient = useQueryClient();
 
   // Initialize form with default values
   const form = useForm<PestControlFormValues>({
@@ -58,7 +59,7 @@ export const usePestControl = () => {
     defaultValues: {
       matricula: matricula,
       empresa: '',
-      data: new Date().toISOString().split('T')[0],
+      data: '',
       finalidade: [],
       observacoes: '',
     }
@@ -72,44 +73,49 @@ export const usePestControl = () => {
         matricula: matricula,
         empresa: pestControl.empresa,
         data: pestControl.data,
-        finalidade: pestControl.finalidade as any,
+        finalidade: pestControl.finalidade,
         observacoes: pestControl.observacoes || '',
       });
-      setEditingPestControl(pestControl);
       
-      // Fetch attachments for this pest control entry
-      fetchAttachments(pestControl.id!);
+      // If editing, fetch attachments for this pest control
+      if (pestControl.id) {
+        fetchAttachmentsForEdit(pestControl.id);
+      } else {
+        setExistingAttachments([]);
+      }
     } else {
       form.reset({
         matricula: matricula,
         empresa: '',
-        data: new Date().toISOString().split('T')[0],
+        data: '',
         finalidade: [],
         observacoes: '',
       });
-      setEditingPestControl(null);
       setAttachments([]);
       setExistingAttachments([]);
     }
   };
 
-  // Fetch attachments for a pest control entry
-  const fetchAttachments = async (pestControlId: string) => {
-    const { data, error } = await supabase
-      .from('pest_control_attachments')
-      .select('*')
-      .eq('pest_control_id', pestControlId);
-    
-    if (error) {
-      console.error("Error fetching attachments:", error);
-      toast.error("Erro ao carregar anexos");
-      return;
+  // Fetch attachments for a pest control record being edited
+  const fetchAttachmentsForEdit = async (pestControlId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('pest_control_attachments')
+        .select('*')
+        .eq('pest_control_id', pestControlId);
+      
+      if (error) {
+        console.error("Error fetching attachments:", error);
+        return;
+      }
+      
+      setExistingAttachments(data as PestControlAttachment[]);
+    } catch (error) {
+      console.error("Error in fetchAttachmentsForEdit:", error);
     }
-    
-    setExistingAttachments(data as PestControlAttachment[]);
   };
 
-  // Query to fetch all pest control entries for the current condominium
+  // Query to fetch all pest controls for the current condominium
   const { data: pestControls, isLoading, error, refetch } = useQuery({
     queryKey: ['pest-controls', matricula],
     queryFn: async () => {
@@ -119,7 +125,7 @@ export const usePestControl = () => {
         .from('pest_controls')
         .select('*')
         .eq('matricula', matricula)
-        .order('data', { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error("Error fetching pest controls:", error);
@@ -132,7 +138,7 @@ export const usePestControl = () => {
     enabled: !!matricula
   });
 
-  // Handle file selection
+  // File handling functions
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const newFiles = Array.from(event.target.files);
@@ -140,103 +146,125 @@ export const usePestControl = () => {
     }
   };
 
-  // Remove file from attachments
   const removeFile = (index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Remove existing attachment
   const removeExistingAttachment = async (attachmentId: string) => {
     try {
-      // Delete the file from storage
+      // First find the attachment to get the file path
       const attachment = existingAttachments.find(a => a.id === attachmentId);
-      if (attachment) {
-        await supabase.storage.from('pest-control-attachments').remove([attachment.file_path]);
+      if (!attachment) return;
+
+      // Delete the file from storage
+      const { error: storageError } = await supabase.storage
+        .from('pest-control-attachments')
+        .remove([attachment.file_path.split('/').pop() || '']);
+      
+      if (storageError) {
+        console.error("Error deleting file from storage:", storageError);
+        toast.error("Erro ao excluir arquivo");
+        return;
       }
       
-      // Delete the database record
-      const { error } = await supabase
+      // Delete the record from the database
+      const { error: dbError } = await supabase
         .from('pest_control_attachments')
         .delete()
         .eq('id', attachmentId);
       
-      if (error) throw error;
+      if (dbError) {
+        console.error("Error deleting attachment record:", dbError);
+        toast.error("Erro ao excluir registro do anexo");
+        return;
+      }
       
       // Update state
       setExistingAttachments(prev => prev.filter(a => a.id !== attachmentId));
       toast.success("Anexo removido com sucesso");
     } catch (error) {
-      console.error("Error removing attachment:", error);
+      console.error("Error in removeExistingAttachment:", error);
       toast.error("Erro ao remover anexo");
     }
   };
 
-  // Upload files to storage
-  const uploadFiles = async (pestControlId: string) => {
-    if (attachments.length === 0) return [];
+  // Function to upload files and return their paths
+  const uploadFiles = async (pestControlId: string): Promise<boolean> => {
+    if (attachments.length === 0) return true;
     
     setIsUploading(true);
-    const uploadedAttachments: PestControlAttachment[] = [];
+    setUploadProgress(0);
     
     try {
-      for (let i = 0; i < attachments.length; i++) {
-        const file = attachments[i];
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${pestControlId}/${fileName}`;
-        
-        // Upload file
-        const { error: uploadError } = await supabase.storage
+      const totalFiles = attachments.length;
+      let uploadedFiles = 0;
+      
+      for (const file of attachments) {
+        // Upload file to storage
+        const fileName = `${Date.now()}_${file.name}`;
+        const { data: fileData, error: uploadError } = await supabase.storage
           .from('pest-control-attachments')
-          .upload(filePath, file);
+          .upload(fileName, file);
         
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Error uploading file:", uploadError);
+          toast.error(`Erro ao enviar arquivo: ${file.name}`);
+          continue;
+        }
         
-        // Create attachment record
-        const { data, error: insertError } = await supabase
+        // Create attachment record in database
+        const attachmentData = {
+          pest_control_id: pestControlId,
+          file_name: file.name,
+          file_type: file.type,
+          file_path: fileData.path
+        };
+        
+        const { error: recordError } = await supabase
           .from('pest_control_attachments')
-          .insert({
-            pest_control_id: pestControlId,
-            file_name: file.name,
-            file_type: file.type,
-            file_path: filePath
-          })
-          .select();
+          .insert(attachmentData);
         
-        if (insertError) throw insertError;
+        if (recordError) {
+          console.error("Error saving attachment record:", recordError);
+          toast.error(`Erro ao salvar registro do anexo: ${file.name}`);
+          continue;
+        }
         
-        uploadedAttachments.push(data[0]);
-        
-        // Update progress
-        setUploadProgress(Math.round(((i + 1) / attachments.length) * 100));
+        uploadedFiles++;
+        setUploadProgress(Math.round((uploadedFiles / totalFiles) * 100));
       }
       
-      toast.success("Anexos enviados com sucesso");
-      return uploadedAttachments;
+      setAttachments([]);
+      return true;
     } catch (error) {
-      console.error("Error uploading files:", error);
+      console.error("Error in uploadFiles:", error);
       toast.error("Erro ao enviar anexos");
-      return [];
+      return false;
     } finally {
       setIsUploading(false);
-      setUploadProgress(0);
-      setAttachments([]);
     }
   };
 
-  // Mutation to create a new pest control entry
+  // Function to get URL for a stored file
+  const getFileUrl = async (path: string): Promise<string> => {
+    const { data } = await supabase.storage
+      .from('pest-control-attachments')
+      .getPublicUrl(path.split('/').pop() || '');
+    
+    return data.publicUrl;
+  };
+
+  // Mutation to create a new pest control
   const createMutation = useMutation({
     mutationFn: async (values: PestControlFormValues) => {
-      // Prepare pest control entry data
-      const pestControl = {
+      const pestControl: PestControl = {
         matricula: values.matricula,
         empresa: values.empresa,
         data: values.data,
         finalidade: values.finalidade,
-        observacoes: values.observacoes || ''
+        observacoes: values.observacoes
       };
       
-      // Insert pest control entry
       const { data, error } = await supabase
         .from('pest_controls')
         .insert(pestControl)
@@ -247,37 +275,42 @@ export const usePestControl = () => {
         throw error;
       }
       
-      // Upload attachments
-      await uploadFiles(data[0].id);
-      
-      return data[0] as PestControl;
+      return data?.[0] as PestControl;
     },
-    onSuccess: () => {
-      toast.success("Dedetização cadastrada com sucesso!");
-      resetForm();
-      queryClient.invalidateQueries({ queryKey: ['pest-controls', matricula] });
+    onSuccess: async (data) => {
+      if (data?.id) {
+        const uploadSuccess = await uploadFiles(data.id);
+        if (uploadSuccess) {
+          toast.success("Dedetização cadastrada com sucesso!");
+          resetForm();
+          queryClient.invalidateQueries({ queryKey: ['pest-controls', matricula] });
+        }
+      }
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Erro ao cadastrar dedetização");
+    onError: (error) => {
+      toast.error("Erro ao cadastrar dedetização");
+      console.error(error);
     }
   });
 
-  // Mutation to update an existing pest control entry
+  // Mutation to update an existing pest control
   const updateMutation = useMutation({
     mutationFn: async (values: PestControlFormValues) => {
       if (!values.id) throw new Error("ID da dedetização não encontrado");
       
       const { id, ...updateData } = values;
       
-      // Update pest control entry
+      const pestControl: Omit<PestControl, 'id'> = {
+        matricula: updateData.matricula,
+        empresa: updateData.empresa,
+        data: updateData.data,
+        finalidade: updateData.finalidade,
+        observacoes: updateData.observacoes
+      };
+      
       const { data, error } = await supabase
         .from('pest_controls')
-        .update({
-          empresa: updateData.empresa,
-          data: updateData.data,
-          finalidade: updateData.finalidade,
-          observacoes: updateData.observacoes || ''
-        })
+        .update(pestControl)
         .eq('id', id)
         .select();
       
@@ -286,25 +319,28 @@ export const usePestControl = () => {
         throw error;
       }
       
-      // Upload new attachments
-      await uploadFiles(id);
-      
-      return data[0] as PestControl;
+      return data?.[0] as PestControl;
     },
-    onSuccess: () => {
-      toast.success("Dedetização atualizada com sucesso!");
-      resetForm();
-      queryClient.invalidateQueries({ queryKey: ['pest-controls', matricula] });
+    onSuccess: async (data) => {
+      if (data?.id) {
+        const uploadSuccess = await uploadFiles(data.id);
+        if (uploadSuccess) {
+          toast.success("Dedetização atualizada com sucesso!");
+          resetForm();
+          queryClient.invalidateQueries({ queryKey: ['pest-controls', matricula] });
+        }
+      }
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Erro ao atualizar dedetização");
+    onError: (error) => {
+      toast.error("Erro ao atualizar dedetização");
+      console.error(error);
     }
   });
 
-  // Mutation to delete a pest control entry
+  // Mutation to delete a pest control
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // First, delete all attachments
+      // First get all attachments to delete them from storage
       const { data: attachments } = await supabase
         .from('pest_control_attachments')
         .select('*')
@@ -312,17 +348,14 @@ export const usePestControl = () => {
       
       if (attachments && attachments.length > 0) {
         // Delete files from storage
-        const filePaths = attachments.map((a: any) => a.file_path);
-        await supabase.storage.from('pest-control-attachments').remove(filePaths);
-        
-        // Delete attachment records
-        await supabase
-          .from('pest_control_attachments')
-          .delete()
-          .eq('pest_control_id', id);
+        for (const attachment of attachments as PestControlAttachment[]) {
+          await supabase.storage
+            .from('pest-control-attachments')
+            .remove([attachment.file_path.split('/').pop() || '']);
+        }
       }
       
-      // Delete pest control entry
+      // Then delete the pest control record (cascade will delete attachments)
       const { error } = await supabase
         .from('pest_controls')
         .delete()
@@ -346,20 +379,11 @@ export const usePestControl = () => {
 
   // Handle form submission
   const onSubmit = (values: PestControlFormValues) => {
-    if (editingPestControl) {
+    if (values.id) {
       updateMutation.mutate(values);
     } else {
       createMutation.mutate(values);
     }
-  };
-
-  // Get file URL for existing attachment
-  const getFileUrl = async (filePath: string) => {
-    const { data } = await supabase.storage
-      .from('pest-control-attachments')
-      .getPublicUrl(filePath);
-    
-    return data.publicUrl;
   };
 
   return {
@@ -367,20 +391,19 @@ export const usePestControl = () => {
     pestControls,
     isLoading,
     error,
-    editingPestControl,
-    attachments,
-    existingAttachments,
-    uploadProgress,
-    isUploading,
     resetForm,
     onSubmit,
+    deletePestControl: deleteMutation.mutate,
+    isSubmitting: createMutation.isPending || updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+    attachments,
+    existingAttachments,
     handleFileChange,
     removeFile,
     removeExistingAttachment,
     getFileUrl,
-    deletePestControl: deleteMutation.mutate,
-    isSubmitting: createMutation.isPending || updateMutation.isPending,
-    isDeleting: deleteMutation.isPending,
+    uploadProgress,
+    isUploading,
     refetch
   };
 };

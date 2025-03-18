@@ -152,6 +152,82 @@ export type Database = {
         }
         Relationships: []
       }
+      pest_control_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+          pest_control_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+          pest_control_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+          pest_control_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pest_control_attachments_pest_control_id_fkey"
+            columns: ["pest_control_id"]
+            isOneToOne: false
+            referencedRelation: "pest_controls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pest_controls: {
+        Row: {
+          created_at: string
+          data: string
+          empresa: string
+          finalidade: string[]
+          id: string
+          matricula: string
+          observacoes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          empresa: string
+          finalidade: string[]
+          id?: string
+          matricula: string
+          observacoes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          empresa?: string
+          finalidade?: string[]
+          id?: string
+          matricula?: string
+          observacoes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pest_controls_matricula_fkey"
+            columns: ["matricula"]
+            isOneToOne: false
+            referencedRelation: "condominiums"
+            referencedColumns: ["matricula"]
+          },
+        ]
+      }
       plan_change_logs: {
         Row: {
           campo: string
