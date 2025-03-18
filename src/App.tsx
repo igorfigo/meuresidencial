@@ -13,6 +13,7 @@ import UnderConstruction from "./pages/UnderConstruction";
 import NotFound from "./pages/NotFound";
 import Moradores from "./pages/Moradores";
 import Dedetizacoes from "./pages/Dedetizacoes";
+import Documentos from "./pages/Documentos";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -180,7 +181,7 @@ const App = () => (
             <Route path="/documentos" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <Documentos />
                 </ProtectedRoute>
               </AnimationController>
             } />

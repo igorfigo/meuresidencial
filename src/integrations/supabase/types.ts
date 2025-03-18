@@ -152,6 +152,71 @@ export type Database = {
         }
         Relationships: []
       }
+      document_attachments: {
+        Row: {
+          created_at: string
+          document_id: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_attachments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          created_at: string
+          data_cadastro: string
+          id: string
+          matricula: string
+          observacoes: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_cadastro?: string
+          id?: string
+          matricula: string
+          observacoes?: string | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_cadastro?: string
+          id?: string
+          matricula?: string
+          observacoes?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pest_control_attachments: {
         Row: {
           created_at: string
