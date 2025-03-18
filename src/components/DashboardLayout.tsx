@@ -216,10 +216,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     if (!user || user.isAdmin) return null;
     
     return (
-      <div className="bg-sidebar-accent px-4 py-4 mb-3 rounded-md shadow-md">
+      <div className="px-4 py-3 mb-3 border-l-4 border-brand-400 bg-sidebar-accent/20 rounded-md">
         <div className="flex items-center">
-          <Building2 className="h-6 w-6 mr-2 text-white" />
-          <span className="text-base text-white font-bold truncate">
+          <Building2 className="h-5 w-5 mr-2 text-brand-400" />
+          <span className="text-sm font-medium text-white truncate">
             {user.nomeCondominio || 'Condomínio'}
           </span>
         </div>
