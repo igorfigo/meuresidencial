@@ -100,3 +100,80 @@ export const getCondominiumChangeLogs = async (matricula: string) => {
   
   return data;
 };
+
+// Function to get announcements by matricula
+export const getAnnouncementsByMatricula = async (matricula: string) => {
+  const { data, error } = await supabase
+    .from('announcements')
+    .select('*')
+    .eq('matricula', matricula)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching announcements:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+// Function to get announcement attachments
+export const getAnnouncementAttachments = async (announcementId: string) => {
+  const { data, error } = await supabase
+    .from('announcement_attachments')
+    .select('*')
+    .eq('announcement_id', announcementId);
+  
+  if (error) {
+    console.error('Error fetching announcement attachments:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+// Function to create a new announcement
+export const createAnnouncement = async (announcementData: any) => {
+  const { data, error } = await supabase
+    .from('announcements')
+    .insert(announcementData)
+    .select();
+  
+  if (error) {
+    console.error('Error creating announcement:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+// Function to update an announcement
+export const updateAnnouncement = async (id: string, announcementData: any) => {
+  const { data, error } = await supabase
+    .from('announcements')
+    .update(announcementData)
+    .eq('id', id)
+    .select();
+  
+  if (error) {
+    console.error('Error updating announcement:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+// Function to delete an announcement
+export const deleteAnnouncement = async (id: string) => {
+  const { error } = await supabase
+    .from('announcements')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error deleting announcement:', error);
+    throw error;
+  }
+  
+  return true;
+};
