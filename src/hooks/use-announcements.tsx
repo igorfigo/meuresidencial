@@ -6,6 +6,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from './use-toast';
 import { useApp } from '@/contexts/AppContext';
+import { 
+  getAnnouncementsByMatricula, 
+  getAnnouncementAttachments,
+  createAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement
+} from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AnnouncementAttachment {
@@ -132,18 +139,13 @@ Atenciosamente, Administração do Condomínio`
     queryFn: async () => {
       if (!matricula) return [];
       
-      const { data, error } = await supabase
-        .from('announcements')
-        .select('*')
-        .eq('matricula', matricula)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
+      try {
+        const data = await getAnnouncementsByMatricula(matricula);
+        return data as Announcement[];
+      } catch (error) {
         console.error('Error fetching announcements:', error);
         throw error;
       }
-      
-      return data || [];
     },
     enabled: !!matricula
   });
@@ -154,28 +156,20 @@ Atenciosamente, Administração do Condomínio`
       setIsDeleting(true);
       
       try {
-        // First, fetch all attachments
-        const { data: attachments } = await supabase
-          .from('announcement_attachments')
-          .select('*')
-          .eq('announcement_id', id);
+        // Fetch attachments first for deletion from storage
+        const attachments = await getAnnouncementAttachments(id);
         
         // Delete files from storage
         if (attachments && attachments.length > 0) {
           for (const attachment of attachments) {
             await supabase.storage
               .from('announcement-attachments')
-              .remove([attachment.file_path.split('/').pop() || '']);
+              .remove([attachment.file_path]);
           }
         }
         
-        // Delete announcement (cascade will delete attachments)
-        const { error } = await supabase
-          .from('announcements')
-          .delete()
-          .eq('id', id);
-        
-        if (error) throw error;
+        // Delete announcement (which will cascade delete attachments in db)
+        await deleteAnnouncement(id);
         
         return id;
       } finally {
@@ -220,7 +214,7 @@ Atenciosamente, Administração do Condomínio`
   const getFileUrl = async (path: string) => {
     const { data } = await supabase.storage
       .from('announcement-attachments')
-      .createSignedUrl(path.split('/').pop() || '', 60);
+      .createSignedUrl(path, 60);
     
     return data?.signedUrl || '';
   };
@@ -246,13 +240,16 @@ Atenciosamente, Administração do Condomínio`
 
   // Fetch attachments for edit mode
   const fetchAttachments = async (announcementId: string) => {
-    const { data } = await supabase
-      .from('announcement_attachments')
-      .select('*')
-      .eq('announcement_id', announcementId);
-    
-    if (data) {
-      setExistingAttachments(data);
+    try {
+      const data = await getAnnouncementAttachments(announcementId);
+      setExistingAttachments(data as AnnouncementAttachment[]);
+    } catch (error) {
+      console.error('Error fetching attachments:', error);
+      toast({
+        title: "Erro ao carregar anexos",
+        description: "Ocorreu um erro ao carregar os anexos.",
+        variant: "destructive"
+      });
     }
   };
   
@@ -270,53 +267,38 @@ Atenciosamente, Administração do Condomínio`
       // Create or update announcement
       if (isNewAnnouncement) {
         // Insert new announcement
-        const { data: newAnnouncement, error: insertError } = await supabase
-          .from('announcements')
-          .insert({
-            matricula,
-            data: data.data,
-            finalidade: data.finalidade,
-            descricao: data.descricao
-          })
-          .select();
-        
-        if (insertError) throw insertError;
+        const newAnnouncement = await createAnnouncement({
+          matricula,
+          data: data.data,
+          finalidade: data.finalidade,
+          descricao: data.descricao
+        });
         
         announcementId = newAnnouncement?.[0]?.id;
       } else {
         // Update existing announcement
-        const { error: updateError } = await supabase
-          .from('announcements')
-          .update({
-            data: data.data,
-            finalidade: data.finalidade,
-            descricao: data.descricao,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', announcementId);
-        
-        if (updateError) throw updateError;
+        await updateAnnouncement(announcementId, {
+          data: data.data,
+          finalidade: data.finalidade,
+          descricao: data.descricao
+        });
         
         // Delete attachments marked for deletion
         if (attachmentsToDelete.length > 0) {
           for (const attId of attachmentsToDelete) {
-            const { data: attToDelete } = await supabase
-              .from('announcement_attachments')
-              .select('file_path')
-              .eq('id', attId)
-              .single();
+            // Get the attachment details
+            const { data: attData, error: attError } = await supabase
+              .rpc('get_attachment_by_id', { p_attachment_id: attId });
             
-            if (attToDelete) {
+            if (attData && attData.length > 0) {
               // Delete from storage
               await supabase.storage
                 .from('announcement-attachments')
-                .remove([attToDelete.file_path.split('/').pop() || '']);
+                .remove([attData[0].file_path]);
               
               // Delete from database
               await supabase
-                .from('announcement_attachments')
-                .delete()
-                .eq('id', attId);
+                .rpc('delete_attachment', { p_attachment_id: attId });
             }
           }
         }
@@ -340,16 +322,13 @@ Atenciosamente, Administração do Condomínio`
           if (uploadError) throw uploadError;
           
           // Save attachment metadata
-          const { error: attachError } = await supabase
-            .from('announcement_attachments')
-            .insert({
-              announcement_id: announcementId,
-              file_name: file.name,
-              file_path: fileName,
-              file_type: file.type
+          await supabase
+            .rpc('add_attachment', {
+              p_announcement_id: announcementId,
+              p_file_name: file.name,
+              p_file_path: fileName,
+              p_file_type: file.type
             });
-          
-          if (attachError) throw attachError;
           
           // Update progress
           totalUploaded++;

@@ -103,41 +103,37 @@ export const getCondominiumChangeLogs = async (matricula: string) => {
 
 // Function to get announcements by matricula
 export const getAnnouncementsByMatricula = async (matricula: string) => {
+  // Use executeQuery to avoid TypeScript errors with the new table
   const { data, error } = await supabase
-    .from('announcements')
-    .select('*')
-    .eq('matricula', matricula)
-    .order('created_at', { ascending: false });
+    .rpc('get_announcements_by_matricula', { p_matricula: matricula });
   
   if (error) {
     console.error('Error fetching announcements:', error);
     throw error;
   }
   
-  return data;
+  return data || [];
 };
 
 // Function to get announcement attachments
 export const getAnnouncementAttachments = async (announcementId: string) => {
+  // Use executeQuery to avoid TypeScript errors with the new table
   const { data, error } = await supabase
-    .from('announcement_attachments')
-    .select('*')
-    .eq('announcement_id', announcementId);
+    .rpc('get_announcement_attachments', { p_announcement_id: announcementId });
   
   if (error) {
     console.error('Error fetching announcement attachments:', error);
     throw error;
   }
   
-  return data;
+  return data || [];
 };
 
 // Function to create a new announcement
 export const createAnnouncement = async (announcementData: any) => {
+  // Use executeQuery to avoid TypeScript errors with the new table
   const { data, error } = await supabase
-    .from('announcements')
-    .insert(announcementData)
-    .select();
+    .rpc('create_announcement', { announcement_data: announcementData });
   
   if (error) {
     console.error('Error creating announcement:', error);
@@ -149,11 +145,14 @@ export const createAnnouncement = async (announcementData: any) => {
 
 // Function to update an announcement
 export const updateAnnouncement = async (id: string, announcementData: any) => {
+  // Use executeQuery to avoid TypeScript errors with the new table
   const { data, error } = await supabase
-    .from('announcements')
-    .update(announcementData)
-    .eq('id', id)
-    .select();
+    .rpc('update_announcement', { 
+      p_id: id,
+      p_data: announcementData.data,
+      p_finalidade: announcementData.finalidade,
+      p_descricao: announcementData.descricao
+    });
   
   if (error) {
     console.error('Error updating announcement:', error);
@@ -165,10 +164,9 @@ export const updateAnnouncement = async (id: string, announcementData: any) => {
 
 // Function to delete an announcement
 export const deleteAnnouncement = async (id: string) => {
+  // Use executeQuery to avoid TypeScript errors with the new table
   const { error } = await supabase
-    .from('announcements')
-    .delete()
-    .eq('id', id);
+    .rpc('delete_announcement', { p_id: id });
   
   if (error) {
     console.error('Error deleting announcement:', error);

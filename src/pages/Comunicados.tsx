@@ -3,10 +3,9 @@ import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Plus, Megaphone } from 'lucide-react';
-import { useAnnouncements } from '@/hooks/use-announcements';
+import { useAnnouncements, AnnouncementAttachment } from '@/hooks/use-announcements';
 import { AnnouncementForm } from '@/components/announcements/AnnouncementForm';
 import { AnnouncementsList } from '@/components/announcements/AnnouncementsList';
-import { supabase } from '@/integrations/supabase/client';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -17,6 +16,7 @@ import {
   AlertDialogHeader, 
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
+import { getAnnouncementAttachments } from '@/integrations/supabase/client';
 
 const Comunicados = () => {
   const { 
@@ -44,12 +44,13 @@ const Comunicados = () => {
   const [announcementToDelete, setAnnouncementToDelete] = useState<string | null>(null);
 
   const fetchAttachments = async (announcementId: string) => {
-    const { data } = await supabase
-      .from('announcement_attachments')
-      .select('*')
-      .eq('announcement_id', announcementId);
-    
-    return data || [];
+    try {
+      const data = await getAnnouncementAttachments(announcementId);
+      return data as AnnouncementAttachment[];
+    } catch (error) {
+      console.error('Error fetching attachments:', error);
+      return [];
+    }
   };
 
   const handleNewAnnouncement = () => {
