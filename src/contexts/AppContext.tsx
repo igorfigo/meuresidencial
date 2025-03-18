@@ -3,12 +3,19 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
 
+interface Condominium {
+  matricula: string;
+  nomeCondominio: string;
+}
+
 interface User {
   nome: string;
   email: string;
   isAdmin: boolean;
   matricula?: string;
-  nomeCondominio?: string; // Added to store the condominium name
+  nomeCondominio?: string;
+  condominiums?: Condominium[];
+  selectedCondominium?: string; // Storing the selected condominium matricula
 }
 
 interface AppContextType {
@@ -17,6 +24,7 @@ interface AppContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
+  switchCondominium: (matricula: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -55,35 +63,63 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
-      // Verificar se é uma tentativa de login com matrícula ou email
-      const { data: condominium, error: condoError } = await supabase
+      // Check if it's a login with email
+      const { data: condominiumsByEmail, error: emailError } = await supabase
         .from('condominiums' as any)
         .select('*')
-        .or(`matricula.eq.${emailOrMatricula},emaillegal.eq.${emailOrMatricula}`)
+        .eq('emaillegal', emailOrMatricula.toLowerCase())
         .eq('senha', password)
-        .eq('ativo', true)
-        .single();
+        .eq('ativo', true);
       
-      if (condoError) {
-        console.error("Erro ao verificar credenciais:", condoError);
-        toast.error("Credenciais inválidas ou usuário inativo. Tente novamente.");
-        return false;
+      if (emailError) {
+        console.error("Erro ao verificar credenciais por email:", emailError);
       }
       
-      if (condominium) {
-        // Type assertion to avoid the TypeScript error since we know the shape of data returned
-        const condoData = condominium as any;
+      // Check if it's a login with matricula
+      const { data: condominiumsByMatricula, error: matriculaError } = await supabase
+        .from('condominiums' as any)
+        .select('*')
+        .eq('matricula', emailOrMatricula)
+        .eq('senha', password)
+        .eq('ativo', true);
+      
+      if (matriculaError) {
+        console.error("Erro ao verificar credenciais por matrícula:", matriculaError);
+      }
+      
+      // Combine the results of both queries
+      const allCondominiums = [
+        ...(condominiumsByEmail || []),
+        ...(condominiumsByMatricula || [])
+      ];
+      
+      // Remove duplicates if any (in case a condominium has the same email and matricula)
+      const uniqueCondominiums = Array.from(
+        new Map(allCondominiums.map(item => [item.matricula, item])).values()
+      );
+      
+      if (uniqueCondominiums.length > 0) {
+        // Format condominiums for the user object
+        const condosFormatted = uniqueCondominiums.map(condo => ({
+          matricula: condo.matricula,
+          nomeCondominio: condo.nomecondominio || 'Condomínio'
+        }));
         
-        const condoUser = {
-          nome: condoData.nomelegal || condoData.matricula,
-          email: condoData.emaillegal || '',
+        // Use the first condominium as the selected one
+        const firstCondo = uniqueCondominiums[0];
+        
+        const managerUser = {
+          nome: firstCondo.nomelegal || firstCondo.matricula,
+          email: firstCondo.emaillegal || '',
           isAdmin: false,
-          matricula: condoData.matricula,
-          nomeCondominio: condoData.nomecondominio || 'Condomínio'
+          matricula: firstCondo.matricula,
+          nomeCondominio: firstCondo.nomecondominio || 'Condomínio',
+          condominiums: condosFormatted,
+          selectedCondominium: firstCondo.matricula
         };
         
-        setUser(condoUser);
-        localStorage.setItem('condoUser', JSON.stringify(condoUser));
+        setUser(managerUser);
+        localStorage.setItem('condoUser', JSON.stringify(managerUser));
         toast.success("Login realizado com sucesso!");
         return true;
       }
@@ -100,6 +136,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const switchCondominium = (matricula: string) => {
+    if (!user || !user.condominiums) return;
+    
+    const selectedCondo = user.condominiums.find(c => c.matricula === matricula);
+    if (!selectedCondo) return;
+    
+    const updatedUser = {
+      ...user,
+      matricula: selectedCondo.matricula,
+      nomeCondominio: selectedCondo.nomeCondominio,
+      selectedCondominium: selectedCondo.matricula
+    };
+    
+    setUser(updatedUser);
+    localStorage.setItem('condoUser', JSON.stringify(updatedUser));
+    toast.success(`Condomínio alterado para ${selectedCondo.nomeCondominio}`);
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('condoUser');
@@ -107,7 +161,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   return (
-    <AppContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading }}>
+    <AppContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading, switchCondominium }}>
       {children}
     </AppContext.Provider>
   );

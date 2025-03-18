@@ -22,10 +22,18 @@ import {
   CalendarDays,
   Briefcase,
   Vote,
-  Bug
+  Bug,
+  Building2,
+  ChevronDown
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -39,7 +47,7 @@ interface MenuItem {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user, logout } = useApp();
+  const { user, logout, switchCondominium } = useApp();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -54,6 +62,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handleCondominiumChange = (matricula: string) => {
+    switchCondominium(matricula);
   };
 
   // Admin menu items
@@ -88,6 +100,49 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   // Choose the appropriate menu items based on user role
   const menuItems = user?.isAdmin ? adminMenuItems : managerMenuItems;
+
+  // Render the condominium selector dropdown
+  const renderCondominiumSelector = () => {
+    if (!user || user.isAdmin || !user.condominiums || user.condominiums.length <= 1) {
+      return null;
+    }
+
+    return (
+      <div className="px-3 py-2 mb-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="w-full justify-between border-dashed border-slate-400 bg-slate-50"
+            >
+              <div className="flex items-center">
+                <Building2 className="h-4 w-4 mr-2 text-slate-500" />
+                <span className="truncate max-w-[140px]">
+                  {user.nomeCondominio || 'Selecione um condomínio'}
+                </span>
+              </div>
+              <ChevronDown className="h-4 w-4 ml-2 text-slate-500" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" className="w-56">
+            {user.condominiums.map((condo) => (
+              <DropdownMenuItem 
+                key={condo.matricula}
+                className={cn(
+                  "cursor-pointer", 
+                  condo.matricula === user.selectedCondominium && "bg-slate-100 font-medium"
+                )}
+                onClick={() => handleCondominiumChange(condo.matricula)}
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                <span className="truncate">{condo.nomeCondominio}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  };
 
   // Render a menu item, handling submenu rendering if needed
   const renderMenuItem = (item: MenuItem) => {
@@ -201,6 +256,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </Button>
         </div>
 
+        {/* Add the condominium selector in mobile view */}
+        {!user?.isAdmin && (
+          <div className="px-3 py-2">
+            {renderCondominiumSelector()}
+          </div>
+        )}
+
         <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {menuItems.map(item => renderMenuItem(item))}
         </div>
@@ -267,6 +329,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </Button>
           )}
         </div>
+        
+        {/* Add the condominium selector in desktop view when sidebar is open */}
+        {sidebarOpen && !user?.isAdmin && (
+          <div className="bg-sidebar px-3 py-2">
+            {renderCondominiumSelector()}
+          </div>
+        )}
         
         <div className="flex-1 bg-sidebar overflow-y-auto py-4 px-3 space-y-1">
           {menuItems.map(item => {
