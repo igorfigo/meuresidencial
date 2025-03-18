@@ -73,12 +73,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
   ];
 
-  // Reordered alphabetically and updated names as requested
+  // Make sure Dashboard is the first item (already is, but being explicit)
   const managerMenuItems: MenuItem[] = [
+    { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/reservas' },
     { name: 'Assembléias', icon: <Vote className="h-5 w-5" />, path: '/assembleias' },
     { name: 'Comunicados', icon: <MessageSquare className="h-5 w-5" />, path: '/comunicados' },
-    { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
     { name: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
     { 
@@ -216,10 +216,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     if (!user || user.isAdmin) return null;
     
     return (
-      <div className="bg-sidebar-accent/50 px-3 py-3 mb-2 rounded-md shadow-sm">
+      <div className="bg-sidebar-accent px-4 py-4 mb-3 rounded-md shadow-md">
         <div className="flex items-center">
-          <Building2 className="h-5 w-5 mr-2 text-white" />
-          <span className="text-sm text-white font-semibold truncate">
+          <Building2 className="h-6 w-6 mr-2 text-white" />
+          <span className="text-base text-white font-bold truncate">
             {user.nomeCondominio || 'Condomínio'}
           </span>
         </div>
