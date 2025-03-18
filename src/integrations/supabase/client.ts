@@ -43,6 +43,7 @@ export interface Condominium {
   vencimento?: string;
   desconto?: string;
   valorMensal?: string;
+  tipoDocumento?: string;
   
   // Segurança
   senha?: string;
@@ -92,6 +93,7 @@ const mapToDatabaseColumns = (data: Partial<Condominium>) => {
     vencimento: data.vencimento,
     desconto: data.desconto,
     valormensal: data.valorMensal,
+    tipoDocumento: data.tipoDocumento,
     senha: data.senha,
     ativo: data.ativo,
     welcome_email_sent: data.welcome_email_sent
@@ -291,12 +293,24 @@ export const saveCondominiumData = async (data: Condominium, userEmail?: string)
     // Remove confirmarSenha from data and map to database column names
     const { confirmarSenha, ...dataWithoutConfirmar } = data;
     
-    // Map our client-side property names to database column names
-    const dataToSave = mapToDatabaseColumns({
-      ...dataWithoutConfirmar,
-      // Se for novo cadastro, define welcome_email_sent como false
-      welcome_email_sent: existingCondominium?.welcome_email_sent || false
-    });
+    // For existing condominiums, only update the password if a new one was provided
+    let dataToSave;
+    if (!isNewCondominium && !data.senha) {
+      // If this is an existing record and no new password was provided, exclude it from the update
+      const { senha, ...dataWithoutSenha } = dataWithoutConfirmar;
+      dataToSave = mapToDatabaseColumns({
+        ...dataWithoutSenha,
+        // Keep the welcome_email_sent status from the existing record
+        welcome_email_sent: existingCondominium?.welcome_email_sent || false
+      });
+    } else {
+      // Otherwise, include the password in the update
+      dataToSave = mapToDatabaseColumns({
+        ...dataWithoutConfirmar,
+        // Keep the welcome_email_sent status from the existing record
+        welcome_email_sent: existingCondominium?.welcome_email_sent || false
+      });
+    }
     
     console.log("Data to save:", dataToSave);
     
@@ -407,7 +421,6 @@ export const saveCondominiumData = async (data: Condominium, userEmail?: string)
       vencimento: typedSavedData[0].vencimento || undefined,
       desconto: typedSavedData[0].desconto || undefined,
       valorMensal: typedSavedData[0].valormensal || undefined,
-      senha: typedSavedData[0].senha || undefined,
       created_at: typedSavedData[0].created_at || undefined,
       updated_at: typedSavedData[0].updated_at || undefined,
       welcome_email_sent: typedSavedData[0].welcome_email_sent || undefined
@@ -552,7 +565,6 @@ function mapRowToCondominium(row: any): Condominium {
     vencimento: row.vencimento || undefined,
     desconto: row.desconto || undefined,
     valorMensal: row.valormensal || undefined,
-    senha: row.senha || undefined,
     ativo: row.ativo !== undefined ? row.ativo : true, // Default para true se não definido
     created_at: row.created_at || undefined,
     updated_at: row.updated_at || undefined,

@@ -12,7 +12,7 @@ interface SegurancaProps {
 }
 
 export const Seguranca = ({ handleInputChange, isExistingRecord }: SegurancaProps) => {
-  const { register } = useFormContext<FormFields>();
+  const { register, getValues } = useFormContext<FormFields>();
 
   return (
     <Card className="form-section p-6">

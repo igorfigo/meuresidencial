@@ -169,7 +169,10 @@ export const useCondominiumForm = () => {
           ...data,
           valorPlano: data.valorPlano ? formatToBRL(Number(data.valorPlano)) : '',
           desconto: data.desconto ? formatToBRL(Number(data.desconto)) : '',
-          valorMensal: data.valorMensal ? formatToBRL(Number(data.valorMensal)) : ''
+          valorMensal: data.valorMensal ? formatToBRL(Number(data.valorMensal)) : '',
+          // Reset password fields to empty strings
+          senha: '',
+          confirmarSenha: ''
         };
         
         form.reset(formattedData);
@@ -192,6 +195,7 @@ export const useCondominiumForm = () => {
 
   const onSubmit = async (data: FormFields) => {
     if (!isExistingRecord) {
+      // For new records, password is required
       if (!data.senha) {
         toast.error('Senha é obrigatória para novos cadastros.');
         return;
@@ -202,11 +206,13 @@ export const useCondominiumForm = () => {
         return;
       }
     } else if (data.senha || data.confirmarSenha) {
+      // For existing records, if any password field is filled, both must match
       if (data.senha !== data.confirmarSenha) {
         toast.error('As senhas não conferem. Por favor, verifique.');
         return;
       }
     }
+    // For existing records with empty password fields, no validation needed
 
     const formattedData = {
       ...data,
@@ -229,6 +235,10 @@ export const useCondominiumForm = () => {
       if (!isExistingRecord) {
         form.reset();
         setIsExistingRecord(false);
+      } else {
+        // For existing records, reset the password fields after successful update
+        form.setValue('senha', '');
+        form.setValue('confirmarSenha', '');
       }
     } catch (error) {
       console.error('Error saving condominium data:', error);
