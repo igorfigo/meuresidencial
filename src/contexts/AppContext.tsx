@@ -1,11 +1,13 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
 
 interface User {
   nome: string;
   email: string;
   isAdmin: boolean;
+  matricula?: string;
 }
 
 interface AppContextType {
@@ -35,11 +37,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (emailOrMatricula: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
       // Verificar as credenciais do administrador
-      if (email.toLowerCase() === 'meuresidencialcom@gmail.com' && password === 'Bigdream@2025') {
+      if (emailOrMatricula.toLowerCase() === 'meuresidencialcom@gmail.com' && password === 'Bigdream@2025') {
         const adminUser = {
           nome: 'IGOR COSTA ALVES',
           email: 'meuresidencialcom@gmail.com',
@@ -52,10 +54,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
+      // Verificar se é uma tentativa de login com matrícula
+      const { data: condominium, error: condoError } = await supabase
+        .from('condominiums' as any)
+        .select('*')
+        .eq('matricula', emailOrMatricula)
+        .eq('senha', password)
+        .eq('ativo', true)
+        .single();
+      
+      if (condoError) {
+        console.error("Erro ao verificar credenciais:", condoError);
+        toast.error("Credenciais inválidas ou usuário inativo. Tente novamente.");
+        return false;
+      }
+      
+      if (condominium) {
+        const condoUser = {
+          nome: condominium.nomecondominio || condominium.matricula,
+          email: condominium.emaillegal || '',
+          isAdmin: false,
+          matricula: condominium.matricula
+        };
+        
+        setUser(condoUser);
+        localStorage.setItem('condoUser', JSON.stringify(condoUser));
+        toast.success("Login realizado com sucesso!");
+        return true;
+      }
+      
       // Simulação de falha no login
-      toast.error("Credenciais inválidas. Tente novamente.");
+      toast.error("Credenciais inválidas ou usuário inativo. Tente novamente.");
       return false;
     } catch (error) {
+      console.error("Erro ao realizar login:", error);
       toast.error("Erro ao realizar login. Tente novamente.");
       return false;
     } finally {

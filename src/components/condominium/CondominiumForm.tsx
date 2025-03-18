@@ -16,6 +16,7 @@ interface CondominiumFormProps {
   isSubmitting: boolean;
   isExistingRecord: boolean;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  toggleAtivoStatus: () => void;
 }
 
 export const CondominiumForm = ({
@@ -23,11 +24,27 @@ export const CondominiumForm = ({
   onSubmit,
   isSubmitting,
   isExistingRecord,
-  handleInputChange
+  handleInputChange,
+  toggleAtivoStatus
 }: CondominiumFormProps) => {
+  const ativo = form.watch('ativo');
+  
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {isExistingRecord && (
+          <div className="flex justify-end">
+            <Button 
+              type="button" 
+              onClick={toggleAtivoStatus}
+              variant={ativo ? "destructive" : "success"}
+              className={ativo ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
+            >
+              {ativo ? 'Desativar Usuário' : 'Ativar Usuário'}
+            </Button>
+          </div>
+        )}
+        
         <InfoCondominio handleInputChange={handleInputChange} />
         <InfoRepresentante handleInputChange={handleInputChange} />
         <InfoFinanceira handleInputChange={handleInputChange} />

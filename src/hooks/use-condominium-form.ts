@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { getCondominiumByMatricula, saveCondominiumData, getCondominiumChangeLogs } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
-import { formatCnpj, formatCep, formatPhone, formatCurrencyInput } from '@/utils/currency';
+import { BRLToNumber, formatToBRL } from '@/utils/currency';
 
 export type FormFields = {
   matricula: string;
@@ -33,6 +33,7 @@ export type FormFields = {
   valorMensal: string;
   senha: string;
   confirmarSenha: string;
+  ativo: boolean;
 };
 
 export type ChangeLogEntry = {
@@ -85,25 +86,21 @@ export const useCondominiumForm = () => {
       desconto: '',
       valorMensal: '',
       senha: '',
-      confirmarSenha: ''
+      confirmarSenha: '',
+      ativo: true
     }
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    if (name === 'cnpj') {
-      form.setValue(name as keyof FormFields, formatCnpj(value));
-    } else if (name === 'cep') {
-      form.setValue(name as keyof FormFields, formatCep(value));
-    } else if (name === 'telefoneLegal') {
-      form.setValue(name as keyof FormFields, formatPhone(value));
-    } else if (name === 'desconto') {
-      const formattedValue = formatCurrencyInput(value);
-      form.setValue(name as keyof FormFields, `R$ ${formattedValue}`);
-    } else {
-      form.setValue(name as keyof FormFields, value);
-    }
+    // Regular form fields
+    form.setValue(name as keyof FormFields, value);
+  };
+
+  const toggleAtivoStatus = () => {
+    const currentStatus = form.watch('ativo');
+    form.setValue('ativo', !currentStatus);
   };
 
   const loadChangeLogs = async (matricula: string) => {
@@ -249,6 +246,7 @@ export const useCondominiumForm = () => {
     onSubmit,
     getCurrentItems,
     handlePageChange,
-    getPageNumbers
+    getPageNumbers,
+    toggleAtivoStatus
   };
 };

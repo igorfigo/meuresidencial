@@ -35,7 +35,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     // Get the raw value
     const value = e.target.value.replace(/\D/g, '');
     
-    // Format to currency with R$ prefix
+    // Format to currency with R$ prefix and proper Brazilian format (comma as decimal separator)
     const formattedValue = value ? formatToBRL(Number(value) / 100) : formatToBRL(0);
     
     setValue('desconto', formattedValue);
