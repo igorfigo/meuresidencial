@@ -22,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 // Opções de títulos e seus conteúdos correspondentes
 const ANNOUNCEMENT_TEMPLATES = {
@@ -91,6 +93,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
 }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const isNewAnnouncement = !announcement?.id;
@@ -100,6 +103,13 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
     if (announcement) {
       setTitle(announcement.title);
       setContent(announcement.content);
+      
+      // Set date from announcement or use current date
+      if (announcement.date) {
+        setDate(announcement.date);
+      } else {
+        setDate(format(new Date(), 'yyyy-MM-dd'));
+      }
     }
   }, [announcement, open]);
 
@@ -115,6 +125,11 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
     setContent(e.target.value);
   };
 
+  // Handle date change
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDate(e.target.value);
+  };
+
   // Handle save action
   const handleSave = async () => {
     if (!announcement) return;
@@ -125,7 +140,8 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
       await onSave({
         ...announcement,
         title,
-        content
+        content,
+        date
       });
       
       onOpenChange(false);
@@ -187,6 +203,16 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
                 placeholder="Título do comunicado"
               />
             )}
+          </div>
+          
+          <div>
+            <Label htmlFor="date">Data</Label>
+            <Input
+              id="date"
+              type="date"
+              value={date}
+              onChange={handleDateChange}
+            />
           </div>
           
           <div className="flex-1 overflow-hidden">

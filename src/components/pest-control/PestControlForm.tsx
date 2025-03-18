@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -28,6 +29,7 @@ import {
   Trash2 
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { format } from 'date-fns';
 
 interface PestControlFormProps {
   form: ReturnType<typeof useForm<PestControlFormValues>>;
@@ -67,6 +69,13 @@ export const PestControlForm: React.FC<PestControlFormProps> = ({
   isUploading
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Set current date when component mounts if the date field is empty
+  React.useEffect(() => {
+    if (!form.getValues().data) {
+      form.setValue('data', format(new Date(), 'yyyy-MM-dd'));
+    }
+  }, [form]);
 
   const openFileSelector = () => {
     if (fileInputRef.current) {

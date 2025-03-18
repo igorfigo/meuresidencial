@@ -24,7 +24,8 @@ import {
   ArrowLeft, 
   Loader2, 
   Download, 
-  Trash2 
+  Trash2,
+  Calendar
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -34,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { format } from "date-fns";
 
 interface DocumentFormProps {
   form: ReturnType<typeof useForm<DocumentFormValues>>;
@@ -77,6 +79,13 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Set current date when the component mounts
+  React.useEffect(() => {
+    if (!form.getValues().data_cadastro) {
+      form.setValue('data_cadastro', format(new Date(), 'yyyy-MM-dd'));
+    }
+  }, [form]);
+
   const openFileSelector = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -118,6 +127,20 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="data_cadastro"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Data</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

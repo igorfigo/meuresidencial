@@ -8,12 +8,14 @@ import {
   deleteAnnouncement 
 } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
+import { format } from 'date-fns';
 
 export interface Announcement {
   id?: string;
   matricula: string;
   title: string;
   content: string;
+  date?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -67,6 +69,11 @@ export function useAnnouncements() {
 
   const createAnnouncement = async (announcementData: Omit<Announcement, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      // Ensure the current date is set if not provided
+      if (!announcementData.date) {
+        announcementData.date = format(new Date(), 'yyyy-MM-dd');
+      }
+      
       const result = await saveAnnouncement({
         ...announcementData,
         matricula: selectedCondominium
@@ -92,6 +99,11 @@ export function useAnnouncements() {
 
   const updateAnnouncement = async (announcementData: Announcement) => {
     try {
+      // Ensure date is set
+      if (!announcementData.date) {
+        announcementData.date = format(new Date(), 'yyyy-MM-dd');
+      }
+      
       const result = await saveAnnouncement(announcementData);
       
       toast({
