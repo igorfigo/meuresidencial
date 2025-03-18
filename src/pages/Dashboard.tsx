@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,7 +25,6 @@ interface DashboardStats {
 
 const Dashboard = () => {
   const { user } = useApp();
-  const firstName = user?.nome?.split(' ')[0] || 'Usuário';
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
   
@@ -141,10 +141,10 @@ const Dashboard = () => {
       return (
         <>
           <h1 className="text-3xl font-bold tracking-tight">
-            Olá {user?.nome}
+            Olá {user?.nome || 'Representante'}
           </h1>
           <p className="text-muted-foreground">
-            Você está gerenciando o {user?.nomeCondominio}
+            Você está gerenciando o {user?.nomeCondominio || 'Condomínio'}
           </p>
         </>
       );

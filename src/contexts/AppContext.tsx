@@ -87,11 +87,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error("Erro ao verificar credenciais por matrícula:", matriculaError);
       }
       
-      // Combine the results of both queries
-      const allCondominiums = [
-        ...(emailData || []),
-        ...(matriculaData || [])
-      ];
+      // Combine the results of both queries and ensure they're treated as arrays
+      const emailDataArray = emailData || [];
+      const matriculaDataArray = matriculaData || [];
+      const allCondominiums = [...emailDataArray, ...matriculaDataArray];
       
       // TypeScript cast to avoid type errors
       const typedCondominiums = allCondominiums as Array<{
