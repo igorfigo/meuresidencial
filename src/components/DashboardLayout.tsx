@@ -21,9 +21,7 @@ import {
   CalendarDays,
   Briefcase,
   Vote,
-  Bug,
-  Building2,
-  ChevronDown
+  Bug
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
