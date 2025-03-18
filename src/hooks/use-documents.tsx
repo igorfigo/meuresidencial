@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
@@ -31,6 +30,7 @@ export interface Document {
 const documentSchema = z.object({
   id: z.string().optional(),
   tipo: z.string().min(1, "Tipo do documento é obrigatório"),
+  data_cadastro: z.string().min(1, "Data é obrigatória"),
   observacoes: z.string().min(1, "Observações são obrigatórias"),
 });
 
@@ -55,6 +55,7 @@ export function useDocuments() {
     resolver: zodResolver(documentSchema),
     defaultValues: {
       tipo: '',
+      data_cadastro: format(new Date(), 'yyyy-MM-dd'),
       observacoes: '',
     }
   });
@@ -109,6 +110,7 @@ export function useDocuments() {
       form.reset({
         id: document.id,
         tipo: document.tipo,
+        data_cadastro: document.data_cadastro || format(new Date(), 'yyyy-MM-dd'),
         observacoes: document.observacoes,
       });
       
@@ -117,6 +119,7 @@ export function useDocuments() {
     } else {
       form.reset({
         tipo: '',
+        data_cadastro: format(new Date(), 'yyyy-MM-dd'),
         observacoes: '',
       });
       setExistingAttachments([]);
@@ -151,8 +154,6 @@ export function useDocuments() {
     setUploadProgress(0);
     
     try {
-      const today = format(new Date(), 'yyyy-MM-dd');
-      
       // Save or update document
       let documentId = data.id;
       
@@ -162,6 +163,7 @@ export function useDocuments() {
           .from('documents')
           .update({
             tipo: data.tipo,
+            data_cadastro: data.data_cadastro,
             observacoes: data.observacoes,
             updated_at: new Date().toISOString(),
           })
@@ -175,7 +177,7 @@ export function useDocuments() {
           .insert({
             matricula,
             tipo: data.tipo,
-            data_cadastro: today,
+            data_cadastro: data.data_cadastro,
             observacoes: data.observacoes,
           })
           .select();

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -78,13 +77,6 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
   isUploading
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  // Set current date when the component mounts
-  React.useEffect(() => {
-    if (!form.getValues().data_cadastro) {
-      form.setValue('data_cadastro', format(new Date(), 'yyyy-MM-dd'));
-    }
-  }, [form]);
 
   const openFileSelector = () => {
     if (fileInputRef.current) {
@@ -206,7 +198,6 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                 </div>
               )}
 
-              {/* New attachments */}
               {attachments.length > 0 && (
                 <div className="space-y-2 mt-2">
                   <h4 className="text-sm font-medium">Arquivos a enviar:</h4>
@@ -238,7 +229,6 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                 </div>
               )}
 
-              {/* Existing attachments */}
               {existingAttachments.length > 0 && (
                 <div className="space-y-2 mt-4">
                   <h4 className="text-sm font-medium">Anexos já enviados:</h4>
