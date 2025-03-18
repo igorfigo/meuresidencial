@@ -15,12 +15,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import { useApp } from '@/contexts/AppContext';
 
 const AnnouncementsList: React.FC = () => {
@@ -31,8 +25,7 @@ const AnnouncementsList: React.FC = () => {
     getAnnouncement,
     createAnnouncement,
     updateAnnouncement,
-    removeAnnouncement,
-    createAnnouncementFromTemplate
+    removeAnnouncement
   } = useAnnouncements();
   
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
@@ -77,10 +70,6 @@ const AnnouncementsList: React.FC = () => {
     }
   };
   
-  const handleUseTemplate = async (index: number) => {
-    await createAnnouncementFromTemplate(index);
-  };
-  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -109,37 +98,6 @@ const AnnouncementsList: React.FC = () => {
         <h2 className="text-2xl font-bold">Comunicados</h2>
         
         <div className="flex gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                Usar modelo
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleUseTemplate(0)}>
-                Convocação de Assembleia
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleUseTemplate(1)}>
-                Aviso de Manutenção
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleUseTemplate(2)}>
-                Comunicado de Segurança
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleUseTemplate(3)}>
-                Informações Financeiras
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleUseTemplate(4)}>
-                Eventos e Atividades
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleUseTemplate(5)}>
-                Regras e Regulamentos
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleUseTemplate(6)}>
-                Informações Administrativas
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
           <Button onClick={handleCreateNew}>
             <PlusCircle className="h-4 w-4 mr-2" />
             Novo comunicado
