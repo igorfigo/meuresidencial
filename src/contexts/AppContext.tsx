@@ -70,11 +70,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       
       if (condominium) {
+        // Type assertion to avoid the TypeScript error since we know the shape of data returned
+        const condoData = condominium as any;
+        
         const condoUser = {
-          nome: condominium.nomecondominio || condominium.matricula,
-          email: condominium.emaillegal || '',
+          nome: condoData.nomecondominio || condoData.matricula,
+          email: condoData.emaillegal || '',
           isAdmin: false,
-          matricula: condominium.matricula
+          matricula: condoData.matricula
         };
         
         setUser(condoUser);

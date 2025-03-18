@@ -22,6 +22,24 @@ export const BRLToNumber = (value: string): number => {
   return isNaN(parsedValue) ? 0 : parsedValue;
 };
 
+// Format an input number into currency display format (adds thousand separators)
+export const formatCurrencyInput = (value: string): string => {
+  if (!value) return '';
+  
+  // Convert the string to a number (cents)
+  const cents = parseInt(value, 10);
+  if (isNaN(cents)) return '';
+  
+  // Convert cents to a proper decimal number
+  const decimalValue = cents / 100;
+  
+  // Format with thousand separators and two decimal places
+  return decimalValue.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
 // Format CNPJ: XX.XXX.XXX/XXXX-XX
 export const formatCnpj = (value: string): string => {
   if (!value) return '';
