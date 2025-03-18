@@ -164,16 +164,36 @@ export const useCondominiumForm = () => {
     try {
       const data = await getCondominiumByMatricula(matriculaSearch);
       if (data) {
-        // Format currency values before setting form data
+        // Map database field names (lowercase) to form field names (camelCase)
         const formattedData = {
-          ...data,
-          valorPlano: data.valorPlano ? formatToBRL(Number(data.valorPlano)) : '',
+          matricula: data.matricula,
+          cnpj: data.cnpj || '',
+          cep: data.cep || '',
+          rua: data.rua || '',
+          numero: data.numero || '',
+          complemento: data.complemento || '',
+          bairro: data.bairro || '',
+          cidade: data.cidade || '',
+          estado: data.estado || '',
+          nomeCondominio: data.nomecondominio || '',
+          nomeLegal: data.nomelegal || '',
+          emailLegal: data.emaillegal || '',
+          telefoneLegal: data.telefonelegal || '',
+          enderecoLegal: data.enderecolegal || '',
+          banco: data.banco || '',
+          agencia: data.agencia || '',
+          conta: data.conta || '',
+          pix: data.pix || '',
+          planoContratado: data.planocontratado || 'STANDARD',
+          valorPlano: data.valorplano ? formatToBRL(Number(data.valorplano)) : '',
+          formaPagamento: data.formapagamento || 'pix',
+          vencimento: data.vencimento || '',
           desconto: data.desconto ? formatToBRL(Number(data.desconto)) : '',
-          valorMensal: data.valorMensal ? formatToBRL(Number(data.valorMensal)) : '',
-          tipoDocumento: data.tipoDocumento || 'recibo', // Ensure tipoDocumento is set
-          // Reset password fields to empty strings
+          valorMensal: data.valormensal ? formatToBRL(Number(data.valormensal)) : '',
+          tipoDocumento: data.tipodocumento || 'recibo',
           senha: '',
-          confirmarSenha: ''
+          confirmarSenha: '',
+          ativo: data.ativo !== null ? data.ativo : true
         };
         
         form.reset(formattedData);
@@ -215,11 +235,36 @@ export const useCondominiumForm = () => {
     }
     // For existing records with empty password fields, no validation needed
 
+    // Map form field names (camelCase) to database field names (lowercase)
     const formattedData = {
-      ...data,
-      valorPlano: BRLToNumber(data.valorPlano).toString(),
+      matricula: data.matricula,
+      cnpj: data.cnpj,
+      cep: data.cep,
+      rua: data.rua,
+      numero: data.numero,
+      complemento: data.complemento,
+      bairro: data.bairro,
+      cidade: data.cidade,
+      estado: data.estado,
+      nomecondominio: data.nomeCondominio,
+      nomelegal: data.nomeLegal,
+      emaillegal: data.emailLegal,
+      telefonelegal: data.telefoneLegal,
+      enderecolegal: data.enderecoLegal,
+      banco: data.banco,
+      agencia: data.agencia,
+      conta: data.conta,
+      pix: data.pix,
+      planocontratado: data.planoContratado,
+      valorplano: BRLToNumber(data.valorPlano).toString(),
+      formapagamento: data.formaPagamento,
+      vencimento: data.vencimento,
       desconto: BRLToNumber(data.desconto).toString(),
-      valorMensal: BRLToNumber(data.valorMensal).toString()
+      valormensal: BRLToNumber(data.valorMensal).toString(),
+      tipodocumento: data.tipoDocumento,
+      senha: data.senha,
+      confirmarsenha: data.confirmarSenha,
+      ativo: data.ativo
     };
 
     setIsSubmitting(true);
