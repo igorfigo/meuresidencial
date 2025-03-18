@@ -7,14 +7,32 @@ import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+// Define type for the location stats
+interface LocationStats {
+  states: [string, number][];
+  cities: [string, number][];
+  neighborhoods: [string, number][];
+}
+
+// Define type for the stats state
+interface DashboardStats {
+  activeManagers: number;
+  invoicePreference: number;
+  locationStats: LocationStats;
+}
+
 const Dashboard = () => {
   const { user } = useApp();
   const firstName = user?.nome?.split(' ')[0] || 'Usuário';
   
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
     invoicePreference: 0,
-    locationStats: []
+    locationStats: {
+      states: [],
+      cities: [],
+      neighborhoods: []
+    }
   });
   
   useEffect(() => {
@@ -44,9 +62,9 @@ const Dashboard = () => {
         if (locationError) throw locationError;
         
         // Process location data
-        const stateCount = {};
-        const cityCount = {};
-        const neighborhoodCount = {};
+        const stateCount: Record<string, number> = {};
+        const cityCount: Record<string, number> = {};
+        const neighborhoodCount: Record<string, number> = {};
         
         locationData.forEach(item => {
           if (item.estado) {
