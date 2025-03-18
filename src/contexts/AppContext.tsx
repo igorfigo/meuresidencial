@@ -64,7 +64,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       
       // Check if it's a login with email
-      const { data: condominiumsByEmail, error: emailError } = await supabase
+      const { data: emailData, error: emailError } = await supabase
         .from('condominiums' as any)
         .select('*')
         .eq('emaillegal', emailOrMatricula.toLowerCase())
@@ -76,7 +76,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       
       // Check if it's a login with matricula
-      const { data: condominiumsByMatricula, error: matriculaError } = await supabase
+      const { data: matriculaData, error: matriculaError } = await supabase
         .from('condominiums' as any)
         .select('*')
         .eq('matricula', emailOrMatricula)
@@ -89,9 +89,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       // Combine the results of both queries
       const allCondominiums = [
-        ...(condominiumsByEmail || []),
-        ...(condominiumsByMatricula || [])
-      ];
+        ...(emailData || []),
+        ...(matriculaData || [])
+      ] as any[];
       
       // Remove duplicates if any (in case a condominium has the same email and matricula)
       const uniqueCondominiums = Array.from(
