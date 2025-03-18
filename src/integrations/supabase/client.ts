@@ -100,3 +100,85 @@ export const getCondominiumChangeLogs = async (matricula: string) => {
   
   return data;
 };
+
+// Announcement functions
+export const getAnnouncements = async (matricula: string) => {
+  const { data, error } = await supabase
+    .from('announcements')
+    .select('*')
+    .eq('matricula', matricula)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching announcements:', error);
+    throw error;
+  }
+  
+  return data;
+};
+
+export const getAnnouncementById = async (id: string) => {
+  const { data, error } = await supabase
+    .from('announcements')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching announcement:', error);
+    return null;
+  }
+  
+  return data;
+};
+
+export const saveAnnouncement = async (announcementData: any) => {
+  const { id } = announcementData;
+  
+  if (id) {
+    // Update existing announcement
+    const { data, error } = await supabase
+      .from('announcements')
+      .update({
+        ...announcementData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select();
+    
+    if (error) {
+      console.error('Error updating announcement:', error);
+      throw error;
+    }
+    
+    return data;
+  } else {
+    // Create new announcement
+    const { data, error } = await supabase
+      .from('announcements')
+      .insert(announcementData)
+      .select();
+    
+    if (error) {
+      console.error('Error creating announcement:', error);
+      throw error;
+    }
+    
+    return data;
+  }
+};
+
+export const deleteAnnouncement = async (id: string) => {
+  const { error } = await supabase
+    .from('announcements')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error deleting announcement:', error);
+    throw error;
+  }
+  
+  return true;
+};
+

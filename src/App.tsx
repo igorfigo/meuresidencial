@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import Moradores from "./pages/Moradores";
 import Dedetizacoes from "./pages/Dedetizacoes";
 import Documentos from "./pages/Documentos";
+import Comunicados from "./pages/Comunicados";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -221,7 +222,7 @@ const App = () => (
             <Route path="/comunicados" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <Comunicados />
                 </ProtectedRoute>
               </AnimationController>
             } />
