@@ -57,3 +57,43 @@ export const formatCurrencyInput = (value: string): string => {
     maximumFractionDigits: 2,
   });
 };
+
+/**
+ * Formats a string to CNPJ format
+ * @param value - String to format
+ * @returns Formatted CNPJ string
+ */
+export const formatCnpj = (value: string): string => {
+  return value
+    .replace(/\D/g, '')
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2')
+    .slice(0, 18);
+};
+
+/**
+ * Formats a string to CEP format
+ * @param value - String to format
+ * @returns Formatted CEP string
+ */
+export const formatCep = (value: string): string => {
+  return value
+    .replace(/\D/g, '')
+    .replace(/^(\d{5})(\d)/, '$1-$2')
+    .slice(0, 9);
+};
+
+/**
+ * Formats a string to phone format
+ * @param value - String to format
+ * @returns Formatted phone string
+ */
+export const formatPhone = (value: string): string => {
+  return value
+    .replace(/\D/g, '')
+    .replace(/^(\d{2})(\d)/g, '($1) $2')
+    .replace(/(\d)(\d{4})$/, '$1-$2')
+    .slice(0, 15);
+};
