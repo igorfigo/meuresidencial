@@ -1,10 +1,9 @@
 
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
-import AnnouncementCard from './AnnouncementCard';
 import AnnouncementEditor from './AnnouncementEditor';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Eye, Trash2, Edit } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +15,17 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useApp } from '@/contexts/AppContext';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const AnnouncementsList: React.FC = () => {
   const { 
@@ -31,9 +41,25 @@ const AnnouncementsList: React.FC = () => {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [detailView, setDetailView] = useState<Announcement | null>(null);
   const { user } = useApp();
   
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+    } catch (error) {
+      return dateString;
+    }
+  };
+  
   const handleViewAnnouncement = async (id: string) => {
+    const announcement = await getAnnouncement(id);
+    if (announcement) {
+      setDetailView(announcement);
+    }
+  };
+  
+  const handleEditAnnouncement = async (id: string) => {
     const announcement = await getAnnouncement(id);
     if (announcement) {
       setSelectedAnnouncement(announcement);
@@ -114,15 +140,52 @@ const AnnouncementsList: React.FC = () => {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {announcements.map((announcement) => (
-            <AnnouncementCard
-              key={announcement.id}
-              announcement={announcement}
-              onView={handleViewAnnouncement}
-              onDelete={handleDeleteClick}
-            />
-          ))}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Título</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead className="w-[100px]">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {announcements.map((announcement) => (
+                <TableRow key={announcement.id}>
+                  <TableCell className="font-medium">{announcement.title}</TableCell>
+                  <TableCell>{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => announcement.id && handleViewAnnouncement(announcement.id)}
+                        title="Ver detalhes"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => announcement.id && handleEditAnnouncement(announcement.id)}
+                        title="Editar"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => announcement.id && handleDeleteClick(announcement.id)}
+                        title="Excluir"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
       
@@ -134,6 +197,29 @@ const AnnouncementsList: React.FC = () => {
           onSave={handleSaveAnnouncement}
         />
       )}
+      
+      {/* View announcement details dialog */}
+      <Dialog open={!!detailView} onOpenChange={(open) => !open && setDetailView(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{detailView?.title}</DialogTitle>
+          </DialogHeader>
+          
+          {detailView && (
+            <div className="space-y-4 mt-2">
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground">Data</h4>
+                <p>{detailView.created_at ? formatDate(detailView.created_at) : '-'}</p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground">Conteúdo</h4>
+                <p className="text-sm whitespace-pre-line">{detailView.content}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
