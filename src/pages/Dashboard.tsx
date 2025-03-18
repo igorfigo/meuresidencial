@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -129,12 +128,12 @@ const Dashboard = () => {
     setIsStateDetailOpen(true);
   };
 
-  // Different greeting for admin vs manager
+  // Modified greeting for admin vs manager
   const getGreeting = () => {
     if (user?.isAdmin) {
       return (
         <>
-          <h1 className="text-3xl font-bold tracking-tight">Olá, {firstName}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Olá, {user.nome}</h1>
           <p className="text-muted-foreground">Aqui está seu Dashboard Gerencial.</p>
         </>
       );
@@ -142,7 +141,7 @@ const Dashboard = () => {
       return (
         <>
           <h1 className="text-3xl font-bold tracking-tight">
-            Olá, {firstName}
+            Olá {user?.nome}
           </h1>
           <p className="text-muted-foreground">
             Você está gerenciando o {user?.nomeCondominio}
