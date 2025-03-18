@@ -129,11 +129,9 @@ const CadastroGestor = () => {
     const valorPlano = watch('valorPlano');
     const descontoValue = watch('desconto');
     
-    // Convert currency strings to numbers for calculation
     const planoNumber = BRLToNumber(valorPlano);
     const descontoNumber = BRLToNumber(descontoValue);
     
-    // Calculate valor mensal and format back to currency
     const valorMensal = formatToBRL(Math.max(0, planoNumber - descontoNumber));
     
     setValue('valorMensal', valorMensal);
@@ -149,7 +147,6 @@ const CadastroGestor = () => {
     } else if (name === 'telefoneLegal') {
       setValue(name as keyof FormFields, formatPhone(value));
     } else if (name === 'desconto') {
-      // Format the discount input as currency
       const formattedValue = formatCurrencyInput(value);
       setValue(name as keyof FormFields, `R$ ${formattedValue}`);
     } else {
@@ -254,6 +251,78 @@ const CadastroGestor = () => {
       toast.error('Erro ao salvar dados. Tente novamente mais tarde.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleMatriculaSearch = async () => {
+    if (!matriculaSearch) {
+      toast.error('Por favor, digite uma matrícula para buscar.');
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const data = await getCondominiumByMatricula(matriculaSearch);
+      if (data) {
+        reset(data);
+        setIsExistingRecord(true);
+        await loadChangeLogs(matriculaSearch);
+        toast.success('Dados encontrados com sucesso!');
+      } else {
+        toast.error('Nenhum registro encontrado para esta matrícula.');
+        reset();
+        setIsExistingRecord(false);
+        setFilteredChangeLogs([]);
+      }
+    } catch (error) {
+      console.error('Error searching matricula:', error);
+      toast.error('Erro ao buscar dados. Tente novamente.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleCepSearch = async () => {
+    const cepValue = watch('cep');
+    if (!cepValue) {
+      toast.error('Por favor, digite um CEP válido.');
+      return;
+    }
+
+    setIsLoadingCep(true);
+    try {
+      const address = await fetchAddressByCep(cepValue);
+      if (address) {
+        setValue('rua', address.logradouro);
+        setValue('bairro', address.bairro);
+        setValue('cidade', address.localidade);
+        setValue('estado', address.uf);
+        toast.success('CEP encontrado com sucesso!');
+      } else {
+        toast.error('CEP não encontrado.');
+      }
+    } catch (error) {
+      console.error('Error fetching CEP:', error);
+      toast.error('Erro ao buscar CEP. Tente novamente.');
+    } finally {
+      setIsLoadingCep(false);
+    }
+  };
+
+  const loadChangeLogs = async (matricula: string) => {
+    setIsLoadingLogs(true);
+    try {
+      const logs = await getCondominiumChangeLogs(matricula);
+      setChangeLogs(logs);
+      setFilteredChangeLogs(logs);
+      setTotalPages(Math.ceil(logs.length / ITEMS_PER_PAGE));
+    } catch (error) {
+      console.error('Error loading change logs:', error);
+      toast.error('Erro ao carregar histórico de alterações.');
+      setChangeLogs([]);
+      setFilteredChangeLogs([]);
+    } finally {
+      setIsLoadingLogs(false);
     }
   };
 
