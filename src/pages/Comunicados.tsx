@@ -46,7 +46,7 @@ const Comunicados = () => {
   const fetchAttachments = async (announcementId: string) => {
     try {
       const data = await getAnnouncementAttachments(announcementId);
-      return data as AnnouncementAttachment[];
+      return data;
     } catch (error) {
       console.error('Error fetching attachments:', error);
       return [];

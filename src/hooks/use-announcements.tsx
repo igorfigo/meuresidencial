@@ -26,7 +26,7 @@ const announcementSchema = z.object({
 
 export type AnnouncementFormValues = z.infer<typeof announcementSchema>;
 
-export { type Announcement, type AnnouncementAttachment };
+export type { Announcement, AnnouncementAttachment };
 
 export function useAnnouncements() {
   const { toast } = useToast();
@@ -293,7 +293,10 @@ Atenciosamente, Administração do Condomínio`
                 
                 // Delete from database using RPC
                 await supabase
-                  .rpc('delete_attachment', { p_attachment_id: attId });
+                  .rpc('delete_attachment', { p_attachment_id: attId })
+                  .then(({ error }) => {
+                    if (error) throw error;
+                  });
               } catch (error) {
                 console.error('Error deleting attachment:', error);
               }
@@ -327,6 +330,9 @@ Atenciosamente, Administração do Condomínio`
                 p_file_name: file.name,
                 p_file_path: fileName,
                 p_file_type: file.type
+              })
+              .then(({ error }) => {
+                if (error) throw error;
               });
             
             // Update progress
