@@ -7,7 +7,7 @@
 export const formatToBRL = (value: string | number): string => {
   // Convert to number and handle invalid inputs
   const numericValue = typeof value === 'string' ? 
-    Number(value.replace(/\./g, '').replace(',', '.')) : 
+    Number(value.replace(/\D/g, '')) / 100 : 
     value;
 
   if (isNaN(numericValue)) return 'R$ 0,00';
@@ -22,11 +22,13 @@ export const formatToBRL = (value: string | number): string => {
 };
 
 /**
- * Converts Brazilian currency format to number format for storage
+ * Converts Brazilian currency format to number format for calculations
  * @param value - Currency string (R$ 1.234,56)
  * @returns Number format (1234.56)
  */
 export const BRLToNumber = (value: string): number => {
+  if (!value) return 0;
+  
   // Remove R$ and spaces, replace dots, replace comma with dot
   const cleaned = value
     .replace(/R\$\s*/g, '')
@@ -55,4 +57,3 @@ export const formatCurrencyInput = (value: string): string => {
     maximumFractionDigits: 2,
   });
 };
-

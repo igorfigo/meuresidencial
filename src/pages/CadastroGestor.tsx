@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useApp } from '@/contexts/AppContext';
 import { usePlans } from '@/hooks/use-plans';
+import { formatToBRL, BRLToNumber, formatCurrencyInput } from '@/utils/currency';
 
 type FormFields = {
   matricula: string;
@@ -125,141 +126,87 @@ const CadastroGestor = () => {
   }, [planoContratado, plans, setValue, getPlanValue]);
 
   useEffect(() => {
-    const planoValue = parseFloat(watch('valorPlano').replace(',', '.')) || 0;
-    const descontoValue = parseFloat(desconto.replace(',', '.')) || 0;
-    const valorMensal = (planoValue - descontoValue).toFixed(2).replace('.', ',');
+    const valorPlano = watch('valorPlano');
+    const descontoValue = watch('desconto');
+    
+    // Convert currency strings to numbers for calculation
+    const planoNumber = BRLToNumber(valorPlano);
+    const descontoNumber = BRLToNumber(descontoValue);
+    
+    // Calculate valor mensal and format back to currency
+    const valorMensal = formatToBRL(Math.max(0, planoNumber - descontoNumber));
     
     setValue('valorMensal', valorMensal);
-  }, [watch, desconto, setValue]);
+  }, [watch('valorPlano'), watch('desconto'), setValue]);
 
-  const handleCepSearch = async () => {
-    const cepValue = form.getValues('cep').replace(/\D/g, '');
-    if (cepValue.length !== 8) {
-      toast.error('CEP inválido. Digite um CEP válido com 8 dígitos.');
-      return;
-    }
-
-    setIsLoadingCep(true);
-    try {
-      const addressData = await fetchAddressByCep(cepValue);
-      if (addressData) {
-        setValue('rua', addressData.logradouro);
-        setValue('bairro', addressData.bairro);
-        setValue('cidade', addressData.localidade);
-        setValue('estado', addressData.uf);
-        toast.success('Endereço encontrado com sucesso!');
-      } else {
-        toast.error('CEP não encontrado. Verifique e tente novamente.');
-      }
-    } catch (error) {
-      toast.error('Erro ao buscar endereço. Tente novamente mais tarde.');
-    } finally {
-      setIsLoadingCep(false);
-    }
-  };
-
-  useEffect(() => {
-    if (changeLogs.length > 0) {
-      const validChanges = changeLogs.filter(log => {
-        if (log.valor_anterior === null && log.valor_novo === null) return false;
-        if (log.valor_anterior === log.valor_novo) return false;
-        return true;
-      });
-      
-      setFilteredChangeLogs(validChanges);
-      setTotalPages(Math.max(1, Math.ceil(validChanges.length / ITEMS_PER_PAGE)));
-      setCurrentPage(1);
-    } else {
-      setFilteredChangeLogs([]);
-      setTotalPages(1);
-    }
-  }, [changeLogs]);
-
-  const loadChangeLogs = async (matricula: string) => {
-    if (!matricula) return;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     
-    setIsLoadingLogs(true);
-    try {
-      const logs = await getCondominiumChangeLogs(matricula);
-      setChangeLogs(logs || []);
-    } catch (error) {
-      console.error('Error loading change logs:', error);
-      toast.error('Erro ao carregar histórico de alterações.');
-    } finally {
-      setIsLoadingLogs(false);
+    if (name === 'cnpj') {
+      setValue(name as keyof FormFields, formatCnpj(value));
+    } else if (name === 'cep') {
+      setValue(name as keyof FormFields, formatCep(value));
+    } else if (name === 'telefoneLegal') {
+      setValue(name as keyof FormFields, formatPhone(value));
+    } else if (name === 'desconto') {
+      // Format the discount input as currency
+      const formattedValue = formatCurrencyInput(value);
+      setValue(name as keyof FormFields, `R$ ${formattedValue}`);
+    } else {
+      setValue(name as keyof FormFields, value);
     }
   };
 
-  const handleMatriculaSearch = async () => {
-    if (!matriculaSearch) {
-      toast.error('Por favor, informe uma matrícula para buscar.');
-      return;
-    }
+  const bancos = [
+    "Itaú Unibanco",
+    "Banco do Brasil",
+    "Bradesco",
+    "Caixa Econômica Federal",
+    "Santander Brasil",
+    "BTG Pactual",
+    "Banco Safra",
+    "Sicredi",
+    "Sicoob",
+    "Citibank"
+  ];
 
-    setIsSearching(true);
-    setChangeLogs([]);
-    try {
-      const data = await getCondominiumByMatricula(matriculaSearch);
-      
-      reset({
-        matricula: '',
-        cnpj: '',
-        cep: '',
-        rua: '',
-        numero: '',
-        complemento: '',
-        bairro: '',
-        cidade: '',
-        estado: '',
-        nomeCondominio: '',
-        nomeLegal: '',
-        emailLegal: '',
-        telefoneLegal: '',
-        enderecoLegal: '',
-        banco: '',
-        agencia: '',
-        conta: '',
-        pix: '',
-        planoContratado: 'standard',
-        valorPlano: '',
-        formaPagamento: 'pix',
-        vencimento: '',
-        desconto: '',
-        valorMensal: '',
-        senha: '',
-        confirmarSenha: ''
-      });
-      
-      if (data) {
-        const formValues: any = {};
-        
-        Object.entries(data).forEach(([key, value]) => {
-          if (value !== null && value !== undefined && key in form.getValues()) {
-            if (key !== 'senha' && key !== 'confirmarSenha') {
-              formValues[key] = value.toString();
-            } else {
-              formValues[key] = ''; // Set password fields to empty
-            }
-          }
-        });
-        
-        reset(formValues);
-        
-        setIsExistingRecord(true);
-        
-        toast.success('Condomínio encontrado com sucesso!');
-        
-        await loadChangeLogs(matriculaSearch);
-      } else {
-        setIsExistingRecord(false);
-        toast.error('Nenhum condomínio encontrado com esta matrícula.');
+  const formatDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
+  };
+
+  const getCurrentItems = () => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredChangeLogs.slice(startIndex, endIndex);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 3;
+    
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
       }
-    } catch (error) {
-      console.error('Error searching for condominium:', error);
-      toast.error('Erro ao buscar condomínio. Tente novamente mais tarde.');
-    } finally {
-      setIsSearching(false);
+    } else {
+      let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+      const endPage = Math.min(startPage + maxPagesToShow - 1, totalPages);
+      
+      if (endPage - startPage + 1 < maxPagesToShow) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
     }
+    
+    return pageNumbers;
   };
 
   const onSubmit = async (data: FormFields) => {
@@ -352,84 +299,6 @@ const CadastroGestor = () => {
     } else {
       return `${formattedValue || '0'},00`;
     }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    if (name === 'cnpj') {
-      setValue(name as keyof FormFields, formatCnpj(value));
-    } else if (name === 'cep') {
-      setValue(name as keyof FormFields, formatCep(value));
-    } else if (name === 'telefoneLegal') {
-      setValue(name as keyof FormFields, formatPhone(value));
-    } else if (name === 'valorPlano' || name === 'desconto') {
-      const formattedValue = formatCurrency(value);
-      setValue(name as keyof FormFields, formattedValue);
-      
-      if (name === 'valorPlano' || name === 'desconto') {
-        const planoValue = parseFloat(formattedValue.replace(',', '.')) || 0;
-        const descontoAtual = name === 'desconto' ? planoValue : parseFloat(watch('desconto').replace(',', '.')) || 0;
-        const planoAtual = name === 'valorPlano' ? planoValue : parseFloat(watch('valorPlano').replace(',', '.')) || 0;
-        
-        const valorMensal = Math.max(0, planoAtual - descontoAtual).toFixed(2).replace('.', ',');
-        setValue('valorMensal', valorMensal);
-      }
-    } else {
-      setValue(name as keyof FormFields, value);
-    }
-  };
-
-  const bancos = [
-    "Itaú Unibanco",
-    "Banco do Brasil",
-    "Bradesco",
-    "Caixa Econômica Federal",
-    "Santander Brasil",
-    "BTG Pactual",
-    "Banco Safra",
-    "Sicredi",
-    "Sicoob",
-    "Citibank"
-  ];
-
-  const formatDate = (isoDate: string) => {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
-  };
-
-  const getCurrentItems = () => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    return filteredChangeLogs.slice(startIndex, endIndex);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxPagesToShow = 3;
-    
-    if (totalPages <= maxPagesToShow) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-      const endPage = Math.min(startPage + maxPagesToShow - 1, totalPages);
-      
-      if (endPage - startPage + 1 < maxPagesToShow) {
-        startPage = Math.max(1, endPage - maxPagesToShow + 1);
-      }
-      
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i);
-      }
-    }
-    
-    return pageNumbers;
   };
 
   return (
