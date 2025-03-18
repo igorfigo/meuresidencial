@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,8 +8,8 @@ import {
   Home, 
   LogOut, 
   Menu, 
-  Settings, 
-  User,
+  Building2,
+  ChevronDown,
   Package,
   Users,
   PiggyBank,
@@ -68,14 +67,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     switchCondominium(matricula);
   };
 
-  // Admin menu items
   const adminMenuItems: MenuItem[] = [
     { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
   ];
 
-  // Manager menu items
   const managerMenuItems: MenuItem[] = [
     { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Moradores', icon: <Users className="h-5 w-5" />, path: '/moradores' },
@@ -98,10 +95,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
   ];
 
-  // Choose the appropriate menu items based on user role
   const menuItems = user?.isAdmin ? adminMenuItems : managerMenuItems;
 
-  // Render the condominium selector dropdown
   const renderCondominiumSelector = () => {
     if (!user || user.isAdmin || !user.condominiums || user.condominiums.length <= 1) {
       return null;
@@ -144,7 +139,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     );
   };
 
-  // Render a menu item, handling submenu rendering if needed
   const renderMenuItem = (item: MenuItem) => {
     const hasSubmenu = item.submenu && item.submenu.length > 0;
     const isSubmenuExpanded = expandedSubmenu === item.name;
@@ -216,9 +210,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     );
   };
 
+  const renderCurrentCondominium = () => {
+    if (!user || user.isAdmin) return null;
+    
+    return (
+      <div className="bg-sidebar-accent/30 px-3 py-2 mb-2 rounded-md">
+        <div className="flex items-center">
+          <Building2 className="h-4 w-4 mr-2 text-white" />
+          <span className="text-sm text-white font-medium truncate">
+            {user.nomeCondominio || 'Condomínio'}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Mobile menu button */}
       <button
         onClick={toggleMobileMenu}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white shadow-md text-gray-700"
@@ -226,7 +234,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Overlay */}
       {mobileMenuOpen && (
         <div 
           className="lg:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
@@ -234,7 +241,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         />
       )}
 
-      {/* Sidebar for mobile */}
       <aside
         className={cn(
           "lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-sidebar flex flex-col transition-transform duration-300 ease-in-out transform",
@@ -256,7 +262,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </Button>
         </div>
 
-        {/* Add the condominium selector in mobile view */}
+        {!user?.isAdmin && (
+          <div className="px-3 pt-3">
+            {renderCurrentCondominium()}
+          </div>
+        )}
+
         {!user?.isAdmin && (
           <div className="px-3 py-2">
             {renderCondominiumSelector()}
@@ -292,7 +303,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      {/* Sidebar for desktop */}
       <aside
         className={cn(
           "hidden lg:flex flex-col h-screen sticky top-0 z-30 transition-all duration-300 ease-in-out",
@@ -330,7 +340,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           )}
         </div>
         
-        {/* Add the condominium selector in desktop view when sidebar is open */}
+        {sidebarOpen && !user?.isAdmin && (
+          <div className="bg-sidebar px-3 pt-3">
+            {renderCurrentCondominium()}
+          </div>
+        )}
+        
         {sidebarOpen && !user?.isAdmin && (
           <div className="bg-sidebar px-3 py-2">
             {renderCondominiumSelector()}
@@ -339,7 +354,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         
         <div className="flex-1 bg-sidebar overflow-y-auto py-4 px-3 space-y-1">
           {menuItems.map(item => {
-            // If sidebar is collapsed and item has submenu, just render a simple button
             if (!sidebarOpen && item.submenu && item.submenu.length > 0) {
               return (
                 <div 
@@ -394,7 +408,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
           {children}

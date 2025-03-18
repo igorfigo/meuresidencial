@@ -5,8 +5,8 @@ import { useResidents } from '@/hooks/use-residents';
 import { ResidentForm } from '@/components/resident/ResidentForm';
 import { ResidentsList } from '@/components/resident/ResidentsList';
 import { Button } from '@/components/ui/button';
-import { Plus, RefreshCw } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Plus } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const Moradores = () => {
   const { 
@@ -67,15 +67,6 @@ const Moradores = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button 
-              onClick={() => refetch()} 
-              variant="outline" 
-              size="sm"
-              className="h-9"
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Atualizar
-            </Button>
             {!showForm && (
               <Button onClick={handleNewResident} className="bg-brand-600 hover:bg-brand-700">
                 <Plus className="mr-2 h-4 w-4" />

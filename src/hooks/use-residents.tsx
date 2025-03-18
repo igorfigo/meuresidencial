@@ -13,11 +13,11 @@ export const residentSchema = z.object({
   id: z.string().optional(),
   matricula: z.string(),
   nome_completo: z.string().min(3, "Nome completo é obrigatório"),
-  cpf: z.string().min(11, "CPF inválido"),
-  telefone: z.string().optional(),
-  email: z.string().email("E-mail inválido").optional().or(z.literal('')),
+  cpf: z.string().min(11, "CPF deve ter 11 dígitos").max(11, "CPF deve ter 11 dígitos"),
+  telefone: z.string().min(11, "Telefone deve ter 11 dígitos").max(11, "Telefone deve ter 11 dígitos"),
+  email: z.string().email("E-mail inválido"),
   unidade: z.string().min(1, "Unidade é obrigatória"),
-  valor_condominio: z.string().optional(),
+  valor_condominio: z.string().min(1, "Valor do condomínio é obrigatório"),
 });
 
 export type ResidentFormValues = z.infer<typeof residentSchema>;
@@ -28,10 +28,10 @@ export interface Resident {
   matricula: string;
   nome_completo: string;
   cpf: string;
-  telefone?: string;
-  email?: string;
+  telefone: string;
+  email: string;
   unidade: string;
-  valor_condominio?: string;
+  valor_condominio: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -73,7 +73,12 @@ export const ResidentForm = ({
                 <FormItem>
                   <FormLabel>CPF *</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="CPF do morador" />
+                    <Input 
+                      {...field} 
+                      placeholder="CPF do morador" 
+                      maxLength={11}
+                      numberOnly
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -85,9 +90,14 @@ export const ResidentForm = ({
               name="telefone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Telefone</FormLabel>
+                  <FormLabel>Telefone *</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Telefone do morador" />
+                    <Input 
+                      {...field} 
+                      placeholder="Telefone do morador" 
+                      maxLength={11}
+                      numberOnly
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,7 +109,7 @@ export const ResidentForm = ({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>E-mail</FormLabel>
+                  <FormLabel>E-mail *</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="E-mail do morador" type="email" />
                   </FormControl>
@@ -127,9 +137,13 @@ export const ResidentForm = ({
               name="valor_condominio"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Valor do Condomínio</FormLabel>
+                  <FormLabel>Valor do Condomínio *</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Valor do condomínio" />
+                    <Input 
+                      {...field} 
+                      placeholder="Valor do condomínio" 
+                      isCurrency
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
