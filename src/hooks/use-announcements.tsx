@@ -67,7 +67,8 @@ export function useAnnouncements() {
     
     try {
       const data = await getAnnouncements(selectedCondominium);
-      setAnnouncements(data || []);
+      // Type assertion to ensure proper typing
+      setAnnouncements(data as Announcement[] || []);
     } catch (err) {
       console.error("Error fetching announcements:", err);
       setError("Failed to load announcements");
@@ -83,7 +84,8 @@ export function useAnnouncements() {
 
   const getAnnouncement = async (id: string) => {
     try {
-      return await getAnnouncementById(id);
+      const data = await getAnnouncementById(id);
+      return data as Announcement | null;
     } catch (err) {
       console.error("Error fetching announcement:", err);
       toast({
