@@ -85,6 +85,7 @@ export const useResidents = () => {
   };
 
   // Query to fetch all residents for the current condominium
+  // Updated to order by unidade in ascending order
   const { data: residents, isLoading, error, refetch } = useQuery({
     queryKey: ['residents', matricula],
     queryFn: async () => {
@@ -94,7 +95,7 @@ export const useResidents = () => {
         .from('residents')
         .select('*')
         .eq('matricula', matricula)
-        .order('nome_completo', { ascending: true });
+        .order('unidade', { ascending: true }); // Changed from nome_completo to unidade
       
       if (error) {
         console.error("Error fetching residents:", error);
