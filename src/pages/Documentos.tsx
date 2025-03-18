@@ -44,7 +44,7 @@ const Documentos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredDocuments, setFilteredDocuments] = useState(documents);
   
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5; // Changed from 10 to 5
   const totalPages = Math.ceil(documents.length / ITEMS_PER_PAGE);
 
   useEffect(() => {
