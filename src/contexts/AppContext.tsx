@@ -65,7 +65,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       // Check if it's a login with email
       const { data: emailData, error: emailError } = await supabase
-        .from('condominiums' as any)
+        .from('condominiums')
         .select('*')
         .eq('emaillegal', emailOrMatricula.toLowerCase())
         .eq('senha', password)
@@ -77,7 +77,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       // Check if it's a login with matricula
       const { data: matriculaData, error: matriculaError } = await supabase
-        .from('condominiums' as any)
+        .from('condominiums')
         .select('*')
         .eq('matricula', emailOrMatricula)
         .eq('senha', password)
@@ -91,11 +91,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const allCondominiums = [
         ...(emailData || []),
         ...(matriculaData || [])
-      ] as any[];
+      ];
+      
+      // TypeScript cast to avoid type errors
+      const typedCondominiums = allCondominiums as Array<{
+        matricula: string;
+        nomecondominio: string;
+        nomelegal: string;
+        emaillegal: string;
+      }>;
       
       // Remove duplicates if any (in case a condominium has the same email and matricula)
       const uniqueCondominiums = Array.from(
-        new Map(allCondominiums.map(item => [item.matricula, item])).values()
+        new Map(typedCondominiums.map(item => [item.matricula, item])).values()
       );
       
       if (uniqueCondominiums.length > 0) {
