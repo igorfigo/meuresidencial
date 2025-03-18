@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -11,10 +12,9 @@ import {
   createAnnouncement,
   updateAnnouncement,
   deleteAnnouncement,
-  Announcement,
-  AnnouncementAttachment
 } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
+import type { Announcement, AnnouncementAttachment } from '@/integrations/supabase/client';
 
 // Form validation schema
 const announcementSchema = z.object({
@@ -26,7 +26,7 @@ const announcementSchema = z.object({
 
 export type AnnouncementFormValues = z.infer<typeof announcementSchema>;
 
-export { Announcement, AnnouncementAttachment };
+export { type Announcement, type AnnouncementAttachment };
 
 export function useAnnouncements() {
   const { toast } = useToast();
@@ -196,11 +196,16 @@ Atenciosamente, Administração do Condomínio`
   
   // Function to get file URL
   const getFileUrl = async (path: string) => {
-    const { data } = await supabase.storage
-      .from('announcement-attachments')
-      .createSignedUrl(path, 60);
-    
-    return data?.signedUrl || '';
+    try {
+      const { data } = await supabase.storage
+        .from('announcement-attachments')
+        .createSignedUrl(path, 60);
+      
+      return data?.signedUrl || '';
+    } catch (error) {
+      console.error('Error creating signed URL:', error);
+      return '';
+    }
   };
   
   // Reset form
@@ -280,14 +285,18 @@ Atenciosamente, Administração do Condomínio`
             const attData = await getAnnouncementAttachments(attId);
             
             if (attData && attData.length > 0) {
-              // Delete from storage
-              await supabase.storage
-                .from('announcement-attachments')
-                .remove([attData[0].file_path]);
-              
-              // Delete from database using RPC
-              await supabase
-                .rpc('delete_attachment', { p_attachment_id: attId });
+              try {
+                // Delete from storage
+                await supabase.storage
+                  .from('announcement-attachments')
+                  .remove([attData[0].file_path]);
+                
+                // Delete from database using RPC
+                await supabase
+                  .rpc('delete_attachment', { p_attachment_id: attId });
+              } catch (error) {
+                console.error('Error deleting attachment:', error);
+              }
             }
           }
         }
@@ -303,25 +312,29 @@ Atenciosamente, Administração do Condomínio`
           const fileExt = file.name.split('.').pop();
           const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
           
-          // Upload file to storage
-          const { error: uploadError } = await supabase.storage
-            .from('announcement-attachments')
-            .upload(fileName, file);
-          
-          if (uploadError) throw uploadError;
-          
-          // Save attachment metadata using RPC
-          await supabase
-            .rpc('add_attachment', {
-              p_announcement_id: announcementId,
-              p_file_name: file.name,
-              p_file_path: fileName,
-              p_file_type: file.type
-            });
-          
-          // Update progress
-          totalUploaded++;
-          setUploadProgress(Math.round((totalUploaded / attachments.length) * 100));
+          try {
+            // Upload file to storage
+            const { error: uploadError } = await supabase.storage
+              .from('announcement-attachments')
+              .upload(fileName, file);
+            
+            if (uploadError) throw uploadError;
+            
+            // Save attachment metadata using RPC
+            await supabase
+              .rpc('add_attachment', {
+                p_announcement_id: announcementId,
+                p_file_name: file.name,
+                p_file_path: fileName,
+                p_file_type: file.type
+              });
+            
+            // Update progress
+            totalUploaded++;
+            setUploadProgress(Math.round((totalUploaded / attachments.length) * 100));
+          } catch (error) {
+            console.error('Error uploading file:', error);
+          }
         }
         
         setIsUploading(false);

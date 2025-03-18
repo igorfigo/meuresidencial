@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { useAnnouncements, Announcement, AnnouncementAttachment } from '@/hooks/use-announcements';
+import { useAnnouncements, type Announcement, type AnnouncementAttachment } from '@/hooks/use-announcements';
 import { AnnouncementForm } from '@/components/announcements/AnnouncementForm';
 import { AnnouncementsList } from '@/components/announcements/AnnouncementsList';
 import { 
