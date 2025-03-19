@@ -6,6 +6,7 @@ import { Copy, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -59,86 +60,90 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   onCancel
 }) => {
   return (
-    <div className="space-y-6 flex-1 overflow-hidden">
-      <div className="space-y-2">
-        <Label htmlFor="title" className="font-medium">Título</Label>
-        {isNewAnnouncement ? (
-          <Select value={title} onValueChange={onTitleChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selecione um título" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(ANNOUNCEMENT_TEMPLATES).map((templateTitle) => (
-                <SelectItem key={templateTitle} value={templateTitle}>
-                  {templateTitle}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => onTitleChange(e.target.value)}
-            placeholder="Título do comunicado"
-            className="w-full"
-          />
-        )}
-        {formErrors.title && <p className="text-sm text-red-500">{formErrors.title}</p>}
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="date" className="font-medium">Data</Label>
-        <Input
-          id="date"
-          type="date"
-          value={date}
-          onChange={onDateChange}
-          className="w-full"
-        />
-        {formErrors.date && <p className="text-sm text-red-500">{formErrors.date}</p>}
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="content" className="font-medium">Conteúdo</Label>
-        <Textarea
-          id="content"
-          value={content}
-          onChange={onContentChange}
-          placeholder="Conteúdo do comunicado"
-          className="h-[240px] resize-none w-full"
-        />
-        {formErrors.content && <p className="text-sm text-red-500">{formErrors.content}</p>}
-      </div>
-
-      <RadioGroup 
-        defaultValue={sendEmail ? "email" : sendWhatsapp ? "whatsapp" : ""} 
-        className="space-y-2"
-        onValueChange={(value) => {
-          if (value === "email") {
-            onSendEmailChange(true);
-            onSendWhatsappChange(false);
-          } else if (value === "whatsapp") {
-            onSendEmailChange(false);
-            onSendWhatsappChange(true);
-          } else {
-            onSendEmailChange(false);
-            onSendWhatsappChange(false);
-          }
-        }}
-      >
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="email" id="send-email" />
-          <Label htmlFor="send-email" className="cursor-pointer">Enviar E-mail aos Moradores</Label>
+    <Card className="w-full border-0 shadow-none">
+      <CardContent className="p-6 space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="title" className="font-medium">Título</Label>
+          {isNewAnnouncement ? (
+            <Select value={title} onValueChange={onTitleChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione um título" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(ANNOUNCEMENT_TEMPLATES).map((templateTitle) => (
+                  <SelectItem key={templateTitle} value={templateTitle}>
+                    {templateTitle}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => onTitleChange(e.target.value)}
+              placeholder="Título do comunicado"
+              className="w-full"
+            />
+          )}
+          {formErrors.title && <p className="text-sm text-red-500">{formErrors.title}</p>}
         </div>
         
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="whatsapp" id="send-whatsapp" />
-          <Label htmlFor="send-whatsapp" className="cursor-pointer">Enviar Whatsapp aos Moradores</Label>
+        <div className="space-y-2">
+          <Label htmlFor="date" className="font-medium">Data</Label>
+          <Input
+            id="date"
+            type="date"
+            value={date}
+            onChange={onDateChange}
+            className="w-full"
+          />
+          {formErrors.date && <p className="text-sm text-red-500">{formErrors.date}</p>}
         </div>
-      </RadioGroup>
+        
+        <div className="space-y-2">
+          <Label htmlFor="content" className="font-medium">Conteúdo</Label>
+          <Textarea
+            id="content"
+            value={content}
+            onChange={onContentChange}
+            placeholder="Conteúdo do comunicado"
+            className="h-[260px] resize-none w-full"
+          />
+          {formErrors.content && <p className="text-sm text-red-500">{formErrors.content}</p>}
+        </div>
+
+        <div className="flex items-center space-x-6">
+          <RadioGroup 
+            defaultValue={sendEmail ? "email" : sendWhatsapp ? "whatsapp" : ""} 
+            className="flex space-x-6"
+            onValueChange={(value) => {
+              if (value === "email") {
+                onSendEmailChange(true);
+                onSendWhatsappChange(false);
+              } else if (value === "whatsapp") {
+                onSendEmailChange(false);
+                onSendWhatsappChange(true);
+              } else {
+                onSendEmailChange(false);
+                onSendWhatsappChange(false);
+              }
+            }}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="email" id="send-email" />
+              <Label htmlFor="send-email" className="cursor-pointer">Enviar E-mail aos Moradores</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="whatsapp" id="send-whatsapp" />
+              <Label htmlFor="send-whatsapp" className="cursor-pointer">Enviar Whatsapp aos Moradores</Label>
+            </div>
+          </RadioGroup>
+        </div>
+      </CardContent>
       
-      <div className="flex justify-end gap-2 pt-4">
+      <CardFooter className="flex justify-end gap-2 p-6 pt-0">
         <Button 
           variant="outline" 
           onClick={onCopy}
@@ -165,8 +170,8 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         >
           Cancelar
         </Button>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 

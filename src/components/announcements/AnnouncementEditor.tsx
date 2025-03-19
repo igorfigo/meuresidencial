@@ -52,8 +52,11 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
 
   const handleTitleChange = (selectedTitle: string) => {
     setTitle(selectedTitle);
-    const newContent = ANNOUNCEMENT_TEMPLATES[selectedTitle as keyof typeof ANNOUNCEMENT_TEMPLATES];
-    setContent(newContent || '');
+    // Set content based on the selected template
+    const templateContent = ANNOUNCEMENT_TEMPLATES[selectedTitle as keyof typeof ANNOUNCEMENT_TEMPLATES];
+    if (templateContent) {
+      setContent(templateContent);
+    }
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -167,8 +170,8 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-2">
             <DialogTitle>{isNewAnnouncement ? "Criar Comunicado" : "Editar Comunicado"}</DialogTitle>
           </DialogHeader>
           
