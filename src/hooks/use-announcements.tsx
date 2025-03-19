@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -17,6 +18,8 @@ export interface Announcement {
   date?: string;
   created_at?: string;
   updated_at?: string;
+  sent_email?: boolean;
+  sent_whatsapp?: boolean;
 }
 
 export function useAnnouncements() {

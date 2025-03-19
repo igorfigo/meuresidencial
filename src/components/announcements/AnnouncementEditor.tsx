@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -40,6 +41,8 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
     if (announcement) {
       setTitle(announcement.title);
       setContent(announcement.content);
+      setSendEmail(announcement.sent_email || false);
+      setSendWhatsapp(announcement.sent_whatsapp || false);
       
       if (announcement.date) {
         setDate(announcement.date);
@@ -118,7 +121,9 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
         ...announcement,
         title,
         content,
-        date
+        date,
+        sent_email: sendEmail,
+        sent_whatsapp: sendWhatsapp
       });
       
       onOpenChange(false);

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, Mail, MessageCircle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +24,7 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface AnnouncementsListProps {
   onEdit: (announcement: Announcement) => void;
@@ -102,7 +103,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
               <TableRow>
                 <TableHead>Título</TableHead>
                 <TableHead>Data</TableHead>
-                <TableHead className="w-[100px]">Ações</TableHead>
+                <TableHead className="w-[180px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -128,6 +129,22 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
+                      <div className="flex items-center ml-1">
+                        <Mail 
+                          className={cn(
+                            "h-4 w-4 mr-2", 
+                            announcement.sent_email ? "text-green-500" : "text-gray-300"
+                          )} 
+                          title={announcement.sent_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
+                        />
+                        <MessageCircle 
+                          className={cn(
+                            "h-4 w-4", 
+                            announcement.sent_whatsapp ? "text-green-500" : "text-gray-300"
+                          )} 
+                          title={announcement.sent_whatsapp ? "Enviado por WhatsApp" : "Não enviado por WhatsApp"}
+                        />
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -154,6 +171,31 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Conteúdo</h4>
                 <p className="text-sm whitespace-pre-line">{detailView.content}</p>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center">
+                  <Mail 
+                    className={cn(
+                      "h-4 w-4 mr-2", 
+                      detailView.sent_email ? "text-green-500" : "text-gray-300"
+                    )} 
+                  />
+                  <span className="text-sm">
+                    {detailView.sent_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <MessageCircle 
+                    className={cn(
+                      "h-4 w-4 mr-2", 
+                      detailView.sent_whatsapp ? "text-green-500" : "text-gray-300"
+                    )} 
+                  />
+                  <span className="text-sm">
+                    {detailView.sent_whatsapp ? "Enviado por WhatsApp" : "Não enviado por WhatsApp"}
+                  </span>
+                </div>
               </div>
             </div>
           )}
