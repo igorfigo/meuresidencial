@@ -87,7 +87,7 @@ const AreasComuns = () => {
 
         <div className="border-t pt-6">
           {showForm ? (
-            <Card>
+            <Card className="border-t-0">
               <CommonAreaForm
                 form={form}
                 onSubmit={handleFormSubmit}
