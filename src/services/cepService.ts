@@ -1,29 +1,23 @@
 
-interface AddressData {
-  logradouro: string;
-  bairro: string;
-  localidade: string;
-  uf: string;
-  erro?: boolean;
-}
+// Extend the existing cepService with a new function to format CEP input
+import { fetchAddressByCep } from '@/services/cepService';
 
-export const fetchAddressByCep = async (cep: string): Promise<AddressData | null> => {
-  try {
-    const cleanedCep = cep.replace(/\D/g, '');
-    if (cleanedCep.length !== 8) {
-      return null;
-    }
-    
-    const response = await fetch(`https://viacep.com.br/ws/${cleanedCep}/json/`);
-    const data = await response.json();
-    
-    if (data.erro) {
-      return null;
-    }
-    
-    return data;
-  } catch (error) {
-    console.error('Error fetching address by CEP:', error);
-    return null;
+export const formatCep = (cep: string): string => {
+  // Remove non-numeric characters
+  const numericCep = cep.replace(/\D/g, '');
+  
+  // Format as #####-###
+  if (numericCep.length <= 5) {
+    return numericCep;
+  } else {
+    return `${numericCep.slice(0, 5)}-${numericCep.slice(5, 8)}`;
   }
 };
+
+export const validateCep = (cep: string): boolean => {
+  const numericCep = cep.replace(/\D/g, '');
+  return numericCep.length === 8;
+};
+
+// Re-export the fetchAddressByCep function
+export { fetchAddressByCep };
