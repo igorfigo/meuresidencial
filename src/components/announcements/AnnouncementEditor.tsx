@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -36,7 +35,6 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-// Opções de títulos e seus conteúdos correspondentes
 const ANNOUNCEMENT_TEMPLATES = {
   "Convocação de Assembleia": `Assunto: Convocação para Assembleia Geral Ordinária
 
@@ -108,16 +106,15 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [formErrors, setFormErrors] = useState<{title?: string; content?: string; date?: string}>({});
   const { toast } = useToast();
   const isNewAnnouncement = !announcement?.id;
 
-  // Initialize the editor when announcement data changes
   useEffect(() => {
     if (announcement) {
       setTitle(announcement.title);
       setContent(announcement.content);
       
-      // Set date from announcement or use current date
       if (announcement.date) {
         setDate(announcement.date);
       } else {
@@ -126,26 +123,54 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
     }
   }, [announcement, open]);
 
-  // Handle title selection change
   const handleTitleChange = (selectedTitle: string) => {
     setTitle(selectedTitle);
     const newContent = ANNOUNCEMENT_TEMPLATES[selectedTitle as keyof typeof ANNOUNCEMENT_TEMPLATES];
     setContent(newContent);
   };
 
-  // Handle content change
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
   };
 
-  // Handle date change
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDate(e.target.value);
   };
 
-  // Handle save action
+  const validateForm = () => {
+    const errors: {title?: string; content?: string; date?: string} = {};
+    let isValid = true;
+
+    if (!title.trim()) {
+      errors.title = "O título é obrigatório";
+      isValid = false;
+    }
+
+    if (!content.trim()) {
+      errors.content = "O conteúdo é obrigatório";
+      isValid = false;
+    }
+
+    if (!date) {
+      errors.date = "A data é obrigatória";
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
   const handleSave = async () => {
     if (!announcement) return;
+    
+    if (!validateForm()) {
+      toast({
+        title: "Campos incompletos",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
     
     if (sendEmail) {
       setShowConfirmDialog(true);
@@ -154,7 +179,6 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
     }
   };
 
-  // Save announcement without confirmation
   const saveAnnouncement = async () => {
     if (!announcement) return;
     
@@ -183,7 +207,6 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
     }
   };
 
-  // Handle copy to clipboard
   const handleCopy = () => {
     navigator.clipboard.writeText(content).then(
       () => {
@@ -236,6 +259,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
                   className="w-full"
                 />
               )}
+              {formErrors.title && <p className="text-sm text-red-500">{formErrors.title}</p>}
             </div>
             
             <div className="space-y-2">
@@ -247,6 +271,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
                 onChange={handleDateChange}
                 className="w-full"
               />
+              {formErrors.date && <p className="text-sm text-red-500">{formErrors.date}</p>}
             </div>
             
             <div className="flex-1 overflow-hidden">
@@ -256,8 +281,9 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
                 value={content}
                 onChange={handleContentChange}
                 placeholder="Conteúdo do comunicado"
-                className="h-[400px] resize-none w-full"
+                className="h-[320px] resize-none w-full"
               />
+              {formErrors.content && <p className="text-sm text-red-500">{formErrors.content}</p>}
             </div>
 
             <div className="flex items-center space-x-2">
