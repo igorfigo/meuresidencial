@@ -15,6 +15,7 @@ import Moradores from "./pages/Moradores";
 import Dedetizacoes from "./pages/Dedetizacoes";
 import Documentos from "./pages/Documentos";
 import Comunicados from "./pages/Comunicados";
+import AreasComuns from "./pages/AreasComuns";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -183,6 +184,14 @@ const App = () => (
               <AnimationController>
                 <ProtectedRoute>
                   <Documentos />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/areas-comuns" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <AreasComuns />
                 </ProtectedRoute>
               </AnimationController>
             } />
