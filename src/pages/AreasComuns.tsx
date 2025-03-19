@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
+import { DashboardLayout } from '@/components/DashboardLayout';
 import { useCommonAreas } from '@/hooks/use-common-areas';
 import { CommonAreaForm } from '@/components/common-areas/CommonAreaForm';
 import { CommonAreasList } from '@/components/common-areas/CommonAreasList';

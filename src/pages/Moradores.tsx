@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
+import { DashboardLayout } from '@/components/DashboardLayout';
 import { useResidents } from '@/hooks/use-residents';
 import { ResidentForm } from '@/components/resident/ResidentForm';
 import { ResidentsList } from '@/components/resident/ResidentsList';
