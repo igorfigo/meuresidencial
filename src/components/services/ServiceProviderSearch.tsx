@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Select, 
@@ -89,15 +90,6 @@ export const ServiceProviderSearch = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <Alert className="mb-6 bg-blue-50 text-blue-800 border-blue-200">
-        <Info className="h-4 w-4" />
-        <AlertTitle>Informação importante</AlertTitle>
-        <AlertDescription>
-          A busca usa a API do Google Maps para encontrar prestadores próximos ao CEP informado. 
-          Se a API do Google estiver indisponível, dados simulados serão mostrados com base na região do CEP.
-        </AlertDescription>
-      </Alert>
-      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label htmlFor="cep" className="block text-sm font-medium mb-1">
@@ -193,6 +185,16 @@ export const ServiceProviderSearch = () => {
           )}
         </div>
       )}
+
+      {/* Informação importante movida para o final da página com texto atualizado */}
+      <Alert className="mt-8 bg-blue-50 text-blue-800 border-blue-200">
+        <Info className="h-4 w-4" />
+        <AlertTitle>Informação importante</AlertTitle>
+        <AlertDescription>
+          A busca utiliza informações do Google Maps para encontrar prestadores próximos ao CEP informado. 
+          Recomendamos que todas as negociações e acordos sejam feitos diretamente entre as partes envolvidas.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };
