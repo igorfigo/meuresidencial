@@ -8,9 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Loader2, Send, AlertCircle } from 'lucide-react';
+import { Loader2, Send } from 'lucide-react';
 import { toast } from 'sonner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -80,13 +79,6 @@ const FaleConosco = () => {
           </CardHeader>
           
           <CardContent>
-            <Alert className="mb-6 bg-blue-50 border-blue-200">
-              <AlertCircle className="h-4 w-4 text-blue-500" />
-              <AlertDescription className="text-blue-700">
-                Suas informações de identificação serão enviadas automaticamente junto com a mensagem.
-              </AlertDescription>
-            </Alert>
-            
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="space-y-2">
