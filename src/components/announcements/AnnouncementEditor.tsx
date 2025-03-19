@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -158,6 +159,10 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
       }
     );
   };
+  
+  const handleCancel = () => {
+    onOpenChange(false);
+  };
 
   return (
     <>
@@ -183,6 +188,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
             onSendWhatsappChange={setSendWhatsapp}
             onSave={handleSave}
             onCopy={handleCopy}
+            onCancel={handleCancel}
           />
         </DialogContent>
       </Dialog>
