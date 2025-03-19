@@ -127,10 +127,14 @@ function generateMockServiceProviders(cep: string, serviceType: ServiceType): Se
     // Generate a random address number
     const addressNumber = Math.floor(Math.random() * 1000) + 1;
     
-    // Format address
-    const address = `R. ${streetName}, ${addressNumber} - ${region}`;
+    // Get random neighborhood name
+    const neighborhoods = regionalData.neighborhoods || ["Centro", "Manaíra", "Bessa", "Bancários", "Tambaú", "Jardim Oceania"];
+    const neighborhood = neighborhoods[Math.floor(Math.random() * neighborhoods.length)];
     
-    // Generate a random phone with the regional area code
+    // Format address with street name, number and neighborhood
+    const address = `R. ${streetName}, ${addressNumber} - ${neighborhood}, ${region}`;
+    
+    // Generate a properly formatted phone with the regional area code
     const phoneNumber = generatePhoneNumber(regionalData.areaCode);
     
     // Random distance between 0.5 and 10 km
@@ -165,8 +169,12 @@ function generateMockServiceProviders(cep: string, serviceType: ServiceType): Se
 
 // Generate a random phone number with the given area code
 function generatePhoneNumber(areaCode: string): string {
-  const randomDigits = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
-  return `(${areaCode}) ${randomDigits.substring(0, 5)}-${randomDigits.substring(5)}`;
+  // Generate 9 digits for mobile phones in Brazil
+  const firstDigit = "9"; // Mobile phones in Brazil start with 9
+  const remainingDigits = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+  
+  // Return the complete number without formatting (will be formatted in the UI)
+  return `${areaCode}${firstDigit}${remainingDigits}`;
 }
 
 // The following helper functions aren't being used now that we're using the real API,
@@ -218,6 +226,27 @@ function getRegionalData(regionCode: string) {
     'DF': ['Asa Sul', 'Asa Norte', 'Lago Sul', 'Lago Norte', 'Sudoeste', 'Noroeste', 'Taguatinga', 'Águas Claras', 'Guará', 'Ceilândia', 'Samambaia', 'Gama'],
     'RS': ['Moinhos de Vento', 'Bela Vista', 'Menino Deus', 'Petrópolis', 'Partenon', 'Cidade Baixa', 'Centro Histórico', 'Navegantes', 'Santana', 'Cavalhada', 'Cristal', 'Tristeza']
   };
+  
+  // Add some common Brazilian street names
+  const commonStreets = [
+    'Brasil', 'Amazonas', 'Paraná', 'São Paulo', 'Bahia', 'Ceará', 
+    'Minas Gerais', 'Pernambuco', 'Maranhão', 'Goiás', 'Piauí', 'Alagoas',
+    'Floriano Peixoto', 'Sete de Setembro', 'Quinze de Novembro', 'Tiradentes',
+    'Santos Dumont', 'Rio Branco', 'Getúlio Vargas', 'Juscelino Kubitschek'
+  ];
+  
+  // Neighborhoods for each region
+  const regionalNeighborhoods: Record<string, string[]> = {
+    'SP': ['Jardins', 'Moema', 'Vila Mariana', 'Tatuapé', 'Pinheiros', 'Itaim Bibi', 'Vila Madalena', 'Santana', 'Perdizes', 'Lapa'],
+    'RJ': ['Copacabana', 'Ipanema', 'Leblon', 'Tijuca', 'Botafogo', 'Flamengo', 'Barra da Tijuca', 'Recreio', 'Jacarepaguá', 'Méier'],
+    'MG': ['Savassi', 'Lourdes', 'Funcionários', 'Serra', 'Buritis', 'Sion', 'Belvedere', 'Cidade Nova', 'Santa Efigênia', 'Pampulha'],
+    'BA': ['Barra', 'Pituba', 'Itaigara', 'Caminho das Árvores', 'Vitória', 'Graça', 'Canela', 'Rio Vermelho', 'Itapuã', 'Paralela'],
+    'PB': ['Manaíra', 'Tambaú', 'Cabo Branco', 'Bessa', 'Jardim Oceania', 'Bancários', 'Mangabeira', 'Altiplano', 'Tambiá', 'Centro'],
+    'PE': ['Boa Viagem', 'Pina', 'Imbiribeira', 'Casa Forte', 'Graças', 'Parnamirim', 'Torre', 'Aflitos', 'Espinheiro', 'Poço da Panela'],
+    'CE': ['Aldeota', 'Meireles', 'Mucuripe', 'Fátima', 'Cocó', 'Varjota', 'Centro', 'Benfica', 'Joaquim Távora', 'Papicu'],
+    'DF': ['Asa Sul', 'Asa Norte', 'Lago Sul', 'Lago Norte', 'Sudoeste', 'Noroeste', 'Cruzeiro', 'Águas Claras', 'Guará', 'Park Way'],
+    'RS': ['Moinhos de Vento', 'Bela Vista', 'Menino Deus', 'Petrópolis', 'Mont Serrat', 'Três Figueiras', 'Cidade Baixa', 'Auxiliadora', 'Rio Branco', 'Santana']
+  };
 
   // Area codes by state
   const areaCodes: Record<string, string> = {
@@ -247,11 +276,13 @@ function getRegionalData(regionCode: string) {
   };
 
   // Default streets if region not found
-  const defaultStreets = ['Brasil', 'Amazonas', 'Paraná', 'São Paulo', 'Bahia', 'Ceará', 'Minas Gerais', 'Pernambuco', 'Maranhão', 'Goiás', 'Piauí', 'Alagoas'];
+  const defaultStreets = commonStreets;
+  const defaultNeighborhoods = ['Centro', 'Jardim América', 'Nova Esperança', 'São José', 'Santo Antônio', 'Boa Vista'];
   
-  // Return streets and area code for the region
+  // Return streets, neighborhoods, and area code for the region
   return {
     streets: regionalStreets[regionCode] || defaultStreets,
+    neighborhoods: regionalNeighborhoods[regionCode] || defaultNeighborhoods,
     areaCode: areaCodes[regionCode] || '00'
   };
 }

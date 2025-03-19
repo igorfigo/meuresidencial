@@ -58,7 +58,7 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
             
             <div className="flex items-start">
               <MapPin className="h-4 w-4 mr-2 mt-0.5 text-slate-500" />
-              <span className="break-words">{provider.address} • {provider.distance}</span>
+              <span className="break-words">{provider.address}</span>
             </div>
           </div>
         </div>
@@ -67,7 +67,7 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
       <CardFooter className="pt-2 pb-6">
         <Button 
           onClick={handleCopyPhone} 
-          className="w-full flex items-center justify-center gap-2 font-medium"
+          className="w-full flex items-center justify-center gap-2 font-medium bg-blue-500 hover:bg-blue-600 text-white"
           variant="default"
         >
           {copied ? (
