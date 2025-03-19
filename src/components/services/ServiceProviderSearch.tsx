@@ -111,7 +111,7 @@ export const ServiceProviderSearch = () => {
           <Button 
             onClick={handleSearch} 
             disabled={isLoading}
-            className="w-full"
+            className="w-full bg-blue-600 hover:bg-blue-700"
           >
             {isLoading ? (
               <>
@@ -140,19 +140,19 @@ export const ServiceProviderSearch = () => {
         <div className="mt-8">
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
-              <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
             </div>
           ) : providers.length > 0 ? (
             <div>
               <h3 className="text-lg font-medium mb-4 flex items-center">
-                <MapPin className="mr-2 h-5 w-5 text-brand-600" />
+                <MapPin className="mr-2 h-5 w-5 text-blue-600" />
                 Prestadores em {searchedCity?.name}-{searchedCity?.state} ({providers.length})
                 <span className="ml-4 flex items-center text-sm text-muted-foreground">
                   <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 mr-1" />
                   Ordenados por avaliação
                 </span>
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {providers.map(provider => (
                   <ServiceProviderCard key={provider.id} provider={provider} />
                 ))}
