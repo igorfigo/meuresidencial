@@ -18,6 +18,8 @@ import {
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
 
+const ITEMS_PER_PAGE = 10;
+
 const Documentos = () => {
   const { 
     form, 
@@ -36,11 +38,23 @@ const Documentos = () => {
     getFileUrl,
     uploadProgress,
     isUploading,
-    refetch
+    fetchDocuments,
+    fetchAttachments
   } = useDocuments();
   
   const [showForm, setShowForm] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = documents ? Math.ceil(documents.length / ITEMS_PER_PAGE) : 1;
+  const paginatedDocuments = documents ? documents.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE, 
+    currentPage * ITEMS_PER_PAGE
+  ) : [];
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleNewDocument = () => {
     resetForm();
@@ -93,7 +107,7 @@ const Documentos = () => {
 
         <div className="border-t pt-6">
           {showForm ? (
-            <Card>
+            <Card className="border-t-4 border-t-blue-600">
               <DocumentForm
                 form={form}
                 onSubmit={handleFormSubmit}
@@ -112,11 +126,15 @@ const Documentos = () => {
             </Card>
           ) : (
             <DocumentsList
-              documents={documents || []}
+              documents={paginatedDocuments}
               onEdit={handleEditDocument}
               onDelete={handleDeleteClick}
               isDeleting={isDeleting}
               getFileUrl={getFileUrl}
+              fetchAttachments={fetchAttachments}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
             />
           )}
         </div>
