@@ -1,6 +1,5 @@
 
-// Extend the existing cepService with a new function to format CEP input
-import { fetchAddressByCep } from '@/services/cepService';
+// Extend the existing cepService with functions to format and validate CEP
 
 export const formatCep = (cep: string): string => {
   // Remove non-numeric characters
@@ -19,5 +18,24 @@ export const validateCep = (cep: string): boolean => {
   return numericCep.length === 8;
 };
 
-// Re-export the fetchAddressByCep function
-export { fetchAddressByCep };
+// Simulate fetching address by CEP (in a real app, this would call an API)
+export const fetchAddressByCep = async (cep: string) => {
+  // Remove non-numeric characters for validation
+  const numericCep = cep.replace(/\D/g, '');
+  
+  if (numericCep.length !== 8) {
+    throw new Error('CEP inválido');
+  }
+  
+  // In a real app, we would call an API here
+  // For now, just return a mock response after a delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  return {
+    cep: cep,
+    logradouro: 'Rua Exemplo',
+    bairro: 'Bairro Teste',
+    cidade: 'São Paulo',
+    uf: 'SP'
+  };
+};
