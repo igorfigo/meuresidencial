@@ -104,7 +104,7 @@ function getJoaoPessoaElectricianData(): ServiceProvider[] {
       serviceType: 'Eletricista',
       rating: 5.0,
       reviewCount: 58,
-      phone: '8398620-1039',
+      phone: '83986201039',
       address: 'João Pessoa - PB',
       yearsInBusiness: 25,
       openingHours: 'Aberto 24 horas',

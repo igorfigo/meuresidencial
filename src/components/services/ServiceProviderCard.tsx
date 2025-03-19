@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -105,6 +104,33 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
     return formatBrazilianPhone(provider.phone);
   };
 
+  // Function to open phone dialer
+  const handleCallProvider = () => {
+    // Format number for dialing (remove spaces and special characters)
+    const phoneNumber = provider.phone.replace(/\D/g, '');
+    window.location.href = `tel:${phoneNumber}`;
+    
+    toast({
+      title: "Ligando para",
+      description: `${provider.name} - ${getFormattedPhone()}`
+    });
+  };
+
+  // Function to open WhatsApp chat
+  const handleWhatsApp = () => {
+    // Format number for WhatsApp (remove spaces and special characters)
+    const phoneNumber = provider.phone.replace(/\D/g, '');
+    // Add Brazil country code if not present
+    const fullPhoneNumber = phoneNumber.startsWith('55') ? phoneNumber : `55${phoneNumber}`;
+    
+    window.open(`https://wa.me/${fullPhoneNumber}`, '_blank');
+    
+    toast({
+      title: "Abrindo WhatsApp para",
+      description: `${provider.name} - ${getFormattedPhone()}`
+    });
+  };
+
   return (
     <Card className="h-full flex flex-col overflow-hidden">
       {/* Header with Store Icon and Badge */}
@@ -195,7 +221,7 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
         
         <div className="grid grid-cols-2 gap-2 w-full">
           <Button 
-            onClick={handleCopyPhone} 
+            onClick={handleCallProvider} 
             className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600"
           >
             <Phone className="h-4 w-4" />
@@ -204,12 +230,7 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
           
           <Button 
             className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600"
-            onClick={() => {
-              toast({
-                title: "WhatsApp",
-                description: "Esta funcionalidade não está disponível no momento."
-              });
-            }}
+            onClick={handleWhatsApp}
           >
             <MessageCircle className="h-4 w-4" />
             <span>WhatsApp</span>
