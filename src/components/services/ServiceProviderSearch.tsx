@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Select, 
@@ -33,7 +32,6 @@ export const ServiceProviderSearch = () => {
   };
 
   const handleSearch = async () => {
-    // Reset error state
     setError(null);
     
     if (!cep || !serviceType) {
@@ -60,7 +58,6 @@ export const ServiceProviderSearch = () => {
     setProviders([]);
 
     try {
-      // Using the configured Google Maps API Key
       const results = await searchServiceProviders(cep, serviceType as ServiceType);
       setProviders(results);
       
@@ -92,12 +89,12 @@ export const ServiceProviderSearch = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Remove or update the API key alert since we now have a key */}
-      <Alert className="mb-6 bg-green-50 text-green-800 border-green-200">
+      <Alert className="mb-6 bg-blue-50 text-blue-800 border-blue-200">
         <Info className="h-4 w-4" />
-        <AlertTitle>API Google Maps configurada</AlertTitle>
+        <AlertTitle>Informação importante</AlertTitle>
         <AlertDescription>
-          A API do Google Maps está configurada. Você pode buscar prestadores de serviço com base no CEP informado.
+          A busca usa a API do Google Maps para encontrar prestadores próximos ao CEP informado. 
+          Se a API do Google estiver indisponível, dados simulados serão mostrados com base na região do CEP.
         </AlertDescription>
       </Alert>
       
