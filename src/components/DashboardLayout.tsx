@@ -1,424 +1,198 @@
-
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Link, useLocation } from 'react-router-dom';
 import { 
-  Building, 
-  ChevronLeft, 
-  ChevronRight, 
   Home, 
-  LogOut, 
+  Users, 
+  Bell, 
+  BookOpen, 
+  LayoutGrid, 
+  Calendar, 
+  Bug, 
+  FileText, 
   Menu, 
+  X,
+  LogOut,
   Building2,
-  ChevronDown,
-  Package,
-  Users,
-  PiggyBank,
-  BarChart,
-  CreditCard,
-  FileText,
-  Receipt,
-  FileIcon,
-  CalendarDays,
-  Briefcase,
-  Vote,
-  Bug,
-  MessageSquare,
-  KeyRound,
-  Mail
+  UserPlus,
+  Settings,
+  PieChart,
+  MessageSquare
 } from 'lucide-react';
-import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { useApp } from '@/contexts/AppContext';
+import { useMobile } from '@/hooks/use-mobile';
+import { useState, useEffect } from 'react';
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { user, logout } = useApp();
+  const location = useLocation();
+  const { isMobile } = useMobile();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-interface MenuItem {
-  name: string;
-  icon: React.ReactNode;
-  path: string;
-  submenu?: MenuItem[];
-}
-
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user, logout, switchCondominium } = useApp();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
-
-  const toggleSidebar = () => setSidebarOpen(prev => !prev);
-  const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
-  const toggleSubmenu = (name: string) => {
-    setExpandedSubmenu(expandedSubmenu === name ? null : name);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
-  const handleCondominiumChange = (matricula: string) => {
-    switchCondominium(matricula);
-  };
-
-  const adminMenuItems: MenuItem[] = [
-    { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
-    { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
-    { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
-  ];
-
-  const managerMenuItems: MenuItem[] = [
-    { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
-    { name: 'Moradores', icon: <Users className="h-5 w-5" />, path: '/moradores' },
-    { name: 'Comunicados', icon: <MessageSquare className="h-5 w-5" />, path: '/comunicados' },
-    { name: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
-    { 
-      name: 'Financeiro', 
-      icon: <PiggyBank className="h-5 w-5" />, 
-      path: '/financeiro',
-      submenu: [
-        { name: 'Dashboard', icon: <BarChart className="h-5 w-5" />, path: '/financeiro/dashboard' },
-        { name: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" />, path: '/financeiro/receitas-despesas' },
-        { name: 'Inadimplências', icon: <CreditCard className="h-5 w-5" />, path: '/financeiro/inadimplencias' },
-        { name: 'Prestação de Contas', icon: <FileText className="h-5 w-5" />, path: '/financeiro/prestacao-contas' },
-      ] 
-    },
-    { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
-    { name: 'Assembléias', icon: <Vote className="h-5 w-5" />, path: '/assembleias' },
-    { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
-    { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
-    { name: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" />, path: '/assinatura' },
-    { name: 'Fale Conosco', icon: <Mail className="h-5 w-5" />, path: '/contato' },
-  ];
-
-  const menuItems = user?.isAdmin ? adminMenuItems : managerMenuItems;
-
-  const renderCondominiumSelector = () => {
-    if (!user || user.isAdmin || !user.condominiums || user.condominiums.length <= 1) {
-      return null;
-    }
-
-    return (
-      <div className="px-3 py-2 mb-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="outline" 
-              className="w-full justify-between border-dashed border-slate-400 bg-slate-50"
-            >
-              <div className="flex items-center">
-                <Building2 className="h-4 w-4 mr-2 text-slate-500" />
-                <span className="truncate max-w-[140px]">
-                  {user.nomeCondominio || 'Selecione um condomínio'}
-                </span>
-              </div>
-              <ChevronDown className="h-4 w-4 ml-2 text-slate-500" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="w-56">
-            {user.condominiums.map((condo) => (
-              <DropdownMenuItem 
-                key={condo.matricula}
-                className={cn(
-                  "cursor-pointer", 
-                  condo.matricula === user.selectedCondominium && "bg-slate-100 font-medium"
-                )}
-                onClick={() => handleCondominiumChange(condo.matricula)}
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                <span className="truncate">{condo.nomeCondominio}</span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    );
-  };
-
-  const renderMenuItem = (item: MenuItem) => {
-    const hasSubmenu = item.submenu && item.submenu.length > 0;
-    const isSubmenuExpanded = expandedSubmenu === item.name;
-
-    return (
-      <div key={item.path} className="w-full">
-        {hasSubmenu ? (
-          <>
-            <button
-              onClick={() => toggleSubmenu(item.name)}
-              className={cn(
-                "flex items-center w-full px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                "text-sidebar-foreground hover:bg-sidebar-accent/50",
-                isSubmenuExpanded && "bg-sidebar-accent/70"
-              )}
-            >
-              {item.icon}
-              {(sidebarOpen || mobileMenuOpen) && (
-                <>
-                  <span className="ml-3 flex-1 text-left">{item.name}</span>
-                  <ChevronRight className={cn(
-                    "h-4 w-4 transition-transform", 
-                    isSubmenuExpanded && "transform rotate-90"
-                  )} />
-                </>
-              )}
-            </button>
-            {isSubmenuExpanded && (sidebarOpen || mobileMenuOpen) && (
-              <div className="ml-4 pl-2 border-l border-sidebar-border space-y-1 mt-1">
-                {item.submenu?.map(subItem => (
-                  <NavLink
-                    key={subItem.path}
-                    to={subItem.path}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-sidebar-accent text-white"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                      )
-                    }
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {subItem.icon}
-                    <span className="ml-3">{subItem.name}</span>
-                  </NavLink>
-                ))}
-              </div>
-            )}
-          </>
-        ) : (
-          <NavLink
-            to={item.path}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-sidebar-accent text-white"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-              )
-            }
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            {item.icon}
-            <span className={cn("ml-3", !sidebarOpen && "lg:hidden")}>{item.name}</span>
-          </NavLink>
-        )}
-      </div>
-    );
-  };
-
-  const renderCurrentCondominium = () => {
-    if (!user || user.isAdmin) return null;
-    
-    return (
-      <div className="px-4 py-3 mb-3 border-l-4 border-brand-400 bg-sidebar-accent/20 rounded-md">
-        <div className="flex items-center">
-          <Building2 className="h-5 w-5 mr-2 text-brand-400" />
-          <span className="text-sm font-medium text-white truncate">
-            {user.nomeCondominio || 'Condomínio'}
-          </span>
-        </div>
-      </div>
-    );
-  };
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location]);
 
   return (
-    <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
-      <button
-        onClick={toggleMobileMenu}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white shadow-md text-gray-700"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
-
-      {mobileMenuOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      <aside
-        className={cn(
-          "lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-sidebar flex flex-col transition-transform duration-300 ease-in-out transform",
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-          <div className="flex items-center space-x-2">
-            <Building className="h-6 w-6 text-white" />
-            <span className="text-white font-display text-xl">MeuResidencial</span>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-sidebar-foreground hover:bg-sidebar-accent"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-        </div>
-
-        {!user?.isAdmin && (
-          <div className="px-3 pt-3">
-            {renderCurrentCondominium()}
-          </div>
-        )}
-
-        {!user?.isAdmin && (
-          <div className="px-3 py-2">
-            {renderCondominiumSelector()}
-          </div>
-        )}
-
-        <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-          {menuItems.map(item => renderMenuItem(item))}
-        </div>
-
-        <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center space-x-3">
-            <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
-              {user?.nome?.charAt(0) || 'U'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
-                {user?.nome || 'Usuário'}
-              </p>
-              <p className="text-xs text-gray-300 truncate">
-                {user?.email || 'email@example.com'}
-              </p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            className="w-full mt-3 text-sidebar-foreground hover:bg-sidebar-accent flex items-center justify-center"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sair
-          </Button>
-        </div>
-      </aside>
-
-      <aside
-        className={cn(
-          "hidden lg:flex flex-col h-screen sticky top-0 z-30 transition-all duration-300 ease-in-out",
-          sidebarOpen ? "w-64" : "w-20"
-        )}
-      >
-        <div className={cn(
-          "flex items-center h-16 px-4 border-b border-sidebar-border bg-sidebar",
-          sidebarOpen ? "justify-between" : "justify-center"
-        )}>
-          {sidebarOpen ? (
-            <>
-              <div className="flex items-center">
-                <Building className="h-6 w-6 text-white" />
-                <span className="ml-2 font-display text-white text-xl">MeuResidencial</span>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-sidebar-foreground hover:bg-sidebar-accent"
-                onClick={toggleSidebar}
-              >
-                <ChevronLeft className="h-5 w-5" />
+    <div className="flex flex-col min-h-screen">
+      {/* Header */}
+      <header className="fixed top-0 left-0 w-full bg-background border-b h-[60px] z-30">
+        <div className="flex items-center justify-between h-full px-4">
+          {/* Logo and Title */}
+          <div className="flex items-center">
+            {isMobile && (
+              <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                <span className="sr-only">Toggle Menu</span>
               </Button>
-            </>
-          ) : (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-sidebar-foreground hover:bg-sidebar-accent"
-              onClick={toggleSidebar}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          )}
-        </div>
-        
-        {sidebarOpen && !user?.isAdmin && (
-          <div className="bg-sidebar px-3 pt-3">
-            {renderCurrentCondominium()}
-          </div>
-        )}
-        
-        {sidebarOpen && !user?.isAdmin && (
-          <div className="bg-sidebar px-3 py-2">
-            {renderCondominiumSelector()}
-          </div>
-        )}
-        
-        <div className="flex-1 bg-sidebar overflow-y-auto py-4 px-3 space-y-1">
-          {menuItems.map(item => {
-            if (!sidebarOpen && item.submenu && item.submenu.length > 0) {
-              return (
-                <div 
-                  key={item.path}
-                  className="flex justify-center p-2 rounded-md cursor-pointer text-sidebar-foreground hover:bg-sidebar-accent/50"
-                  title={item.name}
-                >
-                  {item.icon}
-                </div>
-              );
-            }
-            return renderMenuItem(item);
-          })}
-        </div>
-        
-        <div className={cn(
-          "p-4 border-t border-sidebar-border bg-sidebar",
-          !sidebarOpen && "flex flex-col items-center"
-        )}>
-          {sidebarOpen ? (
-            <div className="flex items-center space-x-3">
-              <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
-                {user?.nome?.charAt(0) || 'U'}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white truncate max-w-[140px]">
-                  {user?.nome || 'Usuário'}
-                </p>
-                <p className="text-xs text-gray-300 truncate max-w-[140px]">
-                  {user?.email || 'email@example.com'}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white mb-2">
-              {user?.nome?.charAt(0) || 'U'}
-            </div>
-          )}
-          
-          <Button
-            variant="ghost"
-            className={cn(
-              "text-sidebar-foreground hover:bg-sidebar-accent",
-              sidebarOpen ? "w-full mt-3" : "p-2 min-w-0 min-h-0 h-auto mt-1"
             )}
-            onClick={handleLogout}
-            title={sidebarOpen ? undefined : "Sair"}
-          >
-            <LogOut className={cn("h-4 w-4", sidebarOpen && "mr-2")} />
-            {sidebarOpen && "Sair"}
-          </Button>
-        </div>
-      </aside>
+            <h1 className="text-lg font-semibold ml-2">Meu Residencial</h1>
+          </div>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
+          {/* User Info and Logout */}
+          {user && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm">{user?.nome}</span>
+              <Button variant="outline" size="sm" onClick={logout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
+              </Button>
+            </div>
+          )}
+        </div>
+      </header>
+      
+      {/* Main content area */}
+      <div className="flex flex-1">
+        {/* Sidebar navigation */}
+        <aside className={cn(
+          "fixed left-0 top-[60px] z-20 h-[calc(100vh-60px)] w-64 border-r bg-background transition-transform lg:static lg:translate-x-0",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+          <nav className="grid gap-1 p-4">
+            <Link
+              to="/dashboard"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                location.pathname === "/dashboard"
+                  ? "bg-muted"
+                  : "hover:bg-muted"
+              )}
+            >
+              <Home className="h-5 w-5" />
+              <span>Dashboard</span>
+            </Link>
+            <Link
+              to="/moradores"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                location.pathname === "/moradores"
+                  ? "bg-muted"
+                  : "hover:bg-muted"
+              )}
+            >
+              <Users className="h-5 w-5" />
+              <span>Moradores</span>
+            </Link>
+            <Link
+              to="/comunicados"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                location.pathname === "/comunicados"
+                  ? "bg-muted"
+                  : "hover:bg-muted"
+              )}
+            >
+              <Bell className="h-5 w-5" />
+              <span>Comunicados</span>
+            </Link>
+            <Link
+              to="/areas-comuns"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                location.pathname === "/areas-comuns"
+                  ? "bg-muted"
+                  : "hover:bg-muted"
+              )}
+            >
+              <LayoutGrid className="h-5 w-5" />
+              <span>Áreas Comuns</span>
+            </Link>
+            <Link
+              to="/documentos"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                location.pathname === "/documentos"
+                  ? "bg-muted"
+                  : "hover:bg-muted"
+              )}
+            >
+              <FileText className="h-5 w-5" />
+              <span>Documentos</span>
+            </Link>
+            <Link
+              to="/dedetizacoes"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                location.pathname === "/dedetizacoes"
+                  ? "bg-muted"
+                  : "hover:bg-muted"
+              )}
+            >
+              <Bug className="h-5 w-5" />
+              <span>Dedetizações</span>
+            </Link>
+            
+            {/* Add Fale Conosco menu item */}
+            <Link
+              to="/fale-conosco"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                location.pathname === "/fale-conosco"
+                  ? "bg-muted"
+                  : "hover:bg-muted"
+              )}
+            >
+              <MessageSquare className="h-5 w-5" />
+              <span>Fale Conosco</span>
+            </Link>
+            
+            {user?.isAdmin && (
+              <>
+                <Link
+                  to="/cadastro-gestor"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                    location.pathname === "/cadastro-gestor"
+                      ? "bg-muted"
+                      : "hover:bg-muted"
+                  )}
+                >
+                  <UserPlus className="h-5 w-5" />
+                  <span>Cadastrar Gestor</span>
+                </Link>
+                <Link
+                  to="/cadastro-planos"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+                    location.pathname === "/cadastro-planos"
+                      ? "bg-muted"
+                      : "hover:bg-muted"
+                  )}
+                >
+                  <PieChart className="h-5 w-5" />
+                  <span>Cadastrar Planos</span>
+                </Link>
+              </>
+            )}
+          </nav>
+        </aside>
+        
+        {/* Main content */}
+        <main className="flex-1 p-4 mt-[60px] lg:ml-64">
           {children}
         </main>
       </div>
     </div>
   );
-};
-
-export default DashboardLayout;
+}
