@@ -12,8 +12,11 @@ export const searchServiceProviders = async (
     // Create the query based on service type and location
     const query = `${serviceType} serviços próximo a ${cep}`;
     
+    // In Vite, we use import.meta.env instead of process.env
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'mock-api-key';
+    
     // Create the API URL (using Google Places API)
-    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&language=pt-BR&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&language=pt-BR&key=${apiKey}`;
     
     // Make the request to Google Places API (in a real app, this would be done via a backend service)
     // For now, we'll continue to use mock data but structured to mimic the expected response

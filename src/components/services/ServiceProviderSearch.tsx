@@ -9,11 +9,12 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { ServiceProvider, ServiceType } from '@/types/serviceProvider';
 import { searchServiceProviders } from '@/services/serviceProviderService';
 import { formatCep, validateCep } from '@/services/cepService';
 import { ServiceProviderCard } from './ServiceProviderCard';
-import { Search, Loader2, MapPin } from 'lucide-react';
+import { Search, Loader2, MapPin, AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 export const ServiceProviderSearch = () => {
@@ -22,6 +23,7 @@ export const ServiceProviderSearch = () => {
   const [providers, setProviders] = useState<ServiceProvider[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +32,9 @@ export const ServiceProviderSearch = () => {
   };
 
   const handleSearch = async () => {
+    // Reset error state
+    setError(null);
+    
     if (!cep || !serviceType) {
       toast({
         title: "Campos obrigatórios",
@@ -70,6 +75,7 @@ export const ServiceProviderSearch = () => {
       }
     } catch (error) {
       console.error('Error searching for providers:', error);
+      setError((error as Error).message || "Ocorreu um erro ao buscar prestadores de serviço. Tente novamente.");
       toast({
         title: "Erro na busca",
         description: "Ocorreu um erro ao buscar prestadores de serviço. Tente novamente.",
@@ -139,7 +145,15 @@ export const ServiceProviderSearch = () => {
         </div>
       </div>
       
-      {hasSearched && (
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erro na busca</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      {hasSearched && !error && (
         <div className="mt-8">
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
