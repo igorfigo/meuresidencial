@@ -1,9 +1,8 @@
 
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
-import AnnouncementEditor from './AnnouncementEditor';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Eye, Trash2, Edit } from 'lucide-react';
+import { Eye, Trash2, Edit } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +13,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useApp } from '@/contexts/AppContext';
 import { 
   Table, 
   TableBody, 
@@ -27,22 +25,21 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-const AnnouncementsList: React.FC = () => {
+interface AnnouncementsListProps {
+  onEdit: (announcement: Announcement) => void;
+}
+
+const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
   const { 
     announcements, 
     isLoading, 
     error, 
     getAnnouncement,
-    createAnnouncement,
-    updateAnnouncement,
     removeAnnouncement
   } = useAnnouncements();
   
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [detailView, setDetailView] = useState<Announcement | null>(null);
-  const { user } = useApp();
   
   const formatDate = (dateString: string) => {
     try {
@@ -62,8 +59,7 @@ const AnnouncementsList: React.FC = () => {
   const handleEditAnnouncement = async (id: string) => {
     const announcement = await getAnnouncement(id);
     if (announcement) {
-      setSelectedAnnouncement(announcement);
-      setIsEditorOpen(true);
+      onEdit(announcement);
     }
   };
   
@@ -75,24 +71,6 @@ const AnnouncementsList: React.FC = () => {
     if (deleteId) {
       await removeAnnouncement(deleteId);
       setDeleteId(null);
-    }
-  };
-  
-  const handleCreateNew = () => {
-    const newAnnouncement: Announcement = {
-      matricula: user?.selectedCondominium || '',
-      title: '',
-      content: ''
-    };
-    setSelectedAnnouncement(newAnnouncement);
-    setIsEditorOpen(true);
-  };
-  
-  const handleSaveAnnouncement = async (announcement: Announcement) => {
-    if (announcement.id) {
-      return updateAnnouncement(announcement);
-    } else {
-      return createAnnouncement(announcement);
     }
   };
   
@@ -120,24 +98,9 @@ const AnnouncementsList: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Comunicados</h2>
-        
-        <div className="flex gap-2">
-          <Button onClick={handleCreateNew}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Novo comunicado
-          </Button>
-        </div>
-      </div>
-      
       {announcements.length === 0 ? (
         <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center">
           <p className="text-muted-foreground mb-4">Nenhum comunicado encontrado.</p>
-          <Button onClick={handleCreateNew}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Criar novo comunicado
-          </Button>
         </div>
       ) : (
         <div className="rounded-md border">
@@ -187,15 +150,6 @@ const AnnouncementsList: React.FC = () => {
             </TableBody>
           </Table>
         </div>
-      )}
-      
-      {selectedAnnouncement && (
-        <AnnouncementEditor
-          open={isEditorOpen}
-          onOpenChange={setIsEditorOpen}
-          announcement={selectedAnnouncement}
-          onSave={handleSaveAnnouncement}
-        />
       )}
       
       {/* View announcement details dialog */}

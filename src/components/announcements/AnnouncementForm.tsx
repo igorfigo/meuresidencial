@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { ANNOUNCEMENT_TEMPLATES } from './AnnouncementTemplates';
 
 interface FormErrors {
@@ -38,6 +37,7 @@ interface AnnouncementFormProps {
   onSendWhatsappChange: (checked: boolean) => void;
   onSave: () => void;
   onCopy: () => void;
+  onCancel: () => void;
 }
 
 const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
@@ -55,7 +55,8 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   onSendEmailChange,
   onSendWhatsappChange,
   onSave,
-  onCopy
+  onCopy,
+  onCancel
 }) => {
   return (
     <div className="space-y-6 flex-1 overflow-hidden">
@@ -137,7 +138,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         </div>
       </RadioGroup>
       
-      <DialogFooter className="flex justify-end gap-2 pt-4">
+      <div className="flex justify-end gap-2 pt-4">
         <Button 
           variant="outline" 
           onClick={onCopy}
@@ -157,12 +158,14 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
           Enviar Comunicado
         </Button>
         
-        <DialogClose asChild>
-          <Button variant="outline" className="gap-2">
-            Cancelar
-          </Button>
-        </DialogClose>
-      </DialogFooter>
+        <Button 
+          variant="outline" 
+          className="gap-2"
+          onClick={onCancel}
+        >
+          Cancelar
+        </Button>
+      </div>
     </div>
   );
 };
