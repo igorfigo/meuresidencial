@@ -100,6 +100,70 @@ export const getCondominiumChangeLogs = async (matricula: string) => {
   return data;
 };
 
+// Common Areas functions
+export const getCommonAreas = async (matricula: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('common_areas')
+      .select('*')
+      .eq('matricula', matricula)
+      .order('name');
+    
+    if (error) {
+      console.error('Error fetching common areas:', error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in getCommonAreas:', error);
+    throw error;
+  }
+};
+
+export const getCommonAreaById = async (id: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('common_areas')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching common area:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in getCommonAreaById:', error);
+    return null;
+  }
+};
+
+export const getReservationsByCommonAreaId = async (commonAreaId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('common_area_reservations')
+      .select(`
+        *,
+        residents:resident_id (nome_completo, unidade)
+      `)
+      .eq('common_area_id', commonAreaId)
+      .order('reservation_date', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching reservations:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getReservationsByCommonAreaId:', error);
+    throw error;
+  }
+};
+
 // Announcement functions with type assertions to avoid TypeScript errors
 export const getAnnouncements = async (matricula: string) => {
   try {

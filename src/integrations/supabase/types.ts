@@ -42,6 +42,110 @@ export type Database = {
         }
         Relationships: []
       }
+      common_area_reservations: {
+        Row: {
+          common_area_id: string
+          created_at: string
+          end_time: string
+          id: string
+          notes: string | null
+          reservation_date: string
+          resident_id: string
+          start_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          common_area_id: string
+          created_at?: string
+          end_time: string
+          id?: string
+          notes?: string | null
+          reservation_date: string
+          resident_id: string
+          start_time: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          common_area_id?: string
+          created_at?: string
+          end_time?: string
+          id?: string
+          notes?: string | null
+          reservation_date?: string
+          resident_id?: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "common_area_reservations_common_area_id_fkey"
+            columns: ["common_area_id"]
+            isOneToOne: false
+            referencedRelation: "common_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "common_area_reservations_resident_id_fkey"
+            columns: ["resident_id"]
+            isOneToOne: false
+            referencedRelation: "residents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      common_areas: {
+        Row: {
+          capacity: number | null
+          closing_time: string | null
+          created_at: string
+          description: string | null
+          id: string
+          matricula: string
+          name: string
+          opening_time: string | null
+          rules: string | null
+          updated_at: string
+          weekdays: string[] | null
+        }
+        Insert: {
+          capacity?: number | null
+          closing_time?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          matricula: string
+          name: string
+          opening_time?: string | null
+          rules?: string | null
+          updated_at?: string
+          weekdays?: string[] | null
+        }
+        Update: {
+          capacity?: number | null
+          closing_time?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          matricula?: string
+          name?: string
+          opening_time?: string | null
+          rules?: string | null
+          updated_at?: string
+          weekdays?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "common_areas_matricula_fkey"
+            columns: ["matricula"]
+            isOneToOne: false
+            referencedRelation: "condominiums"
+            referencedColumns: ["matricula"]
+          },
+        ]
+      }
       condominium_change_logs: {
         Row: {
           campo: string
