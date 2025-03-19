@@ -14,7 +14,7 @@ import { ServiceProvider, ServiceType } from '@/types/serviceProvider';
 import { searchServiceProviders } from '@/services/serviceProviderService';
 import { formatCep, validateCep } from '@/services/cepService';
 import { ServiceProviderCard } from './ServiceProviderCard';
-import { Search, Loader2, MapPin, AlertCircle, Star } from 'lucide-react';
+import { Search, Loader2, MapPin, AlertCircle, Star, Info } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 export const ServiceProviderSearch = () => {
@@ -57,6 +57,7 @@ export const ServiceProviderSearch = () => {
     setIsLoading(true);
     setHasSearched(true);
     setSearchedCep(cep);
+    setProviders([]);
 
     try {
       const results = await searchServiceProviders(cep, serviceType as ServiceType);
@@ -80,10 +81,9 @@ export const ServiceProviderSearch = () => {
       setError((error as Error).message || "Ocorreu um erro ao buscar prestadores de serviço. Tente novamente.");
       toast({
         title: "Erro na busca",
-        description: "Ocorreu um erro ao buscar prestadores de serviço. Tente novamente.",
+        description: (error as Error).message || "Ocorreu um erro ao buscar prestadores de serviço. Tente novamente.",
         variant: "destructive"
       });
-      setProviders([]);
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +91,15 @@ export const ServiceProviderSearch = () => {
 
   return (
     <div className="p-6 space-y-6">
+      <Alert className="mb-6 bg-amber-50 text-amber-800 border-amber-200">
+        <Info className="h-4 w-4" />
+        <AlertTitle>Informação</AlertTitle>
+        <AlertDescription>
+          Para utilizar a busca real de prestadores, é necessário configurar uma chave de API do Google Maps no arquivo .env 
+          com a variável VITE_GOOGLE_MAPS_API_KEY. Sem esta configuração, a busca irá falhar.
+        </AlertDescription>
+      </Alert>
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label htmlFor="cep" className="block text-sm font-medium mb-1">
