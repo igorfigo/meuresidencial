@@ -77,13 +77,18 @@ export const searchServiceProviders = async (
   }
 };
 
-// Function to generate mock service providers when the API fails
+// Use a consistent seed for mock data based on city and service type
+// This ensures the same results for the same search parameters
 function generateMockServiceProviders(city: City, serviceType: ServiceType): ServiceProvider[] {
   console.log(`Generating mock data for ${serviceType} in city ${city.name}, ${city.state}`);
   
+  // Create a deterministic seed based on city and service type
+  const seed = `${city.name}-${city.state}-${serviceType}`;
+  const seededRandom = createSeededRandom(seed);
+  
   const regionalData = getRegionalData(city.state);
   
-  // Generate mock providers
+  // Generate mock providers with consistent data
   const mockProviders: ServiceProvider[] = [];
   
   // A list of realistic provider names for each service type
@@ -110,41 +115,46 @@ function generateMockServiceProviders(city: City, serviceType: ServiceType): Ser
     ]
   };
   
-  // Generate 6 mock providers
+  // Generate exactly 6 mock providers with consistent data
   for (let i = 0; i < 6; i++) {
     const names = providerNames[serviceType];
-    const name = names[Math.floor(Math.random() * names.length)];
+    // Use seeded random to always pick the same name for the same index
+    const nameIndex = Math.floor(seededRandom() * names.length);
+    const name = names[nameIndex];
     
-    // Get a random street name from the regional data
-    const streetName = regionalData.streets[Math.floor(Math.random() * regionalData.streets.length)];
+    // Get a consistent street name
+    const streetIndex = Math.floor(seededRandom() * regionalData.streets.length);
+    const streetName = regionalData.streets[streetIndex];
     
-    // Generate a random address number
-    const addressNumber = Math.floor(Math.random() * 1000) + 1;
+    // Generate a consistent address number
+    const addressNumber = Math.floor(seededRandom() * 1000) + 1;
     
-    // Get random neighborhood name
+    // Get consistent neighborhood name
     const neighborhoods = regionalData.neighborhoods || ["Centro", "Jardim América", "Nova Esperança"];
-    const neighborhood = neighborhoods[Math.floor(Math.random() * neighborhoods.length)];
+    const neighborhoodIndex = Math.floor(seededRandom() * neighborhoods.length);
+    const neighborhood = neighborhoods[neighborhoodIndex];
     
     // Format address with street name, number and neighborhood
     const address = `R. ${streetName}, ${addressNumber} - ${neighborhood}, ${city.name}, ${city.state}`;
     
-    // Generate a properly formatted phone with the regional area code
-    const phoneNumber = generatePhoneNumber(getCityAreaCode(city));
+    // Generate a consistent, properly formatted phone with regional area code
+    const areaCode = getCityAreaCode(city);
+    const phoneNumber = generateConsistentPhoneNumber(areaCode, i, seed);
     
-    // Random distance between 0.5 and 10 km
-    const distance = `${(Math.random() * 9.5 + 0.5).toFixed(1)} km`;
+    // Consistent distance between 0.5 and 10 km
+    const distance = `${(seededRandom() * 9.5 + 0.5).toFixed(1)} km`;
     
-    // Random rating between 3.0 and 5.0
-    const rating = Number((Math.random() * 2 + 3).toFixed(1));
+    // Consistent rating between 3.0 and 5.0
+    const rating = Number((seededRandom() * 2 + 3).toFixed(1));
     
-    // Random review count between 5 and 200
-    const reviewCount = Math.floor(Math.random() * 195) + 5;
+    // Consistent review count
+    const reviewCount = Math.floor(seededRandom() * 195) + 5;
     
-    // Random years in business between 1 and 15
-    const yearsInBusiness = Math.floor(Math.random() * 15) + 1;
+    // Consistent years in business
+    const yearsInBusiness = Math.floor(seededRandom() * 15) + 1;
     
     mockProviders.push({
-      id: `mock-${i}`,
+      id: `mock-${i}-${seed}`,
       name: `${name} ${city.name}`,
       serviceType,
       rating,
@@ -161,6 +171,45 @@ function generateMockServiceProviders(city: City, serviceType: ServiceType): Ser
   return mockProviders.sort((a, b) => b.rating - a.rating);
 }
 
+// Generate a consistent phone number based on area code and an index
+function generateConsistentPhoneNumber(areaCode: string, index: number, seed: string): string {
+  // Create a seeded random generator for this specific index
+  const phoneRandom = createSeededRandom(`${seed}-phone-${index}`);
+  
+  // First digit is always 9 for mobile phones in Brazil
+  const firstDigit = "9";
+  
+  // Generate a consistent 8-digit sequence
+  let remainingDigits = "";
+  for (let i = 0; i < 8; i++) {
+    remainingDigits += Math.floor(phoneRandom() * 10).toString();
+  }
+  
+  // Return the complete formatted number
+  return `${areaCode}${firstDigit}${remainingDigits}`;
+}
+
+// Create a seeded random number generator
+function createSeededRandom(seed: string) {
+  // Simple hash function to convert string to a numeric seed
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  
+  // Seeded random generator
+  return function() {
+    // Simple mulberry32 algorithm
+    let state = hash;
+    state = (state + 0x6D2B79F5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // Get area code based on city and state
 function getCityAreaCode(city: City): string {
   return getAreaCodeByState(city.state);
@@ -172,7 +221,7 @@ function generatePhoneNumber(areaCode: string): string {
   const firstDigit = "9"; // Mobile phones in Brazil start with 9
   const remainingDigits = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
   
-  // Return the complete number without formatting (will be formatted in the UI)
+  // Return the complete number
   return `${areaCode}${firstDigit}${remainingDigits}`;
 }
 
@@ -288,4 +337,3 @@ function getRegionFromCep(cep: string): string {
   // Default to SP if no match
   return 'SP';
 }
-

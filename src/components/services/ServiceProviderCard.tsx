@@ -15,13 +15,40 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = React.useState(false);
   
+  // Format phone number for Brazilian format (XX) XXXXX-XXXX
+  const formatBrazilianPhone = (phone: string): string => {
+    if (!phone) return '';
+    
+    // Remove any non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    
+    // Make sure we have enough digits
+    if (digits.length < 10) return phone;
+    
+    // Format according to Brazilian standard
+    const areaCode = digits.substring(0, 2);
+    
+    // Check if it's a mobile number (has 9 as first digit after area code)
+    if (digits.length === 11) {
+      // Mobile number format: (XX) XXXXX-XXXX
+      const firstPart = digits.substring(2, 7);
+      const secondPart = digits.substring(7);
+      return `(${areaCode}) ${firstPart}-${secondPart}`;
+    } else {
+      // Landline format: (XX) XXXX-XXXX
+      const firstPart = digits.substring(2, 6);
+      const secondPart = digits.substring(6);
+      return `(${areaCode}) ${firstPart}-${secondPart}`;
+    }
+  };
+  
   const handleCopyPhone = () => {
     navigator.clipboard.writeText(provider.phone);
     setCopied(true);
     
     toast({
       title: "Número copiado",
-      description: `O número ${formatPhone(provider.phone)} foi copiado para a área de transferência.`
+      description: `O número ${formatBrazilianPhone(provider.phone)} foi copiado para a área de transferência.`
     });
     
     // Reset copy state after 2 seconds
@@ -78,7 +105,7 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
           ) : (
             <>
               <Phone className="h-4 w-4" />
-              {formatPhone(provider.phone)}
+              {formatBrazilianPhone(provider.phone)}
             </>
           )}
         </Button>
