@@ -5,8 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Copy, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -60,7 +60,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   onCancel
 }) => {
   return (
-    <Card className="w-full border-0 shadow-none">
+    <Card className="w-full border shadow-sm bg-white">
       <CardContent className="p-6 space-y-6">
         <div className="space-y-2">
           <Label htmlFor="title" className="font-medium">Título</Label>
@@ -112,64 +112,57 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
           />
           {formErrors.content && <p className="text-sm text-red-500">{formErrors.content}</p>}
         </div>
-
-        <div className="flex items-center space-x-6">
-          <RadioGroup 
-            defaultValue={sendEmail ? "email" : sendWhatsapp ? "whatsapp" : ""} 
-            className="flex space-x-6"
-            onValueChange={(value) => {
-              if (value === "email") {
-                onSendEmailChange(true);
-                onSendWhatsappChange(false);
-              } else if (value === "whatsapp") {
-                onSendEmailChange(false);
-                onSendWhatsappChange(true);
-              } else {
-                onSendEmailChange(false);
-                onSendWhatsappChange(false);
-              }
-            }}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="email" id="send-email" />
-              <Label htmlFor="send-email" className="cursor-pointer">Enviar E-mail aos Moradores</Label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="whatsapp" id="send-whatsapp" />
-              <Label htmlFor="send-whatsapp" className="cursor-pointer">Enviar Whatsapp aos Moradores</Label>
-            </div>
-          </RadioGroup>
-        </div>
       </CardContent>
       
-      <CardFooter className="flex justify-end gap-2 p-6 pt-0">
-        <Button 
-          variant="outline" 
-          onClick={onCopy}
-          type="button"
-          className="gap-2"
-        >
-          <Copy className="h-4 w-4" />
-          Copiar Texto
-        </Button>
+      <CardFooter className="flex flex-wrap items-center justify-between gap-4 p-6 pt-0">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="send-email" 
+              checked={sendEmail}
+              onCheckedChange={onSendEmailChange}
+            />
+            <Label htmlFor="send-email" className="cursor-pointer">Enviar E-mail aos Moradores</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="send-whatsapp" 
+              checked={sendWhatsapp}
+              onCheckedChange={onSendWhatsappChange}
+            />
+            <Label htmlFor="send-whatsapp" className="cursor-pointer">Enviar Whatsapp aos Moradores</Label>
+          </div>
+        </div>
         
-        <Button 
-          onClick={onSave} 
-          disabled={isSaving}
-          className="gap-2 bg-blue-500 hover:bg-blue-600"
-        >
-          <Send className="h-4 w-4" />
-          Enviar Comunicado
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          className="gap-2"
-          onClick={onCancel}
-        >
-          Cancelar
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={onCopy}
+            type="button"
+            className="gap-2"
+          >
+            <Copy className="h-4 w-4" />
+            Copiar Texto
+          </Button>
+          
+          <Button 
+            onClick={onSave} 
+            disabled={isSaving}
+            className="gap-2 bg-blue-500 hover:bg-blue-600"
+          >
+            <Send className="h-4 w-4" />
+            Enviar Comunicado
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={onCancel}
+          >
+            Cancelar
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
