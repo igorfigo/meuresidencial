@@ -31,6 +31,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [isSaving, setIsSaving] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
+  const [sendWhatsapp, setSendWhatsapp] = useState(false); // New state for Whatsapp
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formErrors, setFormErrors] = useState<{title?: string; content?: string; date?: string}>({});
   const { toast } = useToast();
@@ -98,7 +99,8 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
       return;
     }
     
-    if (sendEmail) {
+    // Show confirm dialog if either email or whatsapp is checked
+    if (sendEmail || sendWhatsapp) {
       setShowConfirmDialog(true);
     } else {
       await saveAnnouncement();
@@ -120,11 +122,18 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
       
       onOpenChange(false);
       
+      let description = "Comunicado salvo com sucesso";
+      if (sendEmail && sendWhatsapp) {
+        description = "Comunicado enviado com sucesso por e-mail e WhatsApp";
+      } else if (sendEmail) {
+        description = "Comunicado enviado com sucesso por e-mail";
+      } else if (sendWhatsapp) {
+        description = "Comunicado enviado com sucesso por WhatsApp";
+      }
+      
       toast({
         title: "Sucesso",
-        description: sendEmail 
-          ? "Comunicado enviado com sucesso para os moradores" 
-          : "Comunicado salvo com sucesso",
+        description: description,
       });
     } catch (error) {
       console.error('Error saving announcement:', error);
@@ -166,12 +175,14 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
             content={content}
             date={date}
             sendEmail={sendEmail}
+            sendWhatsapp={sendWhatsapp}
             formErrors={formErrors}
             isSaving={isSaving}
             onTitleChange={handleTitleChange}
             onContentChange={handleContentChange}
             onDateChange={handleDateChange}
             onSendEmailChange={setSendEmail}
+            onSendWhatsappChange={setSendWhatsapp}
             onSave={handleSave}
             onCopy={handleCopy}
           />
