@@ -15,6 +15,8 @@ export type Database = {
           created_at: string
           id: string
           matricula: string
+          sent_by_email: boolean | null
+          sent_by_whatsapp: boolean | null
           sent_email: boolean | null
           sent_whatsapp: boolean | null
           title: string
@@ -25,6 +27,8 @@ export type Database = {
           created_at?: string
           id?: string
           matricula: string
+          sent_by_email?: boolean | null
+          sent_by_whatsapp?: boolean | null
           sent_email?: boolean | null
           sent_whatsapp?: boolean | null
           title: string
@@ -35,6 +39,8 @@ export type Database = {
           created_at?: string
           id?: string
           matricula?: string
+          sent_by_email?: boolean | null
+          sent_by_whatsapp?: boolean | null
           sent_email?: boolean | null
           sent_whatsapp?: boolean | null
           title?: string

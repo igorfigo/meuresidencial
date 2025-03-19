@@ -218,6 +218,8 @@ export const saveAnnouncement = async (announcementData: any) => {
         .from('announcements' as any)
         .update({
           ...announcementData,
+          sent_by_email: announcementData.sent_by_email,
+          sent_by_whatsapp: announcementData.sent_by_whatsapp,
           updated_at: new Date().toISOString()
         })
         .eq('id', id)
@@ -236,6 +238,8 @@ export const saveAnnouncement = async (announcementData: any) => {
         .from('announcements' as any)
         .insert({
           ...announcementData,
+          sent_by_email: announcementData.sent_by_email,
+          sent_by_whatsapp: announcementData.sent_by_whatsapp,
           created_at: new Date().toISOString()
         })
         .select() as any);

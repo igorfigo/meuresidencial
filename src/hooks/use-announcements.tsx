@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -73,7 +74,9 @@ export function useAnnouncements() {
       
       const result = await saveAnnouncement({
         ...dataToSave,
-        matricula: selectedCondominium
+        matricula: selectedCondominium,
+        sent_by_email: announcementData.sent_by_email || false,
+        sent_by_whatsapp: announcementData.sent_by_whatsapp || false
       });
       
       toast({
@@ -98,7 +101,11 @@ export function useAnnouncements() {
     try {
       const { date, ...dataToSave } = announcementData;
       
-      const result = await saveAnnouncement(dataToSave);
+      const result = await saveAnnouncement({
+        ...dataToSave,
+        sent_by_email: announcementData.sent_by_email || false,
+        sent_by_whatsapp: announcementData.sent_by_whatsapp || false
+      });
       
       toast({
         title: "Sucesso",
