@@ -93,22 +93,16 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
     };
     
     // Use provider id as seed to ensure consistent testimonial for the same provider
-    const seed = parseInt(provider.id.replace(/\D/g, '').substring(0, 5), 16);
+    const seed = parseInt(provider.id.replace(/\D/g, '').substring(0, 5) || '0', 16);
     const options = testimonials[provider.serviceType] || [];
     const index = seed % options.length;
     
-    return `"${options[index]}"`;
+    return `"${options[index] || "Profissional de alta qualidade"}"`;
   };
 
   // Get formatted phone without the country code for display
   const getFormattedPhone = () => {
     return formatBrazilianPhone(provider.phone);
-  };
-  
-  // Get last 4 digits of phone for display in the call button
-  const getLastDigits = () => {
-    const digits = provider.phone.replace(/\D/g, '');
-    return digits.substring(digits.length - 4);
   };
 
   return (
