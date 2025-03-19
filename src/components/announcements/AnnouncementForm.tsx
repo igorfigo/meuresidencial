@@ -101,7 +101,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
           value={content}
           onChange={onContentChange}
           placeholder="Conteúdo do comunicado"
-          className="h-[320px] resize-none w-full"
+          className="h-[256px] resize-none w-full box-border"
         />
         {formErrors.content && <p className="text-sm text-red-500">{formErrors.content}</p>}
       </div>
@@ -136,7 +136,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         </div>
         
         <DialogClose asChild>
-          <Button variant="secondary">Fechar</Button>
+          <Button variant="secondary">Cancelar</Button>
         </DialogClose>
       </DialogFooter>
     </div>
