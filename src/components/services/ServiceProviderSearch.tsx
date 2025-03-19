@@ -54,6 +54,20 @@ export const ServiceProviderSearch = () => {
     try {
       const results = await searchServiceProviders(cep, serviceType as ServiceType);
       setProviders(results);
+      
+      if (results.length === 0) {
+        toast({
+          title: "Nenhum resultado",
+          description: "Não encontramos prestadores para esta busca. Tente outro CEP ou tipo de serviço.",
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "Busca concluída",
+          description: `Encontramos ${results.length} prestadores de serviço próximos ao seu CEP.`,
+          variant: "default"
+        });
+      }
     } catch (error) {
       console.error('Error searching for providers:', error);
       toast({
