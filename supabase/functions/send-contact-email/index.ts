@@ -38,7 +38,7 @@ serve(async (req) => {
       },
     });
 
-    // Melhorada composição do email com design mais profissional
+    // Melhorada composição do email com design mais profissional - removido caracteres "=20"
     const emailContent = `
       <!DOCTYPE html>
       <html lang="pt-BR">
@@ -241,18 +241,18 @@ serve(async (req) => {
       </html>
     `;
 
-    // Envio do email
+    // Envio do email - removido "Contato:" do assunto e alterado o alias para "Fale Conosco"
     await client.send({
-      from: "Meu Residencial <noreply@meuresidencial.com>",
+      from: "Fale Conosco <noreply@meuresidencial.com>",
       to: "contato@meuresidencial.com",
-      subject: `Contato: ${subject}`,
+      subject: `${subject}`,
       html: emailContent,
       replyTo: email,
     });
 
     // Envio de confirmação para o gestor
     await client.send({
-      from: "Meu Residencial <noreply@meuresidencial.com>",
+      from: "Fale Conosco <noreply@meuresidencial.com>",
       to: email,
       subject: "Recebemos sua mensagem - Meu Residencial",
       html: confirmationEmailContent,
