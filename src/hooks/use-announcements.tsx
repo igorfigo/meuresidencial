@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -69,13 +68,11 @@ export function useAnnouncements() {
 
   const createAnnouncement = async (announcementData: Omit<Announcement, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      // Ensure the current date is set if not provided
-      if (!announcementData.date) {
-        announcementData.date = format(new Date(), 'yyyy-MM-dd');
-      }
+      // Create a new object without the date field for database persistence
+      const { date, ...dataToSave } = announcementData;
       
       const result = await saveAnnouncement({
-        ...announcementData,
+        ...dataToSave,
         matricula: selectedCondominium
       });
       
@@ -99,12 +96,10 @@ export function useAnnouncements() {
 
   const updateAnnouncement = async (announcementData: Announcement) => {
     try {
-      // Ensure date is set
-      if (!announcementData.date) {
-        announcementData.date = format(new Date(), 'yyyy-MM-dd');
-      }
+      // Create a new object without the date field for database persistence
+      const { date, ...dataToSave } = announcementData;
       
-      const result = await saveAnnouncement(announcementData);
+      const result = await saveAnnouncement(dataToSave);
       
       toast({
         title: "Sucesso",
