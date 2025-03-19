@@ -13,7 +13,7 @@ import { ServiceProvider, ServiceType } from '@/types/serviceProvider';
 import { searchServiceProviders } from '@/services/serviceProviderService';
 import { formatCep, validateCep } from '@/services/cepService';
 import { ServiceProviderCard } from './ServiceProviderCard';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, MapPin } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 export const ServiceProviderSearch = () => {
@@ -133,8 +133,9 @@ export const ServiceProviderSearch = () => {
             </div>
           ) : providers.length > 0 ? (
             <div>
-              <h3 className="text-lg font-medium mb-4">
-                Prestadores de serviço encontrados ({providers.length})
+              <h3 className="text-lg font-medium mb-4 flex items-center">
+                <MapPin className="mr-2 h-5 w-5 text-brand-600" />
+                Prestadores mais próximos ao seu CEP ({providers.length})
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {providers.map(provider => (

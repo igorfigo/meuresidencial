@@ -16,6 +16,8 @@ export const searchServiceProviders = async (
     const rating = (4 + Math.random()).toFixed(1);
     const reviews = Math.floor(Math.random() * 100) + 10;
     const yearsInBusiness = Math.floor(Math.random() * 15) + 1;
+    // Generate random distance between 0.5 and 10 km
+    const distance = (Math.random() * 9.5 + 0.5).toFixed(1);
     
     return {
       id: `provider-${i}-${serviceType}-${cep}`,
@@ -27,10 +29,14 @@ export const searchServiceProviders = async (
       address: `Próximo ao CEP ${cep}`,
       yearsInBusiness,
       openingHours: `${Math.floor(Math.random() * 3) + 7}h às ${Math.floor(Math.random() * 4) + 17}h`,
-      distance: `${(Math.random() * 5).toFixed(1)} km`
+      distance: `${distance} km`
     };
   });
   
-  // Sort by rating (highest first)
-  return mockProviders.sort((a, b) => b.rating - a.rating);
+  // Sort by distance (closest first)
+  return mockProviders.sort((a, b) => {
+    const distanceA = parseFloat(a.distance.split(' ')[0]);
+    const distanceB = parseFloat(b.distance.split(' ')[0]);
+    return distanceA - distanceB;
+  });
 };
