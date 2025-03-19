@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Resident } from '@/hooks/use-residents';
+import { Card } from '@/components/ui/card';
 
 interface ResidentsListProps {
   residents: Resident[];
@@ -26,7 +27,7 @@ export const ResidentsList = ({
   isDeleting
 }: ResidentsListProps) => {
   return (
-    <div className="rounded-md border">
+    <Card className="overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
@@ -81,6 +82,6 @@ export const ResidentsList = ({
           )}
         </TableBody>
       </Table>
-    </div>
+    </Card>
   );
 };

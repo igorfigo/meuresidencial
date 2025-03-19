@@ -84,7 +84,7 @@ const Moradores = () => {
               onCancel={handleCancelForm}
             />
           ) : (
-            <div className="rounded-md bg-white">
+            <div>
               {isLoading ? (
                 <div className="py-10 text-center text-muted-foreground">
                   Carregando moradores...
