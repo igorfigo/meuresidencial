@@ -1,143 +1,248 @@
 
-import React from 'react';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from 'next-themes';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AppProvider, useApp } from "@/contexts/AppContext";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import CadastroGestor from "./pages/CadastroGestor";
+import CadastroPlanos from "./pages/CadastroPlanos";
+import UnderConstruction from "./pages/UnderConstruction";
+import NotFound from "./pages/NotFound";
+import Moradores from "./pages/Moradores";
+import Dedetizacoes from "./pages/Dedetizacoes";
+import Documentos from "./pages/Documentos";
+import Comunicados from "./pages/Comunicados";
+import AreasComuns from "./pages/AreasComuns";
+import { useEffect } from "react";
 
-import { AppProvider } from './contexts/AppContext';
-import { Toaster } from 'sonner';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { DashboardLayout } from './components/DashboardLayout';
+const queryClient = new QueryClient();
 
-// Pages
-import Index from './pages/Index';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Moradores from './pages/Moradores';
-import NotFound from './pages/NotFound';
-import Comunicados from './pages/Comunicados';
-import AreasComuns from './pages/AreasComuns';
-import Documentos from './pages/Documentos';
-import Dedetizacoes from './pages/Dedetizacoes';
-import CadastroGestor from './pages/CadastroGestor';
-import CadastroPlanos from './pages/CadastroPlanos';
-import UnderConstruction from './pages/UnderConstruction';
-import FaleConosco from './pages/FaleConosco';
+// Protected route wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useApp();
+  
+  if (isLoading) {
+    // You could show a loading spinner here
+    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
-function App() {
-  const queryClient = new QueryClient();
+// Auth route wrapper (redirects if already logged in)
+const AuthRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useApp();
+  
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  }
+  
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AppProvider>
-          <RouterProvider router={createBrowserRouter([
-            {
-              path: "/",
-              element: <Index />,
-            },
-            {
-              path: "/login",
-              element: <Login />,
-            },
-            {
-              path: "/cadastro-gestor",
-              element: <CadastroGestor />,
-            },
-            {
-              path: "/cadastro-planos",
-              element: <CadastroPlanos />,
-            },
-            {
-              path: "/dashboard",
-              element: (
+// AnimationController to handle page transitions
+const AnimationController = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    // Add transition class to the body when component mounts
+    document.body.classList.add('page-transition-enter');
+    document.body.classList.add('page-transition-enter-active');
+    
+    // Remove transition classes after animation completes
+    const timeout = setTimeout(() => {
+      document.body.classList.remove('page-transition-enter');
+      document.body.classList.remove('page-transition-enter-active');
+    }, 300);
+    
+    return () => {
+      clearTimeout(timeout);
+      // Add exit animation classes
+      document.body.classList.add('page-transition-exit');
+      document.body.classList.add('page-transition-exit-active');
+      
+      // Clean up exit classes after animation
+      setTimeout(() => {
+        document.body.classList.remove('page-transition-exit');
+        document.body.classList.remove('page-transition-exit-active');
+      }, 300);
+    };
+  }, []);
+  
+  return <>{children}</>;
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <AppProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={
+              <AnimationController>
+                <AuthRoute>
+                  <Login />
+                </AuthRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/dashboard" element={
+              <AnimationController>
                 <ProtectedRoute>
-                  <DashboardLayout>
-                    <Dashboard />
-                  </DashboardLayout>
+                  <Dashboard />
                 </ProtectedRoute>
-              ),
-            },
-            {
-              path: "/moradores",
-              element: (
+              </AnimationController>
+            } />
+            
+            <Route path="/cadastro-gestor" element={
+              <AnimationController>
                 <ProtectedRoute>
-                  <DashboardLayout>
-                    <Moradores />
-                  </DashboardLayout>
+                  <CadastroGestor />
                 </ProtectedRoute>
-              ),
-            },
-            {
-              path: "/comunicados",
-              element: (
+              </AnimationController>
+            } />
+            
+            <Route path="/cadastro-planos" element={
+              <AnimationController>
                 <ProtectedRoute>
-                  <DashboardLayout>
-                    <Comunicados />
-                  </DashboardLayout>
+                  <CadastroPlanos />
                 </ProtectedRoute>
-              ),
-            },
-            {
-              path: "/areas-comuns",
-              element: (
+              </AnimationController>
+            } />
+            
+            {/* Gestor Menu Routes */}
+            <Route path="/moradores" element={
+              <AnimationController>
                 <ProtectedRoute>
-                  <DashboardLayout>
-                    <AreasComuns />
-                  </DashboardLayout>
+                  <Moradores />
                 </ProtectedRoute>
-              ),
-            },
-            {
-              path: "/documentos",
-              element: (
+              </AnimationController>
+            } />
+            
+            {/* Financeiro Main and Submenu Routes */}
+            <Route path="/financeiro" element={
+              <AnimationController>
                 <ProtectedRoute>
-                  <DashboardLayout>
-                    <Documentos />
-                  </DashboardLayout>
+                  <UnderConstruction />
                 </ProtectedRoute>
-              ),
-            },
-            {
-              path: "/dedetizacoes",
-              element: (
+              </AnimationController>
+            } />
+            
+            <Route path="/financeiro/receitas-despesas" element={
+              <AnimationController>
                 <ProtectedRoute>
-                  <DashboardLayout>
-                    <Dedetizacoes />
-                  </DashboardLayout>
+                  <UnderConstruction />
                 </ProtectedRoute>
-              ),
-            },
-            {
-              path: "/em-construcao",
-              element: (
+              </AnimationController>
+            } />
+            
+            <Route path="/financeiro/dashboard" element={
+              <AnimationController>
                 <ProtectedRoute>
-                  <DashboardLayout>
-                    <UnderConstruction />
-                  </DashboardLayout>
+                  <UnderConstruction />
                 </ProtectedRoute>
-              ),
-            },
-            {
-              path: "/fale-conosco",
-              element: (
+              </AnimationController>
+            } />
+            
+            <Route path="/financeiro/inadimplencias" element={
+              <AnimationController>
                 <ProtectedRoute>
-                  <DashboardLayout>
-                    <FaleConosco />
-                  </DashboardLayout>
+                  <UnderConstruction />
                 </ProtectedRoute>
-              ),
-            },
-            {
-              path: "*",
-              element: <NotFound />,
-            },
-          ])} />
-          <Toaster />
-        </AppProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  );
-}
+              </AnimationController>
+            } />
+            
+            <Route path="/financeiro/prestacao-contas" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            {/* Other Gestor Menu Routes */}
+            <Route path="/boletos" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/documentos" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <Documentos />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/areas-comuns" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <AreasComuns />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/reservas" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/servicos" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/assembleias" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/dedetizacoes" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <Dedetizacoes />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/comunicados" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <Comunicados />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AppProvider>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

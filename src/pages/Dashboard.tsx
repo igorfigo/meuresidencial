@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, MapPin } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
