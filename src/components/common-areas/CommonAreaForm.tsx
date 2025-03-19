@@ -226,7 +226,7 @@ export const CommonAreaForm: React.FC<CommonAreaFormProps> = ({
             />
           </CardContent>
           
-          <CardFooter className="flex justify-between">
+          <CardFooter className="flex gap-2 justify-end">
             <Button
               type="button"
               variant="outline"

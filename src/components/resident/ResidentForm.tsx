@@ -151,7 +151,7 @@ export const ResidentForm = ({
             />
           </CardContent>
           
-          <CardFooter className="flex justify-between">
+          <CardFooter className="flex gap-2 justify-end">
             <Button 
               type="button" 
               variant="outline" 
