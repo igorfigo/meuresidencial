@@ -3,8 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ServiceProvider } from '@/types/serviceProvider';
-import { Star, Phone, Clock, MapPin, Award, Copy, Check } from 'lucide-react';
+import { Star, Phone, Clock, MapPin, Award, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { formatPhone } from '@/utils/currency';
 
 interface ServiceProviderCardProps {
   provider: ServiceProvider;
@@ -14,18 +15,13 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
   const { toast } = useToast();
   const [copied, setCopied] = React.useState(false);
   
-  const handleCall = () => {
-    // In a real app, this would track the call or initiate it
-    window.open(`tel:${provider.phone.replace(/\D/g, '')}`);
-  };
-  
   const handleCopyPhone = () => {
     navigator.clipboard.writeText(provider.phone);
     setCopied(true);
     
     toast({
       title: "Número copiado",
-      description: `O número ${provider.phone} foi copiado para a área de transferência.`
+      description: `O número ${formatPhone(provider.phone)} foi copiado para a área de transferência.`
     });
     
     // Reset copy state after 2 seconds
@@ -68,31 +64,21 @@ export const ServiceProviderCard = ({ provider }: ServiceProviderCardProps) => {
         </div>
       </CardContent>
       
-      <CardFooter className="pt-2 pb-6 flex flex-col gap-2">
+      <CardFooter className="pt-2 pb-6">
         <Button 
-          onClick={handleCall} 
+          onClick={handleCopyPhone} 
           className="w-full flex items-center justify-center gap-2 font-medium"
-          variant="outline"
-        >
-          <Phone className="h-4 w-4" />
-          {provider.phone}
-        </Button>
-        
-        <Button
-          onClick={handleCopyPhone}
-          className="w-full flex items-center justify-center gap-2 text-sm"
-          variant="ghost"
-          size="sm"
+          variant="default"
         >
           {copied ? (
             <>
-              <Check className="h-4 w-4 text-green-500" />
+              <Check className="h-4 w-4" />
               Copiado
             </>
           ) : (
             <>
-              <Copy className="h-4 w-4" />
-              Copiar número
+              <Phone className="h-4 w-4" />
+              {formatPhone(provider.phone)}
             </>
           )}
         </Button>
