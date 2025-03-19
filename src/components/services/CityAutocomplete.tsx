@@ -115,33 +115,41 @@ export const CityAutocomplete = ({ selectedCity, onCityChange }: CityAutocomplet
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput
-            placeholder="Digite o nome da cidade..."
-            value={searchValue}
-            onValueChange={setSearchValue}
-            className="h-9"
-          />
-          <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>
-          {filteredCities.length > 0 && (
-            <CommandGroup className="max-h-60 overflow-y-auto">
-              {filteredCities.map((city) => (
-                <CommandItem
-                  key={`${city.name}-${city.state}`}
-                  value={`${city.name}-${city.state}`}
-                  onSelect={() => handleSelect(city)}
-                  className="flex items-center"
-                >
-                  <MapPin className="mr-2 h-4 w-4 text-slate-500" />
-                  {city.name}, {city.state}
-                  {selectedCity?.name === city.name && selectedCity?.state === city.state && (
-                    <Check className="ml-auto h-4 w-4 text-green-500" />
-                  )}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-        </Command>
+        <div className="rounded-md border">
+          <div className="flex items-center border-b px-3">
+            <MapPin className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <input
+              placeholder="Digite o nome da cidade..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="flex h-9 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+          <div className="max-h-60 overflow-y-auto">
+            {filteredCities.length === 0 ? (
+              <div className="py-6 text-center text-sm">Nenhuma cidade encontrada.</div>
+            ) : (
+              <div className="overflow-hidden p-1 text-foreground">
+                {filteredCities.map((city) => (
+                  <div
+                    key={`${city.name}-${city.state}`}
+                    onClick={() => handleSelect(city)}
+                    className={cn(
+                      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                      selectedCity?.name === city.name && selectedCity?.state === city.state && "bg-accent text-accent-foreground"
+                    )}
+                  >
+                    <MapPin className="mr-2 h-4 w-4 text-slate-500" />
+                    {city.name}, {city.state}
+                    {selectedCity?.name === city.name && selectedCity?.state === city.state && (
+                      <Check className="ml-auto h-4 w-4 text-green-500" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );
