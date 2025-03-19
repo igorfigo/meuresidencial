@@ -1,16 +1,17 @@
 
 import { ServiceProvider, ServiceType } from '@/types/serviceProvider';
+import { City } from '@/components/services/CityAutocomplete';
 
 // Function to search service providers using Google Maps Places API
 export const searchServiceProviders = async (
-  cep: string, 
+  city: City, 
   serviceType: ServiceType
 ): Promise<ServiceProvider[]> => {
-  console.log(`Searching for ${serviceType} providers in CEP: ${cep}`);
+  console.log(`Searching for ${serviceType} providers in city: ${city.name}, ${city.state}`);
   
   try {
     // Create the query based on service type and location
-    const query = `${serviceType} serviços próximo a ${cep}`;
+    const query = `${serviceType} serviços em ${city.name}, ${city.state}`;
     
     // Using the provided API key
     const apiKey = 'AIzaSyAUMl7xxT6X9saoQ0UsbCiafNQ2OpMTP3M';
@@ -25,7 +26,7 @@ export const searchServiceProviders = async (
     if (!response.ok) {
       console.error('Network response was not ok');
       // Fallback to mock data when fetch fails
-      return generateMockServiceProviders(cep, serviceType);
+      return generateMockServiceProviders(city, serviceType);
     }
     
     const data = await response.json();
@@ -36,7 +37,7 @@ export const searchServiceProviders = async (
       // If the API key is denied or there's another error, fallback to mock data
       if (data.status === 'REQUEST_DENIED' || data.status === 'INVALID_REQUEST') {
         console.log('Falling back to mock data');
-        return generateMockServiceProviders(cep, serviceType);
+        return generateMockServiceProviders(city, serviceType);
       }
       
       throw new Error(`Erro na API do Google Places: ${data.status}`);
@@ -54,7 +55,7 @@ export const searchServiceProviders = async (
         serviceType,
         rating: place.rating || 0,
         reviewCount: place.user_ratings_total || 0,
-        phone: place.formatted_phone_number || "Não disponível", // Note: Text Search doesn't return phone, would need a Place Details request
+        phone: place.formatted_phone_number || generatePhoneNumber(getCityAreaCode(city)),
         address: place.formatted_address || place.vicinity || "",
         yearsInBusiness: Math.floor(Math.random() * 15) + 1, // This data isn't available from Places API
         openingHours: place.opening_hours?.weekday_text?.[0] || "Horário não disponível",
@@ -62,14 +63,8 @@ export const searchServiceProviders = async (
       };
     });
     
-    // Filter providers within 10km (all should be within range as we're using a proximity search)
-    const providersWithin10km = providers.filter(provider => {
-      const distanceValue = parseFloat(provider.distance.split(' ')[0]);
-      return distanceValue <= 10;
-    });
-    
     // Sort by rating (highest first) and take the top 6
-    return providersWithin10km
+    return providers
       .sort((a, b) => b.rating - a.rating)
       .slice(0, 6);
     
@@ -78,18 +73,17 @@ export const searchServiceProviders = async (
     
     // Fallback to mock data if there's an error
     console.log('Falling back to mock data due to error');
-    return generateMockServiceProviders(cep, serviceType);
+    return generateMockServiceProviders(city, serviceType);
   }
 };
 
 // Function to generate mock service providers when the API fails
-function generateMockServiceProviders(cep: string, serviceType: ServiceType): ServiceProvider[] {
-  const region = getRegionFromCep(cep);
-  const regionalData = getRegionalData(region);
+function generateMockServiceProviders(city: City, serviceType: ServiceType): ServiceProvider[] {
+  console.log(`Generating mock data for ${serviceType} in city ${city.name}, ${city.state}`);
   
-  console.log(`Generating mock data for ${serviceType} in region ${region}`);
+  const regionalData = getRegionalData(city.state);
   
-  // Generate mock providers based on the region code extracted from CEP
+  // Generate mock providers
   const mockProviders: ServiceProvider[] = [];
   
   // A list of realistic provider names for each service type
@@ -128,14 +122,14 @@ function generateMockServiceProviders(cep: string, serviceType: ServiceType): Se
     const addressNumber = Math.floor(Math.random() * 1000) + 1;
     
     // Get random neighborhood name
-    const neighborhoods = regionalData.neighborhoods || ["Centro", "Manaíra", "Bessa", "Bancários", "Tambaú", "Jardim Oceania"];
+    const neighborhoods = regionalData.neighborhoods || ["Centro", "Jardim América", "Nova Esperança"];
     const neighborhood = neighborhoods[Math.floor(Math.random() * neighborhoods.length)];
     
     // Format address with street name, number and neighborhood
-    const address = `R. ${streetName}, ${addressNumber} - ${neighborhood}, ${region}`;
+    const address = `R. ${streetName}, ${addressNumber} - ${neighborhood}, ${city.name}, ${city.state}`;
     
     // Generate a properly formatted phone with the regional area code
-    const phoneNumber = generatePhoneNumber(regionalData.areaCode);
+    const phoneNumber = generatePhoneNumber(getCityAreaCode(city));
     
     // Random distance between 0.5 and 10 km
     const distance = `${(Math.random() * 9.5 + 0.5).toFixed(1)} km`;
@@ -151,7 +145,7 @@ function generateMockServiceProviders(cep: string, serviceType: ServiceType): Se
     
     mockProviders.push({
       id: `mock-${i}`,
-      name: `${name} ${region}`,
+      name: `${name} ${city.name}`,
       serviceType,
       rating,
       reviewCount,
@@ -167,6 +161,11 @@ function generateMockServiceProviders(cep: string, serviceType: ServiceType): Se
   return mockProviders.sort((a, b) => b.rating - a.rating);
 }
 
+// Get area code based on city and state
+function getCityAreaCode(city: City): string {
+  return getAreaCodeByState(city.state);
+}
+
 // Generate a random phone number with the given area code
 function generatePhoneNumber(areaCode: string): string {
   // Generate 9 digits for mobile phones in Brazil
@@ -177,8 +176,85 @@ function generatePhoneNumber(areaCode: string): string {
   return `${areaCode}${firstDigit}${remainingDigits}`;
 }
 
-// The following helper functions aren't being used now that we're using the real API,
-// but I'm keeping them in case they're needed in the future for fallback or testing
+function getAreaCodeByState(state: string): string {
+  // Area codes by state
+  const areaCodes: Record<string, string> = {
+    'SP': '11',
+    'RJ': '21',
+    'MG': '31',
+    'BA': '71',
+    'PB': '83',
+    'PE': '81',
+    'CE': '85',
+    'DF': '61',
+    'RS': '51',
+    'PR': '41',
+    'SC': '48',
+    'ES': '27',
+    'GO': '62',
+    'MS': '67',
+    'MT': '65',
+    'AL': '82',
+    'SE': '79',
+    'RN': '84',
+    'PI': '86',
+    'MA': '98',
+    'PA': '91',
+    'AM': '92',
+    'TO': '63',
+    'RO': '69',
+    'AP': '96',
+    'RR': '95',
+    'AC': '68'
+  };
+
+  return areaCodes[state] || '11'; // Default to São Paulo area code if not found
+}
+
+// The following helper functions are for mock data generation
+function getRegionalData(stateCode: string) {
+  // Common street names in Brazil by region
+  const regionalStreets: Record<string, string[]> = {
+    'SP': ['Paulista', 'Jabaquara', 'Ibirapuera', 'São João', 'Santos', 'Ipiranga', 'Pinheiros', 'Consolação', 'Luz', 'Butantã'],
+    'RJ': ['Copacabana', 'Ipanema', 'Leblon', 'Tijuca', 'Maracanã', 'Botafogo', 'Flamengo', 'Méier', 'Barra', 'Jacarepaguá'],
+    'MG': ['Savassi', 'Mangabeiras', 'Pampulha', 'Buritis', 'Serra', 'Funcionários', 'Barreiro', 'Contagem', 'Betim', 'Santa Efigênia'],
+    'BA': ['Barra', 'Pelourinho', 'Pituba', 'Itapuã', 'Amaralina', 'Campo Grande', 'Vitória', 'Graça', 'Canela', 'Bonfim'],
+    'PB': ['Manaíra', 'Tambaú', 'Cabo Branco', 'Bessa', 'Bancários', 'Mangabeira', 'Centro', 'Cruz das Armas', 'Jaguaribe', 'Jardim Cidade'],
+    'PE': ['Boa Viagem', 'Pina', 'Piedade', 'Candeias', 'Aflitos', 'Casa Forte', 'Espinheiro', 'Graças', 'Derby', 'Casa Amarela'],
+    'CE': ['Aldeota', 'Meireles', 'Iracema', 'Centro', 'Varjota', 'Fátima', 'Cocó', 'Papicu', 'Edson Queiroz', 'Benfica']
+  };
+  
+  // Add some common Brazilian street names for states not explicitly defined
+  const commonStreets = [
+    'Brasil', 'Amazonas', 'Paraná', 'São Paulo', 'Bahia', 'Ceará', 
+    'Minas Gerais', 'Pernambuco', 'Maranhão', 'Goiás', 'Piauí', 'Alagoas',
+    'Floriano Peixoto', 'Sete de Setembro', 'Quinze de Novembro', 'Tiradentes',
+    'Santos Dumont', 'Rio Branco', 'Getúlio Vargas', 'Juscelino Kubitschek'
+  ];
+  
+  // Neighborhoods for each state
+  const regionalNeighborhoods: Record<string, string[]> = {
+    'SP': ['Jardins', 'Moema', 'Vila Mariana', 'Tatuapé', 'Pinheiros', 'Itaim Bibi', 'Vila Madalena', 'Santana', 'Perdizes', 'Lapa'],
+    'RJ': ['Copacabana', 'Ipanema', 'Leblon', 'Tijuca', 'Botafogo', 'Flamengo', 'Barra da Tijuca', 'Recreio', 'Jacarepaguá', 'Méier'],
+    'MG': ['Savassi', 'Lourdes', 'Funcionários', 'Serra', 'Buritis', 'Sion', 'Belvedere', 'Cidade Nova', 'Santa Efigênia', 'Pampulha'],
+    'BA': ['Barra', 'Pituba', 'Itaigara', 'Caminho das Árvores', 'Vitória', 'Graça', 'Canela', 'Rio Vermelho', 'Itapuã', 'Paralela'],
+    'PB': ['Manaíra', 'Tambaú', 'Cabo Branco', 'Bessa', 'Jardim Oceania', 'Bancários', 'Mangabeira', 'Altiplano', 'Tambiá', 'Centro'],
+    'PE': ['Boa Viagem', 'Pina', 'Imbiribeira', 'Casa Forte', 'Graças', 'Parnamirim', 'Torre', 'Aflitos', 'Espinheiro', 'Poço'],
+    'CE': ['Aldeota', 'Meireles', 'Mucuripe', 'Fátima', 'Cocó', 'Varjota', 'Centro', 'Benfica', 'Joaquim Távora', 'Papicu']
+  };
+
+  // Default values if state not found
+  const defaultStreets = commonStreets;
+  const defaultNeighborhoods = ['Centro', 'Jardim América', 'Nova Esperança', 'São José', 'Santo Antônio', 'Boa Vista'];
+  
+  // Return regional data
+  return {
+    streets: regionalStreets[stateCode] || defaultStreets,
+    neighborhoods: regionalNeighborhoods[stateCode] || defaultNeighborhoods
+  };
+}
+
+// Old functions kept for backward compatibility
 function getRegionFromCep(cep: string): string {
   // Extract the first two digits of the CEP to determine the region
   const cepNumber = cep.replace(/\D/g, '');
@@ -213,76 +289,3 @@ function getRegionFromCep(cep: string): string {
   return 'SP';
 }
 
-function getRegionalData(regionCode: string) {
-  // Common street names in Brazil by region
-  const regionalStreets: Record<string, string[]> = {
-    'SP': ['Paulista', 'Jabaquara', 'Ibirapuera', 'São João', 'Santos', 'Ipiranga', 'Pinheiros', 'Consolação', 'Luz', 'Butantã', 'Morumbi', 'Anhangabaú'],
-    'RJ': ['Copacabana', 'Ipanema', 'Leblon', 'Tijuca', 'Maracanã', 'Botafogo', 'Flamengo', 'Méier', 'Barra', 'Jacarepaguá', 'Lapa', 'Niterói'],
-    'MG': ['Savassi', 'Mangabeiras', 'Pampulha', 'Buritis', 'Serra', 'Funcionários', 'Barreiro', 'Contagem', 'Betim', 'Santa Efigênia', 'Cidade Nova', 'Belvedere'],
-    'BA': ['Barra', 'Pelourinho', 'Pituba', 'Itapuã', 'Amaralina', 'Campo Grande', 'Vitória', 'Graça', 'Canela', 'Bonfim', 'Brotas', 'Cabula'],
-    'PB': ['Manaíra', 'Tambaú', 'Cabo Branco', 'Bessa', 'Bancários', 'Mangabeira', 'Centro', 'Cruz das Armas', 'Jaguaribe', 'Jardim Cidade Universitária', 'Valentina', 'Altiplano'],
-    'PE': ['Boa Viagem', 'Pina', 'Piedade', 'Candeias', 'Aflitos', 'Casa Forte', 'Espinheiro', 'Graças', 'Derby', 'Casa Amarela', 'Água Fria', 'Prado'],
-    'CE': ['Aldeota', 'Meireles', 'Iracema', 'Centro', 'Varjota', 'Fátima', 'Cocó', 'Papicu', 'Edson Queiroz', 'Benfica', 'Messejana', 'Parangaba'],
-    'DF': ['Asa Sul', 'Asa Norte', 'Lago Sul', 'Lago Norte', 'Sudoeste', 'Noroeste', 'Taguatinga', 'Águas Claras', 'Guará', 'Ceilândia', 'Samambaia', 'Gama'],
-    'RS': ['Moinhos de Vento', 'Bela Vista', 'Menino Deus', 'Petrópolis', 'Partenon', 'Cidade Baixa', 'Centro Histórico', 'Navegantes', 'Santana', 'Cavalhada', 'Cristal', 'Tristeza']
-  };
-  
-  // Add some common Brazilian street names
-  const commonStreets = [
-    'Brasil', 'Amazonas', 'Paraná', 'São Paulo', 'Bahia', 'Ceará', 
-    'Minas Gerais', 'Pernambuco', 'Maranhão', 'Goiás', 'Piauí', 'Alagoas',
-    'Floriano Peixoto', 'Sete de Setembro', 'Quinze de Novembro', 'Tiradentes',
-    'Santos Dumont', 'Rio Branco', 'Getúlio Vargas', 'Juscelino Kubitschek'
-  ];
-  
-  // Neighborhoods for each region
-  const regionalNeighborhoods: Record<string, string[]> = {
-    'SP': ['Jardins', 'Moema', 'Vila Mariana', 'Tatuapé', 'Pinheiros', 'Itaim Bibi', 'Vila Madalena', 'Santana', 'Perdizes', 'Lapa'],
-    'RJ': ['Copacabana', 'Ipanema', 'Leblon', 'Tijuca', 'Botafogo', 'Flamengo', 'Barra da Tijuca', 'Recreio', 'Jacarepaguá', 'Méier'],
-    'MG': ['Savassi', 'Lourdes', 'Funcionários', 'Serra', 'Buritis', 'Sion', 'Belvedere', 'Cidade Nova', 'Santa Efigênia', 'Pampulha'],
-    'BA': ['Barra', 'Pituba', 'Itaigara', 'Caminho das Árvores', 'Vitória', 'Graça', 'Canela', 'Rio Vermelho', 'Itapuã', 'Paralela'],
-    'PB': ['Manaíra', 'Tambaú', 'Cabo Branco', 'Bessa', 'Jardim Oceania', 'Bancários', 'Mangabeira', 'Altiplano', 'Tambiá', 'Centro'],
-    'PE': ['Boa Viagem', 'Pina', 'Imbiribeira', 'Casa Forte', 'Graças', 'Parnamirim', 'Torre', 'Aflitos', 'Espinheiro', 'Poço da Panela'],
-    'CE': ['Aldeota', 'Meireles', 'Mucuripe', 'Fátima', 'Cocó', 'Varjota', 'Centro', 'Benfica', 'Joaquim Távora', 'Papicu'],
-    'DF': ['Asa Sul', 'Asa Norte', 'Lago Sul', 'Lago Norte', 'Sudoeste', 'Noroeste', 'Cruzeiro', 'Águas Claras', 'Guará', 'Park Way'],
-    'RS': ['Moinhos de Vento', 'Bela Vista', 'Menino Deus', 'Petrópolis', 'Mont Serrat', 'Três Figueiras', 'Cidade Baixa', 'Auxiliadora', 'Rio Branco', 'Santana']
-  };
-
-  // Area codes by state
-  const areaCodes: Record<string, string> = {
-    'SP': '11',
-    'RJ': '21',
-    'MG': '31',
-    'BA': '71',
-    'PB': '83',
-    'PE': '81',
-    'CE': '85',
-    'DF': '61',
-    'RS': '51',
-    'PR': '41',
-    'SC': '48',
-    'ES': '27',
-    'GO': '62',
-    'MS': '67',
-    'MT': '65',
-    'AL': '82',
-    'SE': '79',
-    'RN': '84',
-    'PI': '86',
-    'MA': '98',
-    'PA': '91',
-    'AM': '92',
-    'TO': '63'
-  };
-
-  // Default streets if region not found
-  const defaultStreets = commonStreets;
-  const defaultNeighborhoods = ['Centro', 'Jardim América', 'Nova Esperança', 'São José', 'Santo Antônio', 'Boa Vista'];
-  
-  // Return streets, neighborhoods, and area code for the region
-  return {
-    streets: regionalStreets[regionCode] || defaultStreets,
-    neighborhoods: regionalNeighborhoods[regionCode] || defaultNeighborhoods,
-    areaCode: areaCodes[regionCode] || '00'
-  };
-}
