@@ -6,6 +6,7 @@ import { usePestControl } from '@/hooks/use-pest-control';
 import { PestControlForm } from '@/components/pest-control/PestControlForm';
 import { PestControlsList } from '@/components/pest-control/PestControlsList';
 import { supabase } from '@/integrations/supabase/client';
+import { Card } from '@/components/ui/card';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -103,38 +104,32 @@ const Dedetizacoes = () => {
 
         <div className="border-t pt-6">
           {showForm ? (
-            <PestControlForm
-              form={form}
-              onSubmit={handleFormSubmit}
-              isSubmitting={isSubmitting}
-              isEditing={!!form.getValues().id}
-              onCancel={handleCancelForm}
-              attachments={attachments}
-              existingAttachments={existingAttachments}
-              handleFileChange={handleFileChange}
-              removeFile={removeFile}
-              removeExistingAttachment={removeExistingAttachment}
-              getFileUrl={getFileUrl}
-              uploadProgress={uploadProgress}
-              isUploading={isUploading}
-            />
+            <Card>
+              <PestControlForm
+                form={form}
+                onSubmit={handleFormSubmit}
+                isSubmitting={isSubmitting}
+                isEditing={!!form.getValues().id}
+                onCancel={handleCancelForm}
+                attachments={attachments}
+                existingAttachments={existingAttachments}
+                handleFileChange={handleFileChange}
+                removeFile={removeFile}
+                removeExistingAttachment={removeExistingAttachment}
+                getFileUrl={getFileUrl}
+                uploadProgress={uploadProgress}
+                isUploading={isUploading}
+              />
+            </Card>
           ) : (
-            <div>
-              {isLoading ? (
-                <div className="py-10 text-center text-muted-foreground">
-                  Carregando dedetizações...
-                </div>
-              ) : (
-                <PestControlsList
-                  pestControls={pestControls || []}
-                  onEdit={handleEditPestControl}
-                  onDelete={handleDeleteClick}
-                  isDeleting={isDeleting}
-                  getFileUrl={getFileUrl}
-                  fetchAttachments={fetchAttachments}
-                />
-              )}
-            </div>
+            <PestControlsList
+              pestControls={pestControls || []}
+              onEdit={handleEditPestControl}
+              onDelete={handleDeleteClick}
+              isDeleting={isDeleting}
+              getFileUrl={getFileUrl}
+              fetchAttachments={fetchAttachments}
+            />
           )}
         </div>
       </div>

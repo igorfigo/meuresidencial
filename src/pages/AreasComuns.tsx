@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useCommonAreas } from '@/hooks/use-common-areas';
@@ -5,6 +6,7 @@ import { CommonAreaForm } from '@/components/common-areas/CommonAreaForm';
 import { CommonAreasList } from '@/components/common-areas/CommonAreasList';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -85,13 +87,15 @@ const AreasComuns = () => {
 
         <div className="border-t pt-6">
           {showForm ? (
-            <CommonAreaForm
-              form={form}
-              onSubmit={handleFormSubmit}
-              isSubmitting={isSubmitting}
-              isEditing={!!editingArea}
-              onCancel={handleCancelForm}
-            />
+            <Card>
+              <CommonAreaForm
+                form={form}
+                onSubmit={handleFormSubmit}
+                isSubmitting={isSubmitting}
+                isEditing={!!editingArea}
+                onCancel={handleCancelForm}
+              />
+            </Card>
           ) : (
             <div>
               {isLoading ? (

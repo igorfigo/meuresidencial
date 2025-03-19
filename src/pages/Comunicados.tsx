@@ -9,6 +9,7 @@ import { useApp } from '@/contexts/AppContext';
 import AnnouncementConfirmDialog from '@/components/announcements/AnnouncementConfirmDialog';
 import { format } from 'date-fns';
 import { ANNOUNCEMENT_TEMPLATES } from '@/components/announcements/AnnouncementTemplates';
+import { Card } from '@/components/ui/card';
 
 const Comunicados: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -163,24 +164,26 @@ const Comunicados: React.FC = () => {
         
         <div className="border-t pt-6">
           {showForm ? (
-            <AnnouncementForm
-              isNewAnnouncement={!selectedAnnouncement?.id}
-              title={title}
-              content={content}
-              date={date}
-              sendEmail={sendEmail}
-              sendWhatsapp={sendWhatsapp}
-              formErrors={formErrors}
-              isSaving={isSaving}
-              onTitleChange={handleTitleChange}
-              onContentChange={handleContentChange}
-              onDateChange={handleDateChange}
-              onSendEmailChange={setSendEmail}
-              onSendWhatsappChange={setSendWhatsapp}
-              onSave={handleSave}
-              onCopy={handleCopy}
-              onCancel={handleCancelForm}
-            />
+            <Card>
+              <AnnouncementForm
+                isNewAnnouncement={!selectedAnnouncement?.id}
+                title={title}
+                content={content}
+                date={date}
+                sendEmail={sendEmail}
+                sendWhatsapp={sendWhatsapp}
+                formErrors={formErrors}
+                isSaving={isSaving}
+                onTitleChange={handleTitleChange}
+                onContentChange={handleContentChange}
+                onDateChange={handleDateChange}
+                onSendEmailChange={setSendEmail}
+                onSendWhatsappChange={setSendWhatsapp}
+                onSave={handleSave}
+                onCopy={handleCopy}
+                onCancel={handleCancelForm}
+              />
+            </Card>
           ) : (
             <AnnouncementsList 
               onEdit={handleEditAnnouncement}

@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useDocuments } from '@/hooks/use-documents';
 import { DocumentForm } from '@/components/documents/DocumentForm';
 import { DocumentsList } from '@/components/documents/DocumentsList';
-import { supabase } from '@/integrations/supabase/client';
+import { Card } from '@/components/ui/card';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -35,22 +36,11 @@ const Documentos = () => {
     getFileUrl,
     uploadProgress,
     isUploading,
-    fetchAttachments
+    refetch
   } = useDocuments();
   
   const [showForm, setShowForm] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filteredDocuments, setFilteredDocuments] = useState(documents);
-  
-  const ITEMS_PER_PAGE = 5;
-  const totalPages = Math.ceil(documents.length / ITEMS_PER_PAGE);
-
-  useEffect(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    setFilteredDocuments(documents.slice(startIndex, endIndex));
-  }, [documents, currentPage]);
 
   const handleNewDocument = () => {
     resetForm();
@@ -83,10 +73,6 @@ const Documentos = () => {
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -94,60 +80,49 @@ const Documentos = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Documentos Úteis</h1>
             <p className="text-muted-foreground">
-              Gerencie os documentos importantes do seu condomínio
+              Gerencie os documentos úteis do seu condomínio
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {!showForm && (
-              <Button onClick={handleNewDocument} className="bg-brand-600 hover:bg-brand-700">
-                <Plus className="mr-2 h-4 w-4" />
-                Novo Documento
-              </Button>
-            )}
-          </div>
+          {!showForm && (
+            <Button onClick={handleNewDocument} className="bg-brand-600 hover:bg-brand-700">
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Documento
+            </Button>
+          )}
         </div>
 
         <div className="border-t pt-6">
           {showForm ? (
-            <DocumentForm
-              form={form}
-              onSubmit={handleFormSubmit}
-              isSubmitting={isSubmitting}
-              isEditing={!!form.getValues().id}
-              onCancel={handleCancelForm}
-              attachments={attachments}
-              existingAttachments={existingAttachments}
-              handleFileChange={handleFileChange}
-              removeFile={removeFile}
-              removeExistingAttachment={removeExistingAttachment}
-              getFileUrl={getFileUrl}
-              uploadProgress={uploadProgress}
-              isUploading={isUploading}
-            />
+            <Card>
+              <DocumentForm
+                form={form}
+                onSubmit={handleFormSubmit}
+                isSubmitting={isSubmitting}
+                isEditing={!!form.getValues().id}
+                onCancel={handleCancelForm}
+                attachments={attachments}
+                existingAttachments={existingAttachments}
+                handleFileChange={handleFileChange}
+                removeFile={removeFile}
+                removeExistingAttachment={removeExistingAttachment}
+                getFileUrl={getFileUrl}
+                uploadProgress={uploadProgress}
+                isUploading={isUploading}
+              />
+            </Card>
           ) : (
-            <div>
-              {isLoading ? (
-                <div className="py-10 text-center text-muted-foreground">
-                  Carregando documentos...
-                </div>
-              ) : (
-                <DocumentsList
-                  documents={filteredDocuments}
-                  onEdit={handleEditDocument}
-                  onDelete={handleDeleteClick}
-                  isDeleting={isDeleting}
-                  getFileUrl={getFileUrl}
-                  fetchAttachments={fetchAttachments}
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
-            </div>
+            <DocumentsList
+              documents={documents || []}
+              onEdit={handleEditDocument}
+              onDelete={handleDeleteClick}
+              isDeleting={isDeleting}
+              getFileUrl={getFileUrl}
+            />
           )}
         </div>
       </div>
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
