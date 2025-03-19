@@ -123,22 +123,24 @@ export const CityAutocomplete = ({ selectedCity, onCityChange }: CityAutocomplet
             className="h-9"
           />
           <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>
-          <CommandGroup className="max-h-60 overflow-y-auto">
-            {filteredCities.map((city) => (
-              <CommandItem
-                key={`${city.name}-${city.state}`}
-                value={`${city.name}-${city.state}`}
-                onSelect={() => handleSelect(city)}
-                className="flex items-center"
-              >
-                <MapPin className="mr-2 h-4 w-4 text-slate-500" />
-                {city.name}, {city.state}
-                {selectedCity?.name === city.name && selectedCity?.state === city.state && (
-                  <Check className="ml-auto h-4 w-4 text-green-500" />
-                )}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          {filteredCities.length > 0 && (
+            <CommandGroup className="max-h-60 overflow-y-auto">
+              {filteredCities.map((city) => (
+                <CommandItem
+                  key={`${city.name}-${city.state}`}
+                  value={`${city.name}-${city.state}`}
+                  onSelect={() => handleSelect(city)}
+                  className="flex items-center"
+                >
+                  <MapPin className="mr-2 h-4 w-4 text-slate-500" />
+                  {city.name}, {city.state}
+                  {selectedCity?.name === city.name && selectedCity?.state === city.state && (
+                    <Check className="ml-auto h-4 w-4 text-green-500" />
+                  )}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
         </Command>
       </PopoverContent>
     </Popover>
