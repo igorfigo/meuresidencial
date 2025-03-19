@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -73,7 +73,7 @@ interface CityAutocompleteProps {
 export const CityAutocomplete = ({ selectedCity, onCityChange }: CityAutocompleteProps) => {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [filteredCities, setFilteredCities] = useState(brazilianCities);
+  const [filteredCities, setFilteredCities] = useState<City[]>(brazilianCities);
 
   useEffect(() => {
     if (searchValue.trim() === '') {
@@ -144,4 +144,3 @@ export const CityAutocomplete = ({ selectedCity, onCityChange }: CityAutocomplet
     </Popover>
   );
 };
-
