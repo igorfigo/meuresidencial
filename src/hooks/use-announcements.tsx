@@ -17,6 +17,8 @@ export interface Announcement {
   date?: string;
   created_at?: string;
   updated_at?: string;
+  sent_by_email?: boolean;
+  sent_by_whatsapp?: boolean;
 }
 
 export function useAnnouncements() {
@@ -36,7 +38,6 @@ export function useAnnouncements() {
     
     try {
       const data = await getAnnouncements(selectedCondominium);
-      // Type assertion to ensure proper typing
       setAnnouncements(data as Announcement[] || []);
     } catch (err) {
       console.error("Error fetching announcements:", err);
@@ -68,7 +69,6 @@ export function useAnnouncements() {
 
   const createAnnouncement = async (announcementData: Omit<Announcement, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      // Create a new object without the date field for database persistence
       const { date, ...dataToSave } = announcementData;
       
       const result = await saveAnnouncement({
@@ -96,7 +96,6 @@ export function useAnnouncements() {
 
   const updateAnnouncement = async (announcementData: Announcement) => {
     try {
-      // Create a new object without the date field for database persistence
       const { date, ...dataToSave } = announcementData;
       
       const result = await saveAnnouncement(dataToSave);
@@ -106,7 +105,6 @@ export function useAnnouncements() {
         description: "Comunicado atualizado com sucesso",
       });
       
-      // Update the local state to reflect changes
       setAnnouncements(prev => 
         prev.map(item => item.id === announcementData.id ? {...item, ...announcementData} : item)
       );
@@ -132,7 +130,6 @@ export function useAnnouncements() {
         description: "Comunicado excluído com sucesso",
       });
       
-      // Update the local state to remove the deleted item
       setAnnouncements(prev => prev.filter(item => item.id !== id));
       
       return true;
@@ -147,7 +144,6 @@ export function useAnnouncements() {
     }
   };
 
-  // Initial load of announcements
   useEffect(() => {
     if (selectedCondominium) {
       fetchAnnouncements();

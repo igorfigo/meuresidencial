@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, Mail, MessageSquare } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -102,6 +103,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
               <TableRow>
                 <TableHead>Título</TableHead>
                 <TableHead className="text-center">Data</TableHead>
+                <TableHead className="text-center">Enviado por</TableHead>
                 <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -110,6 +112,18 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                 <TableRow key={announcement.id}>
                   <TableCell className="font-medium">{announcement.title}</TableCell>
                   <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex justify-center space-x-2">
+                      <Mail 
+                        className={`h-4 w-4 ${announcement.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} 
+                        title={announcement.sent_by_email ? "Enviado por e-mail" : "Não enviado por e-mail"} 
+                      />
+                      <MessageSquare 
+                        className={`h-4 w-4 ${announcement.sent_by_whatsapp ? 'text-green-500' : 'text-gray-300'}`}
+                        title={announcement.sent_by_whatsapp ? "Enviado por WhatsApp" : "Não enviado por WhatsApp"}
+                      />
+                    </div>
+                  </TableCell>
                   <TableCell className="text-center">
                     <div className="flex justify-center space-x-1">
                       <Button 
@@ -153,6 +167,20 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Conteúdo</h4>
                 <p className="text-sm whitespace-pre-line">{detailView.content}</p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground">Enviado via</h4>
+                <div className="flex space-x-4 mt-1">
+                  <div className="flex items-center">
+                    <Mail className={`h-4 w-4 mr-2 ${detailView.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>{detailView.sent_by_email ? 'E-mail' : 'Não enviado por e-mail'}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <MessageSquare className={`h-4 w-4 mr-2 ${detailView.sent_by_whatsapp ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>{detailView.sent_by_whatsapp ? 'WhatsApp' : 'Não enviado por WhatsApp'}</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}

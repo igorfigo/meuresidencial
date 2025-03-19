@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
@@ -46,8 +47,8 @@ const Comunicados: React.FC = () => {
     setTitle(announcement.title);
     setContent(announcement.content);
     setDate(announcement.date || format(new Date(), 'yyyy-MM-dd'));
-    setSendEmail(false);
-    setSendWhatsapp(false);
+    setSendEmail(announcement.sent_by_email || false);
+    setSendWhatsapp(announcement.sent_by_whatsapp || false);
     setFormErrors({});
     setShowForm(true);
   };
@@ -104,7 +105,9 @@ const Comunicados: React.FC = () => {
         ...selectedAnnouncement,
         title,
         content,
-        date
+        date,
+        sent_by_email: sendEmail,
+        sent_by_whatsapp: sendWhatsapp
       };
       
       if (selectedAnnouncement.id) {

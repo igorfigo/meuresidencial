@@ -234,7 +234,10 @@ export const saveAnnouncement = async (announcementData: any) => {
       // Use type assertion to bypass TypeScript checking
       const { data, error } = await (supabase
         .from('announcements' as any)
-        .insert(announcementData)
+        .insert({
+          ...announcementData,
+          created_at: new Date().toISOString()
+        })
         .select() as any);
       
       if (error) {
