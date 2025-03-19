@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
-import { Eye, Trash2, Mail, MessageSquare } from 'lucide-react';
+import { Eye, Trash2, Mail, Phone } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -131,7 +131,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <MessageSquare 
+                            <Phone 
                               className={`h-4 w-4 ${announcement.sent_by_whatsapp ? 'text-green-500' : 'text-gray-300'}`}
                             />
                           </TooltipTrigger>
@@ -195,7 +195,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                     <span>{detailView.sent_by_email ? 'E-mail' : 'Não enviado por e-mail'}</span>
                   </div>
                   <div className="flex items-center">
-                    <MessageSquare className={`h-4 w-4 mr-2 ${detailView.sent_by_whatsapp ? 'text-green-500' : 'text-gray-300'}`} />
+                    <Phone className={`h-4 w-4 mr-2 ${detailView.sent_by_whatsapp ? 'text-green-500' : 'text-gray-300'}`} />
                     <span>{detailView.sent_by_whatsapp ? 'WhatsApp' : 'Não enviado por WhatsApp'}</span>
                   </div>
                 </div>

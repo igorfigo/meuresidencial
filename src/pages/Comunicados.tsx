@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
@@ -9,6 +10,7 @@ import { useApp } from '@/contexts/AppContext';
 import AnnouncementConfirmDialog from '@/components/announcements/AnnouncementConfirmDialog';
 import { format } from 'date-fns';
 import { ANNOUNCEMENT_TEMPLATES } from '@/components/announcements/AnnouncementTemplates';
+import { Card } from '@/components/ui/card';
 
 const Comunicados: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -130,6 +132,7 @@ const Comunicados: React.FC = () => {
   
   const handleTitleChange = (value: string) => {
     setTitle(value);
+    // Set the content based on the selected template title
     const templateContent = ANNOUNCEMENT_TEMPLATES[value as keyof typeof ANNOUNCEMENT_TEMPLATES];
     if (templateContent) {
       setContent(templateContent);
@@ -164,7 +167,7 @@ const Comunicados: React.FC = () => {
         
         <div className="border-t pt-6">
           {showForm ? (
-            <div className="rounded-lg shadow-sm border bg-card text-card-foreground">
+            <Card>
               <AnnouncementForm
                 isNewAnnouncement={!selectedAnnouncement?.id}
                 title={title}
@@ -183,7 +186,7 @@ const Comunicados: React.FC = () => {
                 onCopy={handleCopy}
                 onCancel={handleCancelForm}
               />
-            </div>
+            </Card>
           ) : (
             <AnnouncementsList 
               onEdit={handleEditAnnouncement}
