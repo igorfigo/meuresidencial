@@ -69,7 +69,7 @@ export function useAnnouncements() {
     }
   };
 
-  const createAnnouncement = async (announcementData: Omit<Announcement, 'id' | 'created_at' | 'updated_at'>) => {
+  const createAnnouncement = async (announcementData: Announcement) => {
     try {
       // Create a new object without the date field for database persistence
       const { date, ...dataToSave } = announcementData;
