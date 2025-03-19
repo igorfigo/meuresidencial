@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -31,6 +30,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Card } from '@/components/ui/card';
 
 interface DocumentsListProps {
   documents: Document[];
@@ -105,12 +105,10 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
     }
   };
 
-  // Generate pagination items
   const generatePaginationItems = () => {
     const items = [];
     const maxVisiblePages = 5;
 
-    // Always show first page
     items.push(
       <PaginationItem key="first">
         <PaginationLink 
@@ -126,7 +124,6 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
       </PaginationItem>
     );
 
-    // Calculate start and end pages
     let startPage = Math.max(2, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 3);
     
@@ -134,7 +131,6 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
       startPage = Math.max(2, endPage - (maxVisiblePages - 3));
     }
 
-    // Add ellipsis after first page if needed
     if (startPage > 2) {
       items.push(
         <PaginationItem key="ellipsis-start">
@@ -143,7 +139,6 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
       );
     }
 
-    // Add middle pages
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -161,7 +156,6 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
       );
     }
 
-    // Add ellipsis before last page if needed
     if (endPage < totalPages - 1) {
       items.push(
         <PaginationItem key="ellipsis-end">
@@ -170,7 +164,6 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
       );
     }
 
-    // Always show last page if there's more than one page
     if (totalPages > 1) {
       items.push(
         <PaginationItem key="last">
@@ -202,7 +195,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           </p>
         </div>
       ) : (
-        <div className="rounded-md border">
+        <Card className="overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -285,10 +278,9 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
               </Pagination>
             </div>
           )}
-        </div>
+        </Card>
       )}
 
-      {/* Details dialog */}
       <Dialog open={!!detailView} onOpenChange={(open) => !open && setDetailView(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>

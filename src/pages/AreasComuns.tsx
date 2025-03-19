@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useCommonAreas } from '@/hooks/use-common-areas';
@@ -94,7 +93,7 @@ const AreasComuns = () => {
               onCancel={handleCancelForm}
             />
           ) : (
-            <div className="rounded-md bg-white">
+            <div>
               {isLoading ? (
                 <div className="py-10 text-center text-muted-foreground">
                   Carregando áreas comuns...

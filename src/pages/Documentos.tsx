@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -44,7 +43,7 @@ const Documentos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredDocuments, setFilteredDocuments] = useState(documents);
   
-  const ITEMS_PER_PAGE = 5; // Changed from 10 to 5
+  const ITEMS_PER_PAGE = 5;
   const totalPages = Math.ceil(documents.length / ITEMS_PER_PAGE);
 
   useEffect(() => {
@@ -126,7 +125,7 @@ const Documentos = () => {
               isUploading={isUploading}
             />
           ) : (
-            <div className="rounded-md bg-white">
+            <div>
               {isLoading ? (
                 <div className="py-10 text-center text-muted-foreground">
                   Carregando documentos...
@@ -149,7 +148,6 @@ const Documentos = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -24,6 +23,7 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
 
 interface AnnouncementsListProps {
   onEdit: (announcement: Announcement) => void;
@@ -90,7 +90,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
   }
   
   return (
-    <div className="rounded-md border bg-white shadow-sm">
+    <Card className="overflow-hidden">
       {announcements.length === 0 ? (
         <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center">
           <p className="text-muted-foreground mb-4">Nenhum comunicado encontrado.</p>
@@ -137,7 +137,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
         </div>
       )}
       
-      {/* View announcement details dialog */}
       <Dialog open={!!detailView} onOpenChange={(open) => !open && setDetailView(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -176,7 +175,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </Card>
   );
 };
 

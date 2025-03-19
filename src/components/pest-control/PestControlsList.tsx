@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -24,6 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { PestControl, PestControlAttachment } from '@/hooks/use-pest-control';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Card } from '@/components/ui/card';
 
 interface PestControlsListProps {
   pestControls: PestControl[];
@@ -112,7 +112,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
           </p>
         </div>
       ) : (
-        <div className="rounded-md border">
+        <Card className="overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -161,7 +161,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
               ))}
             </TableBody>
           </Table>
-        </div>
+        </Card>
       )}
 
       {/* Details dialog */}

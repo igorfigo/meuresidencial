@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -120,7 +119,7 @@ const Dedetizacoes = () => {
               isUploading={isUploading}
             />
           ) : (
-            <div className="rounded-md bg-white">
+            <div>
               {isLoading ? (
                 <div className="py-10 text-center text-muted-foreground">
                   Carregando dedetizações...

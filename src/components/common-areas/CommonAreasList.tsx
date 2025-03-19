@@ -150,7 +150,7 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
 
   return (
     <>
-      <div className="rounded-md border">
+      <Card className="overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -216,7 +216,7 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
             )}
           </TableBody>
         </Table>
-      </div>
+      </Card>
 
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
