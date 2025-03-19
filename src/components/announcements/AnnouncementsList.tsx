@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface AnnouncementsListProps {
   onEdit: (announcement: Announcement) => void;
@@ -113,14 +115,31 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                   <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
                   <TableCell className="text-center">
                     <div className="flex justify-center space-x-2">
-                      <Mail 
-                        className={`h-4 w-4 ${announcement.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} 
-                        title={announcement.sent_by_email ? "Enviado por e-mail" : "Não enviado por e-mail"} 
-                      />
-                      <MessageSquare 
-                        className={`h-4 w-4 ${announcement.sent_by_whatsapp ? 'text-green-500' : 'text-gray-300'}`}
-                        title={announcement.sent_by_whatsapp ? "Enviado por WhatsApp" : "Não enviado por WhatsApp"}
-                      />
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Mail 
+                              className={`h-4 w-4 ${announcement.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} 
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {announcement.sent_by_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <MessageSquare 
+                              className={`h-4 w-4 ${announcement.sent_by_whatsapp ? 'text-green-500' : 'text-gray-300'}`}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {announcement.sent_by_whatsapp ? "Enviado por WhatsApp" : "Não enviado por WhatsApp"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
