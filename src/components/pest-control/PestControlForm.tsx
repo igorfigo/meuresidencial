@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -23,7 +22,6 @@ import {
   File, 
   Upload, 
   Save, 
-  ArrowLeft, 
   Loader2, 
   Download, 
   Trash2 
@@ -70,7 +68,6 @@ export const PestControlForm: React.FC<PestControlFormProps> = ({
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Set current date when component mounts if the date field is empty
   React.useEffect(() => {
     if (!form.getValues().data) {
       form.setValue('data', format(new Date(), 'yyyy-MM-dd'));
@@ -230,7 +227,6 @@ export const PestControlForm: React.FC<PestControlFormProps> = ({
                 </div>
               )}
 
-              {/* New attachments */}
               {attachments.length > 0 && (
                 <div className="space-y-2 mt-2">
                   <h4 className="text-sm font-medium">Arquivos a enviar:</h4>
@@ -262,7 +258,6 @@ export const PestControlForm: React.FC<PestControlFormProps> = ({
                 </div>
               )}
 
-              {/* Existing attachments */}
               {existingAttachments.length > 0 && (
                 <div className="space-y-2 mt-4">
                   <h4 className="text-sm font-medium">Anexos já enviados:</h4>
@@ -308,11 +303,10 @@ export const PestControlForm: React.FC<PestControlFormProps> = ({
         <div className="flex gap-2 justify-end">
           <Button 
             type="button" 
-            variant="outline" 
+            variant="cancel" 
             onClick={onCancel}
             disabled={isSubmitting}
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
             Cancelar
           </Button>
           <Button 
