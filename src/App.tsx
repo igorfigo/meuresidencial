@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,7 +17,6 @@ import Documentos from "./pages/Documentos";
 import Comunicados from "./pages/Comunicados";
 import AreasComuns from "./pages/AreasComuns";
 import FaleConosco from "./pages/FaleConosco";
-import Servicos from "./pages/Servicos";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -208,7 +208,7 @@ const App = () => (
             <Route path="/servicos" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <Servicos />
+                  <UnderConstruction />
                 </ProtectedRoute>
               </AnimationController>
             } />

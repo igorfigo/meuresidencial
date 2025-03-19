@@ -31,7 +31,7 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
       if (address) {
         setValue('rua', address.logradouro);
         setValue('bairro', address.bairro);
-        setValue('cidade', address.cidade);
+        setValue('cidade', address.localidade);
         setValue('estado', address.uf);
         toast.success('CEP encontrado com sucesso!');
       } else {

@@ -1,3 +1,4 @@
+
 // Functions for formatting and parsing monetary values
 
 // Format a number to BRL format (Brazilian Real)
@@ -68,7 +69,7 @@ export const formatCep = (value: string): string => {
     .replace(/(-\d{3})\d+?$/, '$1');
 };
 
-// Format phone: (XX)XXXXX-XXXX or (XX)XXXX-XXXX
+// Format phone: (XX) XXXXX-XXXX or (XX) XXXX-XXXX
 export const formatPhone = (value: string): string => {
   if (!value) return '';
   
@@ -77,15 +78,15 @@ export const formatPhone = (value: string): string => {
   
   // Apply phone mask based on length
   if (digits.length <= 10) {
-    // (XX)XXXX-XXXX
+    // (XX) XXXX-XXXX
     return digits
-      .replace(/(\d{2})(\d)/, '($1)$2')
+      .replace(/(\d{2})(\d)/, '($1) $2')
       .replace(/(\d{4})(\d)/, '$1-$2')
       .replace(/(-\d{4})\d+?$/, '$1');
   } else {
-    // (XX)XXXXX-XXXX
+    // (XX) XXXXX-XXXX
     return digits
-      .replace(/(\d{2})(\d)/, '($1)$2')
+      .replace(/(\d{2})(\d)/, '($1) $2')
       .replace(/(\d{5})(\d)/, '$1-$2')
       .replace(/(-\d{4})\d+?$/, '$1');
   }

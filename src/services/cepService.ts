@@ -1,41 +1,29 @@
 
-// Extend the existing cepService with functions to format and validate CEP
+interface AddressData {
+  logradouro: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+  erro?: boolean;
+}
 
-export const formatCep = (cep: string): string => {
-  // Remove non-numeric characters
-  const numericCep = cep.replace(/\D/g, '');
-  
-  // Format as #####-###
-  if (numericCep.length <= 5) {
-    return numericCep;
-  } else {
-    return `${numericCep.slice(0, 5)}-${numericCep.slice(5, 8)}`;
+export const fetchAddressByCep = async (cep: string): Promise<AddressData | null> => {
+  try {
+    const cleanedCep = cep.replace(/\D/g, '');
+    if (cleanedCep.length !== 8) {
+      return null;
+    }
+    
+    const response = await fetch(`https://viacep.com.br/ws/${cleanedCep}/json/`);
+    const data = await response.json();
+    
+    if (data.erro) {
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching address by CEP:', error);
+    return null;
   }
-};
-
-export const validateCep = (cep: string): boolean => {
-  const numericCep = cep.replace(/\D/g, '');
-  return numericCep.length === 8;
-};
-
-// Simulate fetching address by CEP (in a real app, this would call an API)
-export const fetchAddressByCep = async (cep: string) => {
-  // Remove non-numeric characters for validation
-  const numericCep = cep.replace(/\D/g, '');
-  
-  if (numericCep.length !== 8) {
-    throw new Error('CEP inválido');
-  }
-  
-  // In a real app, we would call an API here
-  // For now, just return a mock response after a delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  return {
-    cep: cep,
-    logradouro: 'Rua Exemplo',
-    bairro: 'Bairro Teste',
-    cidade: 'São Paulo',
-    uf: 'SP'
-  };
 };
