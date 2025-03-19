@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -6,7 +7,7 @@ import { ThemeProvider } from 'next-themes';
 import { AppProvider } from './contexts/AppContext';
 import { Toaster } from 'sonner';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import DashboardLayout from './components/DashboardLayout';
+import { DashboardLayout } from './components/DashboardLayout';
 
 // Pages
 import Index from './pages/Index';
