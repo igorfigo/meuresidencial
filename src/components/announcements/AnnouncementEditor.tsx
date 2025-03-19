@@ -11,10 +11,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Copy, Save } from 'lucide-react';
+import { Copy, Send } from 'lucide-react';
 import { Announcement } from '@/hooks/use-announcements';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -22,6 +23,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -95,6 +106,8 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
   const [content, setContent] = useState('');
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [isSaving, setIsSaving] = useState(false);
+  const [sendEmail, setSendEmail] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { toast } = useToast();
   const isNewAnnouncement = !announcement?.id;
 
@@ -134,6 +147,17 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
   const handleSave = async () => {
     if (!announcement) return;
     
+    if (sendEmail) {
+      setShowConfirmDialog(true);
+    } else {
+      await saveAnnouncement();
+    }
+  };
+
+  // Save announcement without confirmation
+  const saveAnnouncement = async () => {
+    if (!announcement) return;
+    
     setIsSaving(true);
     
     try {
@@ -145,6 +169,13 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
       });
       
       onOpenChange(false);
+      
+      toast({
+        title: "Sucesso",
+        description: sendEmail 
+          ? "Comunicado enviado com sucesso para os moradores" 
+          : "Comunicado salvo com sucesso",
+      });
     } catch (error) {
       console.error('Error saving announcement:', error);
     } finally {
@@ -173,86 +204,116 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Editar Comunicado</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4 flex-1 overflow-hidden">
-          <div>
-            <Label htmlFor="title">Título</Label>
-            {isNewAnnouncement ? (
-              <Select value={title} onValueChange={handleTitleChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione um título" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(ANNOUNCEMENT_TEMPLATES).map((templateTitle) => (
-                    <SelectItem key={templateTitle} value={templateTitle}>
-                      {templateTitle}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Título do comunicado"
-              />
-            )}
-          </div>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>{isNewAnnouncement ? "Criar Comunicado" : "Editar Comunicado"}</DialogTitle>
+          </DialogHeader>
           
-          <div>
-            <Label htmlFor="date">Data</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={handleDateChange}
-            />
-          </div>
-          
-          <div className="flex-1 overflow-hidden">
-            <Label htmlFor="content">Conteúdo</Label>
-            <Textarea
-              id="content"
-              value={content}
-              onChange={handleContentChange}
-              placeholder="Conteúdo do comunicado"
-              className="h-[400px] resize-none"
-            />
-          </div>
-        </div>
-        
-        <DialogFooter className="flex justify-between gap-2">
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={handleCopy}
-              type="button"
-            >
-              <Copy className="h-4 w-4 mr-2" />
-              Copiar texto
-            </Button>
+          <div className="space-y-4 flex-1 overflow-hidden">
+            <div className="space-y-2">
+              <Label htmlFor="title">Título</Label>
+              {isNewAnnouncement ? (
+                <Select value={title} onValueChange={handleTitleChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione um título" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(ANNOUNCEMENT_TEMPLATES).map((templateTitle) => (
+                      <SelectItem key={templateTitle} value={templateTitle}>
+                        {templateTitle}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Título do comunicado"
+                  className="w-full"
+                />
+              )}
+            </div>
             
-            <Button 
-              onClick={handleSave} 
-              disabled={isSaving}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Salvar alterações
-            </Button>
+            <div className="space-y-2">
+              <Label htmlFor="date">Data</Label>
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={handleDateChange}
+                className="w-full"
+              />
+            </div>
+            
+            <div className="flex-1 overflow-hidden">
+              <Label htmlFor="content">Conteúdo</Label>
+              <Textarea
+                id="content"
+                value={content}
+                onChange={handleContentChange}
+                placeholder="Conteúdo do comunicado"
+                className="h-[400px] resize-none w-full"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="send-email" 
+                checked={sendEmail} 
+                onCheckedChange={(checked) => setSendEmail(checked === true)}
+              />
+              <Label htmlFor="send-email">Enviar E-mail aos Moradores</Label>
+            </div>
           </div>
           
-          <DialogClose asChild>
-            <Button variant="secondary">Fechar</Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter className="flex justify-between gap-2">
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleCopy}
+                type="button"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copiar texto
+              </Button>
+              
+              <Button 
+                onClick={handleSave} 
+                disabled={isSaving}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Enviar Comunicado
+              </Button>
+            </div>
+            
+            <DialogClose asChild>
+              <Button variant="secondary">Fechar</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar envio</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza do envio? A ação não poderá ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={saveAnnouncement}>
+              Confirmar envio
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
