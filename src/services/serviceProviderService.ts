@@ -25,24 +25,34 @@ export const searchServiceProviders = async (
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
+    // Use the last 5 digits of the CEP to seed randomness
+    const cepSeed = parseInt(cep.replace(/\D/g, '').slice(-5)) || 0;
+    
     // Generate realistic mock service providers that simulate Google Places data
-    const mockProviders: ServiceProvider[] = Array.from({ length: 10 }, (_, i) => {
+    const mockProviders: ServiceProvider[] = Array.from({ length: 12 }, (_, i) => {
       // Generate realistic business names based on service type
       const businessNames = {
-        'Eletricista': ['Elétrica Express', 'Serviços Elétricos Silva', 'Eletricistas Unidos', 'Instalações Elétricas JC', 'Eletricista 24h', 'Rede Elétrica', 'Força & Luz', 'Eletrotécnica BR', 'Ligações Elétricas', 'Elétrica Doméstica'],
-        'Pintor': ['Pintores Profissionais', 'Cores & Cia', 'Pintura Expressa', 'Tintas & Arte', 'Renovação Pinturas', 'Pincel de Ouro', 'Pintura Residencial', 'Arte em Cores', 'Pintura Comercial', 'Pintura Decorativa'],
-        'Encanador': ['Hidroserv', 'Encanadores Express', 'Água & Cia', 'Tubos & Conexões', 'Hidráulica Geral', 'Vazamentos Zero', 'Encanação Profissional', 'Reparo Hidráulico', 'Água Fácil', 'Canos & Cia'],
-        'Diarista': ['Limpeza Express', 'Faxina Completa', 'Casa & Cia Limpezas', 'Diaristas Profissionais', 'Limpeza Total', 'Serviços Domésticos', 'Limpeza Perfeita', 'Limpeza Residencial', 'Faxina Rápida', 'Limpeza Geral'],
-        'Pedreiro': ['Construções Silva', 'Reformas Express', 'Alvenaria Profissional', 'Obras & Cia', 'Construções Rápidas', 'Mão de Obra Especializada', 'Reforma Geral', 'Construção Civil', 'Mestre de Obras', 'Reformas & Reparos']
+        'Eletricista': ['Elétrica Express', 'Serviços Elétricos Silva', 'Eletricistas Unidos', 'Instalações Elétricas JC', 'Eletricista 24h', 'Rede Elétrica', 'Força & Luz', 'Eletrotécnica BR', 'Ligações Elétricas', 'Elétrica Doméstica', 'Instalações Flash', 'Luz & Cia'],
+        'Pintor': ['Pintores Profissionais', 'Cores & Cia', 'Pintura Expressa', 'Tintas & Arte', 'Renovação Pinturas', 'Pincel de Ouro', 'Pintura Residencial', 'Arte em Cores', 'Pintura Comercial', 'Pintura Decorativa', 'Pinturas Mestre', 'Cor & Estilo'],
+        'Encanador': ['Hidroserv', 'Encanadores Express', 'Água & Cia', 'Tubos & Conexões', 'Hidráulica Geral', 'Vazamentos Zero', 'Encanação Profissional', 'Reparo Hidráulico', 'Água Fácil', 'Canos & Cia', 'Hidrotec', 'Tubos Express'],
+        'Diarista': ['Limpeza Express', 'Faxina Completa', 'Casa & Cia Limpezas', 'Diaristas Profissionais', 'Limpeza Total', 'Serviços Domésticos', 'Limpeza Perfeita', 'Limpeza Residencial', 'Faxina Rápida', 'Limpeza Geral', 'Serviços do Lar', 'Brilho Total'],
+        'Pedreiro': ['Construções Silva', 'Reformas Express', 'Alvenaria Profissional', 'Obras & Cia', 'Construções Rápidas', 'Mão de Obra Especializada', 'Reforma Geral', 'Construção Civil', 'Mestre de Obras', 'Reformas & Reparos', 'Construir & Cia', 'Renovação Obras']
       };
       
-      // Generate realistic ratings between 3.0 and 5.0
-      const rating = (3.0 + Math.random() * 2.0).toFixed(1);
-      const reviews = Math.floor(Math.random() * 150) + 5;
-      const yearsInBusiness = Math.floor(Math.random() * 15) + 1;
+      // Use CEP to seed pseudo-random generation
+      const seedMultiplier = (cepSeed * (i + 1)) % 100 / 100;
       
-      // Generate random distance between 0.5 and 15 km, with a higher probability of being within 10km
-      const distanceValue = (0.5 + Math.random() * 14.5).toFixed(1);
+      // Generate realistic ratings between 3.0 and 5.0, slightly influenced by CEP
+      const ratingBase = 3.0 + (seedMultiplier * 2.0);
+      const rating = Math.min(5.0, Math.max(3.0, ratingBase)).toFixed(1);
+      
+      const reviews = Math.floor((seedMultiplier * 150) + 5);
+      const yearsInBusiness = Math.floor((seedMultiplier * 15) + 1);
+      
+      // Generate random distance between 0.5 and 20 km, influenced by CEP and index
+      // This ensures different CEPs will get different distance patterns
+      const distanceBase = 0.5 + ((seedMultiplier + (i * 0.1)) * 19.5);
+      const distanceValue = distanceBase.toFixed(1);
       
       return {
         id: `place-${i}-${serviceType}-${cep}`,
@@ -50,10 +60,10 @@ export const searchServiceProviders = async (
         serviceType,
         rating: parseFloat(rating),
         reviewCount: reviews,
-        phone: `(${Math.floor(Math.random() * 90) + 10}) ${Math.floor(Math.random() * 90000) + 10000}-${Math.floor(Math.random() * 9000) + 1000}`,
-        address: `R. ${['Brasil', 'São José', 'Flores', 'Palmeiras', 'Santos', 'Ipiranga', 'Amazonas', 'Paraná', 'São Paulo', 'Bahia'][i]}, ${Math.floor(Math.random() * 1000) + 100} - Próximo ao CEP ${cep}`,
+        phone: `(${Math.floor(seedMultiplier * 90) + 10}) ${Math.floor(seedMultiplier * 90000) + 10000}-${Math.floor(seedMultiplier * 9000) + 1000}`,
+        address: `R. ${['Brasil', 'São José', 'Flores', 'Palmeiras', 'Santos', 'Ipiranga', 'Amazonas', 'Paraná', 'São Paulo', 'Bahia', 'Ceará', 'Minas Gerais'][i]}, ${Math.floor(seedMultiplier * 1000) + 100} - Próximo ao CEP ${cep}`,
         yearsInBusiness,
-        openingHours: `${Math.floor(Math.random() * 3) + 7}h às ${Math.floor(Math.random() * 4) + 17}h`,
+        openingHours: `${Math.floor(seedMultiplier * 3) + 7}h às ${Math.floor(seedMultiplier * 4) + 17}h`,
         distance: `${distanceValue} km`
       };
     });
