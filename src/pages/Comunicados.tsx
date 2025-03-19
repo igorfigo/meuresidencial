@@ -9,6 +9,7 @@ import AnnouncementForm from '@/components/announcements/AnnouncementForm';
 import { useApp } from '@/contexts/AppContext';
 import AnnouncementConfirmDialog from '@/components/announcements/AnnouncementConfirmDialog';
 import { format } from 'date-fns';
+import { ANNOUNCEMENT_TEMPLATES } from '@/components/announcements/AnnouncementTemplates';
 
 const Comunicados: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -128,6 +129,11 @@ const Comunicados: React.FC = () => {
   
   const handleTitleChange = (value: string) => {
     setTitle(value);
+    // Set the content based on the selected template title
+    const templateContent = ANNOUNCEMENT_TEMPLATES[value as keyof typeof ANNOUNCEMENT_TEMPLATES];
+    if (templateContent) {
+      setContent(templateContent);
+    }
   };
   
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

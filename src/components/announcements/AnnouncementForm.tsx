@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -108,7 +107,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
             value={content}
             onChange={onContentChange}
             placeholder="Conteúdo do comunicado"
-            className="h-[260px] resize-none w-full"
+            className="h-[320px] resize-none w-full"
           />
           {formErrors.content && <p className="text-sm text-red-500">{formErrors.content}</p>}
         </div>

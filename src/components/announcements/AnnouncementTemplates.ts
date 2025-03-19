@@ -1,24 +1,92 @@
 
 export const ANNOUNCEMENT_TEMPLATES = {
-  "Convocação de Assembleia": `Convidamos todos os moradores para a Assembleia Geral Ordinária que será realizada no dia 25 de março de 2025, às 19h, no salão de festas. Pauta: aprovação do orçamento anual, eleição de síndico e assuntos gerais.
+  "Convocação de Assembleia": `📅 CONVOCAÇÃO DE ASSEMBLEIA GERAL
 
-Atenciosamente, Administração do Condomínio`,
-  "Aviso de Manutenção": `Informamos que no dia 30 de março de 2025, das 8h às 12h, será realizada a manutenção preventiva dos elevadores. Durante esse período, os elevadores estarão fora de serviço. Pedimos desculpas pelo transtorno e agradecemos a compreensão.
+Prezados Moradores,
 
-Atenciosamente, Administração do Condomínio`,
-  "Comunicado de Segurança": `Devido ao aumento de furtos na região, reforçamos a importância de manter as portas e janelas fechadas e trancadas. Em caso de emergência, contate a portaria imediatamente.
+Convocamos todos os condôminos para a Assembleia Geral [Ordinária/Extraordinária], que será realizada no dia [data], às [horário], no [local].
 
-Atenciosamente, Administração do Condomínio`,
-  "Informações Financeiras": `Lembramos que a taxa condominial do mês de abril vence no dia 10. O valor é de R$ 500,00. Pedimos que efetuem o pagamento até a data de vencimento para evitar multas.
+Pauta:
 
-Atenciosamente, Administração do Condomínio`,
-  "Eventos e Atividades": `Convidamos todos para a nossa tradicional Festa Junina, que será realizada no dia 15 de junho de 2025, às 18h, no salão de festas. Teremos comidas típicas, música e brincadeiras. Participe!
+[Assunto 1]
+[Assunto 2]
+[Demais assuntos a serem tratados]
 
-Atenciosamente, Administração do Condomínio`,
-  "Regras e Regulamentos": `Reforçamos que é proibido o uso de áreas comuns para festas sem autorização prévia. Pedimos a colaboração de todos para manter a ordem e o respeito entre os moradores.
+A participação de todos é essencial para as decisões do condomínio. Contamos com sua presença!
 
-Atenciosamente, Administração do Condomínio`,
-  "Informações Administrativas": `Informamos que a empresa XYZ será a nova responsável pela administração do condomínio a partir de 1º de abril de 2025. Contamos com a colaboração de todos durante essa transição.
+Atenciosamente,
+Administração do Condomínio`,
+  "Aviso de Manutenção": `📢 AVISO DE MANUTENÇÃO
 
-Atenciosamente, Administração do Condomínio`
+Prezados Moradores,
+
+Informamos que será realizada manutenção em [descrever serviço, ex.: elevadores, portão, sistema hidráulico] no dia [data], das [horário de início] às [horário de término]. Durante esse período, poderá haver [exemplo: interrupção no funcionamento, ruídos, acesso restrito].
+
+Pedimos a compreensão de todos e nos colocamos à disposição para dúvidas.
+
+Atenciosamente,
+Administração do Condomínio`,
+  "Comunicado de Segurança": `🔒 COMUNICADO DE SEGURANÇA
+
+Prezados Moradores,
+
+Com o objetivo de garantir a segurança de todos, reforçamos algumas medidas essenciais:
+
+👉 Mantenha portões sempre fechados e não permita a entrada de estranhos sem identificação.
+👉 Evite divulgar senhas e códigos de acesso a terceiros.
+👉 Ao sair ou chegar, verifique se não há pessoas suspeitas ao redor.
+👉 Em caso de emergência, acione imediatamente [contato de segurança/local da portaria].
+
+A colaboração de todos é fundamental para um ambiente seguro.
+
+Atenciosamente,
+Administração do Condomínio`,
+  "Informações Financeiras": `💰 INFORMAÇÕES FINANCEIRAS
+
+Prezados Moradores,
+
+📌 Reforçamos a importância da pontualidade no pagamento da taxa condominial para mantermos os serviços em dia. 
+📌Para mais detalhes, o demonstrativo completo está disponível em [informe onde acessar, ex.: portal do condomínio, e-mail, administração].
+
+Atenciosamente,
+Administração do Condomínio`,
+  "Eventos e Atividades": `🎉 EVENTO NO CONDOMÍNIO!
+
+Prezados Moradores,
+
+Convidamos todos para [nome do evento, ex.: Festa Junina, Reunião de Confraternização, Cinema ao Ar Livre], que acontecerá no dia [data], às [horário], no [local].
+
+🎶 Atrações: [descrever brevemente]
+🍔 Haverá: [comida/bebida/brindes, se aplicável]
+📂 Confirmação de presença: [se necessário]
+
+Venha participar e aproveitar este momento de integração entre vizinhos!
+
+Atenciosamente,
+Administração do Condomínio`,
+  "Regras e Regulamentos": `📜 REGRAS IMPORTANTES DO CONDOMÍNIO
+
+Prezados Moradores,
+
+Lembramos a todos sobre algumas normas essenciais para o bem-estar coletivo:
+
+🚫 Horário de silêncio: [horário permitido]
+🛋 Uso das áreas comuns: [exemplo: agendamento necessário para salão de festas]
+🐕 Animais de estimação: [exemplo: devem estar com coleira e sob controle]
+🗑 Descarte de lixo: [exemplo: horários e locais permitidos]
+
+Contamos com a colaboração de todos para mantermos um ambiente harmonioso. Em caso de dúvidas, o regulamento completo está disponível em [local de acesso].
+
+Atenciosamente,
+Administração do Condomínio`,
+  "Informações Administrativas": `📌 INFORMAÇÃO IMPORTANTE
+
+Prezados Moradores,
+
+Comunicamos que [exemplo: mudança de administradora, nova portaria digital, alteração de regras para entrega de encomendas] entrará em vigor a partir de [data].
+
+Para dúvidas ou mais informações, estamos à disposição pelo [contato disponível].
+
+Atenciosamente,
+Administração do Condomínio`
 };
