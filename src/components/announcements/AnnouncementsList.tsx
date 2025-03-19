@@ -25,6 +25,12 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AnnouncementsListProps {
   onEdit: (announcement: Announcement) => void;
@@ -130,20 +136,41 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                       <div className="flex items-center ml-1">
-                        <Mail 
-                          className={cn(
-                            "h-4 w-4 mr-2", 
-                            announcement.sent_email ? "text-green-500" : "text-gray-300"
-                          )} 
-                          title={announcement.sent_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
-                        />
-                        <MessageCircle 
-                          className={cn(
-                            "h-4 w-4", 
-                            announcement.sent_whatsapp ? "text-green-500" : "text-gray-300"
-                          )} 
-                          title={announcement.sent_whatsapp ? "Enviado por WhatsApp" : "Não enviado por WhatsApp"}
-                        />
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <Mail 
+                                  className={cn(
+                                    "h-4 w-4 mr-2", 
+                                    announcement.sent_email ? "text-green-500" : "text-gray-300"
+                                  )} 
+                                />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {announcement.sent_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <MessageCircle 
+                                  className={cn(
+                                    "h-4 w-4", 
+                                    announcement.sent_whatsapp ? "text-green-500" : "text-gray-300"
+                                  )} 
+                                />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {announcement.sent_whatsapp ? "Enviado por WhatsApp" : "Não enviado por WhatsApp"}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </div>
                   </TableCell>
