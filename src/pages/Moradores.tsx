@@ -66,40 +66,40 @@ const Moradores = () => {
               Gerencie os moradores do seu condomínio
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {!showForm && (
-              <Button onClick={handleNewResident} className="bg-brand-600 hover:bg-brand-700">
-                <Plus className="mr-2 h-4 w-4" />
-                Novo Morador
-              </Button>
-            )}
-          </div>
+          {!showForm && (
+            <Button onClick={handleNewResident} className="bg-brand-600 hover:bg-brand-700">
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Morador
+            </Button>
+          )}
         </div>
 
-        {showForm ? (
-          <ResidentForm
-            form={form}
-            onSubmit={handleFormSubmit}
-            isSubmitting={isSubmitting}
-            isEditing={!!editingResident}
-            onCancel={handleCancelForm}
-          />
-        ) : (
-          <div className="rounded-md bg-white">
-            {isLoading ? (
-              <div className="py-10 text-center text-muted-foreground">
-                Carregando moradores...
-              </div>
-            ) : (
-              <ResidentsList
-                residents={residents || []}
-                onEdit={handleEditResident}
-                onDelete={handleDeleteClick}
-                isDeleting={isDeleting}
-              />
-            )}
-          </div>
-        )}
+        <div className="border-t pt-6">
+          {showForm ? (
+            <ResidentForm
+              form={form}
+              onSubmit={handleFormSubmit}
+              isSubmitting={isSubmitting}
+              isEditing={!!editingResident}
+              onCancel={handleCancelForm}
+            />
+          ) : (
+            <div className="rounded-md bg-white">
+              {isLoading ? (
+                <div className="py-10 text-center text-muted-foreground">
+                  Carregando moradores...
+                </div>
+              ) : (
+                <ResidentsList
+                  residents={residents || []}
+                  onEdit={handleEditResident}
+                  onDelete={handleDeleteClick}
+                  isDeleting={isDeleting}
+                />
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}

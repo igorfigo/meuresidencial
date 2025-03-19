@@ -108,43 +108,45 @@ const Documentos = () => {
           </div>
         </div>
 
-        {showForm ? (
-          <DocumentForm
-            form={form}
-            onSubmit={handleFormSubmit}
-            isSubmitting={isSubmitting}
-            isEditing={!!form.getValues().id}
-            onCancel={handleCancelForm}
-            attachments={attachments}
-            existingAttachments={existingAttachments}
-            handleFileChange={handleFileChange}
-            removeFile={removeFile}
-            removeExistingAttachment={removeExistingAttachment}
-            getFileUrl={getFileUrl}
-            uploadProgress={uploadProgress}
-            isUploading={isUploading}
-          />
-        ) : (
-          <div className="rounded-md bg-white">
-            {isLoading ? (
-              <div className="py-10 text-center text-muted-foreground">
-                Carregando documentos...
-              </div>
-            ) : (
-              <DocumentsList
-                documents={filteredDocuments}
-                onEdit={handleEditDocument}
-                onDelete={handleDeleteClick}
-                isDeleting={isDeleting}
-                getFileUrl={getFileUrl}
-                fetchAttachments={fetchAttachments}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            )}
-          </div>
-        )}
+        <div className="border-t pt-6">
+          {showForm ? (
+            <DocumentForm
+              form={form}
+              onSubmit={handleFormSubmit}
+              isSubmitting={isSubmitting}
+              isEditing={!!form.getValues().id}
+              onCancel={handleCancelForm}
+              attachments={attachments}
+              existingAttachments={existingAttachments}
+              handleFileChange={handleFileChange}
+              removeFile={removeFile}
+              removeExistingAttachment={removeExistingAttachment}
+              getFileUrl={getFileUrl}
+              uploadProgress={uploadProgress}
+              isUploading={isUploading}
+            />
+          ) : (
+            <div className="rounded-md bg-white">
+              {isLoading ? (
+                <div className="py-10 text-center text-muted-foreground">
+                  Carregando documentos...
+                </div>
+              ) : (
+                <DocumentsList
+                  documents={filteredDocuments}
+                  onEdit={handleEditDocument}
+                  onDelete={handleDeleteClick}
+                  isDeleting={isDeleting}
+                  getFileUrl={getFileUrl}
+                  fetchAttachments={fetchAttachments}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
