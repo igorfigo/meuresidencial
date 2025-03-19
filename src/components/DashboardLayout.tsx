@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,9 @@ import {
   Briefcase,
   Vote,
   Bug,
-  MessageSquare
+  MessageSquare,
+  KeyRound,
+  Mail
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -73,13 +74,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
   ];
 
-  // Make sure Dashboard is the first item (already is, but being explicit)
   const managerMenuItems: MenuItem[] = [
     { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
-    { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/reservas' },
-    { name: 'Assembléias', icon: <Vote className="h-5 w-5" />, path: '/assembleias' },
+    { name: 'Moradores', icon: <Users className="h-5 w-5" />, path: '/moradores' },
     { name: 'Comunicados', icon: <MessageSquare className="h-5 w-5" />, path: '/comunicados' },
-    { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
     { name: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
     { 
       name: 'Financeiro', 
@@ -87,14 +85,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       path: '/financeiro',
       submenu: [
         { name: 'Dashboard', icon: <BarChart className="h-5 w-5" />, path: '/financeiro/dashboard' },
+        { name: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" />, path: '/financeiro/receitas-despesas' },
         { name: 'Inadimplências', icon: <CreditCard className="h-5 w-5" />, path: '/financeiro/inadimplencias' },
         { name: 'Prestação de Contas', icon: <FileText className="h-5 w-5" />, path: '/financeiro/prestacao-contas' },
-        { name: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" />, path: '/financeiro/receitas-despesas' },
       ] 
     },
-    { name: 'Gestão de Boletos', icon: <Receipt className="h-5 w-5" />, path: '/boletos' },
-    { name: 'Moradores', icon: <Users className="h-5 w-5" />, path: '/moradores' },
+    { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/reservas' },
+    { name: 'Assembléias', icon: <Vote className="h-5 w-5" />, path: '/assembleias' },
+    { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
     { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
+    { name: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" />, path: '/assinatura' },
+    { name: 'Fale Conosco', icon: <Mail className="h-5 w-5" />, path: '/contato' },
   ];
 
   const menuItems = user?.isAdmin ? adminMenuItems : managerMenuItems;
