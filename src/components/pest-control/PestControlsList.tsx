@@ -117,19 +117,19 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
             <TableHeader>
               <TableRow>
                 <TableHead>Empresa</TableHead>
-                <TableHead>Data</TableHead>
+                <TableHead className="text-center">Data</TableHead>
                 <TableHead>Finalidade</TableHead>
-                <TableHead className="w-[100px]">Ações</TableHead>
+                <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {pestControls.map((pestControl) => (
                 <TableRow key={pestControl.id}>
                   <TableCell className="font-medium">{pestControl.empresa}</TableCell>
-                  <TableCell>{formatDate(pestControl.data)}</TableCell>
+                  <TableCell className="text-center">{formatDate(pestControl.data)}</TableCell>
                   <TableCell>{renderFinalidades(pestControl.finalidade)}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-1">
+                  <TableCell className="text-center">
+                    <div className="flex justify-center space-x-1">
                       <Button 
                         variant="ghost" 
                         size="icon" 

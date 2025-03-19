@@ -101,17 +101,17 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
             <TableHeader>
               <TableRow>
                 <TableHead>Título</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead className="w-[100px]">Ações</TableHead>
+                <TableHead className="text-center">Data</TableHead>
+                <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {announcements.map((announcement) => (
                 <TableRow key={announcement.id}>
                   <TableCell className="font-medium">{announcement.title}</TableCell>
-                  <TableCell>{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-1">
+                  <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex justify-center space-x-1">
                       <Button 
                         variant="ghost" 
                         size="icon" 

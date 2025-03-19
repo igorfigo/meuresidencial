@@ -31,12 +31,12 @@ export const ResidentsList = ({
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead>CPF</TableHead>
+            <TableHead className="text-center">CPF</TableHead>
             <TableHead>Unidade</TableHead>
             <TableHead>Telefone</TableHead>
-            <TableHead>E-mail</TableHead>
+            <TableHead className="text-center">E-mail</TableHead>
             <TableHead>Valor Condomínio</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+            <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -50,10 +50,10 @@ export const ResidentsList = ({
             residents.map((resident) => (
               <TableRow key={resident.id}>
                 <TableCell className="font-medium">{resident.nome_completo}</TableCell>
-                <TableCell>{resident.cpf}</TableCell>
+                <TableCell className="text-center">{resident.cpf}</TableCell>
                 <TableCell>{resident.unidade}</TableCell>
                 <TableCell>{resident.telefone || '-'}</TableCell>
-                <TableCell>{resident.email || '-'}</TableCell>
+                <TableCell className="text-center">{resident.email || '-'}</TableCell>
                 <TableCell>{resident.valor_condominio || '-'}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
