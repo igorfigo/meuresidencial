@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -148,7 +147,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                         variant="ghost" 
                         size="icon" 
                         onClick={() => announcement.id && handleViewAnnouncement(announcement.id)}
-                        title="Ver detalhes"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -156,7 +154,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                         variant="ghost" 
                         size="icon" 
                         onClick={() => announcement.id && handleDeleteClick(announcement.id)}
-                        title="Excluir"
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
