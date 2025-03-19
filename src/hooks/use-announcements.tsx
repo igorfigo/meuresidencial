@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -18,8 +17,6 @@ export interface Announcement {
   date?: string;
   created_at?: string;
   updated_at?: string;
-  sent_email?: boolean;
-  sent_whatsapp?: boolean;
 }
 
 export function useAnnouncements() {
@@ -69,7 +66,7 @@ export function useAnnouncements() {
     }
   };
 
-  const createAnnouncement = async (announcementData: Announcement) => {
+  const createAnnouncement = async (announcementData: Omit<Announcement, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       // Create a new object without the date field for database persistence
       const { date, ...dataToSave } = announcementData;
