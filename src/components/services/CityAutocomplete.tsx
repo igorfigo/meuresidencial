@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Check, ChevronsUpDown, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// List of Brazilian cities with states
+// List of Brazilian cities with states - Extended list
 const brazilianCities = [
+  // Capitais
   { name: 'São Paulo', state: 'SP' },
   { name: 'Rio de Janeiro', state: 'RJ' },
   { name: 'Brasília', state: 'DF' },
@@ -20,45 +21,191 @@ const brazilianCities = [
   { name: 'Porto Alegre', state: 'RS' },
   { name: 'Belém', state: 'PA' },
   { name: 'Goiânia', state: 'GO' },
-  { name: 'Guarulhos', state: 'SP' },
-  { name: 'Campinas', state: 'SP' },
-  { name: 'São Luís', state: 'MA' },
-  { name: 'São Gonçalo', state: 'RJ' },
-  { name: 'Maceió', state: 'AL' },
-  { name: 'Duque de Caxias', state: 'RJ' },
+  { name: 'Teresina', state: 'PI' },
   { name: 'Natal', state: 'RN' },
   { name: 'Campo Grande', state: 'MS' },
-  { name: 'Teresina', state: 'PI' },
-  { name: 'São Bernardo do Campo', state: 'SP' },
   { name: 'João Pessoa', state: 'PB' },
-  { name: 'Nova Iguaçu', state: 'RJ' },
-  { name: 'Santo André', state: 'SP' },
-  { name: 'Osasco', state: 'SP' },
-  { name: 'Jaboatão dos Guararapes', state: 'PE' },
-  { name: 'Ribeirão Preto', state: 'SP' },
-  { name: 'Uberlândia', state: 'MG' },
-  { name: 'Sorocaba', state: 'SP' },
-  { name: 'Niterói', state: 'RJ' },
-  { name: 'Florianópolis', state: 'SC' },
+  { name: 'Maceió', state: 'AL' },
   { name: 'Aracaju', state: 'SE' },
   { name: 'Cuiabá', state: 'MT' },
-  { name: 'Juiz de Fora', state: 'MG' },
-  { name: 'Joinville', state: 'SC' },
-  { name: 'Londrina', state: 'PR' },
-  { name: 'Aparecida de Goiânia', state: 'GO' },
   { name: 'Porto Velho', state: 'RO' },
-  { name: 'Ananindeua', state: 'PA' },
-  { name: 'Serra', state: 'ES' },
-  { name: 'Caxias do Sul', state: 'RS' },
+  { name: 'Florianópolis', state: 'SC' },
   { name: 'Macapá', state: 'AP' },
+  { name: 'Rio Branco', state: 'AC' },
   { name: 'Vitória', state: 'ES' },
+  { name: 'Palmas', state: 'TO' },
+  { name: 'Boa Vista', state: 'RR' },
+
+  // Cidades importantes de SP
+  { name: 'Guarulhos', state: 'SP' },
+  { name: 'Campinas', state: 'SP' },
+  { name: 'São Bernardo do Campo', state: 'SP' },
+  { name: 'Santo André', state: 'SP' },
+  { name: 'Osasco', state: 'SP' },
+  { name: 'Ribeirão Preto', state: 'SP' },
+  { name: 'Sorocaba', state: 'SP' },
+  { name: 'São José dos Campos', state: 'SP' },
+  { name: 'Santos', state: 'SP' },
+  { name: 'Mauá', state: 'SP' },
   { name: 'São José do Rio Preto', state: 'SP' },
-  { name: 'Maringá', state: 'PR' },
-  { name: 'Montes Claros', state: 'MG' },
   { name: 'Piracicaba', state: 'SP' },
   { name: 'Jundiaí', state: 'SP' },
   { name: 'Carapicuíba', state: 'SP' },
-];
+  { name: 'Bauru', state: 'SP' },
+  { name: 'Limeira', state: 'SP' },
+  { name: 'Franca', state: 'SP' },
+  { name: 'Taubaté', state: 'SP' },
+
+  // Cidades importantes do RJ
+  { name: 'São Gonçalo', state: 'RJ' },
+  { name: 'Duque de Caxias', state: 'RJ' },
+  { name: 'Nova Iguaçu', state: 'RJ' },
+  { name: 'Niterói', state: 'RJ' },
+  { name: 'Belford Roxo', state: 'RJ' },
+  { name: 'Campos dos Goytacazes', state: 'RJ' },
+  { name: 'São João de Meriti', state: 'RJ' },
+  { name: 'Petrópolis', state: 'RJ' },
+  { name: 'Volta Redonda', state: 'RJ' },
+  { name: 'Magé', state: 'RJ' },
+
+  // Cidades importantes de MG
+  { name: 'Uberlândia', state: 'MG' },
+  { name: 'Contagem', state: 'MG' },
+  { name: 'Juiz de Fora', state: 'MG' },
+  { name: 'Betim', state: 'MG' },
+  { name: 'Montes Claros', state: 'MG' },
+  { name: 'Ribeirão das Neves', state: 'MG' },
+  { name: 'Uberaba', state: 'MG' },
+  { name: 'Governador Valadares', state: 'MG' },
+  { name: 'Ipatinga', state: 'MG' },
+  { name: 'Sete Lagoas', state: 'MG' },
+  { name: 'Divinópolis', state: 'MG' },
+  { name: 'Santa Luzia', state: 'MG' },
+  { name: 'Ibirité', state: 'MG' },
+  { name: 'Poços de Caldas', state: 'MG' },
+  { name: 'Patos de Minas', state: 'MG' },
+  { name: 'Pouso Alegre', state: 'MG' },
+  { name: 'Teófilo Otoni', state: 'MG' },
+  { name: 'Barbacena', state: 'MG' },
+  { name: 'Sabará', state: 'MG' },
+  { name: 'Varginha', state: 'MG' },
+
+  // Cidades importantes da BA
+  { name: 'Feira de Santana', state: 'BA' },
+  { name: 'Vitória da Conquista', state: 'BA' },
+  { name: 'Camaçari', state: 'BA' },
+  { name: 'Itabuna', state: 'BA' },
+  { name: 'Juazeiro', state: 'BA' },
+  { name: 'Ilhéus', state: 'BA' },
+  { name: 'Lauro de Freitas', state: 'BA' },
+  { name: 'Jequié', state: 'BA' },
+
+  // Cidades importantes do CE
+  { name: 'Caucaia', state: 'CE' },
+  { name: 'Juazeiro do Norte', state: 'CE' },
+  { name: 'Maracanaú', state: 'CE' },
+  { name: 'Sobral', state: 'CE' },
+  { name: 'Crato', state: 'CE' },
+  { name: 'Itapipoca', state: 'CE' },
+
+  // Cidades importantes de PE
+  { name: 'Jaboatão dos Guararapes', state: 'PE' },
+  { name: 'Olinda', state: 'PE' },
+  { name: 'Caruaru', state: 'PE' },
+  { name: 'Petrolina', state: 'PE' },
+  { name: 'Paulista', state: 'PE' },
+  { name: 'Cabo de Santo Agostinho', state: 'PE' },
+  { name: 'Camaragibe', state: 'PE' },
+
+  // Cidades importantes do PR
+  { name: 'Londrina', state: 'PR' },
+  { name: 'Maringá', state: 'PR' },
+  { name: 'Ponta Grossa', state: 'PR' },
+  { name: 'Cascavel', state: 'PR' },
+  { name: 'São José dos Pinhais', state: 'PR' },
+  { name: 'Foz do Iguaçu', state: 'PR' },
+  { name: 'Colombo', state: 'PR' },
+  { name: 'Guarapuava', state: 'PR' },
+
+  // Cidades importantes do RS
+  { name: 'Caxias do Sul', state: 'RS' },
+  { name: 'Pelotas', state: 'RS' },
+  { name: 'Canoas', state: 'RS' },
+  { name: 'Santa Maria', state: 'RS' },
+  { name: 'Gravataí', state: 'RS' },
+  { name: 'Viamão', state: 'RS' },
+  { name: 'Novo Hamburgo', state: 'RS' },
+  { name: 'São Leopoldo', state: 'RS' },
+  { name: 'Rio Grande', state: 'RS' },
+  { name: 'Alvorada', state: 'RS' },
+  { name: 'Passo Fundo', state: 'RS' },
+
+  // Cidades importantes de SC
+  { name: 'Joinville', state: 'SC' },
+  { name: 'Blumenau', state: 'SC' },
+  { name: 'São José', state: 'SC' },
+  { name: 'Chapecó', state: 'SC' },
+  { name: 'Itajaí', state: 'SC' },
+  { name: 'Criciúma', state: 'SC' },
+  { name: 'Jaraguá do Sul', state: 'SC' },
+  { name: 'Palhoça', state: 'SC' },
+  { name: 'Lages', state: 'SC' },
+  { name: 'Balneário Camboriú', state: 'SC' },
+
+  // Cidades importantes do GO
+  { name: 'Aparecida de Goiânia', state: 'GO' },
+  { name: 'Anápolis', state: 'GO' },
+  { name: 'Rio Verde', state: 'GO' },
+  { name: 'Luziânia', state: 'GO' },
+  { name: 'Águas Lindas de Goiás', state: 'GO' },
+  { name: 'Valparaíso de Goiás', state: 'GO' },
+  { name: 'Trindade', state: 'GO' },
+  
+  // Cidades importantes do PA
+  { name: 'Ananindeua', state: 'PA' },
+  { name: 'Santarém', state: 'PA' },
+  { name: 'Marabá', state: 'PA' },
+  { name: 'Castanhal', state: 'PA' },
+  { name: 'Parauapebas', state: 'PA' },
+  { name: 'Cametá', state: 'PA' },
+  
+  // Cidades importantes do MA
+  { name: 'São Luís', state: 'MA' },
+  { name: 'Imperatriz', state: 'MA' },
+  { name: 'Timon', state: 'MA' },
+  { name: 'Caxias', state: 'MA' },
+  { name: 'Codó', state: 'MA' },
+  { name: 'Paço do Lumiar', state: 'MA' },
+  
+  // Cidades importantes do AM
+  { name: 'Parintins', state: 'AM' },
+  { name: 'Itacoatiara', state: 'AM' },
+  { name: 'Manacapuru', state: 'AM' },
+  { name: 'Coari', state: 'AM' },
+  { name: 'Tefé', state: 'AM' },
+  
+  // Cidades importantes do ES
+  { name: 'Vila Velha', state: 'ES' },
+  { name: 'Serra', state: 'ES' },
+  { name: 'Cariacica', state: 'ES' },
+  { name: 'Cachoeiro de Itapemirim', state: 'ES' },
+  { name: 'Linhares', state: 'ES' },
+  { name: 'São Mateus', state: 'ES' },
+  { name: 'Guarapari', state: 'ES' },
+  { name: 'Colatina', state: 'ES' },
+  
+  // Cidades importantes do PB
+  { name: 'Campina Grande', state: 'PB' },
+  { name: 'Santa Rita', state: 'PB' },
+  { name: 'Patos', state: 'PB' },
+  { name: 'Bayeux', state: 'PB' },
+  { name: 'Sousa', state: 'PB' },
+  { name: 'Cajazeiras', state: 'PB' },
+  
+  // Ordenando em ordem alfabética
+].sort((a, b) => {
+  return a.name.localeCompare(b.name, 'pt-BR');
+});
 
 export type City = {
   name: string;
@@ -84,7 +231,8 @@ export const CityAutocomplete = ({ selectedCity, onCityChange }: CityAutocomplet
     const normalized = searchValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const filtered = brazilianCities.filter(city => {
       const cityName = city.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return cityName.includes(normalized);
+      const cityState = city.state.toLowerCase();
+      return cityName.includes(normalized) || cityState.includes(normalized);
     });
     
     setFilteredCities(filtered);
