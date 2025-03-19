@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, Mail, MessageSquare } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +24,7 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 
 interface AnnouncementsListProps {
   onEdit: (announcement: Announcement) => void;
@@ -102,6 +103,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
               <TableRow>
                 <TableHead>Título</TableHead>
                 <TableHead>Data</TableHead>
+                <TableHead>Enviado</TableHead>
                 <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -110,6 +112,20 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                 <TableRow key={announcement.id}>
                   <TableCell className="font-medium">{announcement.title}</TableCell>
                   <TableCell>{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      {announcement.sent_email && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          <Mail className="h-3 w-3 mr-1" /> Email
+                        </Badge>
+                      )}
+                      {announcement.sent_whatsapp && (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <MessageSquare className="h-3 w-3 mr-1" /> WhatsApp
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex space-x-1">
                       <Button 
@@ -154,6 +170,20 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Conteúdo</h4>
                 <p className="text-sm whitespace-pre-line">{detailView.content}</p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground">Métodos de Envio</h4>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  <Badge variant={detailView.sent_email ? "default" : "outline"} className={detailView.sent_email ? "bg-blue-500" : "text-gray-500"}>
+                    <Mail className="h-3 w-3 mr-1" /> 
+                    {detailView.sent_email ? "Enviado por Email" : "Não enviado por Email"}
+                  </Badge>
+                  <Badge variant={detailView.sent_whatsapp ? "default" : "outline"} className={detailView.sent_whatsapp ? "bg-green-500" : "text-gray-500"}>
+                    <MessageSquare className="h-3 w-3 mr-1" /> 
+                    {detailView.sent_whatsapp ? "Enviado por WhatsApp" : "Não enviado por WhatsApp"}
+                  </Badge>
+                </div>
               </div>
             </div>
           )}
