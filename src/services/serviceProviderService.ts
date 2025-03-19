@@ -11,13 +11,8 @@ export const searchServiceProviders = async (
     // Create the query based on service type and location
     const query = `${serviceType} serviços próximo a ${cep}`;
     
-    // In Vite, we use import.meta.env instead of process.env
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    
-    if (!apiKey) {
-      console.error('Google Maps API key not found in environment variables');
-      throw new Error('Chave da API Google Maps não configurada. Por favor, contate o administrador.');
-    }
+    // Using the provided API key
+    const apiKey = 'AIzaSyAUMl7xxT6X9saoQ0UsbCiafNQ2OpMTP3M';
     
     // Create the API URL (using Google Places API)
     const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&language=pt-BR&key=${apiKey}`;
@@ -74,7 +69,8 @@ export const searchServiceProviders = async (
   }
 };
 
-// Helper function to extract region from CEP
+// The following helper functions aren't being used now that we're using the real API,
+// but I'm keeping them in case they're needed in the future for fallback or testing
 function getRegionFromCep(cep: string): string {
   // Extract the first two digits of the CEP to determine the region
   const cepNumber = cep.replace(/\D/g, '');
@@ -109,7 +105,6 @@ function getRegionFromCep(cep: string): string {
   return 'SP';
 }
 
-// Function to get region-specific data for mock providers
 function getRegionalData(regionCode: string) {
   // Common street names in Brazil by region
   const regionalStreets: Record<string, string[]> = {

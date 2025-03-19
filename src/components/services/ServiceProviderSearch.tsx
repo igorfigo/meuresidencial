@@ -60,6 +60,7 @@ export const ServiceProviderSearch = () => {
     setProviders([]);
 
     try {
+      // Using the configured Google Maps API Key
       const results = await searchServiceProviders(cep, serviceType as ServiceType);
       setProviders(results);
       
@@ -91,12 +92,12 @@ export const ServiceProviderSearch = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <Alert className="mb-6 bg-amber-50 text-amber-800 border-amber-200">
+      {/* Remove or update the API key alert since we now have a key */}
+      <Alert className="mb-6 bg-green-50 text-green-800 border-green-200">
         <Info className="h-4 w-4" />
-        <AlertTitle>Informação</AlertTitle>
+        <AlertTitle>API Google Maps configurada</AlertTitle>
         <AlertDescription>
-          Para utilizar a busca real de prestadores, é necessário configurar uma chave de API do Google Maps no arquivo .env 
-          com a variável VITE_GOOGLE_MAPS_API_KEY. Sem esta configuração, a busca irá falhar.
+          A API do Google Maps está configurada. Você pode buscar prestadores de serviço com base no CEP informado.
         </AlertDescription>
       </Alert>
       
