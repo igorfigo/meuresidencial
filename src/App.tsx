@@ -16,6 +16,7 @@ import Dedetizacoes from "./pages/Dedetizacoes";
 import Documentos from "./pages/Documentos";
 import Comunicados from "./pages/Comunicados";
 import AreasComuns from "./pages/AreasComuns";
+import FaleConosco from "./pages/FaleConosco";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -232,6 +233,15 @@ const App = () => (
               <AnimationController>
                 <ProtectedRoute>
                   <Comunicados />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            {/* Add new route for Fale Conosco */}
+            <Route path="/contato" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <FaleConosco />
                 </ProtectedRoute>
               </AnimationController>
             } />
