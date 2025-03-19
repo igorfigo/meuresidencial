@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
-import { Eye, Trash2, Edit } from 'lucide-react';
+import { Eye, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,13 +56,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
     }
   };
   
-  const handleEditAnnouncement = async (id: string) => {
-    const announcement = await getAnnouncement(id);
-    if (announcement) {
-      onEdit(announcement);
-    }
-  };
-  
   const handleDeleteClick = (id: string) => {
     setDeleteId(id);
   };
@@ -97,13 +90,13 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
   }
   
   return (
-    <div className="space-y-6">
+    <div className="rounded-md border bg-white shadow-sm">
       {announcements.length === 0 ? (
         <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center">
           <p className="text-muted-foreground mb-4">Nenhum comunicado encontrado.</p>
         </div>
       ) : (
-        <div className="rounded-md border">
+        <div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -126,14 +119,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                         title="Ver detalhes"
                       >
                         <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => announcement.id && handleEditAnnouncement(announcement.id)}
-                        title="Editar"
-                      >
-                        <Edit className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="ghost" 

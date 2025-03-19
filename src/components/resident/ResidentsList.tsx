@@ -56,22 +56,22 @@ export const ResidentsList = ({
                 <TableCell>{resident.email || '-'}</TableCell>
                 <TableCell>{resident.valor_condominio || '-'}</TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-1">
                     <Button
-                      size="sm"
-                      variant="outline"
+                      size="icon"
+                      variant="ghost"
                       onClick={() => onEdit(resident)}
                     >
                       <Pencil className="h-4 w-4" />
                       <span className="sr-only">Editar</span>
                     </Button>
                     <Button
-                      size="sm"
-                      variant="destructive"
+                      size="icon"
+                      variant="ghost"
                       onClick={() => resident.id && onDelete(resident.id)}
                       disabled={isDeleting}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 text-red-500" />
                       <span className="sr-only">Excluir</span>
                     </Button>
                   </div>
