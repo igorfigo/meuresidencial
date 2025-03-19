@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -31,7 +30,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [isSaving, setIsSaving] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
-  const [sendWhatsapp, setSendWhatsapp] = useState(false); // New state for Whatsapp
+  const [sendWhatsapp, setSendWhatsapp] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formErrors, setFormErrors] = useState<{title?: string; content?: string; date?: string}>({});
   const { toast } = useToast();
@@ -99,7 +98,6 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
       return;
     }
     
-    // Show confirm dialog if either email or whatsapp is checked
     if (sendEmail || sendWhatsapp) {
       setShowConfirmDialog(true);
     } else {
@@ -164,7 +162,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>{isNewAnnouncement ? "Criar Comunicado" : "Editar Comunicado"}</DialogTitle>
           </DialogHeader>

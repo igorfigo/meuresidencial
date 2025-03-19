@@ -2,10 +2,10 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Copy, Send, PhoneCall } from 'lucide-react';
+import { Copy, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -28,14 +28,14 @@ interface AnnouncementFormProps {
   content: string;
   date: string;
   sendEmail: boolean;
-  sendWhatsapp: boolean; // Add the new property
+  sendWhatsapp: boolean;
   formErrors: FormErrors;
   isSaving: boolean;
   onTitleChange: (value: string) => void;
   onContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSendEmailChange: (checked: boolean) => void;
-  onSendWhatsappChange: (checked: boolean) => void; // Add the new handler
+  onSendWhatsappChange: (checked: boolean) => void;
   onSave: () => void;
   onCopy: () => void;
 }
@@ -46,21 +46,21 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   content,
   date,
   sendEmail,
-  sendWhatsapp, // Add the new property
+  sendWhatsapp,
   formErrors,
   isSaving,
   onTitleChange,
   onContentChange,
   onDateChange,
   onSendEmailChange,
-  onSendWhatsappChange, // Add the new handler
+  onSendWhatsappChange,
   onSave,
   onCopy
 }) => {
   return (
-    <div className="space-y-4 flex-1 overflow-hidden">
+    <div className="space-y-6 flex-1 overflow-hidden">
       <div className="space-y-2">
-        <Label htmlFor="title">Título</Label>
+        <Label htmlFor="title" className="font-medium">Título</Label>
         {isNewAnnouncement ? (
           <Select value={title} onValueChange={onTitleChange}>
             <SelectTrigger className="w-full">
@@ -87,7 +87,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="date">Data</Label>
+        <Label htmlFor="date" className="font-medium">Data</Label>
         <Input
           id="date"
           type="date"
@@ -98,60 +98,69 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         {formErrors.date && <p className="text-sm text-red-500">{formErrors.date}</p>}
       </div>
       
-      <div className="flex-1 overflow-hidden">
-        <Label htmlFor="content">Conteúdo</Label>
+      <div className="space-y-2">
+        <Label htmlFor="content" className="font-medium">Conteúdo</Label>
         <Textarea
           id="content"
           value={content}
           onChange={onContentChange}
           placeholder="Conteúdo do comunicado"
-          className="h-[256px] resize-none w-full box-border"
+          className="h-[240px] resize-none w-full"
         />
         {formErrors.content && <p className="text-sm text-red-500">{formErrors.content}</p>}
       </div>
 
-      <div className="space-y-2">
+      <RadioGroup 
+        defaultValue={sendEmail ? "email" : sendWhatsapp ? "whatsapp" : ""} 
+        className="space-y-2"
+        onValueChange={(value) => {
+          if (value === "email") {
+            onSendEmailChange(true);
+            onSendWhatsappChange(false);
+          } else if (value === "whatsapp") {
+            onSendEmailChange(false);
+            onSendWhatsappChange(true);
+          } else {
+            onSendEmailChange(false);
+            onSendWhatsappChange(false);
+          }
+        }}
+      >
         <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="send-email" 
-            checked={sendEmail} 
-            onCheckedChange={(checked) => onSendEmailChange(checked === true)}
-          />
-          <Label htmlFor="send-email">Enviar E-mail aos Moradores</Label>
+          <RadioGroupItem value="email" id="send-email" />
+          <Label htmlFor="send-email" className="cursor-pointer">Enviar E-mail aos Moradores</Label>
         </div>
         
         <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="send-whatsapp" 
-            checked={sendWhatsapp} 
-            onCheckedChange={(checked) => onSendWhatsappChange(checked === true)}
-          />
-          <Label htmlFor="send-whatsapp">Enviar Whatsapp aos Moradores</Label>
+          <RadioGroupItem value="whatsapp" id="send-whatsapp" />
+          <Label htmlFor="send-whatsapp" className="cursor-pointer">Enviar Whatsapp aos Moradores</Label>
         </div>
-      </div>
+      </RadioGroup>
       
-      <DialogFooter className="flex justify-between gap-2">
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={onCopy}
-            type="button"
-          >
-            <Copy className="h-4 w-4 mr-2" />
-            Copiar Texto
-          </Button>
-          
-          <Button 
-            onClick={onSave} 
-            disabled={isSaving}
-          >
-            <Send className="h-4 w-4 mr-2" />
-            Enviar Comunicado
-          </Button>
-        </div>
+      <DialogFooter className="flex justify-end gap-2 pt-4">
+        <Button 
+          variant="outline" 
+          onClick={onCopy}
+          type="button"
+          className="gap-2"
+        >
+          <Copy className="h-4 w-4" />
+          Copiar Texto
+        </Button>
+        
+        <Button 
+          onClick={onSave} 
+          disabled={isSaving}
+          className="gap-2 bg-blue-500 hover:bg-blue-600"
+        >
+          <Send className="h-4 w-4" />
+          Enviar Comunicado
+        </Button>
         
         <DialogClose asChild>
-          <Button variant="outline">Cancelar</Button>
+          <Button variant="outline" className="gap-2">
+            Cancelar
+          </Button>
         </DialogClose>
       </DialogFooter>
     </div>
