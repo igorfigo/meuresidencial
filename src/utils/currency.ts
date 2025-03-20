@@ -15,8 +15,8 @@ export const formatToBRL = (value: number | string): string => {
 export const BRLToNumber = (value: string): number => {
   if (!value || value === '') return 0;
   
-  // Remove any non-numeric characters except for comma and period
-  const cleanValue = value.replace(/[^\d,\.]/g, '');
+  // Remove R$ prefix and any non-numeric characters except for comma and period
+  const cleanValue = value.replace(/R\$\s*/g, '').replace(/[^\d,\.]/g, '');
   
   // Replace comma with dot for proper number parsing
   const normalizedValue = cleanValue.replace(/\./g, '').replace(',', '.');
@@ -30,7 +30,7 @@ export const formatCurrencyInput = (value: string): string => {
   if (!value) return '0,00';
   
   // Convert the string to a number (cents)
-  const cents = parseInt(value, 10);
+  const cents = parseInt(value.replace(/\D/g, ''), 10);
   if (isNaN(cents)) return '0,00';
   
   // Convert cents to a proper decimal number

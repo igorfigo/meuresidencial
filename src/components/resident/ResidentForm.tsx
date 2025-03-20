@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResidentFormValues } from '@/hooks/use-residents';
+import { formatToBRL } from '@/utils/currency';
 
 interface ResidentFormProps {
   form: any;
@@ -30,6 +31,26 @@ export const ResidentForm = ({
   isEditing,
   onCancel
 }: ResidentFormProps) => {
+  const formattedCurrency = (value: string) => {
+    // Ensure currency values always have the R$ prefix
+    if (value && !value.startsWith('R$')) {
+      return `R$ ${value}`;
+    }
+    return value || 'R$ 0,00';
+  };
+
+  // Add custom onChange handler for currency field
+  const handleCurrencyChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: any) => {
+    // First let the default handler run
+    onChange(e);
+    
+    // Then ensure the value starts with R$
+    const value = e.target.value;
+    if (!value.startsWith('R$')) {
+      e.target.value = formattedCurrency(value);
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -141,8 +162,13 @@ export const ResidentForm = ({
                   <FormControl>
                     <Input 
                       {...field} 
-                      placeholder="Valor do condomínio" 
+                      placeholder="R$ 0,00" 
                       isCurrency
+                      value={formattedCurrency(field.value)}
+                      onChange={(e) => {
+                        // Make sure our currency format is correct
+                        handleCurrencyChange(e, field.onChange);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -93,9 +92,7 @@ export const useCondominiumForm = () => {
     }
   });
 
-  // Format values when form data changes
   useEffect(() => {
-    // Watch for changes in valorPlano and desconto
     const subscription = form.watch((value, { name }) => {
       if (name === 'valorPlano' || name === 'desconto') {
         calculateValorMensal();
@@ -105,29 +102,27 @@ export const useCondominiumForm = () => {
     return () => subscription.unsubscribe();
   }, [form.watch]);
 
-  // Calculate valor mensal based on valorPlano and desconto
   const calculateValorMensal = () => {
     const valorPlano = BRLToNumber(form.getValues('valorPlano') || '0');
     const desconto = BRLToNumber(form.getValues('desconto') || '0');
     
     const valorMensal = Math.max(0, valorPlano - desconto);
     
-    form.setValue('valorMensal', formatToBRL(valorMensal));
+    form.setValue('valorMensal', `R$ ${formatToBRL(valorMensal)}`);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Format currency fields
-    if (name === 'valorPlano' || name === 'desconto') {
-      // Format to BRL
-      const formattedValue = formatToBRL(BRLToNumber(value));
-      form.setValue(name as keyof FormFields, formattedValue);
+    if (name === 'valorPlano' || name === 'desconto' || name === 'valorMensal') {
+      const numericValue = value.replace(/\D/g, '');
+      const formattedValue = formatCurrencyInput(numericValue);
+      form.setValue(name as keyof FormFields, `R$ ${formattedValue}`);
       
-      // Recalculate valorMensal
-      calculateValorMensal();
+      if (name !== 'valorMensal') {
+        calculateValorMensal();
+      }
     } else {
-      // Regular form fields
       form.setValue(name as keyof FormFields, value);
     }
   };
@@ -164,7 +159,6 @@ export const useCondominiumForm = () => {
     try {
       const data = await getCondominiumByMatricula(matriculaSearch);
       if (data) {
-        // Map database field names (lowercase) to form field names (camelCase)
         const formattedData = {
           matricula: data.matricula,
           cnpj: data.cnpj || '',
@@ -175,22 +169,22 @@ export const useCondominiumForm = () => {
           bairro: data.bairro || '',
           cidade: data.cidade || '',
           estado: data.estado || '',
-          nomeCondominio: data.nomecondominio || '',
-          nomeLegal: data.nomelegal || '',
-          emailLegal: data.emaillegal || '',
-          telefoneLegal: data.telefonelegal || '',
-          enderecoLegal: data.enderecolegal || '',
+          nomecondominio: data.nomecondominio || '',
+          nomelegal: data.nomelegal || '',
+          emaillegal: data.emaillegal || '',
+          telefonelegal: data.telefonelegal || '',
+          enderecolegal: data.enderecolegal || '',
           banco: data.banco || '',
           agencia: data.agencia || '',
           conta: data.conta || '',
           pix: data.pix || '',
-          planoContratado: data.planocontratado || 'STANDARD',
-          valorPlano: data.valorplano ? formatToBRL(Number(data.valorplano)) : '',
-          formaPagamento: data.formapagamento || 'pix',
+          planocontratado: data.planocontratado || 'STANDARD',
+          valorplano: data.valorplano ? `R$ ${formatToBRL(Number(data.valorplano))}` : 'R$ 0,00',
+          formapagamento: data.formapagamento || 'pix',
           vencimento: data.vencimento || '',
-          desconto: data.desconto ? formatToBRL(Number(data.desconto)) : '',
-          valorMensal: data.valormensal ? formatToBRL(Number(data.valormensal)) : '',
-          tipoDocumento: data.tipodocumento || 'recibo',
+          desconto: data.desconto ? `R$ ${formatToBRL(Number(data.desconto))}` : 'R$ 0,00',
+          valormensal: data.valormensal ? `R$ ${formatToBRL(Number(data.valormensal))}` : 'R$ 0,00',
+          tipodocumento: data.tipodocumento || 'recibo',
           senha: '',
           confirmarSenha: '',
           ativo: data.ativo !== null ? data.ativo : true
@@ -216,7 +210,6 @@ export const useCondominiumForm = () => {
 
   const onSubmit = async (data: FormFields) => {
     if (!isExistingRecord) {
-      // For new records, password is required
       if (!data.senha) {
         toast.error('Senha é obrigatória para novos cadastros.');
         return;
@@ -227,15 +220,12 @@ export const useCondominiumForm = () => {
         return;
       }
     } else if (data.senha || data.confirmarSenha) {
-      // For existing records, if any password field is filled, both must match
       if (data.senha !== data.confirmarSenha) {
         toast.error('As senhas não conferem. Por favor, verifique.');
         return;
       }
     }
-    // For existing records with empty password fields, no validation needed
 
-    // Map form field names (camelCase) to database field names (lowercase)
     const formattedData = {
       matricula: data.matricula,
       cnpj: data.cnpj,
@@ -282,7 +272,6 @@ export const useCondominiumForm = () => {
         form.reset();
         setIsExistingRecord(false);
       } else {
-        // For existing records, reset the password fields after successful update
         form.setValue('senha', '');
         form.setValue('confirmarSenha', '');
       }
@@ -347,4 +336,9 @@ export const useCondominiumForm = () => {
     getPageNumbers,
     toggleAtivoStatus
   };
+};
+
+const formatCurrencyInput = (value: string) => {
+  const numericValue = value.replace(/\D/g, '');
+  return formatToBRL(Number(numericValue));
 };

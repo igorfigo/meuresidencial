@@ -278,7 +278,10 @@ export const CadastroPlanos = () => {
   };
 
   const formatCurrency = (value: string) => {
-    return `R$ ${value}`;
+    if (!value.startsWith('R$')) {
+      return `R$ ${value}`;
+    }
+    return value;
   };
 
   const formatDate = (isoDate: string) => {
@@ -562,3 +565,4 @@ export const CadastroPlanos = () => {
 };
 
 export default CadastroPlanos;
+

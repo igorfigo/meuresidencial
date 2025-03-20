@@ -37,7 +37,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     const descontoNumber = BRLToNumber(desconto);
     
     // Calculate total value ensuring it's not negative
-    const valorMensal = formatToBRL(Math.max(0, planoNumber - descontoNumber));
+    const valorMensal = `R$ ${formatToBRL(Math.max(0, planoNumber - descontoNumber))}`;
     
     setValue('valorMensal', valorMensal);
   }, [valorPlano, desconto, setValue]);
@@ -47,7 +47,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     const value = e.target.value.replace(/\D/g, '');
     
     // Format to currency with R$ prefix and proper Brazilian format (comma as decimal separator)
-    const formattedValue = value ? formatToBRL(Number(value) / 100) : formatToBRL(0);
+    const formattedValue = value ? `R$ ${formatToBRL(Number(value) / 100)}` : 'R$ 0,00';
     
     setValue('desconto', formattedValue);
     

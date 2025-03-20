@@ -29,10 +29,10 @@ export const usePlans = () => {
 
       if (fetchError) throw new Error(fetchError.message);
       
-      // Format the values to Brazilian currency format with 2 decimal places
+      // Format the values to Brazilian currency format with R$ prefix
       const formattedData = data?.map(plan => ({
         ...plan,
-        valor: formatToBRL(Number(plan.valor))
+        valor: `R$ ${formatToBRL(Number(plan.valor))}`
       })) || [];
       
       setPlans(formattedData);

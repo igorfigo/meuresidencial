@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -47,21 +46,6 @@ const MinhaAssinatura = () => {
   const [selectedPlanValue, setSelectedPlanValue] = useState('R$ 0,00');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   
-  // Fetch condominium data when component mounts
-  useEffect(() => {
-    if (user?.matricula) {
-      fetchCondominiumData(user.matricula);
-    }
-  }, [user]);
-  
-  // Update the selected plan value when a plan is selected
-  useEffect(() => {
-    if (selectedPlan) {
-      const planValue = getPlanValue(selectedPlan);
-      setSelectedPlanValue(planValue);
-    }
-  }, [selectedPlan, getPlanValue]);
-
   const fetchCondominiumData = async (matricula: string) => {
     setIsLoading(true);
     try {
@@ -76,7 +60,6 @@ const MinhaAssinatura = () => {
       }
       
       setCondominiumData(data);
-      // Initialize the selected plan with the current plan
       setSelectedPlan(data.planocontratado || '');
     } catch (error) {
       console.error('Error fetching condominium data:', error);
@@ -141,13 +124,11 @@ const MinhaAssinatura = () => {
         throw error;
       }
       
-      // Update local state
       setCondominiumData({
         ...condominiumData,
         tipodocumento: value
       });
       
-      // Log the change in the condominium_change_logs table
       await supabase.from('condominium_change_logs').insert({
         matricula: user.matricula,
         campo: 'tipodocumento',
@@ -166,7 +147,6 @@ const MinhaAssinatura = () => {
   };
   
   const handleSavePlanUpgrade = async () => {
-    // First show confirmation dialog
     setShowConfirmDialog(true);
   };
   
@@ -175,22 +155,20 @@ const MinhaAssinatura = () => {
     
     setIsLoading(true);
     try {
-      // Get the current plan data for logging changes
       const oldPlan = condominiumData?.planocontratado || '';
       const oldPlanValue = condominiumData?.valorplano || '';
       const oldMonthlyValue = condominiumData?.valormensal || '';
       
-      // Calculate new monthly value based on any existing discount
       const planValue = BRLToNumber(selectedPlanValue);
-      const discountValue = condominiumData?.desconto ? BRLToNumber(condominiumData.desconto) : 0;
-      const newMonthlyValue = formatToBRL(Math.max(0, planValue - discountValue));
+      const discountValue = condominiumData?.desconto ? BRLToNumber(formatCurrencyDisplay(condominiumData.desconto)) : 0;
+      const newMonthlyValue = `R$ ${formatToBRL(Math.max(0, planValue - discountValue))}`;
       
       const { data, error } = await supabase
         .from('condominiums')
         .update({ 
           planocontratado: selectedPlan,
-          valorplano: selectedPlanValue,
-          valormensal: newMonthlyValue
+          valorplano: BRLToNumber(selectedPlanValue).toString(),
+          valormensal: BRLToNumber(newMonthlyValue).toString()
         })
         .eq('matricula', user.matricula)
         .select();
@@ -199,9 +177,7 @@ const MinhaAssinatura = () => {
         throw error;
       }
       
-      // Log the plan change in the condominium_change_logs table
       const changeLogsPromises = [
-        // Log plan type change
         supabase.from('condominium_change_logs').insert({
           matricula: user.matricula,
           campo: 'planocontratado',
@@ -209,19 +185,17 @@ const MinhaAssinatura = () => {
           valor_novo: selectedPlan,
           usuario: user.email
         }),
-        // Log plan value change
         supabase.from('condominium_change_logs').insert({
           matricula: user.matricula,
           campo: 'valorplano',
-          valor_anterior: oldPlanValue,
+          valor_anterior: formatCurrencyDisplay(oldPlanValue),
           valor_novo: selectedPlanValue,
           usuario: user.email
         }),
-        // Log monthly value change
         supabase.from('condominium_change_logs').insert({
           matricula: user.matricula,
           campo: 'valormensal',
-          valor_anterior: oldMonthlyValue,
+          valor_anterior: formatCurrencyDisplay(oldMonthlyValue),
           valor_novo: newMonthlyValue,
           usuario: user.email
         })
@@ -229,12 +203,11 @@ const MinhaAssinatura = () => {
       
       await Promise.all(changeLogsPromises);
       
-      // Update local state
       setCondominiumData({
         ...condominiumData,
         planocontratado: selectedPlan,
-        valorplano: selectedPlanValue,
-        valormensal: newMonthlyValue
+        valorplano: BRLToNumber(selectedPlanValue).toString(),
+        valormensal: BRLToNumber(newMonthlyValue).toString()
       });
       
       toast.success('Plano atualizado com sucesso!');
@@ -248,6 +221,27 @@ const MinhaAssinatura = () => {
     }
   };
   
+  const formatCurrencyDisplay = (value: string | null | undefined): string => {
+    if (!value) return 'R$ 0,00';
+    
+    if (value.startsWith('R$')) return value;
+    
+    return `R$ ${formatToBRL(Number(value))}`;
+  };
+  
+  useEffect(() => {
+    if (user?.matricula) {
+      fetchCondominiumData(user.matricula);
+    }
+  }, [user]);
+  
+  useEffect(() => {
+    if (selectedPlan) {
+      const planValue = getPlanValue(selectedPlan);
+      setSelectedPlanValue(planValue);
+    }
+  }, [selectedPlan, getPlanValue]);
+
   if (!isAuthenticated || !user || user.isAdmin) {
     return (
       <DashboardLayout>
@@ -264,7 +258,6 @@ const MinhaAssinatura = () => {
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6">Minha Assinatura</h1>
         
-        {/* Password Change Section */}
         <Card className="form-section p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Alterar Senha</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -311,7 +304,6 @@ const MinhaAssinatura = () => {
           </div>
         </Card>
         
-        {/* Subscription Info Section */}
         {condominiumData && (
           <Card className="form-section p-6 mb-6">
             <div className="flex justify-between mb-4">
@@ -371,7 +363,7 @@ const MinhaAssinatura = () => {
                       <Label htmlFor="upgradeDiscount">Desconto (R$)</Label>
                       <Input
                         id="upgradeDiscount"
-                        value={condominiumData?.desconto || 'R$ 0,00'}
+                        value={formatCurrencyDisplay(condominiumData?.desconto)}
                         readOnly
                         className="bg-gray-100"
                       />
@@ -381,15 +373,13 @@ const MinhaAssinatura = () => {
                       <Label htmlFor="upgradeMonthlyValue">Valor Mensal (R$)</Label>
                       <Input
                         id="upgradeMonthlyValue"
-                        value={
-                          formatToBRL(
-                            Math.max(
-                              0, 
-                              BRLToNumber(selectedPlanValue) - 
-                              (condominiumData?.desconto ? BRLToNumber(condominiumData.desconto) : 0)
-                            )
+                        value={`R$ ${formatToBRL(
+                          Math.max(
+                            0, 
+                            BRLToNumber(selectedPlanValue) - 
+                            (condominiumData?.desconto ? BRLToNumber(formatCurrencyDisplay(condominiumData.desconto)) : 0)
                           )
-                        }
+                        )}`}
                         readOnly
                         className="bg-gray-100"
                       />
@@ -407,17 +397,15 @@ const MinhaAssinatura = () => {
                           <AlertDialogDescription>
                             Você está prestes a alterar seu plano:
                             <br /><br />
-                            <strong>De:</strong> {condominiumData?.valormensal || 'R$ 0,00'} ({condominiumData?.planocontratado})
+                            <strong>De:</strong> {formatCurrencyDisplay(condominiumData?.valormensal)} ({condominiumData?.planocontratado})
                             <br />
-                            <strong>Para:</strong> {
-                              formatToBRL(
-                                Math.max(
-                                  0, 
-                                  BRLToNumber(selectedPlanValue) - 
-                                  (condominiumData?.desconto ? BRLToNumber(condominiumData.desconto) : 0)
-                                )
+                            <strong>Para:</strong> {`R$ ${formatToBRL(
+                              Math.max(
+                                0, 
+                                BRLToNumber(selectedPlanValue) - 
+                                (condominiumData?.desconto ? BRLToNumber(formatCurrencyDisplay(condominiumData.desconto)) : 0)
                               )
-                            } ({selectedPlan})
+                            )}`} ({selectedPlan})
                             <br /><br />
                             Deseja continuar?
                           </AlertDialogDescription>
@@ -452,7 +440,7 @@ const MinhaAssinatura = () => {
                 <Label htmlFor="valorPlano">Valor do Plano (R$)</Label>
                 <Input
                   id="valorPlano"
-                  value={condominiumData.valorplano || 'R$ 0,00'}
+                  value={formatCurrencyDisplay(condominiumData.valorplano)}
                   readOnly
                   className="bg-gray-100"
                 />
@@ -482,7 +470,7 @@ const MinhaAssinatura = () => {
                 <Label htmlFor="desconto">Desconto (R$)</Label>
                 <Input
                   id="desconto"
-                  value={condominiumData.desconto || 'R$ 0,00'}
+                  value={formatCurrencyDisplay(condominiumData.desconto)}
                   readOnly
                   className="bg-gray-100"
                 />
@@ -492,7 +480,7 @@ const MinhaAssinatura = () => {
                 <Label htmlFor="valorMensal">Valor Mensal (R$)</Label>
                 <Input
                   id="valorMensal"
-                  value={condominiumData.valormensal || 'R$ 0,00'}
+                  value={formatCurrencyDisplay(condominiumData.valormensal)}
                   readOnly
                   className="bg-gray-100"
                 />

@@ -10,7 +10,7 @@ interface InputProps extends React.ComponentPropsWithoutRef<"input"> {
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, numberOnly, isCurrency, onChange, ...props }, ref) => {
+  ({ className, type, numberOnly, isCurrency, onChange, value, ...props }, ref) => {
     // Handle keydown for number-only inputs
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (numberOnly) {
@@ -52,6 +52,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         onKeyDown={handleKeyDown}
         onChange={handleChange}
+        value={value}
         {...props}
       />
     )
