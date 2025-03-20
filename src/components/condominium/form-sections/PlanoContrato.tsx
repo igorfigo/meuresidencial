@@ -63,6 +63,12 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     }
   };
 
+  // Set default value for vencimento to "10" and formaPagamento to "pix"
+  React.useEffect(() => {
+    setValue('vencimento', '10');
+    setValue('formaPagamento', 'pix');
+  }, [setValue]);
+
   return (
     <Card className="form-section p-6">
       <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
@@ -108,42 +114,24 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
         
         <div className="space-y-2">
           <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
-          <Select 
-            value={watch('formaPagamento')}
-            onValueChange={(value) => setValue('formaPagamento', value)}
-          >
-            <SelectTrigger id="formaPagamento">
-              <SelectValue placeholder="Forma de Pagamento" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="pix">PIX</SelectItem>
-                <SelectItem value="boleto">Boleto</SelectItem>
-                <SelectItem value="cartao">Cartão de Crédito</SelectItem>
-                <SelectItem value="transferencia">Transferência Bancária</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <Input
+            id="formaPagamento"
+            value="PIX"
+            readOnly
+            className="bg-gray-100"
+          />
+          <input type="hidden" {...register('formaPagamento')} value="pix" />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="vencimento">Vencimento</Label>
-          <Select 
-            value={watch('vencimento')}
-            onValueChange={(value) => setValue('vencimento', value)}
-          >
-            <SelectTrigger id="vencimento">
-              <SelectValue placeholder="Vencimento" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {/* Only show options 5, 7, and 10 */}
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="7">7</SelectItem>
-                <SelectItem value="10">10</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <Input
+            id="vencimento"
+            value="10"
+            readOnly
+            className="bg-gray-100"
+          />
+          <input type="hidden" {...register('vencimento')} value="10" />
         </div>
         
         <div className="space-y-2">
