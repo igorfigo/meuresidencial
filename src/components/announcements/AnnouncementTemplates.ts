@@ -88,5 +88,20 @@ Comunicamos que [exemplo: mudança de administradora, nova portaria digital, alt
 Para dúvidas ou mais informações, estamos à disposição pelo [contato disponível].
 
 Atenciosamente,
+Administração do Condomínio`,
+  "Dedetização": `📢 Comunicado de Dedetização 📢
+
+Prezados moradores,
+
+🗓️ Informamos que será realizada a dedetização em todas as áreas comuns do condomínio no dia [data], a partir das [horário]. Esta medida é essencial para garantir a saúde e o bem-estar de todos, prevenindo a presença de insetos e pragas.
+
+Orientações: 
+🔒 Fechar portas e janelas: Para evitar que o produto utilizado na dedetização entre nos apartamentos. 
+🐾 Retirar animais de estimação: Mantenha seus pets em locais seguros durante o período de aplicação. 
+🚫 Evitar circulação nas áreas comuns: Durante o horário de dedetização, evite transitar pelas áreas afetadas.
+
+Agradecemos a compreensão e colaboração de todos. Caso tenha alguma dúvida ou necessite de mais informações, por favor, entre em contato com a administração do condomínio.
+
+Atenciosamente,
 Administração do Condomínio`
 };
