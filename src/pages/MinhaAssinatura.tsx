@@ -274,7 +274,7 @@ const MinhaAssinatura = () => {
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6">Minha Assinatura</h1>
         
-        <Card className="form-section p-6 mb-6">
+        <Card className="border-t-4 border-t-brand-600 shadow-md p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Alterar Senha</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
@@ -321,7 +321,7 @@ const MinhaAssinatura = () => {
         </Card>
         
         {condominiumData && (
-          <Card className="form-section p-6 mb-6">
+          <Card className="border-t-4 border-t-brand-600 shadow-md p-6 mb-6">
             <div className="flex justify-between mb-4">
               <h2 className="text-xl font-semibold">Plano / Contrato</h2>
               <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
