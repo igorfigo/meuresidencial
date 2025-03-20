@@ -16,7 +16,9 @@ export const residentSchema = z.object({
   cpf: z.string().length(11, "CPF deve ter 11 dígitos"),
   telefone: z.string().length(11, "Telefone deve ter 11 dígitos"),
   email: z.string().email("E-mail inválido"),
-  unidade: z.string().min(1, "Unidade é obrigatória"),
+  unidade: z.string()
+    .min(1, "Unidade é obrigatória")
+    .refine(value => !/\s/.test(value), "Unidade não pode conter espaços"),
   valor_condominio: z.string().min(1, "Valor do condomínio é obrigatório"),
 });
 
@@ -108,9 +110,42 @@ export const useResidents = () => {
     enabled: !!matricula
   });
 
+  // Helper function to check for duplicate unit in the condominium
+  const checkDuplicateUnit = async (unidade: string, residentId?: string): Promise<boolean> => {
+    // Skip check if no unidade or matricula
+    if (!unidade || !matricula) return false;
+
+    let query = supabase
+      .from('residents')
+      .select('id')
+      .eq('matricula', matricula)
+      .eq('unidade', unidade);
+
+    // If we're editing an existing resident, exclude it from the check
+    if (residentId) {
+      query = query.neq('id', residentId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error checking duplicate unit:", error);
+      return false;
+    }
+
+    // Return true if there's at least one resident with the same unit
+    return data.length > 0;
+  };
+
   // Mutation to create a new resident
   const createMutation = useMutation({
     mutationFn: async (values: ResidentFormValues) => {
+      // Check for duplicate unit before creating
+      const isDuplicateUnit = await checkDuplicateUnit(values.unidade);
+      if (isDuplicateUnit) {
+        throw new Error('Unidade já cadastrada para este condomínio');
+      }
+      
       // Fixed: Ensure the values submitted match the required field structure
       const resident: Resident = {
         matricula: values.matricula,
@@ -130,8 +165,6 @@ export const useResidents = () => {
       if (error) {
         if (error.code === '23505' && error.message.includes('unique_cpf_per_condominium')) {
           throw new Error('CPF já cadastrado para este condomínio');
-        } else if (error.code === '23505' && error.message.includes('unique_unit_per_condominium')) {
-          throw new Error('Unidade já cadastrada para este condomínio');
         } else {
           console.error("Error creating resident:", error);
           throw error;
@@ -155,6 +188,12 @@ export const useResidents = () => {
     mutationFn: async (values: ResidentFormValues) => {
       if (!values.id) throw new Error("ID do morador não encontrado");
       
+      // Check for duplicate unit before updating
+      const isDuplicateUnit = await checkDuplicateUnit(values.unidade, values.id);
+      if (isDuplicateUnit) {
+        throw new Error('Unidade já cadastrada para este condomínio');
+      }
+      
       const { id, ...updateData } = values;
       
       // Fixed: Ensure required fields are properly typed
@@ -177,8 +216,6 @@ export const useResidents = () => {
       if (error) {
         if (error.code === '23505' && error.message.includes('unique_cpf_per_condominium')) {
           throw new Error('CPF já cadastrado para este condomínio');
-        } else if (error.code === '23505' && error.message.includes('unique_unit_per_condominium')) {
-          throw new Error('Unidade já cadastrada para este condomínio');
         } else {
           console.error("Error updating resident:", error);
           throw error;

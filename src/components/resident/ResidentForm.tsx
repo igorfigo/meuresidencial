@@ -51,6 +51,14 @@ export const ResidentForm = ({
     }
   };
 
+  // Add custom onChange handler for unit field to prevent spaces
+  const handleUnitChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: any) => {
+    // Remove any spaces from the input
+    const value = e.target.value.replace(/\s+/g, '');
+    e.target.value = value;
+    onChange(e);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -146,7 +154,11 @@ export const ResidentForm = ({
                 <FormItem>
                   <FormLabel>Unidade (Número do Apto) *</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Número do apartamento/unidade" />
+                    <Input 
+                      {...field} 
+                      placeholder="Número do apartamento/unidade" 
+                      onChange={(e) => handleUnitChange(e, field.onChange)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
