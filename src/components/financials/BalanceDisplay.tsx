@@ -52,11 +52,21 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
     <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 ring-2 ring-blue-100">
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
-          <div className="w-full text-center">
+          <div className="flex items-center gap-1">
             <h2 className="text-base font-semibold text-gray-800">Saldo Atual</h2>
+            {!isEditing && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleEdit} 
+                className="h-6 w-6 ml-1 p-0"
+              >
+                <Pencil size={14} />
+              </Button>
+            )}
           </div>
           
-          {isEditing ? (
+          {isEditing && (
             <div className="flex gap-1">
               <Button variant="outline" size="sm" onClick={handleCancel} className="h-7 text-xs px-2">
                 Cancelar
@@ -65,15 +75,6 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
                 {isSubmitting ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
-          ) : (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleEdit} 
-              className="h-7 w-7 absolute right-3 top-3"
-            >
-              <Pencil size={16} />
-            </Button>
           )}
         </div>
         
