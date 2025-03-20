@@ -1,213 +1,479 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
+import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { useApp } from "@/contexts/AppContext";
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { usePlans } from '@/hooks/use-plans';
+import { BRLToNumber, formatToBRL } from '@/utils/currency';
+import { 
+  Dialog, 
+  DialogTrigger, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const MinhaAssinatura = () => {
-  const { user } = useApp();
+  const { user, isAuthenticated } = useApp();
+  const { plans, isLoading: isLoadingPlans, getPlanValue } = usePlans();
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [condominiumData, setCondominiumData] = useState<any>(null);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [selectedDocType, setSelectedDocType] = useState('Nota Fiscal');
-  const [selectedPlan, setSelectedPlan] = useState('Básico');
-  const [upgradeDialog, setUpgradeDialog] = useState(false);
-
-  // Plans data
-  const plans = [
-    { id: 'basico', name: 'Básico', price: 99.90, discount: 0, finalPrice: 99.90 },
-    { id: 'intermediario', name: 'Intermediário', price: 199.90, discount: 10, finalPrice: 189.90 },
-    { id: 'premium', name: 'Premium', price: 299.90, discount: 20, finalPrice: 279.90 },
-  ];
-
-  // Current plan (would come from user context in a real app)
-  const currentPlan = plans[0];
   
-  // Selected plan for upgrade
-  const [upgradePlan, setUpgradePlan] = useState(plans[0]);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('');
+  const [selectedPlanValue, setSelectedPlanValue] = useState('R$ 0,00');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  
+  // Fetch condominium data when component mounts
+  useEffect(() => {
+    if (user?.matricula) {
+      fetchCondominiumData(user.matricula);
+    }
+  }, [user]);
+  
+  // Update the selected plan value when a plan is selected
+  useEffect(() => {
+    if (selectedPlan) {
+      const planValue = getPlanValue(selectedPlan);
+      setSelectedPlanValue(planValue);
+    }
+  }, [selectedPlan, getPlanValue]);
 
-  const handlePasswordChange = () => {
-    // Password change logic would go here
-    console.log("Password change requested", { currentPassword, newPassword, confirmPassword });
-    // Reset fields
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    // Show success notification
+  const fetchCondominiumData = async (matricula: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('condominiums')
+        .select('*')
+        .eq('matricula', matricula)
+        .single();
+        
+      if (error) {
+        throw error;
+      }
+      
+      setCondominiumData(data);
+      // Initialize the selected plan with the current plan
+      setSelectedPlan(data.planocontratado || '');
+    } catch (error) {
+      console.error('Error fetching condominium data:', error);
+      toast.error('Erro ao carregar dados do condomínio');
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const handleDocTypeChange = (value: string) => {
-    setSelectedDocType(value);
-    // Save doc type preference logic would go here
+  
+  const handleChangePassword = async () => {
+    if (!newPassword || !confirmPassword) {
+      toast.error('Por favor, preencha todos os campos');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      toast.error('As senhas não coincidem');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('condominiums')
+        .update({ 
+          senha: newPassword,
+          confirmarsenha: newPassword
+        })
+        .eq('matricula', user?.matricula)
+        .select();
+        
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Senha alterada com sucesso!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast.error('Erro ao alterar senha');
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const handlePlanChange = (value: string) => {
-    const selected = plans.find(plan => plan.id === value) || plans[0];
-    setUpgradePlan(selected);
+  
+  const handleTipoDocumentoChange = async (value: string) => {
+    if (!user?.matricula) return;
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('condominiums')
+        .update({ 
+          tipodocumento: value 
+        })
+        .eq('matricula', user.matricula)
+        .select();
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update local state
+      setCondominiumData({
+        ...condominiumData,
+        tipodocumento: value
+      });
+      
+      toast.success('Tipo de documento atualizado com sucesso!');
+    } catch (error) {
+      console.error('Error updating document type:', error);
+      toast.error('Erro ao atualizar tipo de documento');
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const confirmUpgrade = () => {
-    // Upgrade plan logic would go here
-    console.log("Plan upgrade confirmed", { from: currentPlan, to: upgradePlan });
-    setUpgradeDialog(false);
-    // Show success notification
+  
+  const handleSavePlanUpgrade = async () => {
+    // First show confirmation dialog
+    setShowConfirmDialog(true);
   };
-
+  
+  const confirmPlanUpgrade = async () => {
+    if (!user?.matricula || !selectedPlan) return;
+    
+    setIsLoading(true);
+    try {
+      // Calculate new monthly value based on any existing discount
+      const planValue = BRLToNumber(selectedPlanValue);
+      const discountValue = condominiumData?.desconto ? BRLToNumber(condominiumData.desconto) : 0;
+      const newMonthlyValue = formatToBRL(Math.max(0, planValue - discountValue));
+      
+      const { data, error } = await supabase
+        .from('condominiums')
+        .update({ 
+          planocontratado: selectedPlan,
+          valorplano: selectedPlanValue,
+          valormensal: newMonthlyValue
+        })
+        .eq('matricula', user.matricula)
+        .select();
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update local state
+      setCondominiumData({
+        ...condominiumData,
+        planocontratado: selectedPlan,
+        valorplano: selectedPlanValue,
+        valormensal: newMonthlyValue
+      });
+      
+      toast.success('Plano atualizado com sucesso!');
+      setShowUpgradeDialog(false);
+      setShowConfirmDialog(false);
+    } catch (error) {
+      console.error('Error upgrading plan:', error);
+      toast.error('Erro ao atualizar plano');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  if (!isAuthenticated || !user || user.isAdmin) {
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto py-6">
+          <h1 className="text-2xl font-bold mb-6">Minha Assinatura</h1>
+          <p>Esta página está disponível apenas para usuários de condomínios.</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+  
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold tracking-tight">Minha Assinatura</h1>
-        </div>
+      <div className="container mx-auto py-6">
+        <h1 className="text-2xl font-bold mb-6">Minha Assinatura</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Password Change Card */}
-          <Card className="shadow-md border-t-[6px] border-t-brand-400">
-            <CardHeader>
-              <CardTitle>Alterar Senha</CardTitle>
-              <CardDescription>Atualize sua senha de acesso ao sistema</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="current-password">Senha Atual</Label>
-                <Input 
-                  id="current-password" 
-                  type="password" 
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="new-password">Nova Senha</Label>
-                <Input 
-                  id="new-password" 
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-                <Input 
-                  id="confirm-password" 
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handlePasswordChange}>Alterar Senha</Button>
-            </CardFooter>
-          </Card>
-
-          {/* Subscription Info Card */}
-          <Card className="shadow-md border-t-[6px] border-t-brand-400">
-            <CardHeader>
-              <CardTitle>Plano / Contrato</CardTitle>
-              <CardDescription>Informações sobre sua assinatura atual</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="plan-type">Plano</Label>
-                <Input id="plan-type" value={currentPlan.name} readOnly className="bg-gray-100" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="plan-price">Valor do Plano (R$)</Label>
-                <Input id="plan-price" value={currentPlan.price.toFixed(2)} readOnly className="bg-gray-100" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="plan-discount">Desconto (R$)</Label>
-                <Input id="plan-discount" value={currentPlan.discount.toFixed(2)} readOnly className="bg-gray-100" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="plan-final">Valor Mensal (R$)</Label>
-                <Input id="plan-final" value={currentPlan.finalPrice.toFixed(2)} readOnly className="bg-gray-100" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="doc-type">Nota Fiscal / Recibo</Label>
-                <Select onValueChange={handleDocTypeChange} defaultValue={selectedDocType}>
-                  <SelectTrigger id="doc-type">
-                    <SelectValue placeholder="Selecione o tipo de documento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Nota Fiscal">Nota Fiscal</SelectItem>
-                    <SelectItem value="Recibo">Recibo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Dialog open={upgradeDialog} onOpenChange={setUpgradeDialog}>
+        {/* Password Change Section */}
+        <Card className="form-section p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">Alterar Senha</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">Senha Atual</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Digite sua senha atual"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">Nova Senha</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Digite a nova senha"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirme a nova senha"
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button 
+              onClick={handleChangePassword} 
+              disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
+            >
+              Alterar Senha
+            </Button>
+          </div>
+        </Card>
+        
+        {/* Subscription Info Section */}
+        {condominiumData && (
+          <Card className="form-section p-6 mb-6">
+            <div className="flex justify-between mb-4">
+              <h2 className="text-xl font-semibold">Plano / Contrato</h2>
+              <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
                 <DialogTrigger asChild>
                   <Button>Realizar Upgrade do Plano</Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Upgrade de Plano</DialogTitle>
                     <DialogDescription>
-                      Selecione o novo plano desejado para sua assinatura.
+                      Selecione o novo plano desejado para o seu condomínio.
                     </DialogDescription>
                   </DialogHeader>
+                  
                   <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="upgrade-plan">Plano Contratado</Label>
-                      <Select onValueChange={handlePlanChange} defaultValue={upgradePlan.id}>
-                        <SelectTrigger id="upgrade-plan">
+                      <Label htmlFor="upgradePlan">Plano Contratado</Label>
+                      <Select 
+                        value={selectedPlan}
+                        onValueChange={setSelectedPlan}
+                        disabled={isLoadingPlans}
+                      >
+                        <SelectTrigger id="upgradePlan">
                           <SelectValue placeholder="Selecione o plano" />
                         </SelectTrigger>
                         <SelectContent>
-                          {plans.map(plan => (
-                            <SelectItem key={plan.id} value={plan.id}>{plan.name}</SelectItem>
-                          ))}
+                          <SelectGroup>
+                            {isLoadingPlans ? (
+                              <SelectItem value="loading" disabled>Carregando planos...</SelectItem>
+                            ) : plans.length === 0 ? (
+                              <SelectItem value="empty" disabled>Nenhum plano disponível</SelectItem>
+                            ) : (
+                              plans.map((plan) => (
+                                <SelectItem key={plan.codigo} value={plan.codigo}>
+                                  {plan.nome}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectGroup>
                         </SelectContent>
                       </Select>
                     </div>
+                    
                     <div className="space-y-2">
-                      <Label htmlFor="upgrade-price">Valor do Plano (R$)</Label>
-                      <Input id="upgrade-price" value={upgradePlan.price.toFixed(2)} readOnly className="bg-gray-100" />
+                      <Label htmlFor="upgradePlanValue">Valor do Plano (R$)</Label>
+                      <Input
+                        id="upgradePlanValue"
+                        value={selectedPlanValue}
+                        readOnly
+                        className="bg-gray-100"
+                      />
                     </div>
+                    
                     <div className="space-y-2">
-                      <Label htmlFor="upgrade-discount">Desconto (R$)</Label>
-                      <Input id="upgrade-discount" value={upgradePlan.discount.toFixed(2)} readOnly className="bg-gray-100" />
+                      <Label htmlFor="upgradeDiscount">Desconto (R$)</Label>
+                      <Input
+                        id="upgradeDiscount"
+                        value={condominiumData?.desconto || 'R$ 0,00'}
+                        readOnly
+                        className="bg-gray-100"
+                      />
                     </div>
+                    
                     <div className="space-y-2">
-                      <Label htmlFor="upgrade-final">Valor Mensal (R$)</Label>
-                      <Input id="upgrade-final" value={upgradePlan.finalPrice.toFixed(2)} readOnly className="bg-gray-100" />
+                      <Label htmlFor="upgradeMonthlyValue">Valor Mensal (R$)</Label>
+                      <Input
+                        id="upgradeMonthlyValue"
+                        value={
+                          formatToBRL(
+                            Math.max(
+                              0, 
+                              BRLToNumber(selectedPlanValue) - 
+                              (condominiumData?.desconto ? BRLToNumber(condominiumData.desconto) : 0)
+                            )
+                          )
+                        }
+                        readOnly
+                        className="bg-gray-100"
+                      />
                     </div>
                   </div>
+                  
                   <DialogFooter>
-                    <AlertDialog>
+                    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
                       <AlertDialogTrigger asChild>
-                        <Button>Salvar Alterações</Button>
+                        <Button onClick={handleSavePlanUpgrade}>Salvar Alterações</Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Confirmar Mudança de Plano</AlertDialogTitle>
+                          <AlertDialogTitle>Confirmar Alteração de Plano</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Você está alterando seu plano de <strong>{currentPlan.name}</strong> (R$ {currentPlan.finalPrice.toFixed(2)}/mês) para <strong>{upgradePlan.name}</strong> (R$ {upgradePlan.finalPrice.toFixed(2)}/mês).
+                            Você está prestes a alterar seu plano:
                             <br /><br />
-                            Deseja confirmar esta alteração?
+                            <strong>De:</strong> {condominiumData?.valormensal || 'R$ 0,00'} ({condominiumData?.planocontratado})
+                            <br />
+                            <strong>Para:</strong> {
+                              formatToBRL(
+                                Math.max(
+                                  0, 
+                                  BRLToNumber(selectedPlanValue) - 
+                                  (condominiumData?.desconto ? BRLToNumber(condominiumData.desconto) : 0)
+                                )
+                              )
+                            } ({selectedPlan})
+                            <br /><br />
+                            Deseja continuar?
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={confirmUpgrade}>Confirmar</AlertDialogAction>
+                          <AlertDialogAction onClick={confirmPlanUpgrade}>Confirmar</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            </CardFooter>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="planoContratado">Plano Contratado</Label>
+                <Input
+                  id="planoContratado"
+                  value={
+                    plans.find(p => p.codigo === condominiumData.planocontratado)?.nome || 
+                    condominiumData.planocontratado || 
+                    ''
+                  }
+                  readOnly
+                  className="bg-gray-100"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="valorPlano">Valor do Plano (R$)</Label>
+                <Input
+                  id="valorPlano"
+                  value={condominiumData.valorplano || 'R$ 0,00'}
+                  readOnly
+                  className="bg-gray-100"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
+                <Input
+                  id="formaPagamento"
+                  value={condominiumData.formapagamento || ''}
+                  readOnly
+                  className="bg-gray-100"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="vencimento">Vencimento</Label>
+                <Input
+                  id="vencimento"
+                  value={condominiumData.vencimento || ''}
+                  readOnly
+                  className="bg-gray-100"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="desconto">Desconto (R$)</Label>
+                <Input
+                  id="desconto"
+                  value={condominiumData.desconto || 'R$ 0,00'}
+                  readOnly
+                  className="bg-gray-100"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="valorMensal">Valor Mensal (R$)</Label>
+                <Input
+                  id="valorMensal"
+                  value={condominiumData.valormensal || 'R$ 0,00'}
+                  readOnly
+                  className="bg-gray-100"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="tipoDocumento">Nota Fiscal / Recibo</Label>
+                <Select 
+                  value={condominiumData.tipodocumento || ''}
+                  onValueChange={handleTipoDocumentoChange}
+                >
+                  <SelectTrigger id="tipoDocumento">
+                    <SelectValue placeholder="Selecione o tipo de documento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="notaFiscal">Nota Fiscal</SelectItem>
+                      <SelectItem value="recibo">Recibo</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </Card>
-        </div>
+        )}
       </div>
     </DashboardLayout>
   );
