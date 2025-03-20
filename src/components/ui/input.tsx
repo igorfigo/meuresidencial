@@ -7,10 +7,11 @@ interface InputProps extends React.ComponentPropsWithoutRef<"input"> {
   type?: string;
   numberOnly?: boolean;
   isCurrency?: boolean;
+  hidePrefix?: boolean; // New prop to control whether to show the R$ prefix
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, numberOnly, isCurrency, onChange, value, ...props }, ref) => {
+  ({ className, type, numberOnly, isCurrency, hidePrefix = false, onChange, value, ...props }, ref) => {
     // Handle keydown for number-only inputs
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (numberOnly) {
@@ -34,7 +35,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       if (isCurrency) {
         const value = e.target.value.replace(/\D/g, '');
         const formattedValue = formatCurrencyInput(value);
-        e.target.value = `R$ ${formattedValue}`;
+        e.target.value = hidePrefix ? formattedValue : `R$ ${formattedValue}`;
       }
       
       if (onChange) {

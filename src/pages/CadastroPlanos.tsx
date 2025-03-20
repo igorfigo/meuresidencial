@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -166,9 +167,10 @@ export const CadastroPlanos = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
-    const valorPattern = /^R\$\s*\d{1,3}(\.\d{3})*,\d{2}$/;
+    // Validate that the value is in the correct format (XX,XX)
+    const valorPattern = /^\d{1,3}(\.\d{3})*,\d{2}$/;
     if (!valorPattern.test(data.valor)) {
-      toast.error('O valor do plano deve seguir o formato R$ 0.000,00');
+      toast.error('O valor do plano deve seguir o formato 0.000,00');
       return;
     }
 
@@ -190,7 +192,7 @@ export const CadastroPlanos = () => {
         
         oldPlan = existingPlan ? {
           ...existingPlan,
-          valor: `R$ ${formatToBRL(Number(existingPlan.valor))}`
+          valor: formatToBRL(Number(existingPlan.valor))
         } : null;
       }
       
@@ -262,11 +264,17 @@ export const CadastroPlanos = () => {
   };
 
   const handleEditPlan = async (plan: Plan) => {
+    // When editing a plan, format the value to remove the R$ prefix
+    let planValue = plan.valor;
+    if (planValue.startsWith('R$')) {
+      planValue = formatToBRL(BRLToNumber(planValue));
+    }
+
     reset({
       codigo: plan.codigo,
       nome: plan.nome,
       descricao: plan.descricao || '',
-      valor: plan.valor
+      valor: planValue
     });
     setIsExistingRecord(true);
   };
@@ -333,7 +341,8 @@ export const CadastroPlanos = () => {
     if (name === 'valor') {
       const numericValue = value.replace(/\D/g, '');
       const formattedValue = formatCurrencyInput(numericValue);
-      setValue(name as keyof FormFields, `R$ ${formattedValue}`);
+      // Set only the formatted value without the R$ prefix
+      setValue(name as keyof FormFields, formattedValue);
     } else {
       setValue(name as keyof FormFields, value);
     }
@@ -396,6 +405,7 @@ export const CadastroPlanos = () => {
                     {...form.register('valor', { required: true })}
                     onChange={handleInputChange}
                   />
+                  <p className="text-xs text-muted-foreground">Digite apenas os números no formato 0,00</p>
                 </div>
                 
                 <Button 

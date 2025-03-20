@@ -49,6 +49,19 @@ export const usePlans = () => {
     return plan?.valor || 'R$ 0,00';
   }, [plans]);
 
+  // Add a function to get the plan value without the R$ prefix
+  const getPlanValueWithoutPrefix = useCallback((codigo: string): string => {
+    const plan = plans.find(p => p.codigo === codigo);
+    if (!plan) return '0,00';
+    
+    // Remove R$ prefix if present
+    if (plan.valor.startsWith('R$')) {
+      return formatToBRL(BRLToNumber(plan.valor));
+    }
+    
+    return plan.valor;
+  }, [plans]);
+
   useEffect(() => {
     fetchPlans();
   }, []);
@@ -59,5 +72,6 @@ export const usePlans = () => {
     error,
     fetchPlans,
     getPlanValue,
+    getPlanValueWithoutPrefix,
   };
 };
