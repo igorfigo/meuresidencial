@@ -147,6 +147,15 @@ const MinhaAssinatura = () => {
         tipodocumento: value
       });
       
+      // Log the change in the condominium_change_logs table
+      await supabase.from('condominium_change_logs').insert({
+        matricula: user.matricula,
+        campo: 'tipodocumento',
+        valor_anterior: condominiumData.tipodocumento,
+        valor_novo: value,
+        usuario: user.email
+      });
+      
       toast.success('Tipo de documento atualizado com sucesso!');
     } catch (error) {
       console.error('Error updating document type:', error);
@@ -166,6 +175,11 @@ const MinhaAssinatura = () => {
     
     setIsLoading(true);
     try {
+      // Get the current plan data for logging changes
+      const oldPlan = condominiumData?.planocontratado || '';
+      const oldPlanValue = condominiumData?.valorplano || '';
+      const oldMonthlyValue = condominiumData?.valormensal || '';
+      
       // Calculate new monthly value based on any existing discount
       const planValue = BRLToNumber(selectedPlanValue);
       const discountValue = condominiumData?.desconto ? BRLToNumber(condominiumData.desconto) : 0;
@@ -184,6 +198,36 @@ const MinhaAssinatura = () => {
       if (error) {
         throw error;
       }
+      
+      // Log the plan change in the condominium_change_logs table
+      const changeLogsPromises = [
+        // Log plan type change
+        supabase.from('condominium_change_logs').insert({
+          matricula: user.matricula,
+          campo: 'planocontratado',
+          valor_anterior: oldPlan,
+          valor_novo: selectedPlan,
+          usuario: user.email
+        }),
+        // Log plan value change
+        supabase.from('condominium_change_logs').insert({
+          matricula: user.matricula,
+          campo: 'valorplano',
+          valor_anterior: oldPlanValue,
+          valor_novo: selectedPlanValue,
+          usuario: user.email
+        }),
+        // Log monthly value change
+        supabase.from('condominium_change_logs').insert({
+          matricula: user.matricula,
+          campo: 'valormensal',
+          valor_anterior: oldMonthlyValue,
+          valor_novo: newMonthlyValue,
+          usuario: user.email
+        })
+      ];
+      
+      await Promise.all(changeLogsPromises);
       
       // Update local state
       setCondominiumData({
