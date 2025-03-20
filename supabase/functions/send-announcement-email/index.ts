@@ -34,6 +34,29 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log(`Getting condominium info for matricula: ${matricula}`);
+    
+    // Fetch condominium name
+    const { data: condominium, error: condominiumError } = await supabaseAdmin
+      .from("condominiums")
+      .select("nomecondominio")
+      .eq("matricula", matricula)
+      .single();
+
+    if (condominiumError) {
+      console.error("Error fetching condominium:", condominiumError);
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch condominium" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    const condominiumName = condominium?.nomecondominio || "Seu Condomínio";
+    console.log(`Condominium name: ${condominiumName}`);
+
     console.log(`Getting residents for matricula: ${matricula}`);
 
     // Get all residents with email for this condominium
@@ -83,8 +106,8 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
-    // Email template for announcements
-    const emailTemplate = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.content{padding:20px;background-color:#fff}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666;border-top:1px solid #e0e0e0}</style></head><body><div class="container"><div class="header"><h1>${title}</h1></div><div class="content"><div class="message-box">${htmlContent}</div></div><div class="footer">Este é um comunicado oficial do seu condomínio.<br>© ${new Date().getFullYear()} Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
+    // Email template for announcements with condominium name included
+    const emailTemplate = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.header h2{color:white;margin:8px 0 0;font-size:18px;font-weight:normal}.content{padding:20px;background-color:#fff}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666;border-top:1px solid #e0e0e0}</style></head><body><div class="container"><div class="header"><h1>${title}</h1><h2>${condominiumName}</h2></div><div class="content"><div class="message-box">${htmlContent}</div></div><div class="footer">Este é um comunicado oficial do seu condomínio.<br>© ${new Date().getFullYear()} Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
 
     // Send email to each resident
     const emailPromises = residents.map(async (resident) => {
@@ -93,9 +116,9 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         console.log(`Sending email to: ${resident.email}`);
         await client.send({
-          from: "Comunicados <noreply@meuresidencial.com>",
+          from: `${condominiumName} <noreply@meuresidencial.com>`,
           to: resident.email,
-          subject: title,
+          subject: `${condominiumName}: ${title}`,
           html: emailTemplate,
         });
         return resident.email;
