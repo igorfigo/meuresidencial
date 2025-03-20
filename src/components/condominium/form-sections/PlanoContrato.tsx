@@ -15,7 +15,7 @@ interface PlanoContratoProps {
 
 export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   const { register, setValue, watch } = useFormContext<FormFields>();
-  const { plans, isLoading: isLoadingPlans } = usePlans();
+  const { plans, isLoading: isLoadingPlans, getPlanValue } = usePlans();
 
   React.useEffect(() => {
     const valorPlano = watch('valorPlano');
@@ -30,6 +30,15 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     
     setValue('valorMensal', valorMensal);
   }, [watch('valorPlano'), watch('desconto'), setValue]);
+
+  // Add this effect to update the valorPlano when planoContratado changes
+  React.useEffect(() => {
+    const planoContratado = watch('planoContratado');
+    if (planoContratado) {
+      const planValue = getPlanValue(planoContratado);
+      setValue('valorPlano', planValue);
+    }
+  }, [watch('planoContratado'), getPlanValue, setValue]);
 
   const handleDescontoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Get the raw value
