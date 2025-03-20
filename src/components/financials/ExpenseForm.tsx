@@ -95,10 +95,14 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
     try {
       const { attachments, ...expenseData } = values;
       
+      // Create a valid FinancialExpense object with all required fields
       await onSubmit(
         {
           ...expenseData,
           matricula: user.selectedCondominium,
+          category: expenseData.category, // Explicitly include required fields
+          amount: expenseData.amount,
+          reference_month: expenseData.reference_month,
           id: initialData?.id
         },
         attachmentsList.length > 0 ? attachmentsList : undefined

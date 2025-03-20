@@ -53,40 +53,43 @@ const FinanceiroReceitasDespesas = () => {
         const result = await addExpense(data);
         
         // If there are attachments and the expense was saved successfully
-        if (attachments && attachments.length > 0 && result) {
-          const expenseId = Array.isArray(result) ? result[0].id : result.id;
+        if (attachments && attachments.length > 0 && result && result.length > 0) {
+          const expenseId = result[0]?.id;
           
-          // Upload each attachment
-          for (const file of attachments) {
-            const filename = `${Date.now()}-${file.name}`;
-            const filePath = `expense-attachments/${user?.selectedCondominium}/${expenseId}/${filename}`;
-            
-            // Upload the file to storage
-            const { error: uploadError } = await supabase.storage
-              .from('attachments')
-              .upload(filePath, file);
-            
-            if (uploadError) {
-              console.error('Error uploading file:', uploadError);
-              toast.error(`Erro ao anexar arquivo: ${file.name}`);
-              continue;
+          // Only proceed if we have a valid expense ID
+          if (expenseId) {
+            // Upload each attachment
+            for (const file of attachments) {
+              const filename = `${Date.now()}-${file.name}`;
+              const filePath = `expense-attachments/${user?.selectedCondominium}/${expenseId}/${filename}`;
+              
+              // Upload the file to storage
+              const { error: uploadError } = await supabase.storage
+                .from('attachments')
+                .upload(filePath, file);
+              
+              if (uploadError) {
+                console.error('Error uploading file:', uploadError);
+                toast.error(`Erro ao anexar arquivo: ${file.name}`);
+                continue;
+              }
+              
+              // Get public URL
+              const { data: publicUrlData } = supabase.storage
+                .from('attachments')
+                .getPublicUrl(filePath);
+              
+              // Save attachment record
+              await supabase.from('expense_attachments').insert({
+                expense_id: expenseId,
+                file_name: file.name,
+                file_path: filePath,
+                file_type: file.type
+              });
             }
             
-            // Get public URL
-            const { data: publicUrlData } = supabase.storage
-              .from('attachments')
-              .getPublicUrl(filePath);
-            
-            // Save attachment record
-            await supabase.from('expense_attachments').insert({
-              expense_id: expenseId,
-              file_name: file.name,
-              file_path: filePath,
-              file_type: file.type
-            });
+            toast.success('Comprovantes anexados com sucesso');
           }
-          
-          toast.success('Comprovantes anexados com sucesso');
         }
       }
     } catch (error) {

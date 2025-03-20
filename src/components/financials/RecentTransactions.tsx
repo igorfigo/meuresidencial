@@ -4,7 +4,8 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import { BRLToNumber } from '@/utils/currency';
 
-interface Transaction {
+// Define a more specific Transaction type that includes required fields
+export interface Transaction {
   id?: string;
   type: 'income' | 'expense';
   category: string;

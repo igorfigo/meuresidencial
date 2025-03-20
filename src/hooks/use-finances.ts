@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useApp } from '@/contexts/AppContext';
@@ -13,6 +14,7 @@ import {
   supabase
 } from '@/integrations/supabase/client';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
+import { Transaction } from '@/components/financials/RecentTransactions';
 
 export interface FinancialIncome {
   id?: string;
@@ -49,7 +51,7 @@ export const useFinances = () => {
   const [incomes, setIncomes] = useState<FinancialIncome[]>([]);
   const [expenses, setExpenses] = useState<FinancialExpense[]>([]);
   const [balance, setBalance] = useState<FinancialBalance | null>(null);
-  const [recentTransactions, setRecentTransactions] = useState<Array<FinancialIncome | FinancialExpense>>([]);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
 
   const fetchFinancialData = async () => {
     if (!user?.selectedCondominium) return;
@@ -66,16 +68,16 @@ export const useFinances = () => {
       setExpenses(expensesData);
       setBalance(balanceData);
       
-      // Combine and sort recent transactions
-      const allTransactions = [
+      // Combine and sort recent transactions with proper type
+      const allTransactions: Transaction[] = [
         ...incomesData.map(income => ({ 
           ...income, 
-          type: 'income',
+          type: 'income' as const,
           date: income.payment_date || new Date().toISOString()
         })),
         ...expensesData.map(expense => ({ 
           ...expense, 
-          type: 'expense',
+          type: 'expense' as const,
           date: expense.payment_date || expense.due_date || new Date().toISOString()
         }))
       ];
@@ -125,23 +127,27 @@ export const useFinances = () => {
 
   const addIncome = async (income: FinancialIncome) => {
     try {
-      await saveFinancialIncome(income);
+      const result = await saveFinancialIncome(income);
       toast.success('Receita adicionada com sucesso');
       await updateBalance();
+      return result; // Return the result for possible use
     } catch (error) {
       console.error('Error adding income:', error);
       toast.error('Erro ao adicionar receita');
+      throw error; // Re-throw to be handled by caller if needed
     }
   };
 
   const editIncome = async (income: FinancialIncome) => {
     try {
-      await saveFinancialIncome(income);
+      const result = await saveFinancialIncome(income);
       toast.success('Receita atualizada com sucesso');
       await updateBalance();
+      return result; // Return the result for possible use
     } catch (error) {
       console.error('Error updating income:', error);
       toast.error('Erro ao atualizar receita');
+      throw error; // Re-throw to be handled by caller if needed
     }
   };
 
@@ -158,23 +164,27 @@ export const useFinances = () => {
 
   const addExpense = async (expense: FinancialExpense) => {
     try {
-      await saveFinancialExpense(expense);
+      const result = await saveFinancialExpense(expense);
       toast.success('Despesa adicionada com sucesso');
       await updateBalance();
+      return result; // Return the result for possible use
     } catch (error) {
       console.error('Error adding expense:', error);
       toast.error('Erro ao adicionar despesa');
+      throw error; // Re-throw to be handled by caller if needed
     }
   };
 
   const editExpense = async (expense: FinancialExpense) => {
     try {
-      await saveFinancialExpense(expense);
+      const result = await saveFinancialExpense(expense);
       toast.success('Despesa atualizada com sucesso');
       await updateBalance();
+      return result; // Return the result for possible use
     } catch (error) {
       console.error('Error updating expense:', error);
       toast.error('Erro ao atualizar despesa');
+      throw error; // Re-throw to be handled by caller if needed
     }
   };
 

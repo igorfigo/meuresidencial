@@ -81,9 +81,13 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     
     setIsSubmitting(true);
     try {
+      // Create a valid FinancialIncome object with all required fields
       await onSubmit({
         ...values,
         matricula: user.selectedCondominium,
+        category: values.category, // Explicitly include required fields
+        amount: values.amount, 
+        reference_month: values.reference_month,
         id: initialData?.id
       });
       
