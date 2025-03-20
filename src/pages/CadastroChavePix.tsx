@@ -28,8 +28,8 @@ type FormFields = {
 
 interface PixKey {
   id: string;
-  tipoChave: string;
-  chavePix: string;
+  tipochave: string;  // Match the database column name
+  chavepix: string;   // Match the database column name
   created_at: string;
 }
 
@@ -105,9 +105,10 @@ export const CadastroChavePix = () => {
 
     setIsSubmitting(true);
     try {
+      // Map our form field names to the database column names
       const formData = {
-        tipoChave: data.tipoChave,
-        chavePix: data.chavePix
+        tipochave: data.tipoChave,  // Changed from tipoChave to tipochave
+        chavepix: data.chavePix     // Changed from chavePix to chavepix
       };
       
       if (isExistingRecord && data.id) {
@@ -140,8 +141,8 @@ export const CadastroChavePix = () => {
   const handleEditPixKey = (pixKey: PixKey) => {
     reset({
       id: pixKey.id,
-      tipoChave: pixKey.tipoChave,
-      chavePix: pixKey.chavePix
+      tipoChave: pixKey.tipochave,  // Changed from tipoChave to tipochave
+      chavePix: pixKey.chavepix     // Changed from chavePix to chavepix
     });
     setIsExistingRecord(true);
   };
@@ -279,8 +280,8 @@ export const CadastroChavePix = () => {
                     ) : (
                       pixKeys.map((pixKey) => (
                         <TableRow key={pixKey.id}>
-                          <TableCell className="font-medium">{pixKey.tipoChave}</TableCell>
-                          <TableCell>{pixKey.chavePix}</TableCell>
+                          <TableCell className="font-medium">{pixKey.tipochave}</TableCell>
+                          <TableCell>{pixKey.chavepix}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button 
