@@ -9,6 +9,7 @@ import {
 } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Announcement {
   id?: string;
@@ -68,6 +69,28 @@ export function useAnnouncements() {
     }
   };
 
+  const sendEmailToResidents = async (announcement: Announcement) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-announcement-email', {
+        body: {
+          matricula: announcement.matricula,
+          title: announcement.title,
+          content: announcement.content
+        }
+      });
+
+      if (error) {
+        console.error("Error sending announcement emails:", error);
+        throw new Error("Falha ao enviar emails aos moradores");
+      }
+
+      return data;
+    } catch (err) {
+      console.error("Error in sendEmailToResidents:", err);
+      throw err;
+    }
+  };
+
   const createAnnouncement = async (announcementData: Omit<Announcement, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const { date, ...dataToSave } = announcementData;
@@ -78,6 +101,28 @@ export function useAnnouncements() {
         sent_by_email: announcementData.sent_by_email || false,
         sent_by_whatsapp: announcementData.sent_by_whatsapp || false
       });
+      
+      // If announcement should be sent by email
+      if (announcementData.sent_by_email) {
+        try {
+          await sendEmailToResidents({
+            ...dataToSave,
+            matricula: selectedCondominium
+          });
+          
+          toast({
+            title: "Emails enviados",
+            description: "Comunicado enviado por email aos moradores",
+          });
+        } catch (emailError) {
+          console.error("Failed to send emails:", emailError);
+          toast({
+            title: "Atenção",
+            description: "Comunicado salvo, mas houve falha ao enviar emails",
+            variant: "destructive"
+          });
+        }
+      }
       
       toast({
         title: "Sucesso",
@@ -106,6 +151,25 @@ export function useAnnouncements() {
         sent_by_email: announcementData.sent_by_email || false,
         sent_by_whatsapp: announcementData.sent_by_whatsapp || false
       });
+      
+      // If announcement should be sent by email
+      if (announcementData.sent_by_email) {
+        try {
+          await sendEmailToResidents(dataToSave);
+          
+          toast({
+            title: "Emails enviados",
+            description: "Comunicado enviado por email aos moradores",
+          });
+        } catch (emailError) {
+          console.error("Failed to send emails:", emailError);
+          toast({
+            title: "Atenção",
+            description: "Comunicado atualizado, mas houve falha ao enviar emails",
+            variant: "destructive"
+          });
+        }
+      }
       
       toast({
         title: "Sucesso",

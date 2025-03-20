@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -40,6 +41,8 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
     if (announcement) {
       setTitle(announcement.title);
       setContent(announcement.content);
+      setSendEmail(announcement.sent_by_email || false);
+      setSendWhatsapp(announcement.sent_by_whatsapp || false);
       
       if (announcement.date) {
         setDate(announcement.date);
@@ -118,24 +121,12 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
         ...announcement,
         title,
         content,
-        date
+        date,
+        sent_by_email: sendEmail,
+        sent_by_whatsapp: sendWhatsapp
       });
       
       onOpenChange(false);
-      
-      let description = "Comunicado salvo com sucesso";
-      if (sendEmail && sendWhatsapp) {
-        description = "Comunicado enviado com sucesso por e-mail e WhatsApp";
-      } else if (sendEmail) {
-        description = "Comunicado enviado com sucesso por e-mail";
-      } else if (sendWhatsapp) {
-        description = "Comunicado enviado com sucesso por WhatsApp";
-      }
-      
-      toast({
-        title: "Sucesso",
-        description: description,
-      });
     } catch (error) {
       console.error('Error saving announcement:', error);
     } finally {
