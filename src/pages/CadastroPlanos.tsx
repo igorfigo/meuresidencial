@@ -58,7 +58,7 @@ export const CadastroPlanos = () => {
     }
   });
 
-  const { reset, handleSubmit, setValue } = form;
+  const { reset, handleSubmit, setValue, getValues } = form;
 
   const fetchPlans = async () => {
     try {
@@ -68,7 +68,13 @@ export const CadastroPlanos = () => {
         .order('nome', { ascending: true });
 
       if (error) throw error;
-      setPlans(data || []);
+      
+      const formattedData = data?.map(plan => ({
+        ...plan,
+        valor: `R$ ${formatToBRL(Number(plan.valor))}`
+      })) || [];
+      
+      setPlans(formattedData);
     } catch (error) {
       console.error('Erro ao carregar planos:', error);
       toast.error('Erro ao carregar a lista de planos.');
@@ -182,7 +188,10 @@ export const CadastroPlanos = () => {
           .eq('codigo', formattedData.codigo)
           .single();
         
-        oldPlan = existingPlan;
+        oldPlan = existingPlan ? {
+          ...existingPlan,
+          valor: `R$ ${formatToBRL(Number(existingPlan.valor))}`
+        } : null;
       }
       
       const { error } = await supabase

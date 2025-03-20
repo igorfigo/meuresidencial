@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { formatToBRL } from '@/utils/currency';
+import { formatToBRL, BRLToNumber } from '@/utils/currency';
 
 export interface Plan {
   id?: string;

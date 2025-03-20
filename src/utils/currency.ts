@@ -5,7 +5,7 @@
 export const formatToBRL = (value: number | string): string => {
   const numValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
   
-  if (isNaN(numValue)) return '';
+  if (isNaN(numValue)) return '0,00';
   
   // Format with 2 decimal places and use comma as separator
   return numValue.toFixed(2).replace('.', ',');
@@ -15,8 +15,11 @@ export const formatToBRL = (value: number | string): string => {
 export const BRLToNumber = (value: string): number => {
   if (!value || value === '') return 0;
   
+  // Remove any non-numeric characters except for comma and period
+  const cleanValue = value.replace(/[^\d,\.]/g, '');
+  
   // Replace comma with dot for proper number parsing
-  const normalizedValue = value.replace(/\./g, '').replace(',', '.');
+  const normalizedValue = cleanValue.replace(/\./g, '').replace(',', '.');
   const parsedValue = parseFloat(normalizedValue);
   
   return isNaN(parsedValue) ? 0 : parsedValue;
@@ -24,11 +27,11 @@ export const BRLToNumber = (value: string): number => {
 
 // Format an input number into currency display format (adds thousand separators)
 export const formatCurrencyInput = (value: string): string => {
-  if (!value) return '';
+  if (!value) return '0,00';
   
   // Convert the string to a number (cents)
   const cents = parseInt(value, 10);
-  if (isNaN(cents)) return '';
+  if (isNaN(cents)) return '0,00';
   
   // Convert cents to a proper decimal number
   const decimalValue = cents / 100;
