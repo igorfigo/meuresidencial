@@ -81,10 +81,27 @@ const handler = async (req: Request): Promise<Response> => {
           password: "Bigdream@2025",
         },
       },
+      // Add DKIM configuration
+      pool: 5,
+      dkim: {
+        domainName: "meuresidencial.com",
+        keySelector: "default",
+        privateKey: Deno.env.get("DKIM_PRIVATE_KEY") || "",
+      },
     });
 
     // Email template for announcements
     const emailTemplate = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.content{padding:20px;background-color:#fff}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666;border-top:1px solid #e0e0e0}</style></head><body><div class="container"><div class="header"><h1>${title}</h1></div><div class="content"><div class="message-box">${htmlContent}</div></div><div class="footer">Este é um comunicado oficial do seu condomínio.<br>© ${new Date().getFullYear()} Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
+
+    // Add email authentication headers
+    const emailHeaders = {
+      // SPF is handled at DNS level, but we can add Return-Path for alignment
+      "Return-Path": "noreply@meuresidencial.com",
+      // Additional headers to improve deliverability
+      "X-Mailer": "Meu Residencial System",
+      "List-Unsubscribe": "<mailto:unsubscribe@meuresidencial.com>",
+      // DMARC alignment is enforced by ensuring From header matches domain with SPF/DKIM records
+    };
 
     // Send email to each resident
     const emailPromises = residents.map(async (resident) => {
@@ -97,6 +114,7 @@ const handler = async (req: Request): Promise<Response> => {
           to: resident.email,
           subject: title,
           html: emailTemplate,
+          headers: emailHeaders,
         });
         return resident.email;
       } catch (emailError) {

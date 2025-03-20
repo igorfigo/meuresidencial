@@ -36,7 +36,24 @@ serve(async (req) => {
           password: "Bigdream@2025",
         },
       },
+      // Add DKIM configuration
+      pool: 5,
+      dkim: {
+        domainName: "meuresidencial.com",
+        keySelector: "default",
+        privateKey: Deno.env.get("DKIM_PRIVATE_KEY") || "",
+      },
     });
+
+    // Add email authentication headers
+    const emailHeaders = {
+      // SPF is handled at DNS level, but we can add Return-Path for alignment
+      "Return-Path": "noreply@meuresidencial.com",
+      // Additional headers to improve deliverability
+      "X-Mailer": "Meu Residencial System",
+      "List-Unsubscribe": "<mailto:unsubscribe@meuresidencial.com>",
+      // DMARC alignment is enforced by ensuring From header matches domain with SPF/DKIM records
+    };
 
     // Email template compactado para evitar caracteres =20
     // Removendo quebras de linha e espaços desnecessários no template HTML
@@ -52,6 +69,7 @@ serve(async (req) => {
       subject: `${subject}`,
       html: emailContent,
       replyTo: email,
+      headers: emailHeaders,
     });
 
     // Envio de confirmação para o gestor
@@ -60,6 +78,7 @@ serve(async (req) => {
       to: email,
       subject: "Recebemos sua mensagem - Meu Residencial",
       html: confirmationEmailContent,
+      headers: emailHeaders,
     });
 
     await client.close();
