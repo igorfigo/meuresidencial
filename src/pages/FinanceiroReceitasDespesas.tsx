@@ -1,178 +1,129 @@
 
-import { useState } from 'react';
-import { toast } from 'sonner';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
+import { RecentTransactions } from '@/components/financials/RecentTransactions';
+import { useFinances } from '@/hooks/use-finances';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { IncomeForm } from '@/components/financials/IncomeForm';
 import { ExpenseForm } from '@/components/financials/ExpenseForm';
-import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
-import { RecentTransactions } from '@/components/financials/RecentTransactions';
-import { useFinances, FinancialIncome, FinancialExpense } from '@/hooks/use-finances';
-import { BRLToNumber, formatToBRL } from '@/utils/currency';
-import { supabase } from '@/integrations/supabase/client';
-import { useApp } from '@/contexts/AppContext';
+import { FinancialDashboard } from '@/components/financials/FinancialDashboard';
+import { ResidentsSummary } from '@/components/financials/ResidentsSummary';
+import { AnnouncementsSummary } from '@/components/financials/AnnouncementsSummary';
 
 const FinanceiroReceitasDespesas = () => {
-  const { user } = useApp();
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isIncomeSheetOpen, setIsIncomeSheetOpen] = useState(false);
+  const [isExpenseSheetOpen, setIsExpenseSheetOpen] = useState(false);
+  
   const { 
+    isLoading, 
     incomes, 
     expenses, 
     balance, 
-    recentTransactions,
-    addIncome,
-    editIncome,
-    removeIncome,
-    addExpense,
-    editExpense,
+    recentTransactions, 
+    addIncome, 
+    editIncome, 
+    removeIncome, 
+    addExpense, 
+    editExpense, 
     removeExpense,
     updateBalance,
-    isLoading
+    refreshData
   } = useFinances();
   
-  const [activeTab, setActiveTab] = useState<string>('income');
-  
-  const handleIncomeSubmit = async (data: FinancialIncome) => {
-    try {
-      if (data.id) {
-        await editIncome(data);
-      } else {
-        await addIncome(data);
-      }
-    } catch (error) {
-      console.error('Error submitting income:', error);
-      toast.error('Erro ao salvar receita');
-    }
+  const handleAddIncome = async (incomeData: any) => {
+    await addIncome(incomeData);
+    setIsIncomeSheetOpen(false);
   };
   
-  const handleExpenseSubmit = async (data: FinancialExpense, attachments?: File[]) => {
-    try {
-      // First save the expense
-      if (data.id) {
-        await editExpense(data);
-      } else {
-        const result = await addExpense(data);
-        
-        // If there are attachments and the expense was saved successfully
-        if (attachments && attachments.length > 0 && result && result.length > 0) {
-          const expenseId = result[0]?.id;
-          
-          // Only proceed if we have a valid expense ID
-          if (expenseId) {
-            // Upload each attachment
-            for (const file of attachments) {
-              const filename = `${Date.now()}-${file.name}`;
-              const filePath = `expense-attachments/${user?.selectedCondominium}/${expenseId}/${filename}`;
-              
-              // Upload the file to storage
-              const { error: uploadError } = await supabase.storage
-                .from('attachments')
-                .upload(filePath, file);
-              
-              if (uploadError) {
-                console.error('Error uploading file:', uploadError);
-                toast.error(`Erro ao anexar arquivo: ${file.name}`);
-                continue;
-              }
-              
-              // Get public URL
-              const { data: publicUrlData } = supabase.storage
-                .from('attachments')
-                .getPublicUrl(filePath);
-              
-              // Save attachment record
-              await supabase.from('expense_attachments').insert({
-                expense_id: expenseId,
-                file_name: file.name,
-                file_path: filePath,
-                file_type: file.type
-              });
-            }
-            
-            toast.success('Comprovantes anexados com sucesso');
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error submitting expense:', error);
-      toast.error('Erro ao salvar despesa');
-    }
+  const handleAddExpense = async (expenseData: any) => {
+    await addExpense(expenseData);
+    setIsExpenseSheetOpen(false);
   };
-  
-  const handleUpdateBalance = async (newBalance: string) => {
-    try {
-      await updateBalance(newBalance);
-      toast.success('Saldo atualizado com sucesso');
-    } catch (error) {
-      console.error('Error updating balance:', error);
-      toast.error('Erro ao atualizar saldo');
-    }
-  };
-  
-  const calculateFinancialSummary = () => {
-    const totalIncome = incomes.reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
-    const totalExpense = expenses.reduce((sum, expense) => sum + BRLToNumber(expense.amount), 0);
-    const currentBalance = balance?.balance ? BRLToNumber(balance.balance) : (totalIncome - totalExpense);
-    
-    return {
-      totalIncome: formatToBRL(totalIncome),
-      totalExpense: formatToBRL(totalExpense),
-      currentBalance: formatToBRL(currentBalance)
-    };
-  };
-  
-  const { currentBalance } = calculateFinancialSummary();
-  
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-6">Receitas/Despesas</h1>
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-pulse text-lg text-gray-500">Carregando dados financeiros...</div>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Receitas/Despesas</h1>
-            <p className="text-gray-500 mt-1">Gestão de receitas e despesas do condomínio</p>
-          </div>
-          <div className="w-64">
-            <BalanceDisplay 
-              balance={balance?.balance || currentBalance} 
-              onBalanceChange={handleUpdateBalance}
-            />
+      <div className="space-y-4 animate-fade-in">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold tracking-tight">Financeiro</h1>
+          
+          <div className="flex gap-2">
+            <Sheet open={isIncomeSheetOpen} onOpenChange={setIsIncomeSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <PlusCircle className="h-4 w-4" /> Nova Receita
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="sm:max-w-lg">
+                <SheetHeader>
+                  <SheetTitle>Nova Receita</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6">
+                  <IncomeForm 
+                    onSave={handleAddIncome}
+                    onCancel={() => setIsIncomeSheetOpen(false)}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+            
+            <Sheet open={isExpenseSheetOpen} onOpenChange={setIsExpenseSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <PlusCircle className="h-4 w-4" /> Nova Despesa
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="sm:max-w-lg">
+                <SheetHeader>
+                  <SheetTitle>Nova Despesa</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6">
+                  <ExpenseForm 
+                    onSave={handleAddExpense}
+                    onCancel={() => setIsExpenseSheetOpen(false)}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
         
-        <Tabs defaultValue="income" value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid w-full md:w-[400px] grid-cols-2">
-            <TabsTrigger value="income">Receitas</TabsTrigger>
-            <TabsTrigger value="expense">Despesas</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="transactions">Transações</TabsTrigger>
+            <TabsTrigger value="info">Informações</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="income" className="mt-6">
-            <IncomeForm onSubmit={handleIncomeSubmit} />
+          <TabsContent value="dashboard" className="py-4">
+            {!isLoading && balance && (
+              <FinancialDashboard 
+                balance={balance?.balance || '0'} 
+                incomes={incomes} 
+                expenses={expenses} 
+                onBalanceChange={updateBalance}
+              />
+            )}
           </TabsContent>
           
-          <TabsContent value="expense" className="mt-6">
-            <ExpenseForm onSubmit={handleExpenseSubmit} />
+          <TabsContent value="transactions" className="py-4">
+            <RecentTransactions 
+              transactions={recentTransactions}
+              onDeleteIncome={removeIncome}
+              onDeleteExpense={removeExpense}
+            />
+          </TabsContent>
+          
+          <TabsContent value="info" className="py-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ResidentsSummary />
+              <AnnouncementsSummary />
+            </div>
           </TabsContent>
         </Tabs>
-        
-        <div className="mb-8">
-          <RecentTransactions 
-            transactions={recentTransactions} 
-            onDeleteIncome={removeIncome}
-            onDeleteExpense={removeExpense}
-          />
-        </div>
       </div>
     </DashboardLayout>
   );
