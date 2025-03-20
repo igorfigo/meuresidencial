@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
 import { formatCurrencyInput } from '@/utils/currency';
 
 interface BalanceDisplayProps {
@@ -51,7 +52,7 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
     <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 ring-2 ring-blue-100">
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="w-full text-center">
             <h2 className="text-base font-semibold text-gray-800">Saldo Atual</h2>
           </div>
           
@@ -65,8 +66,13 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
               </Button>
             </div>
           ) : (
-            <Button variant="outline" size="sm" onClick={handleEdit} className="h-7 text-xs px-2">
-              Editar
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleEdit} 
+              className="h-7 w-7 absolute top-2 right-2"
+            >
+              <Pencil size={16} />
             </Button>
           )}
         </div>
