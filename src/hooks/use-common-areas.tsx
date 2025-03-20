@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,11 +11,11 @@ import { useApp } from '@/contexts/AppContext';
 const commonAreaSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Nome da área é obrigatório"),
-  description: z.string().optional(),
-  capacity: z.number().int().positive().optional().nullable(),
-  rules: z.string().optional(),
-  opening_time: z.string().optional(),
-  closing_time: z.string().optional(),
+  description: z.string().min(1, "Descrição é obrigatória"),
+  capacity: z.number().int().positive("Capacidade deve ser um número positivo").min(1, "Capacidade é obrigatória"),
+  rules: z.string().min(1, "Regras de utilização são obrigatórias"),
+  opening_time: z.string().min(1, "Horário de abertura é obrigatório"),
+  closing_time: z.string().min(1, "Horário de fechamento é obrigatório"),
   weekdays: z.array(z.string()).optional(),
 });
 

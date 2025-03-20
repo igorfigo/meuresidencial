@@ -67,7 +67,7 @@ export const CommonAreaForm: React.FC<CommonAreaFormProps> = ({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome da Área</FormLabel>
+                  <FormLabel>Nome da Área <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Ex: Salão de Festas, Piscina, Churrasqueira" />
                   </FormControl>
@@ -81,7 +81,7 @@ export const CommonAreaForm: React.FC<CommonAreaFormProps> = ({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descrição</FormLabel>
+                  <FormLabel>Descrição <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Textarea 
                       {...field} 
@@ -100,7 +100,7 @@ export const CommonAreaForm: React.FC<CommonAreaFormProps> = ({
                 name="capacity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Capacidade</FormLabel>
+                    <FormLabel>Capacidade <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -124,7 +124,7 @@ export const CommonAreaForm: React.FC<CommonAreaFormProps> = ({
                   name="opening_time"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Horário de Abertura</FormLabel>
+                      <FormLabel>Horário de Abertura <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="time" 
@@ -142,7 +142,7 @@ export const CommonAreaForm: React.FC<CommonAreaFormProps> = ({
                   name="closing_time"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Horário de Fechamento</FormLabel>
+                      <FormLabel>Horário de Fechamento <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input 
                           type="time" 
@@ -162,7 +162,7 @@ export const CommonAreaForm: React.FC<CommonAreaFormProps> = ({
               name="rules"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Regras de Utilização</FormLabel>
+                  <FormLabel>Regras de Utilização <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Textarea 
                       {...field} 
