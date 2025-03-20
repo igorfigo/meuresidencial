@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,6 @@ import {
   FileIcon,
   CalendarDays,
   Briefcase,
-  Vote,
   Bug,
   MessageSquare,
   KeyRound,
@@ -92,7 +90,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       ] 
     },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
-    { name: 'Assembléias', icon: <Vote className="h-5 w-5" />, path: '/assembleias' },
     { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
     { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
     { name: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" />, path: '/minha-assinatura' },
