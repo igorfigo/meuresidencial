@@ -1,10 +1,18 @@
-
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye } from 'lucide-react';
 import { BRLToNumber } from '@/utils/currency';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 // Define a more specific Transaction type that includes required fields
 export interface Transaction {
@@ -30,15 +38,15 @@ export const RecentTransactions = ({
   onDeleteIncome, 
   onDeleteExpense 
 }: RecentTransactionsProps) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   const getCategoryLabel = (category: string): string => {
     const categoryMap: Record<string, string> = {
-      // Income categories
       'taxa_condominio': 'Taxa de Condomínio',
       'reserva_area_comum': 'Reserva Área Comum',
       'taxa_extra': 'Taxa Extra',
       
-      // Expense categories
       'energia': 'Energia',
       'agua': 'Água',
       'manutencao': 'Manutenção',
@@ -109,7 +117,6 @@ export const RecentTransactions = ({
   };
   
   const handleView = (transaction: Transaction) => {
-    // For now, just show the transaction details in a toast
     const typeLabel = transaction.type === 'income' ? 'Receita' : 'Despesa';
     const amountFormatted = formatAmount(transaction.amount, transaction.type);
     
@@ -141,6 +148,15 @@ export const RecentTransactions = ({
     );
   };
   
+  const totalPages = Math.ceil(transactions.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTransactions = transactions.slice(indexOfFirstItem, indexOfLastItem);
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  
   return (
     <Card className="border-t-4 border-t-brand-600">
       <CardHeader>
@@ -160,14 +176,14 @@ export const RecentTransactions = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.length === 0 ? (
+            {currentTransactions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-6 text-gray-500">
                   Nenhuma transação encontrada
                 </TableCell>
               </TableRow>
             ) : (
-              transactions.map((transaction, index) => (
+              currentTransactions.map((transaction, index) => (
                 <TableRow key={transaction.id || index}>
                   <TableCell>
                     <div className="flex items-center">
@@ -213,6 +229,40 @@ export const RecentTransactions = ({
             )}
           </TableBody>
         </Table>
+        
+        {totalPages > 1 && (
+          <div className="mt-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }).map((_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      isActive={currentPage === index + 1}
+                      onClick={() => handlePageChange(index + 1)}
+                      className="cursor-pointer"
+                    >
+                      {index + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

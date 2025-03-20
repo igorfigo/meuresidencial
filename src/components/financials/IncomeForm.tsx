@@ -45,7 +45,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     defaultValues: initialData || {
       category: '',
       amount: '',
-      reference_month: new Date().toISOString().substring(0, 7), // YYYY-MM format
+      reference_month: '', // Set to empty string instead of current month
       payment_date: '', // Empty initially
       unit: '',
       observations: ''

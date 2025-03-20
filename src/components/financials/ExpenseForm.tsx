@@ -53,9 +53,9 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
     defaultValues: initialData || {
       category: '',
       amount: '',
-      reference_month: new Date().toISOString().substring(0, 7), // YYYY-MM format
-      due_date: new Date().toISOString().substring(0, 10), // YYYY-MM-DD format
-      payment_date: new Date().toISOString().substring(0, 10), // YYYY-MM-DD format
+      reference_month: '', // Empty string instead of current month
+      due_date: '', // Empty string instead of current date
+      payment_date: '', // Empty string instead of current date
       observations: '',
       attachments: undefined
     }
