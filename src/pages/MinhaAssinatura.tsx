@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -229,6 +230,19 @@ const MinhaAssinatura = () => {
     return `R$ ${formatToBRL(Number(value))}`;
   };
   
+  // Find the current plan details based on the code
+  const getCurrentPlanDetails = () => {
+    if (!condominiumData || !plans.length) return { name: '', value: 'R$ 0,00' };
+    
+    const planCode = condominiumData.planocontratado;
+    const plan = plans.find(p => p.codigo === planCode);
+    
+    return {
+      name: plan ? plan.nome : planCode || '',
+      value: plan ? plan.valor : formatCurrencyDisplay(condominiumData.valorplano)
+    };
+  };
+  
   useEffect(() => {
     if (user?.matricula) {
       fetchCondominiumData(user.matricula);
@@ -252,6 +266,8 @@ const MinhaAssinatura = () => {
       </DashboardLayout>
     );
   }
+  
+  const planDetails = getCurrentPlanDetails();
   
   return (
     <DashboardLayout>
@@ -426,11 +442,7 @@ const MinhaAssinatura = () => {
                 <Label htmlFor="planoContratado">Plano Contratado</Label>
                 <Input
                   id="planoContratado"
-                  value={
-                    plans.find(p => p.codigo === condominiumData.planocontratado)?.nome || 
-                    condominiumData.planocontratado || 
-                    ''
-                  }
+                  value={planDetails.name}
                   readOnly
                   className="bg-gray-100"
                 />
@@ -440,7 +452,7 @@ const MinhaAssinatura = () => {
                 <Label htmlFor="valorPlano">Valor do Plano (R$)</Label>
                 <Input
                   id="valorPlano"
-                  value={formatCurrencyDisplay(condominiumData.valorplano)}
+                  value={planDetails.value}
                   readOnly
                   className="bg-gray-100"
                 />

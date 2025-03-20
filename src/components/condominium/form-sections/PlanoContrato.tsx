@@ -42,6 +42,12 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     setValue('valorMensal', valorMensal);
   }, [valorPlano, desconto, setValue]);
 
+  const handlePlanoChange = (value: string) => {
+    setValue('planoContratado', value);
+    const planValue = getPlanValue(value);
+    setValue('valorPlano', planValue);
+  };
+
   const handleDescontoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Get the raw value
     const value = e.target.value.replace(/\D/g, '');
@@ -66,7 +72,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
           <Label htmlFor="planoContratado">Plano Contratado</Label>
           <Select 
             value={planoContratado}
-            onValueChange={(value) => setValue('planoContratado', value)}
+            onValueChange={handlePlanoChange}
             disabled={isLoadingPlans}
           >
             <SelectTrigger id="planoContratado">
