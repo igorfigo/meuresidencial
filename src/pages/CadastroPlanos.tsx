@@ -278,10 +278,14 @@ export const CadastroPlanos = () => {
   };
 
   const formatCurrency = (value: string) => {
-    if (!value.startsWith('R$')) {
-      return `R$ ${value}`;
+    if (!value) return 'R$ 0,00';
+    
+    if (value.startsWith('R$')) {
+      const numericValue = BRLToNumber(value);
+      return `R$ ${formatToBRL(numericValue)}`;
     }
-    return value;
+    
+    return `R$ ${formatToBRL(Number(value))}`;
   };
 
   const formatDate = (isoDate: string) => {
@@ -326,7 +330,7 @@ export const CadastroPlanos = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    if (name === 'valor' as keyof FormFields) {
+    if (name === 'valor') {
       const numericValue = value.replace(/\D/g, '');
       const formattedValue = formatCurrencyInput(numericValue);
       setValue(name as keyof FormFields, `R$ ${formattedValue}`);
@@ -565,4 +569,3 @@ export const CadastroPlanos = () => {
 };
 
 export default CadastroPlanos;
-
