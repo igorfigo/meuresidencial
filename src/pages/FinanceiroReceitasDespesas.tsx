@@ -139,7 +139,10 @@ const FinanceiroReceitasDespesas = () => {
     <DashboardLayout>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-start mb-6">
-          <h1 className="text-3xl font-bold">Receitas/Despesas</h1>
+          <div>
+            <h1 className="text-3xl font-bold">Receitas/Despesas</h1>
+            <p className="text-gray-500 mt-1">Gestão de receitas e despesas do condomínio</p>
+          </div>
           <div className="w-64">
             <BalanceDisplay 
               balance={balance?.balance || currentBalance} 

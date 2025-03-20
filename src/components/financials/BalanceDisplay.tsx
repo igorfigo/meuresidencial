@@ -87,11 +87,13 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
               />
             </div>
           ) : (
-            <div className="flex items-baseline">
-              <span className="text-sm font-bold mr-1 tracking-tight">R$</span>
-              <span className={`text-lg font-bold ${getBalanceClass()}`}>
-                {balance}
-              </span>
+            <div className="flex items-center justify-center">
+              <div className="flex items-baseline">
+                <span className="text-sm font-bold mr-1 tracking-tight">R$</span>
+                <span className={`text-xl font-bold ${getBalanceClass()}`}>
+                  {balance}
+                </span>
+              </div>
             </div>
           )}
         </div>
