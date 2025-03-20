@@ -360,6 +360,167 @@ export type Database = {
         }
         Relationships: []
       }
+      expense_attachments: {
+        Row: {
+          created_at: string
+          expense_id: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          expense_id: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          expense_id?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_attachments_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "financial_expenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_balance: {
+        Row: {
+          balance: string
+          id: string
+          matricula: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: string
+          id?: string
+          matricula: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: string
+          id?: string
+          matricula?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_balance_matricula_fkey"
+            columns: ["matricula"]
+            isOneToOne: true
+            referencedRelation: "condominiums"
+            referencedColumns: ["matricula"]
+          },
+        ]
+      }
+      financial_expenses: {
+        Row: {
+          amount: string
+          category: string
+          created_at: string
+          due_date: string | null
+          id: string
+          matricula: string
+          observations: string | null
+          payment_date: string | null
+          reference_month: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: string
+          category: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          matricula: string
+          observations?: string | null
+          payment_date?: string | null
+          reference_month: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: string
+          category?: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          matricula?: string
+          observations?: string | null
+          payment_date?: string | null
+          reference_month?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_expenses_matricula_fkey"
+            columns: ["matricula"]
+            isOneToOne: false
+            referencedRelation: "condominiums"
+            referencedColumns: ["matricula"]
+          },
+        ]
+      }
+      financial_incomes: {
+        Row: {
+          amount: string
+          category: string
+          created_at: string
+          id: string
+          matricula: string
+          observations: string | null
+          payment_date: string | null
+          reference_month: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: string
+          category: string
+          created_at?: string
+          id?: string
+          matricula: string
+          observations?: string | null
+          payment_date?: string | null
+          reference_month: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: string
+          category?: string
+          created_at?: string
+          id?: string
+          matricula?: string
+          observations?: string | null
+          payment_date?: string | null
+          reference_month?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_incomes_matricula_fkey"
+            columns: ["matricula"]
+            isOneToOne: false
+            referencedRelation: "condominiums"
+            referencedColumns: ["matricula"]
+          },
+        ]
+      }
       pest_control_attachments: {
         Row: {
           created_at: string

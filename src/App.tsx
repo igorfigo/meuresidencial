@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +18,7 @@ import Comunicados from "./pages/Comunicados";
 import AreasComuns from "./pages/AreasComuns";
 import FaleConosco from "./pages/FaleConosco";
 import MinhaAssinatura from "./pages/MinhaAssinatura";
+import FinanceiroReceitasDespesas from "./pages/FinanceiroReceitasDespesas";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -120,7 +122,7 @@ const App = () => (
             <Route path="/financeiro/receitas-despesas" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <FinanceiroReceitasDespesas />
                 </ProtectedRoute>
               </AnimationController>
             } />
