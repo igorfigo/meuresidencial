@@ -45,7 +45,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     defaultValues: initialData || {
       category: '',
       amount: '',
-      reference_month: '', // Set to empty string instead of current month
+      reference_month: '', // Set to empty string initially
       payment_date: '', // Empty initially
       unit: '',
       observations: ''
@@ -81,13 +81,15 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     
     setIsSubmitting(true);
     try {
-      // Create a valid FinancialIncome object with all required fields
+      // Fix for the payment date - we don't need to modify it
+      // The date from the form is already correct, we just need to pass it along
       await onSubmit({
         ...values,
         matricula: user.selectedCondominium,
-        category: values.category, // Explicitly include required fields
+        category: values.category,
         amount: values.amount, 
         reference_month: values.reference_month,
+        payment_date: values.payment_date, // Keep the payment date as is
         id: initialData?.id
       });
       
@@ -95,7 +97,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
         form.reset({
           category: '',
           amount: '',
-          reference_month: new Date().toISOString().substring(0, 7),
+          reference_month: '',
           payment_date: '', // Reset to empty
           unit: '',
           observations: ''

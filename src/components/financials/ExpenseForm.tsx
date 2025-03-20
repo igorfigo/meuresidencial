@@ -68,14 +68,16 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
     try {
       const { attachments, ...expenseData } = values;
       
-      // Create a valid FinancialExpense object with all required fields
+      // Don't modify the dates - pass them directly to avoid the 1-day shift
       await onSubmit(
         {
           ...expenseData,
           matricula: user.selectedCondominium,
-          category: expenseData.category, // Explicitly include required fields
+          category: expenseData.category,
           amount: expenseData.amount,
           reference_month: expenseData.reference_month,
+          due_date: expenseData.due_date, // Keep the due date as is
+          payment_date: expenseData.payment_date, // Keep the payment date as is
           id: initialData?.id
         },
         attachmentsList.length > 0 ? attachmentsList : undefined
@@ -85,9 +87,9 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
         form.reset({
           category: '',
           amount: '',
-          reference_month: new Date().toISOString().substring(0, 7),
-          due_date: new Date().toISOString().substring(0, 10),
-          payment_date: new Date().toISOString().substring(0, 10),
+          reference_month: '',
+          due_date: '',
+          payment_date: '',
           observations: '',
           attachments: undefined
         });

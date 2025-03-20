@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -169,10 +170,10 @@ export const RecentTransactions = ({
             <TableRow>
               <TableHead>Tipo</TableHead>
               <TableHead>Categoria</TableHead>
-              <TableHead>Unidade</TableHead>
+              <TableHead className="text-center">Unidade</TableHead>
               <TableHead>Referência</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead className="text-right">Valor</TableHead>
+              <TableHead>Data de Pgto</TableHead>
+              <TableHead className="text-center">Valor</TableHead>
               <TableHead className="w-[120px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -197,12 +198,12 @@ export const RecentTransactions = ({
                     </div>
                   </TableCell>
                   <TableCell>{getCategoryLabel(transaction.category)}</TableCell>
-                  <TableCell>{transaction.unit || '-'}</TableCell>
+                  <TableCell className="text-center">{transaction.unit || '-'}</TableCell>
                   <TableCell>{formatMonth(transaction.reference_month)}</TableCell>
                   <TableCell>
                     {formatDate(transaction.payment_date || transaction.due_date)}
                   </TableCell>
-                  <TableCell className={`text-right font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                  <TableCell className={`text-center font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                     {formatAmount(transaction.amount, transaction.type)}
                   </TableCell>
                   <TableCell>
