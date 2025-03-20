@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -16,8 +16,8 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
   const [editBalance, setEditBalance] = useState(balance);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Atualiza o estado local quando o saldo é alterado
-  useState(() => {
+  // Update local state when balance changes
+  useEffect(() => {
     setEditBalance(balance);
   }, [balance]);
   
