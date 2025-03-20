@@ -67,7 +67,6 @@ export const useFinances = () => {
       setExpenses(expensesData);
       setBalance(balanceData);
       
-      // Combine and sort recent transactions with proper type
       const allTransactions: Transaction[] = [
         ...incomesData.map(income => ({ 
           ...income, 
@@ -81,14 +80,11 @@ export const useFinances = () => {
         }))
       ];
       
-      // Sort transactions by created_at date if available, otherwise fall back to date
       const sortedTransactions = allTransactions.sort((a, b) => {
-        // First try to sort by created_at if available
         if (a.created_at && b.created_at) {
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         }
         
-        // Fall back to the date field
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
       
@@ -105,7 +101,6 @@ export const useFinances = () => {
     if (user?.selectedCondominium) {
       fetchFinancialData();
       
-      // Set up realtime subscription
       const channel = supabase
         .channel('financial-changes')
         .on('postgres_changes', {
@@ -136,11 +131,11 @@ export const useFinances = () => {
       const result = await saveFinancialIncome(income);
       toast.success('Receita adicionada com sucesso');
       await calculateAndUpdateBalance();
-      return result; // Return the result for possible use
+      return result;
     } catch (error) {
       console.error('Error adding income:', error);
       toast.error('Erro ao adicionar receita');
-      throw error; // Re-throw to be handled by caller if needed
+      throw error;
     }
   };
 
@@ -149,11 +144,11 @@ export const useFinances = () => {
       const result = await saveFinancialIncome(income);
       toast.success('Receita atualizada com sucesso');
       await calculateAndUpdateBalance();
-      return result; // Return the result for possible use
+      return result;
     } catch (error) {
       console.error('Error updating income:', error);
       toast.error('Erro ao atualizar receita');
-      throw error; // Re-throw to be handled by caller if needed
+      throw error;
     }
   };
 
@@ -173,11 +168,11 @@ export const useFinances = () => {
       const result = await saveFinancialExpense(expense);
       toast.success('Despesa adicionada com sucesso');
       await calculateAndUpdateBalance();
-      return result; // Return the result for possible use
+      return result;
     } catch (error) {
       console.error('Error adding expense:', error);
       toast.error('Erro ao adicionar despesa');
-      throw error; // Re-throw to be handled by caller if needed
+      throw error;
     }
   };
 
@@ -186,11 +181,11 @@ export const useFinances = () => {
       const result = await saveFinancialExpense(expense);
       toast.success('Despesa atualizada com sucesso');
       await calculateAndUpdateBalance();
-      return result; // Return the result for possible use
+      return result;
     } catch (error) {
       console.error('Error updating expense:', error);
       toast.error('Erro ao atualizar despesa');
-      throw error; // Re-throw to be handled by caller if needed
+      throw error;
     }
   };
 
