@@ -65,8 +65,6 @@ const MinhaAssinatura = () => {
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6">Minha Assinatura</h1>
         
-        <PasswordChangeSection userMatricula={user.matricula} />
-        
         {condominiumData && (
           <SubscriptionDetailsCard 
             condominiumData={condominiumData}
@@ -75,6 +73,8 @@ const MinhaAssinatura = () => {
             getCurrentPlanDetails={getPlanDetails}
           />
         )}
+        
+        <PasswordChangeSection userMatricula={user.matricula} />
       </div>
     </DashboardLayout>
   );
