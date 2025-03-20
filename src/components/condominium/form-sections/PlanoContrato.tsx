@@ -15,7 +15,20 @@ interface PlanoContratoProps {
 
 export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   const { register, setValue, watch } = useFormContext<FormFields>();
-  const { plans, isLoading: isLoadingPlans } = usePlans();
+  const { plans, isLoading: isLoadingPlans, getPlanValue } = usePlans();
+
+  // Update plan value when plan is selected
+  React.useEffect(() => {
+    const planoContratado = watch('planoContratado');
+    if (planoContratado) {
+      // Find the selected plan
+      const selectedPlan = plans.find(plan => plan.codigo === planoContratado);
+      if (selectedPlan) {
+        // Set the plan value to the form
+        setValue('valorPlano', selectedPlan.valor);
+      }
+    }
+  }, [watch('planoContratado'), plans, setValue]);
 
   React.useEffect(() => {
     const valorPlano = watch('valorPlano');
