@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +16,7 @@ import Documentos from "./pages/Documentos";
 import Comunicados from "./pages/Comunicados";
 import AreasComuns from "./pages/AreasComuns";
 import FaleConosco from "./pages/FaleConosco";
+import MinhaAssinatura from "./pages/MinhaAssinatura";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -98,40 +98,17 @@ const App = () => (
               </AnimationController>
             } />
             
-            <Route path="/dashboard" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/cadastro-gestor" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <CadastroGestor />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/cadastro-planos" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <CadastroPlanos />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/cadastro-gestor" element={<CadastroGestor />} />
+            <Route path="/minha-assinatura" element={<MinhaAssinatura />} />
+            <Route path="/moradores" element={<Moradores />} />
+            <Route path="/areas-comuns" element={<AreasComuns />} />
+            <Route path="/comunicados" element={<Comunicados />} />
+            <Route path="/documentos" element={<Documentos />} />
+            <Route path="/dedetizacoes" element={<Dedetizacoes />} />
+            <Route path="/cadastro-planos" element={<CadastroPlanos />} />
             
             {/* Gestor Menu Routes */}
-            <Route path="/moradores" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <Moradores />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            {/* Financeiro Main and Submenu Routes */}
             <Route path="/financeiro" element={
               <AnimationController>
                 <ProtectedRoute>
@@ -181,22 +158,6 @@ const App = () => (
               </AnimationController>
             } />
             
-            <Route path="/documentos" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <Documentos />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/areas-comuns" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <AreasComuns />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
             <Route path="/reservas" element={
               <AnimationController>
                 <ProtectedRoute>
@@ -217,22 +178,6 @@ const App = () => (
               <AnimationController>
                 <ProtectedRoute>
                   <UnderConstruction />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/dedetizacoes" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <Dedetizacoes />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/comunicados" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <Comunicados />
                 </ProtectedRoute>
               </AnimationController>
             } />
