@@ -26,6 +26,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePlans } from '@/hooks/use-plans';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface PlanUpgradeDialogProps {
   condominiumData: any;
@@ -72,8 +74,6 @@ export const PlanUpgradeDialog = ({
     
     setIsLoading(true);
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const oldPlan = condominiumData?.planocontratado || '';
       const oldPlanValue = condominiumData?.valorplano || '';
       const oldMonthlyValue = condominiumData?.valormensal || '';
@@ -131,13 +131,11 @@ export const PlanUpgradeDialog = ({
       
       onPlanUpgrade(updatedData);
       
-      import { toast } from 'sonner';
       toast.success('Plano atualizado com sucesso!');
       setShowUpgradeDialog(false);
       setShowConfirmDialog(false);
     } catch (error) {
       console.error('Error upgrading plan:', error);
-      import { toast } from 'sonner';
       toast.error('Erro ao atualizar plano');
     } finally {
       setIsLoading(false);
