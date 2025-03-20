@@ -26,6 +26,7 @@ export interface Transaction {
   due_date?: string;
   date: string;
   unit?: string;
+  observations?: string;
   created_at?: string;
 }
 
@@ -139,6 +140,13 @@ export const RecentTransactions = ({
             <>
               <span className="font-medium">Unidade:</span>
               <span>{transaction.unit}</span>
+            </>
+          )}
+          
+          {transaction.observations && (
+            <>
+              <span className="font-medium">Observações:</span>
+              <span>{transaction.observations}</span>
             </>
           )}
         </div>
