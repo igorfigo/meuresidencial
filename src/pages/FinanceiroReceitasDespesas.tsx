@@ -138,13 +138,14 @@ const FinanceiroReceitasDespesas = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-6">Receitas/Despesas</h1>
-        
-        <div className="mb-8">
-          <BalanceDisplay 
-            balance={balance?.balance || currentBalance} 
-            onBalanceChange={handleUpdateBalance}
-          />
+        <div className="flex justify-between items-start mb-6">
+          <h1 className="text-3xl font-bold">Receitas/Despesas</h1>
+          <div className="w-64">
+            <BalanceDisplay 
+              balance={balance?.balance || currentBalance} 
+              onBalanceChange={handleUpdateBalance}
+            />
+          </div>
         </div>
         
         <Tabs defaultValue="income" value={activeTab} onValueChange={setActiveTab} className="mb-8">

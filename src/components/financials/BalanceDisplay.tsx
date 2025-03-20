@@ -48,36 +48,33 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
   };
   
   return (
-    <Card className="bg-gradient-to-br from-slate-50 to-blue-50 border-t-4 border-t-brand-600">
-      <CardContent className="p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+    <Card className="bg-gradient-to-br from-slate-50 to-blue-50 border-t-2 border-t-brand-600 shadow-sm">
+      <CardContent className="p-3">
+        <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-800">Saldo Atual</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {isEditing ? 'Edite o saldo manualmente' : 'Saldo atual do condomínio'}
-            </p>
+            <h2 className="text-base font-semibold text-gray-800">Saldo Atual</h2>
           </div>
           
           {isEditing ? (
-            <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
-              <Button variant="outline" onClick={handleCancel}>
+            <div className="flex gap-1">
+              <Button variant="outline" size="sm" onClick={handleCancel} className="h-7 text-xs px-2">
                 Cancelar
               </Button>
-              <Button onClick={handleSave} disabled={isSubmitting}>
+              <Button size="sm" onClick={handleSave} disabled={isSubmitting} className="h-7 text-xs px-2">
                 {isSubmitting ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
           ) : (
-            <Button variant="outline" onClick={handleEdit}>
-              Editar Saldo
+            <Button variant="outline" size="sm" onClick={handleEdit} className="h-7 text-xs px-2">
+              Editar
             </Button>
           )}
         </div>
         
-        <div className="mt-6">
+        <div className="mt-2">
           {isEditing ? (
-            <div className="space-y-2">
-              <Label htmlFor="balance">Saldo</Label>
+            <div className="space-y-1">
+              <Label htmlFor="balance" className="text-xs">Saldo</Label>
               <Input
                 id="balance"
                 isCurrency
@@ -86,13 +83,13 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
                   setEditBalance(formattedValue);
                 }}
                 value={`R$ ${editBalance}`}
-                className="text-2xl font-bold h-16"
+                className="text-sm font-bold h-8"
               />
             </div>
           ) : (
             <div className="flex items-baseline">
-              <span className="text-4xl font-bold mr-2 tracking-tight">R$</span>
-              <span className={`text-5xl font-extrabold ${getBalanceClass()}`}>
+              <span className="text-sm font-bold mr-1 tracking-tight">R$</span>
+              <span className={`text-lg font-bold ${getBalanceClass()}`}>
                 {balance}
               </span>
             </div>
