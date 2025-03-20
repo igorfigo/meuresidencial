@@ -1,8 +1,6 @@
 
 import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
-import { Resend } from 'npm:resend@2.0.0';
-
-const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,45 +28,93 @@ serve(async (req) => {
     const nomeCondo = nomeCondominio || 'seu condomínio';
     const nomeRepresentante = nomelegal || 'Representante Legal';
 
-    const emailResponse = await resend.emails.send({
-      from: 'Meu Residencial <onboarding@resend.dev>',
-      to: [emailLegal],
-      subject: `Bem-vindo ao Meu Residencial - Detalhes de acesso para ${nomeCondo}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #4A6CF7;">Bem-vindo ao Meu Residencial!</h1>
-          </div>
-          
-          <p style="font-size: 16px; line-height: 1.5;">Olá, <strong>${nomeRepresentante}</strong>!</p>
-          
-          <p style="font-size: 16px; line-height: 1.5;">Obrigado por cadastrar ${nomeCondo} em nossa plataforma. É com grande satisfação que recebemos você como novo cliente!</p>
-          
-          <p style="font-size: 16px; line-height: 1.5;">Segue abaixo suas informações de acesso:</p>
-          
-          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Usuário:</strong> ${matricula}</p>
-            <p style="margin: 5px 0;"><strong>Senha:</strong> ${senha}</p>
-          </div>
-          
-          <p style="font-size: 16px; line-height: 1.5;">Você pode acessar o sistema a qualquer momento através do link: <a href="https://meuresidencial.vercel.app" style="color: #4A6CF7;">meuresidencial.vercel.app</a></p>
-          
-          <p style="font-size: 16px; line-height: 1.5;">Se tiver qualquer dúvida ou precisar de suporte, entre em contato conosco pelo e-mail: <a href="mailto:suporte@meuresidencial.com" style="color: #4A6CF7;">suporte@meuresidencial.com</a></p>
-          
-          <p style="font-size: 16px; line-height: 1.5;">Atenciosamente,</p>
-          <p style="font-size: 16px; line-height: 1.5;"><strong>Equipe Meu Residencial</strong></p>
-          
-          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; color: #888; font-size: 12px;">
-            <p>© 2024 Meu Residencial. Todos os direitos reservados.</p>
-          </div>
-        </div>
-      `,
+    // Configuração do cliente SMTP com melhores práticas
+    const client = new SMTPClient({
+      connection: {
+        hostname: "smtp.hostinger.com",
+        port: 465,
+        tls: true,
+        auth: {
+          username: "noreply@meuresidencial.com",
+          password: "Bigdream@2025",
+        },
+      },
+      pool: true,
+      rateLimit: 5,
     });
 
-    console.log('Email enviado com sucesso:', emailResponse);
+    // HTML Template melhorado para evitar filtros de spam
+    const emailHtml = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo ao Meu Residencial</title>
+</head>
+<body style="font-family:Arial,sans-serif;margin:0;padding:0;background-color:#f5f5f5;">
+    <div style="max-width:600px;margin:20px auto;background-color:#ffffff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1);overflow:hidden;">
+        <div style="background-color:#4A6CF7;padding:30px 20px;text-align:center;">
+            <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:700;">Bem-vindo ao Meu Residencial!</h1>
+        </div>
+        
+        <div style="padding:30px 25px;">
+            <p style="font-size:16px;line-height:1.5;color:#333333;margin-bottom:25px;">Olá, <strong>${nomeRepresentante}</strong>!</p>
+            
+            <p style="font-size:16px;line-height:1.5;color:#333333;margin-bottom:25px;">Obrigado por cadastrar ${nomeCondo} em nossa plataforma. É com grande satisfação que recebemos você como novo cliente!</p>
+            
+            <p style="font-size:16px;line-height:1.5;color:#333333;margin-bottom:15px;">Segue abaixo suas informações de acesso:</p>
+            
+            <div style="background-color:#f8f9fa;border-left:4px solid #4A6CF7;padding:15px 20px;margin:20px 0;border-radius:4px;">
+                <p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Usuário:</strong> ${matricula}</p>
+                <p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Senha:</strong> ${senha}</p>
+            </div>
+            
+            <p style="font-size:16px;line-height:1.5;color:#333333;margin-bottom:25px;">Você pode acessar o sistema a qualquer momento através do link: <a href="https://meuresidencial.vercel.app" style="color:#4A6CF7;text-decoration:underline;">meuresidencial.vercel.app</a></p>
+            
+            <p style="font-size:16px;line-height:1.5;color:#333333;margin-bottom:15px;">Se tiver qualquer dúvida ou precisar de suporte, entre em contato conosco pelo e-mail: <a href="mailto:suporte@meuresidencial.com" style="color:#4A6CF7;text-decoration:underline;">suporte@meuresidencial.com</a></p>
+            
+            <div style="margin-top:30px;padding-top:20px;border-top:1px solid #e0e0e0;">
+                <p style="font-size:16px;line-height:1.5;color:#333333;margin:5px 0;">Atenciosamente,</p>
+                <p style="font-size:16px;line-height:1.5;color:#333333;margin:5px 0;font-weight:bold;">Equipe Meu Residencial</p>
+            </div>
+        </div>
+        
+        <div style="text-align:center;background-color:#f5f5f5;padding:20px;font-size:12px;color:#666666;border-top:1px solid #e0e0e0;">
+            <p>© ${new Date().getFullYear()} Meu Residencial. Todos os direitos reservados.</p>
+            <p>Este e-mail foi enviado automaticamente, não é necessário respondê-lo.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+    // Send email with improved headers
+    const { error } = await client.send({
+      from: { name: "Meu Residencial", address: "noreply@meuresidencial.com" },
+      to: { name: nomeRepresentante, address: emailLegal },
+      subject: `Bem-vindo ao Meu Residencial - Detalhes de acesso para ${nomeCondo}`,
+      html: emailHtml,
+      headers: {
+        "List-Unsubscribe": "<mailto:suporte@meuresidencial.com?subject=unsubscribe>",
+        "Precedence": "bulk",
+        "X-Auto-Response-Suppress": "OOF, AutoReply",
+        "Feedback-ID": `welcome:meuresidencial`,
+        "X-Entity-Ref-ID": `welcome-${new Date().getTime()}`,
+        "X-Priority": "1",
+        "Importance": "high",
+      },
+      priority: "high"
+    });
+
+    if (error) {
+      throw new Error(`Failed to send email: ${error.message}`);
+    }
+
+    await client.close();
+
+    console.log('Email enviado com sucesso para:', emailLegal);
 
     return new Response(
-      JSON.stringify(emailResponse),
+      JSON.stringify({ success: true }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
