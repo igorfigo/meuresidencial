@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatToBRL } from '@/utils/currency';
 
@@ -43,10 +44,10 @@ export const usePlans = () => {
     }
   };
 
-  const getPlanValue = (codigo: string): string => {
+  const getPlanValue = useCallback((codigo: string): string => {
     const plan = plans.find(p => p.codigo === codigo);
     return plan?.valor || 'R$ 0,00';
-  };
+  }, [plans]);
 
   useEffect(() => {
     fetchPlans();

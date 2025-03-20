@@ -16,29 +16,31 @@ interface PlanoContratoProps {
 export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   const { register, setValue, watch } = useFormContext<FormFields>();
   const { plans, isLoading: isLoadingPlans, getPlanValue } = usePlans();
+  
+  // Watch for changes to planoContratado and desconto
+  const planoContratado = watch('planoContratado');
+  const desconto = watch('desconto');
+  const valorPlano = watch('valorPlano');
 
+  // Effect to update valorPlano when planoContratado changes
   React.useEffect(() => {
-    const valorPlano = watch('valorPlano');
-    const descontoValue = watch('desconto');
-    
+    if (planoContratado) {
+      const planValue = getPlanValue(planoContratado);
+      setValue('valorPlano', planValue);
+    }
+  }, [planoContratado, getPlanValue, setValue]);
+
+  // Effect to calculate valorMensal when valorPlano or desconto changes
+  React.useEffect(() => {
     // Convert values to numbers for calculation
     const planoNumber = BRLToNumber(valorPlano);
-    const descontoNumber = BRLToNumber(descontoValue);
+    const descontoNumber = BRLToNumber(desconto);
     
     // Calculate total value ensuring it's not negative
     const valorMensal = formatToBRL(Math.max(0, planoNumber - descontoNumber));
     
     setValue('valorMensal', valorMensal);
-  }, [watch('valorPlano'), watch('desconto'), setValue]);
-
-  // Add this effect to update the valorPlano when planoContratado changes
-  React.useEffect(() => {
-    const planoContratado = watch('planoContratado');
-    if (planoContratado) {
-      const planValue = getPlanValue(planoContratado);
-      setValue('valorPlano', planValue);
-    }
-  }, [watch('planoContratado'), getPlanValue, setValue]);
+  }, [valorPlano, desconto, setValue]);
 
   const handleDescontoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Get the raw value
@@ -63,7 +65,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
         <div className="space-y-2">
           <Label htmlFor="planoContratado">Plano Contratado</Label>
           <Select 
-            value={watch('planoContratado')}
+            value={planoContratado}
             onValueChange={(value) => setValue('planoContratado', value)}
             disabled={isLoadingPlans}
           >
