@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -169,22 +170,22 @@ export const useCondominiumForm = () => {
           bairro: data.bairro || '',
           cidade: data.cidade || '',
           estado: data.estado || '',
-          nomecondominio: data.nomecondominio || '',
-          nomelegal: data.nomelegal || '',
-          emaillegal: data.emaillegal || '',
-          telefonelegal: data.telefonelegal || '',
-          enderecolegal: data.enderecolegal || '',
+          nomeCondominio: data.nomecondominio || '',
+          nomeLegal: data.nomelegal || '',
+          emailLegal: data.emaillegal || '',
+          telefoneLegal: data.telefonelegal || '',
+          enderecoLegal: data.enderecolegal || '',
           banco: data.banco || '',
           agencia: data.agencia || '',
           conta: data.conta || '',
           pix: data.pix || '',
-          planocontratado: data.planocontratado || 'STANDARD',
-          valorplano: data.valorplano ? `R$ ${formatToBRL(Number(data.valorplano))}` : 'R$ 0,00',
-          formapagamento: data.formapagamento || 'pix',
+          planoContratado: data.planocontratado || 'STANDARD',
+          valorPlano: data.valorplano ? `R$ ${formatToBRL(Number(data.valorplano))}` : 'R$ 0,00',
+          formaPagamento: data.formapagamento || 'pix',
           vencimento: data.vencimento || '',
           desconto: data.desconto ? `R$ ${formatToBRL(Number(data.desconto))}` : 'R$ 0,00',
-          valormensal: data.valormensal ? `R$ ${formatToBRL(Number(data.valormensal))}` : 'R$ 0,00',
-          tipodocumento: data.tipodocumento || 'recibo',
+          valorMensal: data.valormensal ? `R$ ${formatToBRL(Number(data.valormensal))}` : 'R$ 0,00',
+          tipoDocumento: data.tipodocumento || 'recibo',
           senha: '',
           confirmarSenha: '',
           ativo: data.ativo !== null ? data.ativo : true
