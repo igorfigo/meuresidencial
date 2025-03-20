@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import CadastroGestor from "./pages/CadastroGestor";
 import CadastroPlanos from "./pages/CadastroPlanos";
+import CadastroChavePix from "./pages/CadastroChavePix";
 import UnderConstruction from "./pages/UnderConstruction";
 import NotFound from "./pages/NotFound";
 import Moradores from "./pages/Moradores";
@@ -23,12 +23,10 @@ import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
-// Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useApp();
   
   if (isLoading) {
-    // You could show a loading spinner here
     return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
   }
   
@@ -39,7 +37,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Auth route wrapper (redirects if already logged in)
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useApp();
   
@@ -54,14 +51,11 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// AnimationController to handle page transitions
 const AnimationController = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
-    // Add transition class to the body when component mounts
     document.body.classList.add('page-transition-enter');
     document.body.classList.add('page-transition-enter-active');
     
-    // Remove transition classes after animation completes
     const timeout = setTimeout(() => {
       document.body.classList.remove('page-transition-enter');
       document.body.classList.remove('page-transition-enter-active');
@@ -69,11 +63,9 @@ const AnimationController = ({ children }: { children: React.ReactNode }) => {
     
     return () => {
       clearTimeout(timeout);
-      // Add exit animation classes
       document.body.classList.add('page-transition-exit');
       document.body.classList.add('page-transition-exit-active');
       
-      // Clean up exit classes after animation
       setTimeout(() => {
         document.body.classList.remove('page-transition-exit');
         document.body.classList.remove('page-transition-exit-active');
@@ -109,8 +101,8 @@ const App = () => (
             <Route path="/documentos" element={<Documentos />} />
             <Route path="/dedetizacoes" element={<Dedetizacoes />} />
             <Route path="/cadastro-planos" element={<CadastroPlanos />} />
+            <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
             
-            {/* Gestor Menu Routes */}
             <Route path="/financeiro" element={
               <AnimationController>
                 <ProtectedRoute>
@@ -151,7 +143,6 @@ const App = () => (
               </AnimationController>
             } />
             
-            {/* Other Gestor Menu Routes */}
             <Route path="/boletos" element={
               <AnimationController>
                 <ProtectedRoute>
@@ -184,7 +175,6 @@ const App = () => (
               </AnimationController>
             } />
             
-            {/* Add new route for Fale Conosco */}
             <Route path="/contato" element={
               <AnimationController>
                 <ProtectedRoute>
@@ -193,7 +183,6 @@ const App = () => (
               </AnimationController>
             } />
             
-            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
