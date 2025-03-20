@@ -70,7 +70,7 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
               variant="ghost" 
               size="icon" 
               onClick={handleEdit} 
-              className="h-7 w-7 absolute right-2"
+              className="h-7 w-7 absolute right-3 top-3"
             >
               <Pencil size={16} />
             </Button>
