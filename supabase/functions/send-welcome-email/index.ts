@@ -88,6 +88,8 @@ serve(async (req) => {
       </div>
     `;
 
+    console.log('Tentando enviar e-mail...');
+    
     // Enviar e-mail utilizando denomailer
     await client.send({
       from: "Meu Residencial <noreply@meuresidencial.com>",
@@ -108,7 +110,7 @@ serve(async (req) => {
   } catch (error: any) {
     console.error('Erro ao enviar e-mail de boas-vindas:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message, stack: error.stack }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

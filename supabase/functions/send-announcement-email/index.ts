@@ -47,7 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (residentsError) {
       console.error("Error fetching residents:", residentsError);
       return new Response(
-        JSON.stringify({ error: "Failed to fetch residents" }),
+        JSON.stringify({ error: "Failed to fetch residents", details: residentsError }),
         {
           status: 500,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -55,7 +55,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Found ${residents.length} residents with emails`);
+    console.log(`Found ${residents.length} residents with emails:`, residents);
     
     if (residents.length === 0) {
       return new Response(
@@ -70,7 +70,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Create an HTML version of the content with proper formatting
     const htmlContent = content.replace(/\n/g, "<br>");
 
-    // Configuração do cliente SMTP - using the same credentials as in "Fale Conosco"
+    // Create SMTP client
+    console.log("Creating SMTP client...");
     const client = new SMTPClient({
       connection: {
         hostname: "smtp.hostinger.com",
@@ -104,6 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     // Send email to each resident
+    console.log("Attempting to send emails to residents...");
     const emailPromises = residents.map(async (resident) => {
       if (!resident.email) return null;
       
@@ -116,6 +118,7 @@ const handler = async (req: Request): Promise<Response> => {
           html: emailTemplate,
           headers: emailHeaders,
         });
+        console.log(`Successfully sent email to: ${resident.email}`);
         return resident.email;
       } catch (emailError) {
         console.error(`Error sending email to ${resident.email}:`, emailError);
@@ -123,16 +126,20 @@ const handler = async (req: Request): Promise<Response> => {
       }
     });
 
+    console.log("Waiting for all email sends to complete...");
     const emailResults = await Promise.all(emailPromises);
     const successfulEmails = emailResults.filter(Boolean);
 
+    console.log("Closing SMTP client...");
     await client.close();
     
     console.log(`Successfully sent ${successfulEmails.length} emails out of ${residents.length} residents`);
 
     return new Response(
       JSON.stringify({ 
-        message: `Successfully sent ${successfulEmails.length} emails out of ${residents.length} residents`
+        message: `Successfully sent ${successfulEmails.length} emails out of ${residents.length} residents`,
+        successfulEmails,
+        totalResidents: residents.length
       }),
       {
         status: 200,
@@ -142,7 +149,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-announcement-email function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message, stack: error.stack }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
