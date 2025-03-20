@@ -32,9 +32,8 @@ const expenseSchema = z.object({
   category: z.string().min(1, { message: 'Categoria é obrigatória' }),
   amount: z.string().min(1, { message: 'Valor é obrigatório' }),
   reference_month: z.string().min(1, { message: 'Mês de referência é obrigatório' }),
-  due_date: z.string().optional(),
-  payment_date: z.string().optional(),
-  unit: z.string().optional(),
+  due_date: z.string().min(1, { message: 'Data de vencimento é obrigatória' }),
+  payment_date: z.string().min(1, { message: 'Data de pagamento é obrigatória' }),
   observations: z.string().optional(),
   attachments: z.instanceof(FileList).optional().transform(files => files ? Array.from(files) : [])
 });
@@ -46,7 +45,6 @@ interface ExpenseFormProps {
 
 export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
   const { user } = useApp();
-  const [units, setUnits] = useState<{ value: string; label: string; }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachmentsList, setAttachmentsList] = useState<File[]>([]);
   
@@ -57,36 +55,11 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
       amount: '',
       reference_month: new Date().toISOString().substring(0, 7), // YYYY-MM format
       due_date: new Date().toISOString().substring(0, 10), // YYYY-MM-DD format
-      payment_date: '',
-      unit: '',
+      payment_date: new Date().toISOString().substring(0, 10), // YYYY-MM-DD format
       observations: '',
       attachments: undefined
     }
   });
-
-  // Fetch units for the current condominium
-  useEffect(() => {
-    const fetchUnits = async () => {
-      if (!user?.selectedCondominium) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('residents')
-          .select('unidade')
-          .eq('matricula', user.selectedCondominium)
-          .order('unidade');
-        
-        if (error) throw error;
-        
-        const uniqueUnits = [...new Set(data.map(item => item.unidade))];
-        setUnits(uniqueUnits.map(unit => ({ value: unit, label: unit })));
-      } catch (error) {
-        console.error('Error fetching units:', error);
-      }
-    };
-    
-    fetchUnits();
-  }, [user?.selectedCondominium]);
   
   const handleSubmit = async (values: z.infer<typeof expenseSchema>) => {
     if (!user?.selectedCondominium) return;
@@ -114,8 +87,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
           amount: '',
           reference_month: new Date().toISOString().substring(0, 7),
           due_date: new Date().toISOString().substring(0, 10),
-          payment_date: '',
-          unit: '',
+          payment_date: new Date().toISOString().substring(0, 10),
           observations: '',
           attachments: undefined
         });
@@ -195,52 +167,22 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
               )}
             />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="reference_month"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mês de Referência*</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="month"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="unit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Unidade</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma unidade" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {units.map(unit => (
-                          <SelectItem key={unit.value} value={unit.value}>
-                            {unit.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="reference_month"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mês de Referência*</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="month"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -248,12 +190,11 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                 name="due_date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data de Vencimento</FormLabel>
+                    <FormLabel>Data de Vencimento*</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
                         {...field}
-                        value={field.value || ''}
                       />
                     </FormControl>
                     <FormMessage />
@@ -266,12 +207,11 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                 name="payment_date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data de Pagamento</FormLabel>
+                    <FormLabel>Data de Pagamento*</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
                         {...field}
-                        value={field.value || ''}
                       />
                     </FormControl>
                     <FormMessage />

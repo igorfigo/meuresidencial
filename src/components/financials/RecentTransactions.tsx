@@ -1,6 +1,7 @@
+
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { ArrowDownCircle, ArrowUpCircle, Trash2 } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye } from 'lucide-react';
 import { BRLToNumber } from '@/utils/currency';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -107,6 +108,39 @@ export const RecentTransactions = ({
     }
   };
   
+  const handleView = (transaction: Transaction) => {
+    // For now, just show the transaction details in a toast
+    const typeLabel = transaction.type === 'income' ? 'Receita' : 'Despesa';
+    const amountFormatted = formatAmount(transaction.amount, transaction.type);
+    
+    toast(
+      <div className="space-y-2">
+        <h3 className="font-medium">{typeLabel}: {getCategoryLabel(transaction.category)}</h3>
+        <div className="text-sm grid grid-cols-2 gap-x-4 gap-y-1">
+          <span className="font-medium">Valor:</span>
+          <span>{amountFormatted}</span>
+          
+          <span className="font-medium">Referência:</span>
+          <span>{formatMonth(transaction.reference_month)}</span>
+          
+          <span className="font-medium">Data:</span>
+          <span>{formatDate(transaction.payment_date || transaction.due_date)}</span>
+          
+          {transaction.unit && (
+            <>
+              <span className="font-medium">Unidade:</span>
+              <span>{transaction.unit}</span>
+            </>
+          )}
+        </div>
+      </div>,
+      {
+        description: "Detalhes da transação",
+        duration: 5000
+      }
+    );
+  };
+  
   return (
     <Card className="border-t-4 border-t-brand-600">
       <CardHeader>
@@ -118,16 +152,17 @@ export const RecentTransactions = ({
             <TableRow>
               <TableHead>Tipo</TableHead>
               <TableHead>Categoria</TableHead>
+              <TableHead>Unidade</TableHead>
               <TableHead>Referência</TableHead>
               <TableHead>Data</TableHead>
               <TableHead className="text-right">Valor</TableHead>
-              <TableHead className="w-[80px]">Ações</TableHead>
+              <TableHead className="w-[120px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {transactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-6 text-gray-500">
                   Nenhuma transação encontrada
                 </TableCell>
               </TableRow>
@@ -145,6 +180,7 @@ export const RecentTransactions = ({
                     </div>
                   </TableCell>
                   <TableCell>{getCategoryLabel(transaction.category)}</TableCell>
+                  <TableCell>{transaction.unit || '-'}</TableCell>
                   <TableCell>{formatMonth(transaction.reference_month)}</TableCell>
                   <TableCell>
                     {formatDate(transaction.payment_date || transaction.due_date)}
@@ -153,14 +189,24 @@ export const RecentTransactions = ({
                     {formatAmount(transaction.amount, transaction.type)}
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => handleDelete(transaction)}
-                      title="Excluir Transação"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                    <div className="flex space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleView(transaction)}
+                        title="Visualizar Detalhes"
+                      >
+                        <Eye className="h-4 w-4 text-blue-500" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleDelete(transaction)}
+                        title="Excluir Transação"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

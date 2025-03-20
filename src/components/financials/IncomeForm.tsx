@@ -26,7 +26,7 @@ const incomeSchema = z.object({
   amount: z.string().min(1, { message: 'Valor é obrigatório' }),
   reference_month: z.string().min(1, { message: 'Mês de referência é obrigatório' }),
   payment_date: z.string().optional(),
-  unit: z.string().optional(),
+  unit: z.string().min(1, { message: 'Unidade é obrigatória' }),
   observations: z.string().optional()
 });
 
@@ -46,7 +46,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
       category: '',
       amount: '',
       reference_month: new Date().toISOString().substring(0, 7), // YYYY-MM format
-      payment_date: new Date().toISOString().substring(0, 10), // YYYY-MM-DD format
+      payment_date: '', // Empty initially
       unit: '',
       observations: ''
     }
@@ -96,7 +96,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
           category: '',
           amount: '',
           reference_month: new Date().toISOString().substring(0, 7),
-          payment_date: new Date().toISOString().substring(0, 10),
+          payment_date: '', // Reset to empty
           unit: '',
           observations: ''
         });
@@ -206,7 +206,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
               name="unit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Unidade</FormLabel>
+                  <FormLabel>Unidade*</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
