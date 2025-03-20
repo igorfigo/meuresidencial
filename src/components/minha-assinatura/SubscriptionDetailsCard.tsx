@@ -71,16 +71,7 @@ export const SubscriptionDetailsCard = ({
 
   return (
     <Card className="border-t-4 border-t-brand-600 shadow-md p-6 mb-6">
-      <div className="flex justify-between mb-4">
-        <h2 className="text-xl font-semibold">Plano / Contrato</h2>
-        <PlanUpgradeDialog 
-          condominiumData={localCondominiumData}
-          userMatricula={user.matricula}
-          userEmail={user.email}
-          onPlanUpgrade={handlePlanUpgrade}
-          formatCurrencyDisplay={formatCurrencyDisplay}
-        />
-      </div>
+      <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -160,6 +151,16 @@ export const SubscriptionDetailsCard = ({
             </SelectContent>
           </Select>
         </div>
+      </div>
+      
+      <div className="mt-6 flex justify-end">
+        <PlanUpgradeDialog 
+          condominiumData={localCondominiumData}
+          userMatricula={user.matricula}
+          userEmail={user.email}
+          onPlanUpgrade={handlePlanUpgrade}
+          formatCurrencyDisplay={formatCurrencyDisplay}
+        />
       </div>
     </Card>
   );

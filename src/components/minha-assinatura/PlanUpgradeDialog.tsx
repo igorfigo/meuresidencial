@@ -145,11 +145,11 @@ export const PlanUpgradeDialog = ({
   return (
     <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
       <DialogTrigger asChild>
-        <Button>Realizar Upgrade do Plano</Button>
+        <Button>Alterar Plano</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Upgrade de Plano</DialogTitle>
+          <DialogTitle>Alteração de Plano</DialogTitle>
           <DialogDescription>
             Selecione o novo plano desejado para o seu condomínio.
           </DialogDescription>
