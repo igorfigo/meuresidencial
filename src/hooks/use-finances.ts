@@ -205,39 +205,30 @@ export const useFinances = () => {
     }
   };
 
-  // Substitui a função updateBalance antiga por esta função que calcula o saldo corretamente
   const calculateAndUpdateBalance = async () => {
     if (!user?.selectedCondominium) return;
     
     try {
-      // Buscar dados atualizados para garantir cálculo correto
       const freshIncomes = await getFinancialIncomes(user.selectedCondominium);
       const freshExpenses = await getFinancialExpenses(user.selectedCondominium);
       
-      // Calcula receitas totais
       const totalIncome = freshIncomes.reduce((sum, income) => {
         return sum + BRLToNumber(income.amount);
       }, 0);
       
-      // Calcula despesas totais
       const totalExpense = freshExpenses.reduce((sum, expense) => {
         return sum + BRLToNumber(expense.amount);
       }, 0);
       
-      // Calcula o saldo atual
       const newBalance = totalIncome - totalExpense;
       
-      // Formata o saldo para o formato de moeda brasileira
       const formattedBalance = formatToBRL(newBalance);
       
-      // Atualiza o saldo no banco de dados
       await updateFinancialBalance(user.selectedCondominium, formattedBalance);
       
-      // Atualiza o estado local
       const updatedBalance = await getFinancialBalance(user.selectedCondominium);
       setBalance(updatedBalance);
       
-      // Atualiza os dados financeiros para manter tudo sincronizado
       await fetchFinancialData();
     } catch (error) {
       console.error('Error calculating and updating balance:', error);
@@ -245,20 +236,16 @@ export const useFinances = () => {
     }
   };
 
-  // Mantém a função updateBalance para compatibilidade, mas agora usando a nova função
   const updateBalance = async (manualBalance?: string) => {
     if (!user?.selectedCondominium) return;
     
     try {
       if (manualBalance) {
-        // Se um saldo manual for fornecido, atualize-o diretamente
         await updateFinancialBalance(user.selectedCondominium, manualBalance);
         
-        // Busque e atualize o saldo no estado local
         const updatedBalance = await getFinancialBalance(user.selectedCondominium);
         setBalance(updatedBalance);
       } else {
-        // Caso contrário, calcule o saldo com base nas receitas e despesas
         await calculateAndUpdateBalance();
       }
     } catch (error) {

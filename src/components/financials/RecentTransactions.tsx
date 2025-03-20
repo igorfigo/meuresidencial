@@ -25,6 +25,7 @@ export interface Transaction {
   due_date?: string;
   date: string;
   unit?: string;
+  created_at?: string;
 }
 
 interface RecentTransactionsProps {
