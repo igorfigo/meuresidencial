@@ -1,9 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 import { supabaseAdmin } from "../_shared/supabase-admin.ts";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,28 +70,35 @@ const handler = async (req: Request): Promise<Response> => {
     // Create an HTML version of the content with proper formatting
     const htmlContent = content.replace(/\n/g, "<br>");
 
+    // Configuração do cliente SMTP - using the same credentials as in "Fale Conosco"
+    const client = new SMTPClient({
+      connection: {
+        hostname: "smtp.hostinger.com",
+        port: 465,
+        tls: true,
+        auth: {
+          username: "noreply@meuresidencial.com",
+          password: "Bigdream@2025",
+        },
+      },
+    });
+
+    // Email template for announcements
+    const emailTemplate = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.content{padding:20px;background-color:#fff}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666;border-top:1px solid #e0e0e0}</style></head><body><div class="container"><div class="header"><h1>${title}</h1></div><div class="content"><div class="message-box">${htmlContent}</div></div><div class="footer">Este é um comunicado oficial do seu condomínio.<br>© ${new Date().getFullYear()} Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
+
     // Send email to each resident
     const emailPromises = residents.map(async (resident) => {
       if (!resident.email) return null;
       
       try {
         console.log(`Sending email to: ${resident.email}`);
-        return await resend.emails.send({
-          from: "Comunicados <onboarding@resend.dev>",
-          to: [resident.email],
+        await client.send({
+          from: "Comunicados <noreply@meuresidencial.com>",
+          to: resident.email,
           subject: title,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #333;">${title}</h2>
-              <div style="margin-top: 20px; line-height: 1.5;">
-                ${htmlContent}
-              </div>
-              <p style="color: #777; font-size: 12px; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px;">
-                Este é um comunicado oficial do seu condomínio.
-              </p>
-            </div>
-          `,
+          html: emailTemplate,
         });
+        return resident.email;
       } catch (emailError) {
         console.error(`Error sending email to ${resident.email}:`, emailError);
         return null;
@@ -103,6 +108,8 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResults = await Promise.all(emailPromises);
     const successfulEmails = emailResults.filter(Boolean);
 
+    await client.close();
+    
     console.log(`Successfully sent ${successfulEmails.length} emails out of ${residents.length} residents`);
 
     return new Response(
