@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useApp } from '@/contexts/AppContext';
@@ -82,9 +81,16 @@ export const useFinances = () => {
         }))
       ];
       
+      // Sort transactions by created_at date if available, otherwise fall back to date
       const sortedTransactions = allTransactions.sort((a, b) => {
+        // First try to sort by created_at if available
+        if (a.created_at && b.created_at) {
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+        
+        // Fall back to the date field
         return new Date(b.date).getTime() - new Date(a.date).getTime();
-      }).slice(0, 10);
+      });
       
       setRecentTransactions(sortedTransactions);
     } catch (error) {
