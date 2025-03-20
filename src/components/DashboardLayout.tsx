@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   Building, 
@@ -48,9 +48,18 @@ interface MenuItem {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, logout, switchCondominium } = useApp();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
+
+  const isFinanceiroPath = location.pathname.includes('/financeiro');
+
+  useEffect(() => {
+    if (isFinanceiroPath && !user?.isAdmin) {
+      setExpandedSubmenu('Financeiro');
+    }
+  }, [location.pathname, isFinanceiroPath, user?.isAdmin]);
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
@@ -144,6 +153,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const renderMenuItem = (item: MenuItem) => {
     const hasSubmenu = item.submenu && item.submenu.length > 0;
     const isSubmenuExpanded = expandedSubmenu === item.name;
+    
+    const isSubmenuActive = hasSubmenu && item.submenu?.some(subItem => 
+      location.pathname === subItem.path
+    );
 
     return (
       <div key={item.path} className="w-full">
@@ -154,7 +167,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               className={cn(
                 "flex items-center w-full px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 "text-sidebar-foreground hover:bg-sidebar-accent/50",
-                isSubmenuExpanded && "bg-sidebar-accent/70"
+                (isSubmenuExpanded || isSubmenuActive) && "bg-sidebar-accent/70"
               )}
             >
               {item.icon}
@@ -420,4 +433,3 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 };
 
 export default DashboardLayout;
-
