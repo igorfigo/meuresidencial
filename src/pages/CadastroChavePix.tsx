@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Save, KeyRound, Trash } from 'lucide-react';
+import { Save, KeyRound, Trash, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type FormFields = {
   id?: string;
@@ -38,6 +39,7 @@ export const CadastroChavePix = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExistingRecord, setIsExistingRecord] = useState(false);
   const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
+  const [maxKeysReached, setMaxKeysReached] = useState(false);
 
   const form = useForm<FormFields>({
     defaultValues: {
@@ -58,7 +60,11 @@ export const CadastroChavePix = () => {
 
       if (error) throw error;
       
-      setPixKeys(data || []);
+      const keys = data || [];
+      setPixKeys(keys);
+      
+      // Check if max keys limit is reached (only applies for new records)
+      setMaxKeysReached(keys.length > 0 && !isExistingRecord);
     } catch (error) {
       console.error('Erro ao carregar chaves PIX:', error);
       toast.error('Erro ao carregar a lista de chaves PIX.');
@@ -68,6 +74,11 @@ export const CadastroChavePix = () => {
   useEffect(() => {
     fetchPixKeys();
   }, []);
+
+  // Update maxKeysReached whenever isExistingRecord changes
+  useEffect(() => {
+    setMaxKeysReached(pixKeys.length > 0 && !isExistingRecord);
+  }, [isExistingRecord, pixKeys.length]);
 
   const validatePixKey = (value: string, type: string): boolean => {
     switch (type) {
@@ -120,16 +131,31 @@ export const CadastroChavePix = () => {
         if (error) throw error;
         toast.success('Chave PIX atualizada com sucesso!');
       } else {
+        // Check again if we already have a key (in case another client added one)
+        const { data: existingKeys } = await supabase
+          .from('pix_keys')
+          .select('*') as { data: PixKey[] | null };
+          
+        if (existingKeys && existingKeys.length > 0) {
+          toast.error('Já existe uma chave PIX cadastrada. Edite a existente ou exclua-a para adicionar uma nova.');
+          setIsSubmitting(false);
+          return;
+        }
+        
         const { error } = await supabase
           .from('pix_keys')
           .insert(formData) as { error: any };
 
         if (error) throw error;
         toast.success('Chave PIX cadastrada com sucesso!');
-        reset();
+        reset({
+          tipoChave: '',
+          chavePix: ''
+        });
       }
       
       fetchPixKeys();
+      setIsExistingRecord(false);
     } catch (error) {
       console.error('Erro ao salvar chave PIX:', error);
       toast.error('Erro ao salvar chave PIX. Tente novamente mais tarde.');
@@ -174,6 +200,14 @@ export const CadastroChavePix = () => {
     }
   };
 
+  const handleCancelEdit = () => {
+    reset({
+      tipoChave: '',
+      chavePix: ''
+    });
+    setIsExistingRecord(false);
+  };
+
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
@@ -193,11 +227,21 @@ export const CadastroChavePix = () => {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <h2 className="text-xl font-semibold mb-4">{isExistingRecord ? 'Editar Chave PIX' : 'Nova Chave PIX'}</h2>
                 
+                {maxKeysReached && !isExistingRecord && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    <AlertDescription>
+                      Você já possui uma chave PIX cadastrada. Edite a existente ou exclua-a para adicionar uma nova.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 <div className="space-y-2">
                   <Label htmlFor="tipoChave">Tipo da Chave</Label>
                   <Select
                     onValueChange={(value) => setValue('tipoChave', value)}
                     defaultValue={form.getValues().tipoChave}
+                    value={form.getValues().tipoChave}
                   >
                     <SelectTrigger id="tipoChave">
                       <SelectValue placeholder="Selecione o tipo de chave" />
@@ -246,14 +290,26 @@ export const CadastroChavePix = () => {
                   </p>
                 </div>
                 
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting || !tipoChave}
-                  className="w-full bg-brand-600 hover:bg-brand-700"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Chave PIX' : 'Salvar Chave PIX')}
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting || !tipoChave || (maxKeysReached && !isExistingRecord)}
+                    className="flex-1 bg-brand-600 hover:bg-brand-700"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Chave PIX' : 'Salvar Chave PIX')}
+                  </Button>
+                  
+                  {isExistingRecord && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleCancelEdit}
+                    >
+                      Cancelar
+                    </Button>
+                  )}
+                </div>
               </form>
             </Card>
           </div>
