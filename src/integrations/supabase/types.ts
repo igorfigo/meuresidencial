@@ -597,6 +597,27 @@ export type Database = {
           },
         ]
       }
+      pix_keys: {
+        Row: {
+          chavepix: string
+          created_at: string
+          id: string
+          tipochave: string
+        }
+        Insert: {
+          chavepix: string
+          created_at?: string
+          id?: string
+          tipochave: string
+        }
+        Update: {
+          chavepix?: string
+          created_at?: string
+          id?: string
+          tipochave?: string
+        }
+        Relationships: []
+      }
       plan_change_logs: {
         Row: {
           campo: string

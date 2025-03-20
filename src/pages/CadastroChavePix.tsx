@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Save, KeyRound, Search, Trash } from 'lucide-react';
+import { Save, KeyRound, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,7 +54,7 @@ export const CadastroChavePix = () => {
       const { data, error } = await supabase
         .from('pix_keys')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as { data: PixKey[] | null, error: any };
 
       if (error) throw error;
       
@@ -114,14 +114,14 @@ export const CadastroChavePix = () => {
         const { error } = await supabase
           .from('pix_keys')
           .update(formData)
-          .eq('id', data.id);
+          .eq('id', data.id) as { error: any };
 
         if (error) throw error;
         toast.success('Chave PIX atualizada com sucesso!');
       } else {
         const { error } = await supabase
           .from('pix_keys')
-          .insert(formData);
+          .insert(formData) as { error: any };
 
         if (error) throw error;
         toast.success('Chave PIX cadastrada com sucesso!');
@@ -152,7 +152,7 @@ export const CadastroChavePix = () => {
         const { error } = await supabase
           .from('pix_keys')
           .delete()
-          .eq('id', id);
+          .eq('id', id) as { error: any };
         
         if (error) throw error;
         
