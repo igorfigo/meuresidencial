@@ -48,7 +48,7 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
   };
   
   return (
-    <Card className="bg-gradient-to-br from-slate-50 to-blue-50 border-t-2 border-t-brand-600 shadow-sm">
+    <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 ring-2 ring-blue-100">
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
           <div>
@@ -88,7 +88,7 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
             </div>
           ) : (
             <div className="flex items-center justify-center">
-              <div className="flex items-baseline">
+              <div className="flex items-baseline bg-white/70 px-3 py-1 rounded-md">
                 <span className="text-sm font-bold mr-1 tracking-tight">R$</span>
                 <span className={`text-xl font-bold ${getBalanceClass()}`}>
                   {balance}
