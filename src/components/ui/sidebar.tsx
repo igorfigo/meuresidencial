@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -15,7 +16,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
 import { useEffect, useState } from 'react';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
 import {
   DropdownMenu,
@@ -30,7 +31,7 @@ import { SwitchCondominium } from './switch-condominium';
 
 export function Sidebar() {
   const { user, logout, isAuthenticated, switchCondominium } = useApp();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const location = useLocation();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
