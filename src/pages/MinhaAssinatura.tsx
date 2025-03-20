@@ -71,7 +71,7 @@ const MinhaAssinatura = () => {
   };
   
   const handleChangePassword = async () => {
-    if (!newPassword || !confirmPassword) {
+    if (!newPassword || !confirmPassword || !currentPassword) {
       toast.error('Por favor, preencha todos os campos');
       return;
     }
@@ -83,6 +83,24 @@ const MinhaAssinatura = () => {
     
     setIsLoading(true);
     try {
+      // First, verify if the current password is correct
+      const { data: passwordCheck, error: passwordCheckError } = await supabase
+        .from('condominiums')
+        .select('senha')
+        .eq('matricula', user?.matricula)
+        .single();
+        
+      if (passwordCheckError) {
+        throw passwordCheckError;
+      }
+      
+      if (passwordCheck.senha !== currentPassword) {
+        toast.error('Senha atual incorreta');
+        setIsLoading(false);
+        return;
+      }
+      
+      // If the current password is correct, proceed with password change
       const { data, error } = await supabase
         .from('condominiums')
         .update({ 
@@ -285,6 +303,7 @@ const MinhaAssinatura = () => {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Digite sua senha atual"
+                required
               />
             </div>
             
@@ -296,6 +315,7 @@ const MinhaAssinatura = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Digite a nova senha"
+                required
               />
             </div>
             
@@ -307,6 +327,7 @@ const MinhaAssinatura = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirme a nova senha"
+                required
               />
             </div>
           </div>
