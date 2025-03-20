@@ -163,7 +163,11 @@ const FinanceiroReceitasDespesas = () => {
         </Tabs>
         
         <div className="mb-8">
-          <RecentTransactions transactions={recentTransactions} />
+          <RecentTransactions 
+            transactions={recentTransactions} 
+            onDeleteIncome={removeIncome}
+            onDeleteExpense={removeExpense}
+          />
         </div>
       </div>
     </DashboardLayout>

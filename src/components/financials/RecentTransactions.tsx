@@ -1,8 +1,9 @@
-
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Trash2 } from 'lucide-react';
 import { BRLToNumber } from '@/utils/currency';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 // Define a more specific Transaction type that includes required fields
 export interface Transaction {
@@ -19,9 +20,16 @@ export interface Transaction {
 
 interface RecentTransactionsProps {
   transactions: Transaction[];
+  onDeleteIncome?: (id: string) => Promise<void>;
+  onDeleteExpense?: (id: string) => Promise<void>;
 }
 
-export const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
+export const RecentTransactions = ({ 
+  transactions, 
+  onDeleteIncome, 
+  onDeleteExpense 
+}: RecentTransactionsProps) => {
+  
   const getCategoryLabel = (category: string): string => {
     const categoryMap: Record<string, string> = {
       // Income categories
@@ -79,6 +87,26 @@ export const RecentTransactions = ({ transactions }: RecentTransactionsProps) =>
     }
   };
   
+  const handleDelete = async (transaction: Transaction) => {
+    if (!transaction.id) {
+      toast.error('Não foi possível excluir esta transação');
+      return;
+    }
+    
+    try {
+      if (transaction.type === 'income' && onDeleteIncome) {
+        await onDeleteIncome(transaction.id);
+        toast.success('Receita excluída com sucesso');
+      } else if (transaction.type === 'expense' && onDeleteExpense) {
+        await onDeleteExpense(transaction.id);
+        toast.success('Despesa excluída com sucesso');
+      }
+    } catch (error) {
+      console.error('Erro ao excluir transação:', error);
+      toast.error('Erro ao excluir transação');
+    }
+  };
+  
   return (
     <Card className="border-t-4 border-t-brand-600">
       <CardHeader>
@@ -93,12 +121,13 @@ export const RecentTransactions = ({ transactions }: RecentTransactionsProps) =>
               <TableHead>Referência</TableHead>
               <TableHead>Data</TableHead>
               <TableHead className="text-right">Valor</TableHead>
+              <TableHead className="w-[80px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {transactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-6 text-gray-500">
+                <TableCell colSpan={6} className="text-center py-6 text-gray-500">
                   Nenhuma transação encontrada
                 </TableCell>
               </TableRow>
@@ -122,6 +151,16 @@ export const RecentTransactions = ({ transactions }: RecentTransactionsProps) =>
                   </TableCell>
                   <TableCell className={`text-right font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                     {formatAmount(transaction.amount, transaction.type)}
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleDelete(transaction)}
+                      title="Excluir Transação"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
