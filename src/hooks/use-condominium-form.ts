@@ -227,7 +227,8 @@ export const useCondominiumForm = () => {
       }
     }
 
-    const formattedData = {
+    // Create base formatted data without password fields
+    const formattedData: Record<string, any> = {
       matricula: data.matricula,
       cnpj: data.cnpj,
       cep: data.cep,
@@ -253,10 +254,14 @@ export const useCondominiumForm = () => {
       desconto: BRLToNumber(data.desconto).toString(),
       valormensal: BRLToNumber(data.valorMensal).toString(),
       tipodocumento: data.tipoDocumento,
-      senha: data.senha,
-      confirmarsenha: data.confirmarSenha,
       ativo: data.ativo
     };
+
+    // Only include password fields if they are filled
+    if (data.senha && data.confirmarSenha) {
+      formattedData.senha = data.senha;
+      formattedData.confirmarsenha = data.confirmarSenha;
+    }
 
     setIsSubmitting(true);
     try {
