@@ -129,7 +129,7 @@ export const useFinances = () => {
     try {
       const result = await saveFinancialIncome(income);
       toast.success('Receita adicionada com sucesso');
-      await updateBalance();
+      await calculateAndUpdateBalance();
       return result; // Return the result for possible use
     } catch (error) {
       console.error('Error adding income:', error);
@@ -142,7 +142,7 @@ export const useFinances = () => {
     try {
       const result = await saveFinancialIncome(income);
       toast.success('Receita atualizada com sucesso');
-      await updateBalance();
+      await calculateAndUpdateBalance();
       return result; // Return the result for possible use
     } catch (error) {
       console.error('Error updating income:', error);
@@ -155,7 +155,7 @@ export const useFinances = () => {
     try {
       await deleteFinancialIncome(id);
       toast.success('Receita removida com sucesso');
-      await updateBalance();
+      await calculateAndUpdateBalance();
     } catch (error) {
       console.error('Error removing income:', error);
       toast.error('Erro ao remover receita');
@@ -166,7 +166,7 @@ export const useFinances = () => {
     try {
       const result = await saveFinancialExpense(expense);
       toast.success('Despesa adicionada com sucesso');
-      await updateBalance();
+      await calculateAndUpdateBalance();
       return result; // Return the result for possible use
     } catch (error) {
       console.error('Error adding expense:', error);
@@ -179,7 +179,7 @@ export const useFinances = () => {
     try {
       const result = await saveFinancialExpense(expense);
       toast.success('Despesa atualizada com sucesso');
-      await updateBalance();
+      await calculateAndUpdateBalance();
       return result; // Return the result for possible use
     } catch (error) {
       console.error('Error updating expense:', error);
@@ -192,31 +192,69 @@ export const useFinances = () => {
     try {
       await deleteFinancialExpense(id);
       toast.success('Despesa removida com sucesso');
-      await updateBalance();
+      await calculateAndUpdateBalance();
     } catch (error) {
       console.error('Error removing expense:', error);
       toast.error('Erro ao remover despesa');
     }
   };
 
+  // Substitui a função updateBalance antiga por esta função que calcula o saldo corretamente
+  const calculateAndUpdateBalance = async () => {
+    if (!user?.selectedCondominium) return;
+    
+    try {
+      // Buscar dados atualizados para garantir cálculo correto
+      const freshIncomes = await getFinancialIncomes(user.selectedCondominium);
+      const freshExpenses = await getFinancialExpenses(user.selectedCondominium);
+      
+      // Calcula receitas totais
+      const totalIncome = freshIncomes.reduce((sum, income) => {
+        return sum + BRLToNumber(income.amount);
+      }, 0);
+      
+      // Calcula despesas totais
+      const totalExpense = freshExpenses.reduce((sum, expense) => {
+        return sum + BRLToNumber(expense.amount);
+      }, 0);
+      
+      // Calcula o saldo atual
+      const newBalance = totalIncome - totalExpense;
+      
+      // Formata o saldo para o formato de moeda brasileira
+      const formattedBalance = formatToBRL(newBalance);
+      
+      // Atualiza o saldo no banco de dados
+      await updateFinancialBalance(user.selectedCondominium, formattedBalance);
+      
+      // Atualiza o estado local
+      const updatedBalance = await getFinancialBalance(user.selectedCondominium);
+      setBalance(updatedBalance);
+      
+      // Atualiza os dados financeiros para manter tudo sincronizado
+      await fetchFinancialData();
+    } catch (error) {
+      console.error('Error calculating and updating balance:', error);
+      toast.error('Erro ao atualizar saldo');
+    }
+  };
+
+  // Mantém a função updateBalance para compatibilidade, mas agora usando a nova função
   const updateBalance = async (manualBalance?: string) => {
     if (!user?.selectedCondominium) return;
     
     try {
       if (manualBalance) {
-        // If a manual balance is provided, update it directly
+        // Se um saldo manual for fornecido, atualize-o diretamente
         await updateFinancialBalance(user.selectedCondominium, manualBalance);
-      } else {
-        // Otherwise calculate the balance
-        const totalIncome = incomes.reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
-        const totalExpense = expenses.reduce((sum, expense) => sum + BRLToNumber(expense.amount), 0);
-        const newBalance = totalIncome - totalExpense;
         
-        await updateFinancialBalance(user.selectedCondominium, formatToBRL(newBalance));
+        // Busque e atualize o saldo no estado local
+        const updatedBalance = await getFinancialBalance(user.selectedCondominium);
+        setBalance(updatedBalance);
+      } else {
+        // Caso contrário, calcule o saldo com base nas receitas e despesas
+        await calculateAndUpdateBalance();
       }
-      
-      const updatedBalance = await getFinancialBalance(user.selectedCondominium);
-      setBalance(updatedBalance);
     } catch (error) {
       console.error('Error updating balance:', error);
       toast.error('Erro ao atualizar saldo');

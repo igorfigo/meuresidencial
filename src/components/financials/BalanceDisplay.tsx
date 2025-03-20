@@ -16,6 +16,11 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
   const [editBalance, setEditBalance] = useState(balance);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Atualiza o estado local quando o saldo é alterado
+  useState(() => {
+    setEditBalance(balance);
+  }, [balance]);
+  
   const handleEdit = () => {
     setEditBalance(balance);
     setIsEditing(true);
