@@ -30,6 +30,11 @@ const Documentos = () => {
   
   const [isEditing, setIsEditing] = useState(false);
   
+  // Add pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(documents.length / itemsPerPage);
+  
   const handleEdit = (document: any) => {
     resetForm(document);
     setIsEditing(true);
@@ -38,6 +43,10 @@ const Documentos = () => {
   const handleCancel = () => {
     resetForm();
     setIsEditing(false);
+  };
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -62,6 +71,9 @@ const Documentos = () => {
               isDeleting={isDeleting}
               getFileUrl={getFileUrl}
               fetchAttachments={fetchAttachments}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
             />
           </div>
           <div className="lg:col-span-1">
