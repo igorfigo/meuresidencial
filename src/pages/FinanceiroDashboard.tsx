@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -32,6 +31,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { 
+  Tooltip as UITooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
+} from '@/components/ui/tooltip';
 
 const FinanceiroDashboard = () => {
   const { user } = useApp();
@@ -175,9 +180,19 @@ const FinanceiroDashboard = () => {
       
       const unpaidUnits = totalUnits - paidUnitsCount;
       
+      const paidUnitsList = residents
+        .filter(resident => paidUnitNames.has(resident.unidade))
+        .map(resident => resident.unidade)
+        .sort();
+        
+      const unpaidUnitsList = residents
+        .filter(resident => !paidUnitNames.has(resident.unidade))
+        .map(resident => resident.unidade)
+        .sort();
+      
       setUnitStatusData([
-        { name: 'Pagas', value: paidUnitsCount },
-        { name: 'Pendentes', value: unpaidUnits }
+        { name: 'Pagas', value: paidUnitsCount, units: paidUnitsList },
+        { name: 'Pendentes', value: unpaidUnits, units: unpaidUnitsList }
       ]);
     } catch (error) {
       console.error('Error fetching unit payment status:', error);
@@ -194,7 +209,6 @@ const FinanceiroDashboard = () => {
       
       if (error) throw error;
       
-      // Filter only the current month expenses
       const currentMonthExpenses = data.filter(expense => 
         expense.reference_month === currentMonthYearFormatted
       );
@@ -417,21 +431,72 @@ const FinanceiroDashboard = () => {
               <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="bg-slate-100 rounded p-2">
                   <p className="text-xs text-gray-500">Total de Unidades</p>
-                  <p className="text-xl font-bold text-gray-800">
-                    {unitStatusData.reduce((sum, item) => sum + item.value, 0)}
-                  </p>
+                  <TooltipProvider>
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xl font-bold text-gray-800 cursor-help">
+                          {unitStatusData.reduce((sum, item) => sum + item.value, 0)}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs max-h-36 overflow-y-auto">
+                        <div>
+                          <p className="font-semibold">Todas as Unidades:</p>
+                          <div className="grid grid-cols-4 gap-1 mt-1">
+                            {[...new Set([
+                              ...(unitStatusData.find(item => item.name === 'Pagas')?.units || []),
+                              ...(unitStatusData.find(item => item.name === 'Pendentes')?.units || [])
+                            ])].sort().map((unit, idx) => (
+                              <span key={idx} className="text-xs">{unit}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </TooltipContent>
+                    </UITooltip>
+                  </TooltipProvider>
                 </div>
                 <div className="bg-green-100 rounded p-2">
                   <p className="text-xs text-gray-500">Unidades Pagas</p>
-                  <p className="text-xl font-bold text-green-600">
-                    {unitStatusData.find(item => item.name === 'Pagas')?.value || 0}
-                  </p>
+                  <TooltipProvider>
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xl font-bold text-green-600 cursor-help">
+                          {unitStatusData.find(item => item.name === 'Pagas')?.value || 0}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs max-h-36 overflow-y-auto">
+                        <div>
+                          <p className="font-semibold text-green-600">Unidades Pagas:</p>
+                          <div className="grid grid-cols-4 gap-1 mt-1">
+                            {unitStatusData.find(item => item.name === 'Pagas')?.units?.map((unit, idx) => (
+                              <span key={idx} className="text-xs">{unit}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </TooltipContent>
+                    </UITooltip>
+                  </TooltipProvider>
                 </div>
                 <div className="bg-red-100 rounded p-2">
                   <p className="text-xs text-gray-500">Unidades Pendentes</p>
-                  <p className="text-xl font-bold text-red-600">
-                    {unitStatusData.find(item => item.name === 'Pendentes')?.value || 0}
-                  </p>
+                  <TooltipProvider>
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xl font-bold text-red-600 cursor-help">
+                          {unitStatusData.find(item => item.name === 'Pendentes')?.value || 0}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs max-h-36 overflow-y-auto">
+                        <div>
+                          <p className="font-semibold text-red-600">Unidades Pendentes:</p>
+                          <div className="grid grid-cols-4 gap-1 mt-1">
+                            {unitStatusData.find(item => item.name === 'Pendentes')?.units?.map((unit, idx) => (
+                              <span key={idx} className="text-xs">{unit}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </TooltipContent>
+                    </UITooltip>
+                  </TooltipProvider>
                 </div>
               </div>
             </CardContent>
@@ -615,3 +680,4 @@ const FinanceiroDashboard = () => {
 };
 
 export default FinanceiroDashboard;
+
