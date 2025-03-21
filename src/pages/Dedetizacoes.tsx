@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { usePestControl } from '@/hooks/use-pest-control';
 import { PestControlForm } from '@/components/pest-control/PestControlForm';
@@ -9,18 +9,35 @@ import { Card } from '@/components/ui/card';
 
 const Dedetizacoes = () => {
   const {
+    form,
     pestControls,
     isLoading,
-    createPestControl,
-    updatePestControl,
+    onSubmit,
     deletePestControl,
-    filterPestControls,
-    searchTerm,
-    setSearchTerm,
-    filteredPestControls,
-    sortOrder,
-    setSortOrder,
+    isSubmitting,
+    isDeleting,
+    attachments,
+    existingAttachments,
+    handleFileChange,
+    removeFile,
+    removeExistingAttachment,
+    getFileUrl,
+    uploadProgress,
+    isUploading,
+    resetForm
   } = usePestControl();
+  
+  const [isEditing, setIsEditing] = useState(false);
+  
+  const handleEdit = (pestControl: any) => {
+    resetForm(pestControl);
+    setIsEditing(true);
+  };
+  
+  const handleCancel = () => {
+    resetForm();
+    setIsEditing(false);
+  };
 
   return (
     <DashboardLayout>
@@ -38,20 +55,32 @@ const Dedetizacoes = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <PestControlsList
-              pestControls={filteredPestControls}
-              isLoading={isLoading}
+              pestControls={pestControls || []}
+              onEdit={handleEdit}
               onDelete={deletePestControl}
-              onUpdate={updatePestControl}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              sortOrder={sortOrder}
-              setSortOrder={setSortOrder}
+              isDeleting={isDeleting}
+              getFileUrl={getFileUrl}
+              fetchAttachments={async (id: string) => []}
             />
           </div>
           <div className="lg:col-span-1">
             <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
-              <h2 className="text-xl font-semibold mb-4">Nova Dedetização</h2>
-              <PestControlForm onSubmit={createPestControl} />
+              <h2 className="text-xl font-semibold mb-4">{isEditing ? 'Editar Dedetização' : 'Nova Dedetização'}</h2>
+              <PestControlForm 
+                form={form}
+                onSubmit={onSubmit}
+                isSubmitting={isSubmitting}
+                isEditing={isEditing}
+                onCancel={handleCancel}
+                attachments={attachments}
+                existingAttachments={existingAttachments}
+                handleFileChange={handleFileChange}
+                removeFile={removeFile}
+                removeExistingAttachment={removeExistingAttachment}
+                getFileUrl={getFileUrl}
+                uploadProgress={uploadProgress}
+                isUploading={isUploading}
+              />
             </Card>
           </div>
         </div>
