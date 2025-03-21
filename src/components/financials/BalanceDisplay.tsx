@@ -6,27 +6,24 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { formatCurrencyInput } from '@/utils/currency';
-import { FinancialBalance } from '@/hooks/use-finances';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface BalanceDisplayProps {
-  balance: FinancialBalance | null;
-  isLoading?: boolean;
-  onBalanceChange?: (balance: string) => Promise<void>;
+  balance: string;
+  onBalanceChange: (balance: string) => Promise<void>;
 }
 
-export const BalanceDisplay = ({ balance, isLoading, onBalanceChange }: BalanceDisplayProps) => {
+export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editBalance, setEditBalance] = useState(balance?.balance || '0');
+  const [editBalance, setEditBalance] = useState(balance);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Update local state when balance changes
   useEffect(() => {
-    setEditBalance(balance?.balance || '0');
+    setEditBalance(balance);
   }, [balance]);
   
   const handleEdit = () => {
-    setEditBalance(balance?.balance || '0');
+    setEditBalance(balance);
     setIsEditing(true);
   };
   
@@ -35,8 +32,6 @@ export const BalanceDisplay = ({ balance, isLoading, onBalanceChange }: BalanceD
   };
   
   const handleSave = async () => {
-    if (!onBalanceChange) return;
-    
     setIsSubmitting(true);
     try {
       await onBalanceChange(editBalance);
@@ -47,32 +42,19 @@ export const BalanceDisplay = ({ balance, isLoading, onBalanceChange }: BalanceD
   };
   
   const getBalanceClass = () => {
-    const numBalance = parseFloat((balance?.balance || '0').replace(',', '.'));
+    const numBalance = parseFloat(balance.replace(',', '.'));
     if (numBalance > 0) return 'text-green-500';
     if (numBalance < 0) return 'text-red-500';
     return 'text-slate-500';
   };
   
-  if (isLoading) {
-    return (
-      <Card className="bg-gradient-to-br from-white to-blue-50 border-t-4 border-t-brand-600 shadow-md hover:shadow-lg transition-all duration-300">
-        <CardContent className="p-3">
-          <div className="flex flex-col items-center">
-            <Skeleton className="h-6 w-32 mb-2" />
-            <Skeleton className="h-10 w-24 mt-2" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
   return (
-    <Card className="bg-gradient-to-br from-white to-blue-50 border-t-4 border-t-brand-600 shadow-md hover:shadow-lg transition-all duration-300">
+    <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 ring-2 ring-blue-100">
       <CardContent className="p-3">
         <div className="flex flex-col items-center">
           <div className="flex items-center justify-center gap-1 mb-2 w-full">
             <h2 className="text-base font-semibold text-gray-800">Saldo Atual</h2>
-            {!isEditing && onBalanceChange && (
+            {!isEditing && (
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -84,7 +66,7 @@ export const BalanceDisplay = ({ balance, isLoading, onBalanceChange }: BalanceD
             )}
           </div>
           
-          {isEditing && onBalanceChange && (
+          {isEditing && (
             <div className="flex gap-1 mt-2">
               <Button variant="outline" size="sm" onClick={handleCancel} className="h-7 text-xs px-2">
                 Cancelar
@@ -97,7 +79,7 @@ export const BalanceDisplay = ({ balance, isLoading, onBalanceChange }: BalanceD
         </div>
         
         <div className="mt-2">
-          {isEditing && onBalanceChange ? (
+          {isEditing ? (
             <div className="space-y-1">
               <Label htmlFor="balance" className="text-xs">Saldo</Label>
               <Input
@@ -116,7 +98,7 @@ export const BalanceDisplay = ({ balance, isLoading, onBalanceChange }: BalanceD
               <div className="flex items-baseline bg-white/70 px-3 py-1 rounded-md">
                 <span className="text-sm font-bold mr-1 tracking-tight">R$</span>
                 <span className={`text-xl font-bold ${getBalanceClass()}`}>
-                  {balance?.balance || '0'}
+                  {balance}
                 </span>
               </div>
             </div>
