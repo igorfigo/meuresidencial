@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -10,7 +9,7 @@ import { formatToBRL, BRLToNumber } from '@/utils/currency';
 import { Calendar, Wallet, Home, PieChart, AlertCircle, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { format, subMonths } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   BarChart,
@@ -35,7 +34,6 @@ const FinanceiroDashboard = () => {
   const [revenueDistributionData, setRevenueDistributionData] = useState<any[]>([]);
   const [pendingRevenueData, setPendingRevenueData] = useState<any>({});
   const [paymentStatusData, setPaymentStatusData] = useState<any[]>([]);
-  const [lastSixMonths, setLastSixMonths] = useState<{month: number, year: number, label: string}[]>([]);
   
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a163be', '#61dafb', '#f97150', '#4db35e'];
   const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -56,7 +54,7 @@ const FinanceiroDashboard = () => {
         fetchUnitPaymentStatus(),
         fetchRevenueDistribution(),
         fetchPendingRevenue(),
-        fetchLast6MonthsPaymentStatus()
+        fetchAnnualPaymentStatus()
       ]);
       
     } catch (error) {
@@ -263,27 +261,10 @@ const FinanceiroDashboard = () => {
     }
   };
   
-  const fetchLast6MonthsPaymentStatus = async () => {
+  const fetchAnnualPaymentStatus = async () => {
     try {
-      // Get the last 6 months
       const today = new Date();
-      const sixMonthsData = [];
-      const months = [];
-      
-      for (let i = 0; i < 6; i++) {
-        const date = subMonths(today, i);
-        const monthNum = date.getMonth();
-        const year = date.getFullYear();
-        const monthName = MONTHS[monthNum];
-        
-        months.unshift({
-          month: monthNum + 1, // 1-based for database
-          year,
-          label: `${monthName.substring(0, 3)}/${year.toString().substring(2)}`
-        });
-      }
-      
-      setLastSixMonths(months);
+      const currentYear = today.getFullYear();
       
       const { data: residents, error: residentsError } = await supabase
         .from('residents')
@@ -292,15 +273,12 @@ const FinanceiroDashboard = () => {
       
       if (residentsError) throw residentsError;
       
-      // Construct reference months for the query (YYYY-MM format)
-      const referenceMonths = months.map(m => `${m.year}-${m.month.toString().padStart(2, '0')}`);
-      
       const { data: payments, error: paymentsError } = await supabase
         .from('financial_incomes')
         .select('unit, reference_month')
         .eq('matricula', user?.selectedCondominium)
         .eq('category', 'taxa_condominio')
-        .in('reference_month', referenceMonths);
+        .ilike('reference_month', `${currentYear}-%`);
       
       if (paymentsError) throw paymentsError;
       
@@ -309,23 +287,13 @@ const FinanceiroDashboard = () => {
           .filter(payment => payment.unit === resident.unidade)
           .map(payment => {
             const [year, month] = payment.reference_month.split('-');
-            return { year: parseInt(year), month: parseInt(month) };
+            return parseInt(month);
           });
         
         const monthlyStatus = {};
-        
-        // Initialize with "unpaid" for all 6 months
-        months.forEach((m, i) => {
-          monthlyStatus[`month${i}`] = 'unpaid';
-        });
-        
-        // Mark as "paid" for months when payment was made
-        unitPayments.forEach(payment => {
-          const idx = months.findIndex(m => m.year === payment.year && m.month === payment.month);
-          if (idx >= 0) {
-            monthlyStatus[`month${idx}`] = 'paid';
-          }
-        });
+        for (let i = 1; i <= 12; i++) {
+          monthlyStatus[`month${i}`] = unitPayments.includes(i) ? 'paid' : 'unpaid';
+        }
         
         return {
           unit: resident.unidade,
@@ -335,8 +303,31 @@ const FinanceiroDashboard = () => {
       
       setPaymentStatusData(statusData);
     } catch (error) {
-      console.error('Error fetching last 6 months payment status:', error);
+      console.error('Error fetching annual payment status:', error);
       setPaymentStatusData([]);
+    }
+  };
+  
+  const handleBalanceChange = async (newBalance: string) => {
+    try {
+      const { error } = await supabase
+        .from('financial_balance')
+        .upsert(
+          { 
+            matricula: user?.selectedCondominium, 
+            balance: newBalance,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'matricula' }
+        );
+      
+      if (error) throw error;
+      
+      setBalance(newBalance);
+      toast.success('Saldo atualizado com sucesso');
+    } catch (error) {
+      console.error('Error updating balance:', error);
+      toast.error('Erro ao atualizar saldo');
     }
   };
   
@@ -364,7 +355,7 @@ const FinanceiroDashboard = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div>
-            <BalanceDisplay balance={balance} />
+            <BalanceDisplay balance={balance} onBalanceChange={handleBalanceChange} />
           </div>
           
           <Card className="overflow-hidden border-blue-300 shadow-md">
@@ -475,6 +466,51 @@ const FinanceiroDashboard = () => {
           <Card className="overflow-hidden border-blue-300 shadow-md">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
+                <Home className="h-5 w-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-800">Status de Pagamento das Unidades</h3>
+              </div>
+              
+              <div className="h-64">
+                <ChartContainer 
+                  config={{
+                    Pagas: { color: '#4db35e', label: 'Unidades Pagas' },
+                    Pendentes: { color: '#f97150', label: 'Unidades Pendentes' }
+                  }}
+                >
+                  <BarChart data={unitStatusData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" />
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
+                              <p className="text-sm font-medium">{payload[0].payload.name}</p>
+                              <p className="text-sm" style={{ color: payload[0].color }}>
+                                Unidades: {payload[0].value}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="value" name="Unidades">
+                      {unitStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.name === 'Pagas' ? '#4db35e' : '#f97150'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="overflow-hidden border-blue-300 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
                 <PieChart className="h-5 w-5 text-blue-500" />
                 <h3 className="font-semibold text-gray-800">Distribuição das Receitas</h3>
               </div>
@@ -524,27 +560,25 @@ const FinanceiroDashboard = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="h-5 w-5 text-blue-500" />
-                <h3 className="font-semibold text-gray-800">Status de Pagamento - Últimos 6 Meses</h3>
+                <h3 className="font-semibold text-gray-800">Status de Pagamento Anual</h3>
               </div>
               
-              <ScrollArea className="h-[300px]">
+              <ScrollArea className="h-[300px] w-full">
                 <div className="min-w-[700px]">
                   <table className="w-full text-sm">
                     <thead className="sticky top-0 bg-white z-10">
                       <tr className="border-b">
-                        <th className="text-left p-2 bg-white sticky left-0 z-20">Unidade</th>
-                        {lastSixMonths.map((month, index) => (
-                          <th key={index} className="p-2 text-center bg-white">
-                            {month.label}
-                          </th>
+                        <th className="text-left p-2 bg-white">Unidade</th>
+                        {MONTHS.slice(0, 12).map((month, index) => (
+                          <th key={month} className="p-2 text-center bg-white">{month.substring(0, 3)}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {paymentStatusData.map((row, rowIndex) => (
                         <tr key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
-                          <td className="p-2 font-medium sticky left-0 bg-white z-10">{row.unit}</td>
-                          {[0, 1, 2, 3, 4, 5].map(month => (
+                          <td className="p-2 font-medium sticky left-0 bg-white">{row.unit}</td>
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                             <td key={month} className="p-2 text-center">
                               <div className={`inline-block w-4 h-4 rounded-full ${
                                 row[`month${month}`] === 'paid' 

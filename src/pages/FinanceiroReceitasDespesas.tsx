@@ -146,6 +146,7 @@ const FinanceiroReceitasDespesas = () => {
           <div className="w-64">
             <BalanceDisplay 
               balance={balance?.balance || currentBalance} 
+              onBalanceChange={handleUpdateBalance}
             />
           </div>
         </div>
