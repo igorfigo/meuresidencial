@@ -3,7 +3,7 @@ import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer } from '@/components/ui/chart';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatToBRL, BRLToNumber } from '@/utils/currency';
 import { Calendar, Wallet, Home, PieChart, AlertCircle, BarChart3 } from 'lucide-react';
@@ -19,7 +19,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
   PieChart as RechartsPie,
   Pie,
   Cell,
@@ -46,7 +45,6 @@ const FinanceiroDashboard = () => {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a163be', '#61dafb', '#f97150', '#4db35e'];
   const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   
-  // Get current month and year for display
   const today = new Date();
   const currentMonth = MONTHS[today.getMonth()];
   const currentYear = today.getFullYear();
@@ -279,15 +277,19 @@ const FinanceiroDashboard = () => {
   const fetchAnnualPaymentStatus = async () => {
     try {
       const today = new Date();
-      const currentYear = today.getFullYear();
-      const lastYear = currentYear - 1;
       
-      const startMonth = today.getMonth() + 1;
-      
+      const months = [];
+      for (let i = 11; i >= 0; i--) {
+        const month = new Date();
+        month.setMonth(today.getMonth() - i);
+        months.push(format(month, 'yyyy-MM', { locale: ptBR }));
+      }
+
       const { data: residents, error: residentsError } = await supabase
         .from('residents')
         .select('unidade')
-        .eq('matricula', user?.selectedCondominium);
+        .eq('matricula', user?.selectedCondominium)
+        .order('unidade', { ascending: true });
       
       if (residentsError) throw residentsError;
       
@@ -295,17 +297,9 @@ const FinanceiroDashboard = () => {
         .from('financial_incomes')
         .select('unit, reference_month')
         .eq('matricula', user?.selectedCondominium)
-        .eq('category', 'taxa_condominio')
-        .or(`reference_month.ilike.${currentYear}-%, reference_month.ilike.${lastYear}-${startMonth <= 12 ? '%' : ''}`);
+        .eq('category', 'taxa_condominio');
       
       if (paymentsError) throw paymentsError;
-      
-      const months = [];
-      for (let i = 0; i < 12; i++) {
-        const month = new Date();
-        month.setMonth(today.getMonth() - i);
-        months.push(format(month, 'yyyy-MM', { locale: ptBR }));
-      }
       
       const statusData = residents.map(resident => {
         const unitPayments = payments
@@ -364,7 +358,7 @@ const FinanceiroDashboard = () => {
     const result = [];
     const today = new Date();
     
-    for (let i = 0; i < 12; i++) {
+    for (let i = 11; i >= 0; i--) {
       const month = new Date();
       month.setMonth(today.getMonth() - i);
       result.push({
@@ -567,48 +561,46 @@ const FinanceiroDashboard = () => {
           </Card>
         </div>
         
-        <Card className="overflow-hidden border-blue-300 shadow-md mb-8">
+        <Card className="overflow-hidden border-blue-300 shadow-md mb-8 w-full">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center justify-center gap-2 mb-3">
               <Calendar className="h-5 w-5 text-blue-500" />
-              <h3 className="font-semibold text-gray-800">Status de Pagamento (Últimos 12 Meses)</h3>
+              <h3 className="font-semibold text-gray-800 text-center">Status de Pagamento (Últimos 12 Meses)</h3>
             </div>
             
-            <ScrollArea className="h-[350px] w-full">
-              <div className="min-w-[1000px]">
-                <Table className="text-xs">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="sticky left-0 bg-white z-20 font-semibold">Unidade</TableHead>
-                      {last12Months.map((monthData) => (
-                        <TableHead key={`${monthData.year}-${monthData.month}`} className="text-center bg-white py-1 px-2">
-                          {monthData.fullLabel}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paymentStatusData.map((row, rowIndex) => (
-                      <TableRow key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
-                        <TableCell className="font-medium sticky left-0 bg-white z-10 py-1 px-2">{row.unit}</TableCell>
-                        {Array.from({ length: 12 }, (_, i) => i).map((monthIndex) => {
-                          const monthKey = `month${monthIndex}`;
-                          return (
-                            <TableCell key={`${row.unit}-${monthIndex}`} className="text-center p-1">
-                              <div className={`inline-block w-3 h-3 rounded-full ${
-                                row[monthKey]?.paid 
-                                  ? 'bg-green-500' 
-                                  : 'bg-red-500'
-                              }`} />
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
+            <div className="w-full">
+              <Table compact className="text-xs border-collapse">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead compact className="sticky left-0 bg-white z-20 font-semibold">Unidade</TableHead>
+                    {last12Months.map((monthData) => (
+                      <TableHead compact key={`${monthData.year}-${monthData.month}`} className="text-center bg-white py-1 px-2">
+                        {monthData.fullLabel}
+                      </TableHead>
                     ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </ScrollArea>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paymentStatusData.map((row, rowIndex) => (
+                    <TableRow key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
+                      <TableCell compact className="font-medium sticky left-0 bg-white z-10 py-1 px-2">{row.unit}</TableCell>
+                      {Array.from({ length: 12 }, (_, i) => i).map((monthIndex) => {
+                        const monthKey = `month${monthIndex}`;
+                        return (
+                          <TableCell compact key={`${row.unit}-${monthIndex}`} className="text-center p-1">
+                            <div className={`inline-block w-3 h-3 rounded-full ${
+                              row[monthKey]?.paid 
+                                ? 'bg-green-500' 
+                                : 'bg-red-500'
+                            }`} />
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
