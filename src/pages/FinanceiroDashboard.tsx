@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -444,7 +445,7 @@ const FinanceiroDashboard = () => {
               <div className="flex flex-col gap-2">
                 <div className="bg-amber-50 rounded p-3 text-center">
                   <p className="text-xs text-gray-500 mb-1">Valor a Receber</p>
-                  <p className="text-xl font-bold text-amber-600">
+                  <p className="text-xl font-bold text-amber-600 text-center">
                     R$ {formatToBRL(pendingRevenueData.pendingAmount || 0)}
                   </p>
                 </div>
@@ -490,7 +491,7 @@ const FinanceiroDashboard = () => {
                               <p className="text-sm font-medium">{payload[0].payload.month}</p>
                               {payload.map((entry, index) => (
                                 <p key={index} className="text-sm" style={{ color: entry.color }}>
-                                  {entry.name === 'receita' ? 'Receita: ' : 'Despesa: '}
+                                  {entry.dataKey === 'receita' ? 'Receita: ' : 'Despesa: '}
                                   R$ {formatToBRL(entry.value as number)}
                                 </p>
                               ))}
