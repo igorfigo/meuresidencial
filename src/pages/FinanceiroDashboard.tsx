@@ -82,7 +82,7 @@ const FinanceiroDashboard = () => {
 
   // Function to calculate units payment status
   const calculateUnitsPaymentStatus = () => {
-    if (!residents.length || !incomes.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
+    if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
 
     const currentMonth = format(new Date(), 'MM/yyyy');
     
@@ -92,8 +92,13 @@ const FinanceiroDashboard = () => {
     // Get units that paid this month (based on financial_incomes)
     const paidUnitsMap = new Map();
     
+    // Only consider 'taxa_condominio' payments for units
     incomes.forEach(income => {
-      if (income.reference_month === currentMonth && income.unit) {
+      if (
+        income.reference_month === currentMonth && 
+        income.unit && 
+        income.category.toLowerCase() === 'taxa_condominio'
+      ) {
         paidUnitsMap.set(income.unit, true);
       }
     });
@@ -106,7 +111,10 @@ const FinanceiroDashboard = () => {
     }, 0);
     
     const paidTotal = incomes
-      .filter(income => income.reference_month === currentMonth)
+      .filter(income => 
+        income.reference_month === currentMonth &&
+        income.category.toLowerCase() === 'taxa_condominio'
+      )
       .reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
     
     const pendingAmount = Math.max(0, expectedTotal - paidTotal);
@@ -121,7 +129,7 @@ const FinanceiroDashboard = () => {
 
   // Calculate payment status for all units for each month of the current year
   const calculateYearlyPaymentStatus = () => {
-    if (!residents.length || !incomes.length) return {};
+    if (!residents.length) return {};
 
     const currentYear = new Date().getFullYear();
     const monthsInYear = Array.from({ length: 12 }).map((_, i) => {
@@ -138,10 +146,15 @@ const FinanceiroDashboard = () => {
       });
     });
 
-    // Mark payments based on income records
+    // Mark payments based on income records - only consider 'taxa_condominio' payments
     incomes.forEach(income => {
-      // Only process incomes from current year
-      if (income.unit && income.reference_month && monthsInYear.includes(income.reference_month)) {
+      // Only process condominium fee incomes from current year
+      if (
+        income.unit && 
+        income.reference_month && 
+        monthsInYear.includes(income.reference_month) &&
+        income.category.toLowerCase() === 'taxa_condominio'
+      ) {
         if (paymentStatus[income.unit]) {
           paymentStatus[income.unit][income.reference_month] = true;
         }
