@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -13,7 +12,6 @@ import { useFinances } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
 
-// Função para gerar os últimos 12 meses (incluindo o atual)
 const getLast12Months = () => {
   const months = [];
   const today = new Date();
@@ -41,7 +39,6 @@ export const AccountingReport = () => {
   
   const months = getLast12Months();
   
-  // Filtrar receitas e despesas para o mês selecionado
   useEffect(() => {
     if (!isLoading) {
       const filteredIncomes = incomes.filter(income => 
@@ -55,7 +52,6 @@ export const AccountingReport = () => {
       setMonthlyIncomes(filteredIncomes);
       setMonthlyExpenses(filteredExpenses);
       
-      // Calcular saldo no início do mês (estimativa)
       const totalIncome = filteredIncomes.reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
       const totalExpense = filteredExpenses.reduce((sum, expense) => sum + BRLToNumber(expense.amount), 0);
       
@@ -83,25 +79,20 @@ export const AccountingReport = () => {
     setIsGenerating(true);
     
     try {
-      // Extrair o mês e ano para o nome do arquivo
       const [year, month] = selectedMonth.split('-');
       const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleString('pt-BR', { month: 'long' });
       
-      // Cabeçalho do CSV
       let csvContent = "Prestação de Contas - " + monthName.toUpperCase() + " " + year + "\r\n\r\n";
       
-      // Informações do condomínio
-      csvContent += "Condomínio:," + (user?.condominiumName || "Nome não disponível") + "\r\n";
+      csvContent += "Condomínio:," + (user?.nomeCondominio || "Nome não disponível") + "\r\n";
       csvContent += "Matrícula:," + (user?.selectedCondominium || "Não disponível") + "\r\n\r\n";
       
-      // Resumo financeiro
       csvContent += "RESUMO FINANCEIRO\r\n";
       csvContent += "Saldo Inicial:,R$ " + startBalance + "\r\n";
       csvContent += "Total de Receitas:,R$ " + formatToBRL(getTotalIncome()) + "\r\n";
       csvContent += "Total de Despesas:,R$ " + formatToBRL(getTotalExpense()) + "\r\n";
       csvContent += "Saldo Final:,R$ " + endBalance + "\r\n\r\n";
       
-      // Receitas
       csvContent += "RECEITAS\r\n";
       csvContent += "Categoria,Unidade,Data de Pagamento,Valor,Observações\r\n";
       
@@ -129,11 +120,9 @@ export const AccountingReport = () => {
         ].join(",") + "\r\n";
       });
       
-      // Criar um objeto Blob para o download
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       
-      // Criar um link temporário e clicar nele para iniciar o download
       const link = document.createElement("a");
       const fileName = `prestacao_contas_${monthName.toLowerCase()}_${year}.csv`;
       
