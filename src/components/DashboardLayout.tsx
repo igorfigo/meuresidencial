@@ -95,7 +95,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       submenu: [
         { name: 'Dashboard', icon: <BarChart className="h-5 w-5" />, path: '/financeiro/dashboard' },
         { name: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" />, path: '/financeiro/receitas-despesas' },
-        { name: 'Inadimplências', icon: <CreditCard className="h-5 w-5" />, path: '/financeiro/inadimplencias' },
         { name: 'Prestação de Contas', icon: <FileText className="h-5 w-5" />, path: '/financeiro/prestacao-contas' },
       ] 
     },
@@ -435,4 +434,3 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 };
 
 export default DashboardLayout;
-
