@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -39,7 +38,6 @@ const FinanceiroDashboard = () => {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a163be', '#61dafb', '#f97150', '#4db35e'];
   const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   
-  // Get current month and year for display
   const today = new Date();
   const currentMonth = MONTHS[today.getMonth()];
   const currentYear = today.getFullYear();
@@ -556,13 +554,13 @@ const FinanceiroDashboard = () => {
               </div>
               
               <ScrollArea className="h-[300px] w-full">
-                <div className="min-w-[700px]">
-                  <table className="w-full text-sm">
+                <div className="min-w-[600px]">
+                  <table className="w-full text-xs">
                     <thead className="sticky top-0 bg-white z-10">
                       <tr className="border-b">
-                        <th className="text-left p-2 bg-white sticky left-0 z-20">Unidade</th>
+                        <th className="text-left p-1 bg-white sticky left-0 z-20 font-medium">Unidade</th>
                         {last6Months.map((monthData) => (
-                          <th key={`${monthData.year}-${monthData.month}`} className="p-2 text-center bg-white">
+                          <th key={`${monthData.year}-${monthData.month}`} className="p-1 text-center bg-white font-medium">
                             {monthData.name}/{monthData.year.toString().substring(2)}
                           </th>
                         ))}
@@ -571,12 +569,12 @@ const FinanceiroDashboard = () => {
                     <tbody>
                       {paymentStatusData.map((row, rowIndex) => (
                         <tr key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
-                          <td className="p-2 font-medium sticky left-0 bg-white z-10">{row.unit}</td>
+                          <td className="p-1 font-medium sticky left-0 bg-white z-10">{row.unit}</td>
                           {last6Months.map((monthData) => {
-                            const monthKey = `month${monthData.index + 1}`;
+                            const monthKey = `month${monthData.month}`;
                             return (
-                              <td key={`${row.unit}-${monthData.year}-${monthData.month}`} className="p-2 text-center">
-                                <div className={`inline-block w-4 h-4 rounded-full ${
+                              <td key={`${row.unit}-${monthData.year}-${monthData.month}`} className="p-1 text-center">
+                                <div className={`inline-block w-3 h-3 rounded-full ${
                                   row[monthKey] === 'paid' 
                                     ? 'bg-green-500' 
                                     : 'bg-red-500'
