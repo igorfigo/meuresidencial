@@ -118,6 +118,11 @@ export const useFinances = () => {
           schema: 'public',
           table: 'financial_balance'
         }, () => fetchFinancialData())
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'balance_adjustments'
+        }, () => fetchFinancialData())
         .subscribe();
       
       return () => {
@@ -157,9 +162,11 @@ export const useFinances = () => {
       await deleteFinancialIncome(id);
       toast.success('Receita removida com sucesso');
       await calculateAndUpdateBalance();
+      return true;
     } catch (error) {
       console.error('Error removing income:', error);
       toast.error('Erro ao remover receita');
+      throw error;
     }
   };
 
@@ -194,9 +201,11 @@ export const useFinances = () => {
       await deleteFinancialExpense(id);
       toast.success('Despesa removida com sucesso');
       await calculateAndUpdateBalance();
+      return true;
     } catch (error) {
       console.error('Error removing expense:', error);
       toast.error('Erro ao remover despesa');
+      throw error;
     }
   };
 

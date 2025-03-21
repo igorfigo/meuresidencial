@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -25,7 +26,8 @@ const FinanceiroReceitasDespesas = () => {
     editExpense,
     removeExpense,
     updateBalance,
-    isLoading
+    isLoading,
+    refreshData
   } = useFinances();
   
   const [activeTab, setActiveTab] = useState<string>('income');
@@ -114,6 +116,10 @@ const FinanceiroReceitasDespesas = () => {
       
       // Update the balance
       await updateBalance(newBalance);
+      
+      // Refresh data to update the transactions list
+      await refreshData();
+      
       toast.success('Saldo atualizado com sucesso');
     } catch (error) {
       console.error('Error updating balance:', error);
@@ -134,6 +140,26 @@ const FinanceiroReceitasDespesas = () => {
   };
   
   const { currentBalance } = calculateFinancialSummary();
+  
+  const handleDeleteIncome = async (id: string) => {
+    try {
+      await removeIncome(id);
+      // No need to refresh data as the hook will handle it via the Supabase subscription
+    } catch (error) {
+      console.error('Error deleting income:', error);
+      toast.error('Erro ao excluir receita');
+    }
+  };
+  
+  const handleDeleteExpense = async (id: string) => {
+    try {
+      await removeExpense(id);
+      // No need to refresh data as the hook will handle it via the Supabase subscription
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      toast.error('Erro ao excluir despesa');
+    }
+  };
   
   if (isLoading) {
     return (
@@ -183,8 +209,8 @@ const FinanceiroReceitasDespesas = () => {
         <div className="mb-8">
           <RecentTransactions 
             transactions={recentTransactions} 
-            onDeleteIncome={removeIncome}
-            onDeleteExpense={removeExpense}
+            onDeleteIncome={handleDeleteIncome}
+            onDeleteExpense={handleDeleteExpense}
           />
         </div>
       </div>

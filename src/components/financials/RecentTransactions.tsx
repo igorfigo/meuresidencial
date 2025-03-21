@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye, History } from 'lucide-react';
 import { BRLToNumber } from '@/utils/currency';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
