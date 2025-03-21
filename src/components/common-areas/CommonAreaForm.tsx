@@ -32,6 +32,7 @@ interface CommonAreaFormProps {
   onCancel: () => void;
 }
 
+// Reorder weekday options from Monday to Sunday
 const weekdayOptions = [
   { id: 'Segunda', label: 'Segunda-feira' },
   { id: 'Terça', label: 'Terça-feira' },

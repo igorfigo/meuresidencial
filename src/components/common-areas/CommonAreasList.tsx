@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Eye, 
@@ -102,7 +101,20 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
   const formatWeekdays = (weekdays?: string[]) => {
     if (!weekdays || weekdays.length === 0) return 'Nenhum';
     if (weekdays.length === 7) return 'Todos os dias';
-    return weekdays.join(', ');
+    
+    const orderedWeekdays = new Map([
+      ['Segunda', 1],
+      ['Terça', 2],
+      ['Quarta', 3],
+      ['Quinta', 4],
+      ['Sexta', 5],
+      ['Sábado', 6],
+      ['Domingo', 7]
+    ]);
+    
+    return [...weekdays]
+      .sort((a, b) => (orderedWeekdays.get(a) || 0) - (orderedWeekdays.get(b) || 0))
+      .join(', ');
   };
   
   const formatHours = (opening?: string, closing?: string) => {
