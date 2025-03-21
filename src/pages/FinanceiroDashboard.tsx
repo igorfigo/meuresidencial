@@ -82,23 +82,36 @@ const FinanceiroDashboard = () => {
 
   // Function to calculate units payment status
   const calculateUnitsPaymentStatus = () => {
-    if (!residents.length || !incomes.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
+    if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
 
     const currentMonth = format(new Date(), 'MM/yyyy');
+    const matricula = user?.selectedCondominium || '';
+
+    console.log('Payment status calculation:', {
+      matricula,
+      totalUnits: residents.length,
+      currentMonth
+    });
     
-    // Count total units
+    // Count total units for this condominium
     const totalUnits = residents.length;
     
-    // Get units that paid this month (based on financial_incomes)
-    const paidUnitsMap = new Map();
+    // Get units that paid this month (condominium fee)
+    // Only count incomes with category 'taxa_condominio' for the current month
+    const paidUnitsSet = new Set();
     
     incomes.forEach(income => {
-      if (income.reference_month === currentMonth && income.unit) {
-        paidUnitsMap.set(income.unit, true);
+      if (
+        income.reference_month === currentMonth && 
+        income.category === 'taxa_condominio' && 
+        income.unit
+      ) {
+        paidUnitsSet.add(income.unit);
       }
     });
     
-    const paidUnits = paidUnitsMap.size;
+    const paidUnits = paidUnitsSet.size;
+    const pendingUnits = totalUnits - paidUnits;
     
     // Calculate pending amount (expected - received)
     const expectedTotal = residents.reduce((sum, resident) => {
@@ -106,16 +119,31 @@ const FinanceiroDashboard = () => {
     }, 0);
     
     const paidTotal = incomes
-      .filter(income => income.reference_month === currentMonth)
+      .filter(income => 
+        income.reference_month === currentMonth && 
+        income.category === 'taxa_condominio'
+      )
       .reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
     
     const pendingAmount = Math.max(0, expectedTotal - paidTotal);
+    
+    console.log('Payment status calculation:', {
+      matricula,
+      totalUnits,
+      paidUnits,
+      pendingUnits,
+      pendingAmount,
+      currentMonth,
+      paidUnitsSet: Array.from(paidUnitsSet),
+      residentsCount: residents.length,
+      incomesForThisMatricula: incomes.length
+    });
     
     return { 
       totalUnits, 
       paidUnits, 
       pendingAmount,
-      pendingUnits: totalUnits - paidUnits
+      pendingUnits
     };
   };
 
@@ -138,10 +166,15 @@ const FinanceiroDashboard = () => {
       });
     });
 
-    // Mark payments based on income records
+    // Mark payments based on income records with category 'taxa_condominio'
     incomes.forEach(income => {
-      // Only process incomes from current year
-      if (income.unit && income.reference_month && monthsInYear.includes(income.reference_month)) {
+      // Only process incomes for condominium fee
+      if (
+        income.unit && 
+        income.reference_month && 
+        monthsInYear.includes(income.reference_month) &&
+        income.category === 'taxa_condominio'
+      ) {
         if (paymentStatus[income.unit]) {
           paymentStatus[income.unit][income.reference_month] = true;
         }
@@ -156,8 +189,17 @@ const FinanceiroDashboard = () => {
       setMonthlyData(calculateMonthlyData());
       setPieData(calculateIncomeDistribution());
       setUnitsData(calculateUnitsPaymentStatus());
+      
+      // Log finance data loaded for debugging
+      console.log('Finances data loaded:', {
+        matricula: user?.selectedCondominium,
+        incomesCount: incomes.length,
+        expensesCount: expenses.length,
+        residentsCount: residents.length,
+        currentMonth: format(new Date(), 'MM/yyyy')
+      });
     }
-  }, [isLoading, isLoadingResidents, incomes, expenses, residents]);
+  }, [isLoading, isLoadingResidents, incomes, expenses, residents, user?.selectedCondominium]);
 
   if (isLoading || isLoadingResidents) {
     return (
