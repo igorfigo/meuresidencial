@@ -3,15 +3,14 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
 import { useFinances } from '@/hooks/use-finances';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { BRLToNumber, formatToBRL } from '@/utils/currency';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { format, subMonths, parse, isAfter, startOfMonth } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { useApp } from '@/contexts/AppContext';
 import { useResidents } from '@/hooks/use-residents';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer } from '@/components/ui/chart';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { BRLToNumber, formatToBRL } from '@/utils/currency';
+import { format, subMonths, parse, isAfter } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { CheckCircle2, XCircle } from 'lucide-react';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#F1C40F', '#3498DB'];
@@ -83,21 +82,28 @@ const FinanceiroDashboard = () => {
   // Function to calculate units payment status
   const calculateUnitsPaymentStatus = () => {
     if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0, pendingUnits: 0 };
+    if (!user?.matricula && !user?.selectedCondominium) {
+      console.error('No matricula found for logged in user');
+      return { totalUnits: 0, paidUnits: 0, pendingAmount: 0, pendingUnits: 0 };
+    }
 
     const currentMonth = format(new Date(), 'MM/yyyy');
+    const matricula = user?.selectedCondominium || user?.matricula || '';
     
-    // Count total units from residents table
-    const totalUnits = residents.length;
+    // Count total units from residents table with matching matricula
+    const residentsWithMatricula = residents.filter(resident => resident.matricula === matricula);
+    const totalUnits = residentsWithMatricula.length;
     
     // Count paid units from financial_incomes with category "taxa_condominio"
-    // and reference_month equal to current month
+    // and reference_month equal to current month and matching matricula
     const paidUnitsSet = new Set();
     
     incomes.forEach(income => {
       if (
         income.reference_month === currentMonth && 
         income.category === 'taxa_condominio' && 
-        income.unit
+        income.unit &&
+        income.matricula === matricula
       ) {
         paidUnitsSet.add(income.unit);
       }
@@ -107,23 +113,30 @@ const FinanceiroDashboard = () => {
     const pendingUnits = totalUnits - paidUnits;
     
     // Calculate pending amount (expected - received)
-    const expectedTotal = residents.reduce((sum, resident) => {
+    const expectedTotal = residentsWithMatricula.reduce((sum, resident) => {
       return sum + (resident.valor_condominio ? BRLToNumber(resident.valor_condominio) : 0);
     }, 0);
     
     const paidTotal = incomes
-      .filter(income => income.reference_month === currentMonth && income.category === 'taxa_condominio')
+      .filter(income => 
+        income.reference_month === currentMonth && 
+        income.category === 'taxa_condominio' &&
+        income.matricula === matricula
+      )
       .reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
     
     const pendingAmount = Math.max(0, expectedTotal - paidTotal);
     
     console.log('Payment status calculation:', { 
+      matricula,
       totalUnits, 
       paidUnits, 
       pendingUnits,
       pendingAmount,
       currentMonth,
-      paidUnitsSet: Array.from(paidUnitsSet)
+      paidUnitsSet: Array.from(paidUnitsSet),
+      residentsCount: residentsWithMatricula.length,
+      incomesForThisMatricula: incomes.filter(i => i.matricula === matricula).length
     });
     
     return { 
@@ -137,31 +150,37 @@ const FinanceiroDashboard = () => {
   // Calculate payment status for all units for each month of the current year
   const calculateYearlyPaymentStatus = () => {
     if (!residents.length || !incomes.length) return {};
+    if (!user?.matricula && !user?.selectedCondominium) return {};
 
+    const matricula = user?.selectedCondominium || user?.matricula || '';
     const currentYear = new Date().getFullYear();
     const monthsInYear = Array.from({ length: 12 }).map((_, i) => {
       return format(new Date(currentYear, i, 1), 'MM/yyyy');
     });
 
+    // Filter residents by matricula
+    const residentsWithMatricula = residents.filter(resident => resident.matricula === matricula);
     const paymentStatus: Record<string, Record<string, boolean>> = {};
 
     // Initialize all residents for all months as not paid
-    residents.forEach(resident => {
+    residentsWithMatricula.forEach(resident => {
       paymentStatus[resident.unidade] = {};
       monthsInYear.forEach(month => {
         paymentStatus[resident.unidade][month] = false;
       });
     });
 
-    // Mark payments based on income records
-    incomes.forEach(income => {
-      // Only process incomes from current year
-      if (income.unit && income.reference_month && monthsInYear.includes(income.reference_month)) {
-        if (paymentStatus[income.unit]) {
-          paymentStatus[income.unit][income.reference_month] = true;
+    // Mark payments based on income records, filtered by matricula
+    incomes
+      .filter(income => income.matricula === matricula)
+      .forEach(income => {
+        // Only process incomes from current year
+        if (income.unit && income.reference_month && monthsInYear.includes(income.reference_month)) {
+          if (paymentStatus[income.unit]) {
+            paymentStatus[income.unit][income.reference_month] = true;
+          }
         }
-      }
-    });
+      });
 
     return paymentStatus;
   };
@@ -173,13 +192,14 @@ const FinanceiroDashboard = () => {
       setUnitsData(calculateUnitsPaymentStatus());
       
       console.log('Finances data loaded:', {
+        matricula: user?.selectedCondominium || user?.matricula,
         incomesCount: incomes.length,
         expensesCount: expenses.length,
         residentsCount: residents.length,
         currentMonth: format(new Date(), 'MM/yyyy')
       });
     }
-  }, [isLoading, isLoadingResidents, incomes, expenses, residents]);
+  }, [isLoading, isLoadingResidents, incomes, expenses, residents, user?.matricula, user?.selectedCondominium]);
 
   if (isLoading || isLoadingResidents) {
     return (
