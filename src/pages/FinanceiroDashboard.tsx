@@ -335,6 +335,26 @@ const FinanceiroDashboard = () => {
     return formatToBRL(value);
   };
   
+  const getLast6Months = () => {
+    const result = [];
+    const today = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const month = new Date();
+      month.setMonth(today.getMonth() - i);
+      result.push({
+        name: MONTHS[month.getMonth()].substring(0, 3),
+        index: month.getMonth(),
+        year: month.getFullYear(),
+        month: month.getMonth() + 1
+      });
+    }
+    
+    return result;
+  };
+  
+  const last6Months = getLast6Months();
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -355,10 +375,10 @@ const FinanceiroDashboard = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div>
-            <BalanceDisplay balance={balance} onBalanceChange={handleBalanceChange} />
+            <BalanceDisplay balance={balance} readOnly={true} className="h-full" />
           </div>
           
-          <Card className="overflow-hidden border-blue-300 shadow-md">
+          <Card className="overflow-hidden border-blue-300 shadow-md h-full">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Home className="h-5 w-5 text-blue-500" />
@@ -388,7 +408,7 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="overflow-hidden border-blue-300 shadow-md">
+          <Card className="overflow-hidden border-blue-300 shadow-md h-full">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <AlertCircle className="h-5 w-5 text-amber-500" />
@@ -466,51 +486,6 @@ const FinanceiroDashboard = () => {
           <Card className="overflow-hidden border-blue-300 shadow-md">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
-                <Home className="h-5 w-5 text-blue-500" />
-                <h3 className="font-semibold text-gray-800">Status de Pagamento das Unidades</h3>
-              </div>
-              
-              <div className="h-64">
-                <ChartContainer 
-                  config={{
-                    Pagas: { color: '#4db35e', label: 'Unidades Pagas' },
-                    Pendentes: { color: '#f97150', label: 'Unidades Pendentes' }
-                  }}
-                >
-                  <BarChart data={unitStatusData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="name" type="category" />
-                    <Tooltip 
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
-                              <p className="text-sm font-medium">{payload[0].payload.name}</p>
-                              <p className="text-sm" style={{ color: payload[0].color }}>
-                                Unidades: {payload[0].value}
-                              </p>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Legend />
-                    <Bar dataKey="value" name="Unidades">
-                      {unitStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.name === 'Pagas' ? '#4db35e' : '#f97150'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="overflow-hidden border-blue-300 shadow-md">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-3">
                 <PieChart className="h-5 w-5 text-blue-500" />
                 <h3 className="font-semibold text-gray-800">Distribuição das Receitas</h3>
               </div>
@@ -560,7 +535,7 @@ const FinanceiroDashboard = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="h-5 w-5 text-blue-500" />
-                <h3 className="font-semibold text-gray-800">Status de Pagamento Anual</h3>
+                <h3 className="font-semibold text-gray-800">Status de Pagamento (Últimos 6 Meses)</h3>
               </div>
               
               <ScrollArea className="h-[300px] w-full">
@@ -568,25 +543,30 @@ const FinanceiroDashboard = () => {
                   <table className="w-full text-sm">
                     <thead className="sticky top-0 bg-white z-10">
                       <tr className="border-b">
-                        <th className="text-left p-2 bg-white">Unidade</th>
-                        {MONTHS.slice(0, 12).map((month, index) => (
-                          <th key={month} className="p-2 text-center bg-white">{month.substring(0, 3)}</th>
+                        <th className="text-left p-2 bg-white sticky left-0 z-20">Unidade</th>
+                        {last6Months.map((monthData) => (
+                          <th key={`${monthData.year}-${monthData.month}`} className="p-2 text-center bg-white">
+                            {monthData.name}/{monthData.year.toString().substring(2)}
+                          </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {paymentStatusData.map((row, rowIndex) => (
                         <tr key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
-                          <td className="p-2 font-medium sticky left-0 bg-white">{row.unit}</td>
-                          {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                            <td key={month} className="p-2 text-center">
-                              <div className={`inline-block w-4 h-4 rounded-full ${
-                                row[`month${month}`] === 'paid' 
-                                  ? 'bg-green-500' 
-                                  : 'bg-red-500'
-                              }`} />
-                            </td>
-                          ))}
+                          <td className="p-2 font-medium sticky left-0 bg-white z-10">{row.unit}</td>
+                          {last6Months.map((monthData) => {
+                            const monthKey = `month${monthData.index + 1}`;
+                            return (
+                              <td key={`${row.unit}-${monthData.year}-${monthData.month}`} className="p-2 text-center">
+                                <div className={`inline-block w-4 h-4 rounded-full ${
+                                  row[monthKey] === 'paid' 
+                                    ? 'bg-green-500' 
+                                    : 'bg-red-500'
+                                }`} />
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                     </tbody>

@@ -4,15 +4,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Pencil, Wallet } from 'lucide-react';
+import { Pencil, Wallet, LockIcon } from 'lucide-react';
 import { formatCurrencyInput } from '@/utils/currency';
 
 interface BalanceDisplayProps {
   balance: string;
-  onBalanceChange: (balance: string) => Promise<void>;
+  onBalanceChange?: (balance: string) => Promise<void>;
+  readOnly?: boolean;
+  className?: string;
 }
 
-export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps) => {
+export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, className }: BalanceDisplayProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editBalance, setEditBalance] = useState(balance);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +34,8 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
   };
   
   const handleSave = async () => {
+    if (!onBalanceChange) return;
+    
     setIsSubmitting(true);
     try {
       await onBalanceChange(editBalance);
@@ -49,13 +53,13 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
   };
   
   return (
-    <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300">
+    <Card className={`bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 ${className || ''}`}>
       <CardContent className="p-4">
         <div className="flex flex-col items-center">
           <div className="flex items-center justify-center gap-2 mb-3 w-full">
             <Wallet className="h-5 w-5 text-blue-500" />
             <h3 className="font-semibold text-gray-800">Saldo Atual</h3>
-            {!isEditing && (
+            {!readOnly && !isEditing && (
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -65,10 +69,13 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
                 <Pencil size={14} />
               </Button>
             )}
+            {readOnly && (
+              <LockIcon className="h-4 w-4 text-gray-500 ml-auto" />
+            )}
           </div>
           
           <div className="w-full">
-            {isEditing ? (
+            {!readOnly && isEditing ? (
               <div className="space-y-2">
                 <Label htmlFor="balance" className="text-xs">Saldo</Label>
                 <Input
