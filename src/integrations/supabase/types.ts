@@ -432,18 +432,21 @@ export type Database = {
         Row: {
           balance: string
           id: string
+          is_manual: boolean | null
           matricula: string
           updated_at: string
         }
         Insert: {
           balance?: string
           id?: string
+          is_manual?: boolean | null
           matricula: string
           updated_at?: string
         }
         Update: {
           balance?: string
           id?: string
+          is_manual?: boolean | null
           matricula?: string
           updated_at?: string
         }

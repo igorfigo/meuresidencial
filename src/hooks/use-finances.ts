@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useApp } from '@/contexts/AppContext';
@@ -43,6 +44,7 @@ export interface FinancialBalance {
   matricula: string;
   balance: string;
   is_manual?: boolean;
+  updated_at?: string;
 }
 
 export const useFinances = () => {
