@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,12 +9,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
+// Define type for the location stats
 interface LocationStats {
   states: [string, number][];
   cities: Record<string, [string, number][]>;
   neighborhoods: [string, number][];
 }
 
+// Define type for the stats state
 interface DashboardStats {
   activeManagers: number;
   invoicePreference: number;
@@ -38,6 +41,7 @@ const Dashboard = () => {
   useEffect(() => {
     async function fetchDashboardData() {
       try {
+        // Fetch active managers count
         const { count: activeCount, error: activeError } = await supabase
           .from('condominiums')
           .select('*', { count: 'exact', head: true })
@@ -45,6 +49,7 @@ const Dashboard = () => {
         
         if (activeError) throw activeError;
         
+        // Fetch invoice preference count
         const { count: invoiceCount, error: invoiceError } = await supabase
           .from('condominiums')
           .select('*', { count: 'exact', head: true })
@@ -52,12 +57,14 @@ const Dashboard = () => {
         
         if (invoiceError) throw invoiceError;
         
+        // Fetch location stats
         const { data: locationData, error: locationError } = await supabase
           .from('condominiums')
           .select('estado, cidade, bairro');
         
         if (locationError) throw locationError;
         
+        // Process location data
         const stateCount: Record<string, number> = {};
         const cityByState: Record<string, Record<string, number>> = {};
         const neighborhoodCount: Record<string, number> = {};
@@ -66,6 +73,7 @@ const Dashboard = () => {
           if (item.estado) {
             stateCount[item.estado] = (stateCount[item.estado] || 0) + 1;
             
+            // Organize cities by state
             if (item.cidade) {
               if (!cityByState[item.estado]) {
                 cityByState[item.estado] = {};
@@ -75,6 +83,8 @@ const Dashboard = () => {
           }
           
           if (item.cidade) {
+            // This still tracks all cities regardless of state
+            // for backward compatibility
           }
           
           if (item.bairro) {
@@ -82,9 +92,11 @@ const Dashboard = () => {
           }
         });
         
+        // Sort and get top locations
         const topStates = Object.entries(stateCount)
           .sort((a, b) => b[1] - a[1]);
           
+        // Convert cityByState to the format we need
         const citiesByState: Record<string, [string, number][]> = {};
         Object.entries(cityByState).forEach(([state, cities]) => {
           citiesByState[state] = Object.entries(cities).sort((a, b) => b[1] - a[1]);
@@ -116,6 +128,7 @@ const Dashboard = () => {
     setIsStateDetailOpen(true);
   };
 
+  // Modified greeting for admin vs manager
   const getGreeting = () => {
     if (user?.isAdmin) {
       return (
@@ -138,10 +151,11 @@ const Dashboard = () => {
     }
   };
 
+  // Admin dashboard content
   const renderAdminDashboard = () => (
     <>
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+        <Card className="card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Gestores Ativos</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -154,7 +168,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+        <Card className="card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Preferência por Nota Fiscal</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -167,7 +181,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+        <Card className="card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Distribuição Geográfica</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -192,6 +206,7 @@ const Dashboard = () => {
         </Card>
       </section>
 
+      {/* Sheet for displaying cities when a state is clicked */}
       <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
         <SheetContent>
           <SheetHeader>
@@ -216,9 +231,10 @@ const Dashboard = () => {
     </>
   );
 
+  // Manager dashboard content (placeholder for now)
   const renderManagerDashboard = () => (
     <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+      <Card className="card-hover">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
         </CardHeader>

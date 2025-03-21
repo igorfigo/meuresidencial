@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -166,6 +167,7 @@ export const CadastroPlanos = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
+    // Validate that the value is in the correct format (XX,XX)
     const valorPattern = /^\d{1,3}(\.\d{3})*,\d{2}$/;
     if (!valorPattern.test(data.valor)) {
       toast.error('O valor do plano deve seguir o formato 0.000,00');
@@ -262,6 +264,7 @@ export const CadastroPlanos = () => {
   };
 
   const handleEditPlan = async (plan: Plan) => {
+    // When editing a plan, format the value to remove the R$ prefix
     let planValue = plan.valor;
     if (planValue.startsWith('R$')) {
       planValue = formatToBRL(BRLToNumber(planValue));
@@ -338,6 +341,7 @@ export const CadastroPlanos = () => {
     if (name === 'valor') {
       const numericValue = value.replace(/\D/g, '');
       const formattedValue = formatCurrencyInput(numericValue);
+      // Set only the formatted value without the R$ prefix
       setValue(name as keyof FormFields, formattedValue);
     } else {
       setValue(name as keyof FormFields, value);
@@ -359,7 +363,7 @@ export const CadastroPlanos = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
+            <Card className="p-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <h2 className="text-xl font-semibold mb-4">{isExistingRecord ? 'Editar Plano' : 'Novo Plano'}</h2>
                 
@@ -417,7 +421,7 @@ export const CadastroPlanos = () => {
           </div>
           
           <div className="lg:col-span-2">
-            <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
+            <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Planos Cadastrados</h2>
               <ScrollArea className="h-80">
                 <Table>

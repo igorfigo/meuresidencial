@@ -15,7 +15,7 @@ export const Seguranca = ({ handleInputChange, isExistingRecord }: SegurancaProp
   const { register, getValues } = useFormContext<FormFields>();
 
   return (
-    <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md">
+    <Card className="form-section p-6">
       <h2 className="text-xl font-semibold mb-4">Segurança</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
