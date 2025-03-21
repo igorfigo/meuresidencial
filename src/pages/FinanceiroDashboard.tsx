@@ -39,6 +39,7 @@ const FinanceiroDashboard = () => {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a163be', '#61dafb', '#f97150', '#4db35e'];
   const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   
+  // Get current month and year for display
   const today = new Date();
   const currentMonth = MONTHS[today.getMonth()];
   const currentYear = today.getFullYear();
@@ -546,53 +547,52 @@ const FinanceiroDashboard = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        {/* Changed to full width - this section now takes up the entire width of the screen */}
-        <Card className="overflow-hidden border-blue-300 shadow-md w-full mb-8">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar className="h-5 w-5 text-blue-500" />
-              <h3 className="font-semibold text-gray-800">Status de Pagamento (Últimos 6 Meses)</h3>
-            </div>
-            
-            <ScrollArea className="h-[300px] w-full">
-              <div className="min-w-[600px]">
-                <table className="w-full text-xs" compact>
-                  <thead className="sticky top-0 bg-white z-10">
-                    <tr className="border-b">
-                      <th className="text-left p-1 bg-white sticky left-0 z-20 font-medium" compact>Unidade</th>
-                      {last6Months.map((monthData) => (
-                        <th key={`${monthData.year}-${monthData.month}`} className="p-1 text-center bg-white font-medium" compact>
-                          {monthData.name}/{monthData.year.toString().substring(2)}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paymentStatusData.map((row, rowIndex) => (
-                      <tr key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
-                        <td className="p-1 font-medium sticky left-0 bg-white z-10" compact>{row.unit}</td>
-                        {last6Months.map((monthData) => {
-                          const monthKey = `month${monthData.month}`;
-                          return (
-                            <td key={`${row.unit}-${monthData.year}-${monthData.month}`} className="p-1 text-center" compact>
-                              <div className={`inline-block w-3 h-3 rounded-full ${
-                                row[monthKey] === 'paid' 
-                                  ? 'bg-green-500' 
-                                  : 'bg-red-500'
-                              }`} />
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          
+          <Card className="overflow-hidden border-blue-300 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Calendar className="h-5 w-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-800">Status de Pagamento (Últimos 6 Meses)</h3>
               </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+              
+              <ScrollArea className="h-[300px] w-full">
+                <div className="min-w-[700px]">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 bg-white z-10">
+                      <tr className="border-b">
+                        <th className="text-left p-2 bg-white sticky left-0 z-20">Unidade</th>
+                        {last6Months.map((monthData) => (
+                          <th key={`${monthData.year}-${monthData.month}`} className="p-2 text-center bg-white">
+                            {monthData.name}/{monthData.year.toString().substring(2)}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paymentStatusData.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
+                          <td className="p-2 font-medium sticky left-0 bg-white z-10">{row.unit}</td>
+                          {last6Months.map((monthData) => {
+                            const monthKey = `month${monthData.index + 1}`;
+                            return (
+                              <td key={`${row.unit}-${monthData.year}-${monthData.month}`} className="p-2 text-center">
+                                <div className={`inline-block w-4 h-4 rounded-full ${
+                                  row[monthKey] === 'paid' 
+                                    ? 'bg-green-500' 
+                                    : 'bg-red-500'
+                                }`} />
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
