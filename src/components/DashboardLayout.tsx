@@ -298,14 +298,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
               {user?.nome?.charAt(0) || 'U'}
             </div>
-            <div className="flex-1 min-w-0">
+            <NavLink to="/perfil" className="flex-1 min-w-0 hover:opacity-80 transition-opacity">
               <p className="text-sm font-medium text-white truncate">
                 {user?.nome || 'Usuário'}
               </p>
               <p className="text-xs text-gray-300 truncate">
                 {user?.email || 'email@example.com'}
               </p>
-            </div>
+            </NavLink>
           </div>
           <Button
             variant="ghost"
@@ -389,7 +389,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           !sidebarOpen && "flex flex-col items-center"
         )}>
           {sidebarOpen ? (
-            <div className="flex items-center space-x-3">
+            <NavLink to="/perfil" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
                 {user?.nome?.charAt(0) || 'U'}
               </div>
@@ -401,11 +401,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   {user?.email || 'email@example.com'}
                 </p>
               </div>
-            </div>
+            </NavLink>
           ) : (
-            <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white mb-2">
-              {user?.nome?.charAt(0) || 'U'}
-            </div>
+            <NavLink to="/perfil" title="Meu Perfil">
+              <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white mb-2">
+                {user?.nome?.charAt(0) || 'U'}
+              </div>
+            </NavLink>
           )}
           
           <Button
@@ -433,3 +435,4 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 };
 
 export default DashboardLayout;
+

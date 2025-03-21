@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,7 @@ import Comunicados from "./pages/Comunicados";
 import AreasComuns from "./pages/AreasComuns";
 import FaleConosco from "./pages/FaleConosco";
 import MinhaAssinatura from "./pages/MinhaAssinatura";
+import UserProfile from "./pages/UserProfile";
 import FinanceiroReceitasDespesas from "./pages/FinanceiroReceitasDespesas";
 import { useEffect } from "react";
 
@@ -95,6 +97,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/cadastro-gestor" element={<CadastroGestor />} />
             <Route path="/minha-assinatura" element={<MinhaAssinatura />} />
+            <Route path="/perfil" element={<UserProfile />} />
             <Route path="/moradores" element={<Moradores />} />
             <Route path="/areas-comuns" element={<AreasComuns />} />
             <Route path="/comunicados" element={<Comunicados />} />
