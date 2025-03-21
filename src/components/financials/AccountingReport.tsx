@@ -82,23 +82,24 @@ export const AccountingReport = () => {
     
     try {
       const [year, month] = selectedMonth.split('-');
-      const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleString('pt-BR', { month: 'long' });
+      const monthDate = new Date(parseInt(year), parseInt(month) - 1);
+      const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
       
       // Create new PDF document
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       let yPosition = 20;
       const lineHeight = 7;
-      const margin = 10;
+      const margin = 15;
       
-      // Title and Header
+      // Title - Improved formatting
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      const title = `Prestação de Contas - ${monthName.toUpperCase()} ${year}`;
+      const title = `Prestação de Contas - ${monthName} ${year}`;
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
-      yPosition += lineHeight * 2;
+      yPosition += lineHeight * 2.5;
       
-      // Condominium Information
+      // Condominium Information - Improved spacing
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       doc.text(`Condomínio: ${user?.nomeCondominio || "Nome não disponível"}`, margin, yPosition);
@@ -106,10 +107,11 @@ export const AccountingReport = () => {
       doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, margin, yPosition);
       yPosition += lineHeight * 2;
       
-      // Financial Summary Section
+      // Financial Summary Section - Better formatting
       doc.setFont('helvetica', 'bold');
       doc.text('RESUMO FINANCEIRO', margin, yPosition);
-      yPosition += lineHeight;
+      yPosition += lineHeight * 1.2;
+      
       doc.setFont('helvetica', 'normal');
       doc.text(`Saldo Inicial: R$ ${startBalance}`, margin, yPosition);
       yPosition += lineHeight;
@@ -120,28 +122,42 @@ export const AccountingReport = () => {
       doc.text(`Saldo Final: R$ ${endBalance}`, margin, yPosition);
       yPosition += lineHeight * 2;
       
-      // Incomes Section
+      // Incomes Section - Improved table formatting
       doc.setFont('helvetica', 'bold');
       doc.text('RECEITAS', margin, yPosition);
-      yPosition += lineHeight;
+      yPosition += lineHeight * 1.2;
       
-      // Table headers for incomes
+      // Table headers for incomes with better spacing
+      const incomeColWidths = [45, 25, 45, 30, 50]; // Adjusted column widths
+      const tableWidth = pageWidth - (margin * 2);
+      
+      // Helper function to draw table lines
+      const drawLine = (y: number) => {
+        doc.setDrawColor(0);
+        doc.line(margin, y, pageWidth - margin, y);
+      };
+      
+      // Income table headers
+      let currentX = margin;
+      doc.setFont('helvetica', 'bold');
+      
+      // Define header content
       const incomeHeaders = ['Categoria', 'Unidade', 'Data de Pagamento', 'Valor', 'Observações'];
-      const incomeColumnWidths = [40, 20, 40, 25, 55];
-      let startX = margin;
       
-      // Draw income headers
-      incomeHeaders.forEach((header, index) => {
-        doc.text(header, startX, yPosition);
-        startX += incomeColumnWidths[index];
+      // Draw header cells
+      incomeHeaders.forEach((header, i) => {
+        doc.text(header, currentX, yPosition);
+        currentX += incomeColWidths[i];
       });
-      yPosition += lineHeight;
       
-      // Draw separator line
-      doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+      yPosition += lineHeight / 2;
+      drawLine(yPosition);
+      yPosition += lineHeight / 2;
       
-      // Add income rows
+      // Income table rows
       if (monthlyIncomes.length > 0) {
+        doc.setFont('helvetica', 'normal');
+        
         monthlyIncomes.forEach(income => {
           // Check if we need a new page
           if (yPosition > 270) {
@@ -149,33 +165,40 @@ export const AccountingReport = () => {
             yPosition = 20;
           }
           
-          startX = margin;
-          doc.setFont('helvetica', 'normal');
-          doc.text(income.category?.substring(0, 18) || "N/A", startX, yPosition, { maxWidth: incomeColumnWidths[0] - 2 });
-          startX += incomeColumnWidths[0];
+          currentX = margin;
           
-          doc.text(income.unit || "N/A", startX, yPosition);
-          startX += incomeColumnWidths[1];
+          // Format and display each cell in the row
+          doc.text(income.category || "N/A", currentX, yPosition);
+          currentX += incomeColWidths[0];
           
-          doc.text(income.payment_date || "N/A", startX, yPosition);
-          startX += incomeColumnWidths[2];
+          doc.text(income.unit || "N/A", currentX, yPosition);
+          currentX += incomeColWidths[1];
           
-          doc.text(`R$ ${income.amount}`, startX, yPosition);
-          startX += incomeColumnWidths[3];
+          doc.text(income.payment_date || "N/A", currentX, yPosition);
+          currentX += incomeColWidths[2];
           
-          doc.text(income.observations?.substring(0, 20) || "", startX, yPosition, { maxWidth: incomeColumnWidths[4] - 2 });
+          doc.text(`R$ ${income.amount}`, currentX, yPosition);
+          currentX += incomeColWidths[3];
+          
+          const observations = income.observations ? 
+                               (income.observations.length > 20 ? 
+                               income.observations.substring(0, 20) + '...' : 
+                               income.observations) : 
+                               "";
+          doc.text(observations, currentX, yPosition);
           
           yPosition += lineHeight;
         });
         
-        // Add total row
+        // Total row
         yPosition += lineHeight / 2;
-        doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+        drawLine(yPosition);
         yPosition += lineHeight / 2;
         
         doc.setFont('helvetica', 'bold');
         doc.text('Total', margin, yPosition);
-        doc.text(`R$ ${formatToBRL(getTotalIncome())}`, margin + incomeColumnWidths[0] + incomeColumnWidths[1] + incomeColumnWidths[2], yPosition);
+        const totalXPos = margin + incomeColWidths[0] + incomeColWidths[1] + incomeColWidths[2];
+        doc.text(`R$ ${formatToBRL(getTotalIncome())}`, totalXPos, yPosition);
         
         yPosition += lineHeight * 2;
       } else {
@@ -191,28 +214,35 @@ export const AccountingReport = () => {
         yPosition = 20;
       }
       
-      // Expenses Section
+      // Expenses Section - Improved table formatting
       doc.setFont('helvetica', 'bold');
       doc.text('DESPESAS', margin, yPosition);
-      yPosition += lineHeight;
+      yPosition += lineHeight * 1.2;
       
-      // Table headers for expenses
+      // Table headers for expenses with better spacing
+      const expenseColWidths = [45, 25, 30, 30, 30, 40]; // Adjusted column widths
+      
+      // Expense table headers
+      currentX = margin;
+      doc.setFont('helvetica', 'bold');
+      
+      // Define expense header content
       const expenseHeaders = ['Categoria', 'Unidade', 'Vencimento', 'Pagamento', 'Valor', 'Observações'];
-      const expenseColumnWidths = [35, 15, 25, 25, 25, 55];
-      startX = margin;
       
-      // Draw expense headers
-      expenseHeaders.forEach((header, index) => {
-        doc.text(header, startX, yPosition);
-        startX += expenseColumnWidths[index];
+      // Draw expense header cells
+      expenseHeaders.forEach((header, i) => {
+        doc.text(header, currentX, yPosition);
+        currentX += expenseColWidths[i];
       });
-      yPosition += lineHeight;
       
-      // Draw separator line
-      doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+      yPosition += lineHeight / 2;
+      drawLine(yPosition);
+      yPosition += lineHeight / 2;
       
-      // Add expense rows
+      // Expense table rows
       if (monthlyExpenses.length > 0) {
+        doc.setFont('helvetica', 'normal');
+        
         monthlyExpenses.forEach(expense => {
           // Check if we need a new page
           if (yPosition > 270) {
@@ -220,43 +250,54 @@ export const AccountingReport = () => {
             yPosition = 20;
           }
           
-          startX = margin;
-          doc.setFont('helvetica', 'normal');
-          doc.text(expense.category?.substring(0, 16) || "N/A", startX, yPosition, { maxWidth: expenseColumnWidths[0] - 2 });
-          startX += expenseColumnWidths[0];
+          currentX = margin;
           
-          doc.text(expense.unit || "N/A", startX, yPosition);
-          startX += expenseColumnWidths[1];
+          // Format and display each cell in the row
+          doc.text(expense.category || "N/A", currentX, yPosition);
+          currentX += expenseColWidths[0];
           
-          doc.text(expense.due_date || "N/A", startX, yPosition);
-          startX += expenseColumnWidths[2];
+          doc.text(expense.unit || "N/A", currentX, yPosition);
+          currentX += expenseColWidths[1];
           
-          doc.text(expense.payment_date || "N/A", startX, yPosition);
-          startX += expenseColumnWidths[3];
+          doc.text(expense.due_date || "N/A", currentX, yPosition);
+          currentX += expenseColWidths[2];
           
-          doc.text(`R$ ${expense.amount}`, startX, yPosition);
-          startX += expenseColumnWidths[4];
+          doc.text(expense.payment_date || "N/A", currentX, yPosition);
+          currentX += expenseColWidths[3];
           
-          doc.text(expense.observations?.substring(0, 20) || "", startX, yPosition, { maxWidth: expenseColumnWidths[5] - 2 });
+          doc.text(`R$ ${expense.amount}`, currentX, yPosition);
+          currentX += expenseColWidths[4];
+          
+          const observations = expense.observations ? 
+                              (expense.observations.length > 15 ? 
+                              expense.observations.substring(0, 15) + '...' : 
+                              expense.observations) : 
+                              "";
+          doc.text(observations, currentX, yPosition);
           
           yPosition += lineHeight;
         });
         
-        // Add total row
+        // Total row
         yPosition += lineHeight / 2;
-        doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+        drawLine(yPosition);
         yPosition += lineHeight / 2;
         
         doc.setFont('helvetica', 'bold');
         doc.text('Total', margin, yPosition);
-        doc.text(`R$ ${formatToBRL(getTotalExpense())}`, margin + expenseColumnWidths[0] + expenseColumnWidths[1] + expenseColumnWidths[2] + expenseColumnWidths[3], yPosition);
+        const totalXPos = margin + expenseColWidths[0] + expenseColWidths[1] + expenseColWidths[2] + expenseColWidths[3];
+        doc.text(`R$ ${formatToBRL(getTotalExpense())}`, totalXPos, yPosition);
       } else {
         yPosition += lineHeight;
         doc.setFont('helvetica', 'italic');
         doc.text('Nenhuma despesa registrada para este mês', margin, yPosition);
       }
       
-      // Save PDF
+      // Draw final separator line
+      yPosition += lineHeight;
+      drawLine(yPosition);
+      
+      // Save PDF with appropriate month name in filename
       const fileName = `prestacao_contas_${monthName.toLowerCase()}_${year}.pdf`;
       doc.save(fileName);
     } catch (error) {
