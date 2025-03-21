@@ -84,17 +84,27 @@ export const AccountingReport = () => {
       const [year, month] = selectedMonth.split('-');
       const monthDate = new Date(parseInt(year), parseInt(month) - 1);
       const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
+      const currentDate = format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
       
       // Create new PDF document
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
-      let yPosition = 20;
+      let yPosition = 15;
       const lineHeight = 7;
       const margin = 15;
+      
+      // Header with system information
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(100, 100, 100);
+      doc.text("Gerado por: www.meuresidencial.com", pageWidth - margin, yPosition, { align: 'right' });
+      doc.text(`Relatório gerado em: ${currentDate}`, margin, yPosition);
+      yPosition += lineHeight * 2;
       
       // Title - Improved formatting
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
       const title = `Prestação de Contas - ${monthName} ${year}`;
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
@@ -163,6 +173,12 @@ export const AccountingReport = () => {
           if (yPosition > 270) {
             doc.addPage();
             yPosition = 20;
+            
+            // Add system info to new page
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(100, 100, 100);
+            doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
           }
           
           currentX = margin;
@@ -181,10 +197,10 @@ export const AccountingReport = () => {
           currentX += incomeColWidths[3];
           
           const observations = income.observations ? 
-                               (income.observations.length > 20 ? 
-                               income.observations.substring(0, 20) + '...' : 
-                               income.observations) : 
-                               "";
+                              (income.observations.length > 20 ? 
+                              income.observations.substring(0, 20) + '...' : 
+                              income.observations) : 
+                              "";
           doc.text(observations, currentX, yPosition);
           
           yPosition += lineHeight;
@@ -212,9 +228,17 @@ export const AccountingReport = () => {
       if (yPosition > 220) {
         doc.addPage();
         yPosition = 20;
+        
+        // Add system info to new page
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(100, 100, 100);
+        doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
       }
       
       // Expenses Section - Improved table formatting
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
       doc.setFont('helvetica', 'bold');
       doc.text('DESPESAS', margin, yPosition);
       yPosition += lineHeight * 1.2;
@@ -248,6 +272,12 @@ export const AccountingReport = () => {
           if (yPosition > 270) {
             doc.addPage();
             yPosition = 20;
+            
+            // Add system info to new page
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(100, 100, 100);
+            doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
           }
           
           currentX = margin;
@@ -296,6 +326,13 @@ export const AccountingReport = () => {
       // Draw final separator line
       yPosition += lineHeight;
       drawLine(yPosition);
+      
+      // Add footer with system information
+      const footerPosition = doc.internal.pageSize.getHeight() - 10;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Relatório gerado pelo sistema Meu Residencial - www.meuresidencial.com - ${currentDate}`, pageWidth / 2, footerPosition, { align: 'center' });
       
       // Save PDF with appropriate month name in filename
       const fileName = `prestacao_contas_${monthName.toLowerCase()}_${year}.pdf`;
