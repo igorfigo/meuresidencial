@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
@@ -17,12 +16,10 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   const { register, setValue, watch } = useFormContext<FormFields>();
   const { plans, isLoading: isLoadingPlans, getPlanValue } = usePlans();
   
-  // Watch for changes to planoContratado and desconto
   const planoContratado = watch('planoContratado');
   const desconto = watch('desconto');
   const valorPlano = watch('valorPlano');
 
-  // Effect to update valorPlano when planoContratado changes
   React.useEffect(() => {
     if (planoContratado) {
       const planValue = getPlanValue(planoContratado);
@@ -30,13 +27,10 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     }
   }, [planoContratado, getPlanValue, setValue]);
 
-  // Effect to calculate valorMensal when valorPlano or desconto changes
   React.useEffect(() => {
-    // Convert values to numbers for calculation
     const planoNumber = BRLToNumber(valorPlano);
     const descontoNumber = BRLToNumber(desconto);
     
-    // Calculate total value ensuring it's not negative
     const valorMensal = `R$ ${formatToBRL(Math.max(0, planoNumber - descontoNumber))}`;
     
     setValue('valorMensal', valorMensal);
@@ -49,28 +43,24 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   };
 
   const handleDescontoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get the raw value
     const value = e.target.value.replace(/\D/g, '');
     
-    // Format to currency with R$ prefix and proper Brazilian format (comma as decimal separator)
     const formattedValue = value ? `R$ ${formatToBRL(Number(value) / 100)}` : 'R$ 0,00';
     
     setValue('desconto', formattedValue);
     
-    // Apply the general input change handler for other effects
     if (handleInputChange) {
       handleInputChange(e);
     }
   };
 
-  // Set default value for vencimento to "10" and formaPagamento to "pix"
   React.useEffect(() => {
     setValue('vencimento', '10');
     setValue('formaPagamento', 'pix');
   }, [setValue]);
 
   return (
-    <Card className="form-section p-6">
+    <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md">
       <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
