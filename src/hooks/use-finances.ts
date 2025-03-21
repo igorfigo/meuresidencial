@@ -268,16 +268,16 @@ export const useFinances = () => {
         currentBalanceData && 'is_manual' in currentBalanceData ? currentBalanceData.is_manual : false
       );
       
-      await updateFinancialBalance(
+      // Update balance in database and local state immediately
+      const result = await updateFinancialBalance(
         user.selectedCondominium, 
         formattedBalance, 
         isManual
       );
       
-      const updatedBalance = await getFinancialBalance(user.selectedCondominium);
-      setBalance(updatedBalance);
-      
-      await fetchFinancialData();
+      if (result && result.length > 0) {
+        setBalance(result[0]);
+      }
     } catch (error) {
       console.error('Error calculating and updating balance:', error);
       toast.error('Erro ao atualizar saldo');
@@ -289,20 +289,29 @@ export const useFinances = () => {
     
     try {
       if (manualBalance) {
-        await updateFinancialBalance(
+        // Optimistically update the UI state
+        setBalance(prev => prev ? {...prev, balance: manualBalance, is_manual: true} : null);
+        
+        // Update in database
+        const result = await updateFinancialBalance(
           user.selectedCondominium, 
           manualBalance, 
           true
         );
         
-        const updatedBalance = await getFinancialBalance(user.selectedCondominium);
-        setBalance(updatedBalance);
+        // Update state with the actual result from the server
+        if (result && result.length > 0) {
+          setBalance(result[0]);
+        }
+        
+        return result;
       } else {
         await calculateAndUpdateBalance();
       }
     } catch (error) {
       console.error('Error updating balance:', error);
       toast.error('Erro ao atualizar saldo');
+      throw error;
     }
   };
 

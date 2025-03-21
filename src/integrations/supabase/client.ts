@@ -447,49 +447,26 @@ export const getFinancialBalance = async (matricula: string) => {
 
 export const updateFinancialBalance = async (matricula: string, balance: string, isManual: boolean = false) => {
   try {
-    // Check if record exists
-    const { data: existingBalance } = await supabase
+    // Use a direct update instead of checking if record exists first
+    const { data, error } = await supabase
       .from('financial_balance')
-      .select('*')
-      .eq('matricula', matricula)
-      .single();
+      .upsert({
+        matricula,
+        balance,
+        is_manual: isManual,
+        updated_at: new Date().toISOString()
+      }, { 
+        onConflict: 'matricula',
+        ignoreDuplicates: false
+      })
+      .select();
     
-    if (existingBalance) {
-      // Update existing balance
-      const { data, error } = await supabase
-        .from('financial_balance')
-        .update({
-          balance,
-          is_manual: isManual,
-          updated_at: new Date().toISOString()
-        })
-        .eq('matricula', matricula)
-        .select();
-      
-      if (error) {
-        console.error('Error updating financial balance:', error);
-        throw error;
-      }
-      
-      return data;
-    } else {
-      // Create new balance record
-      const { data, error } = await supabase
-        .from('financial_balance')
-        .insert({
-          matricula,
-          balance,
-          is_manual: isManual
-        })
-        .select();
-      
-      if (error) {
-        console.error('Error creating financial balance:', error);
-        throw error;
-      }
-      
-      return data;
+    if (error) {
+      console.error('Error updating financial balance:', error);
+      throw error;
     }
+    
+    return data;
   } catch (error) {
     console.error('Error in updateFinancialBalance:', error);
     throw error;

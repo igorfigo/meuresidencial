@@ -41,8 +41,11 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
     
     setIsSubmitting(true);
     try {
+      // By awaiting this operation, we ensure the promise resolves before setting isEditing to false
       await onBalanceChange(editBalance);
       setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving balance:', error);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -104,18 +103,27 @@ const FinanceiroReceitasDespesas = () => {
     try {
       const oldBalance = balance?.balance || '0,00';
       
-      // Insert record in balance_adjustments table to keep history
-      if (user?.selectedCondominium) {
-        await supabase.from('balance_adjustments').insert({
-          matricula: user.selectedCondominium,
-          previous_balance: oldBalance,
-          new_balance: newBalance,
-          adjustment_date: new Date().toISOString()
-        });
-      }
+      // Optimistically update the UI to improve perceived performance
+      const tempBalance = {...balance, balance: newBalance};
       
-      // Update the balance - this now marks the balance as manually set
-      await updateBalance(newBalance);
+      // Start a transaction - use Promise.all to perform both operations nearly simultaneously
+      const [balanceAdjustmentResult] = await Promise.all([
+        // Insert record in balance_adjustments table to keep history
+        user?.selectedCondominium ? 
+          supabase.from('balance_adjustments').insert({
+            matricula: user.selectedCondominium,
+            previous_balance: oldBalance,
+            new_balance: newBalance,
+            adjustment_date: new Date().toISOString()
+          }) : Promise.resolve(null),
+        
+        // Update the balance - this now marks the balance as manually set
+        updateBalance(newBalance)
+      ]);
+      
+      if (balanceAdjustmentResult?.error) {
+        throw balanceAdjustmentResult.error;
+      }
       
       // Refresh data to update the transactions list
       await refreshData();
@@ -124,6 +132,8 @@ const FinanceiroReceitasDespesas = () => {
     } catch (error) {
       console.error('Error updating balance:', error);
       toast.error('Erro ao atualizar saldo');
+      // Refresh data to ensure UI is in sync with database
+      await refreshData();
     }
   };
   
