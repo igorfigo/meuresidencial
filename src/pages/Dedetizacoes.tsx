@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -104,7 +105,7 @@ const Dedetizacoes = () => {
 
         <div className="border-t pt-6">
           {showForm ? (
-            <Card>
+            <Card className="border-t-4 border-t-brand-600 shadow-md">
               <PestControlForm
                 form={form}
                 onSubmit={handleFormSubmit}

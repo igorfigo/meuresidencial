@@ -53,7 +53,7 @@ const CadastroGestor = () => {
           </p>
         </header>
 
-        <Card className="mb-6 p-4">
+        <Card className="mb-6 p-4 border-t-4 border-t-brand-600 shadow-md">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <Label htmlFor="matriculaSearch">Buscar por Matrícula</Label>
@@ -92,7 +92,7 @@ const CadastroGestor = () => {
         />
         
         {getCurrentItems().length > 0 && (
-          <Card className="mt-8 mb-8 p-6">
+          <Card className="mt-8 mb-8 p-6 border-t-4 border-t-brand-600 shadow-md">
             <div className="flex items-center mb-4">
               <History className="h-5 w-5 mr-2 text-brand-600" />
               <h2 className="text-xl font-semibold">Histórico de Alterações</h2>

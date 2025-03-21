@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -107,7 +106,7 @@ const Documentos = () => {
 
         <div className="border-t pt-6">
           {showForm ? (
-            <Card className="border-t-4 border-t-blue-600">
+            <Card className="border-t-4 border-t-brand-600 shadow-md">
               <DocumentForm
                 form={form}
                 onSubmit={handleFormSubmit}
