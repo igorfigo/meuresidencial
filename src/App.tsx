@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +22,7 @@ import MinhaAssinatura from "./pages/MinhaAssinatura";
 import UserProfile from "./pages/UserProfile";
 import FinanceiroReceitasDespesas from './pages/FinanceiroReceitasDespesas';
 import FinanceiroDashboard from './pages/FinanceiroDashboard';
+import FinanceiroPrestacaoContas from './pages/FinanceiroPrestacaoContas';
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -109,7 +111,7 @@ const App = () => (
             <Route path="/financeiro" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <UnderConstruction pageTitle="Financeiro" />
                 </ProtectedRoute>
               </AnimationController>
             } />
@@ -130,18 +132,18 @@ const App = () => (
               </AnimationController>
             } />
             
-            <Route path="/financeiro/inadimplencias" element={
+            <Route path="/financeiro/prestacao-contas" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <FinanceiroPrestacaoContas />
                 </ProtectedRoute>
               </AnimationController>
             } />
             
-            <Route path="/financeiro/prestacao-contas" element={
+            <Route path="/financeiro/inadimplencias" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <UnderConstruction pageTitle="Inadimplências" />
                 </ProtectedRoute>
               </AnimationController>
             } />
@@ -149,7 +151,7 @@ const App = () => (
             <Route path="/boletos" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <UnderConstruction pageTitle="Boletos" />
                 </ProtectedRoute>
               </AnimationController>
             } />
@@ -157,7 +159,7 @@ const App = () => (
             <Route path="/reservas" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <UnderConstruction pageTitle="Reservas" />
                 </ProtectedRoute>
               </AnimationController>
             } />
@@ -165,7 +167,7 @@ const App = () => (
             <Route path="/servicos" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <UnderConstruction pageTitle="Serviços" />
                 </ProtectedRoute>
               </AnimationController>
             } />
@@ -173,7 +175,7 @@ const App = () => (
             <Route path="/assembleias" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <UnderConstruction pageTitle="Assembleias" />
                 </ProtectedRoute>
               </AnimationController>
             } />
