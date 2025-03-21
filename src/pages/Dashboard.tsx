@@ -15,7 +15,8 @@ const Dashboard = () => {
     balance, 
     recentTransactions, 
     removeIncome, 
-    removeExpense 
+    removeExpense,
+    updateBalance
   } = useFinances();
 
   return (
@@ -47,7 +48,8 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 gap-6">
           <BalanceDisplay 
             balance={balance} 
-            isLoading={isLoading} 
+            isLoading={isLoading}
+            onBalanceChange={updateBalance}
           />
           
           <RecentTransactions 
