@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { FinancialIncome } from '@/hooks/use-finances';
 import { formatCurrencyInput } from '@/utils/currency';
+import { toast } from 'sonner';
 
 const incomeCategories = [
   { value: 'taxa_condominio', label: 'Taxa de Condomínio' },
@@ -39,14 +40,15 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   const { user } = useApp();
   const [units, setUnits] = useState<{ value: string; label: string; }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
   
   const form = useForm<z.infer<typeof incomeSchema>>({
     resolver: zodResolver(incomeSchema),
     defaultValues: initialData || {
       category: '',
       amount: '',
-      reference_month: '', // Set to empty string initially
-      payment_date: '', // Empty initially
+      reference_month: '',
+      payment_date: '',
       unit: '',
       observations: ''
     }
@@ -76,20 +78,61 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     fetchUnits();
   }, [user?.selectedCondominium]);
   
+  const checkDuplicateIncome = async (values: z.infer<typeof incomeSchema>) => {
+    if (!user?.selectedCondominium || values.category !== 'taxa_condominio') {
+      return false; // Only check for duplicates with "Taxa de Condomínio" category
+    }
+    
+    setIsCheckingDuplicate(true);
+    try {
+      const { data, error } = await supabase
+        .from('financial_incomes')
+        .select('id')
+        .eq('matricula', user.selectedCondominium)
+        .eq('category', 'taxa_condominio')
+        .eq('unit', values.unit)
+        .eq('reference_month', values.reference_month);
+        
+      if (error) throw error;
+      
+      // If we're editing an existing income, filter out the current income from duplicate check
+      const filteredData = initialData?.id 
+        ? data.filter(item => item.id !== initialData.id) 
+        : data;
+        
+      return filteredData.length > 0;
+    } catch (error) {
+      console.error('Error checking duplicate income:', error);
+      return false;
+    } finally {
+      setIsCheckingDuplicate(false);
+    }
+  };
+  
   const handleSubmit = async (values: z.infer<typeof incomeSchema>) => {
     if (!user?.selectedCondominium) return;
     
     setIsSubmitting(true);
     try {
-      // Fix for the payment date - we don't need to modify it
-      // The date from the form is already correct, we just need to pass it along
+      // Check for duplicates when adding/editing a Taxa de Condomínio
+      if (values.category === 'taxa_condominio') {
+        const isDuplicate = await checkDuplicateIncome(values);
+        
+        if (isDuplicate) {
+          toast.error('Já existe uma Taxa de Condomínio cadastrada para esta unidade e mês de referência');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
+      // If no duplicate, proceed with form submission
       await onSubmit({
         ...values,
         matricula: user.selectedCondominium,
         category: values.category,
         amount: values.amount, 
         reference_month: values.reference_month,
-        payment_date: values.payment_date, // Keep the payment date as is
+        payment_date: values.payment_date,
         id: initialData?.id
       });
       
@@ -98,7 +141,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
           category: '',
           amount: '',
           reference_month: '',
-          payment_date: '', // Reset to empty
+          payment_date: '',
           unit: '',
           observations: ''
         });
@@ -250,8 +293,8 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
             />
             
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Salvando...' : initialData ? 'Atualizar' : 'Adicionar'}
+              <Button type="submit" disabled={isSubmitting || isCheckingDuplicate}>
+                {isSubmitting ? 'Salvando...' : isCheckingDuplicate ? 'Verificando...' : initialData ? 'Atualizar' : 'Adicionar'}
               </Button>
             </div>
           </form>
