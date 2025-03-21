@@ -445,7 +445,7 @@ export const getFinancialBalance = async (matricula: string) => {
   }
 };
 
-export const updateFinancialBalance = async (matricula: string, balance: string) => {
+export const updateFinancialBalance = async (matricula: string, balance: string, isManual: boolean = false) => {
   try {
     // Check if record exists
     const { data: existingBalance } = await supabase
@@ -460,6 +460,7 @@ export const updateFinancialBalance = async (matricula: string, balance: string)
         .from('financial_balance')
         .update({
           balance,
+          is_manual: isManual,
           updated_at: new Date().toISOString()
         })
         .eq('matricula', matricula)
@@ -477,7 +478,8 @@ export const updateFinancialBalance = async (matricula: string, balance: string)
         .from('financial_balance')
         .insert({
           matricula,
-          balance
+          balance,
+          is_manual: isManual
         })
         .select();
       
@@ -534,4 +536,3 @@ export const getBalanceAdjustments = async (matricula: string) => {
     throw error;
   }
 };
-

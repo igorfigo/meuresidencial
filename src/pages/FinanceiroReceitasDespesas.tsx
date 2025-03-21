@@ -114,7 +114,7 @@ const FinanceiroReceitasDespesas = () => {
         });
       }
       
-      // Update the balance
+      // Update the balance - this now marks the balance as manually set
       await updateBalance(newBalance);
       
       // Refresh data to update the transactions list

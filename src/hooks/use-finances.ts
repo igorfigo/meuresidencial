@@ -42,6 +42,7 @@ export interface FinancialBalance {
   id?: string;
   matricula: string;
   balance: string;
+  is_manual?: boolean;
 }
 
 export const useFinances = () => {
@@ -213,6 +214,8 @@ export const useFinances = () => {
     if (!user?.selectedCondominium) return;
     
     try {
+      const currentBalanceData = await getFinancialBalance(user.selectedCondominium);
+      
       const freshIncomes = await getFinancialIncomes(user.selectedCondominium);
       const freshExpenses = await getFinancialExpenses(user.selectedCondominium);
       
@@ -224,11 +227,40 @@ export const useFinances = () => {
         return sum + BRLToNumber(expense.amount);
       }, 0);
       
-      const newBalance = totalIncome - totalExpense;
+      let newBalance;
+      
+      if (currentBalanceData?.is_manual) {
+        const currentBalanceValue = BRLToNumber(currentBalanceData.balance);
+        
+        const latestTransactions = [...freshIncomes, ...freshExpenses].sort((a, b) => {
+          const aDate = new Date(a.created_at || new Date());
+          const bDate = new Date(b.created_at || new Date());
+          return bDate.getTime() - aDate.getTime();
+        });
+        
+        if (latestTransactions.length > 0) {
+          const latestTransaction = latestTransactions[0];
+          const transactionAmount = BRLToNumber(latestTransaction.amount);
+          
+          const isIncome = freshIncomes.some(income => income.id === latestTransaction.id);
+          
+          newBalance = isIncome 
+            ? currentBalanceValue + transactionAmount 
+            : currentBalanceValue - transactionAmount;
+        } else {
+          newBalance = currentBalanceValue;
+        }
+      } else {
+        newBalance = totalIncome - totalExpense;
+      }
       
       const formattedBalance = formatToBRL(newBalance);
       
-      await updateFinancialBalance(user.selectedCondominium, formattedBalance);
+      await updateFinancialBalance(
+        user.selectedCondominium, 
+        formattedBalance, 
+        currentBalanceData?.is_manual || false
+      );
       
       const updatedBalance = await getFinancialBalance(user.selectedCondominium);
       setBalance(updatedBalance);
@@ -245,7 +277,11 @@ export const useFinances = () => {
     
     try {
       if (manualBalance) {
-        await updateFinancialBalance(user.selectedCondominium, manualBalance);
+        await updateFinancialBalance(
+          user.selectedCondominium, 
+          manualBalance, 
+          true
+        );
         
         const updatedBalance = await getFinancialBalance(user.selectedCondominium);
         setBalance(updatedBalance);
