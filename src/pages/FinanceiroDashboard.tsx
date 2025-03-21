@@ -189,14 +189,19 @@ const FinanceiroDashboard = () => {
     try {
       const { data, error } = await supabase
         .from('financial_expenses')
-        .select('amount, category')
+        .select('amount, category, reference_month')
         .eq('matricula', user?.selectedCondominium);
       
       if (error) throw error;
       
+      // Filter only the current month expenses
+      const currentMonthExpenses = data.filter(expense => 
+        expense.reference_month === currentMonthYearFormatted
+      );
+      
       const categories: Record<string, number> = {};
       
-      data.forEach(expense => {
+      currentMonthExpenses.forEach(expense => {
         const category = expense.category || 'Outros';
         const amount = BRLToNumber(expense.amount);
         
