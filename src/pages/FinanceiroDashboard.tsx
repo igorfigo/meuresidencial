@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatToBRL, BRLToNumber } from '@/utils/currency';
 import { Calendar, Wallet, Home, PieChart, AlertCircle, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -65,7 +65,6 @@ const FinanceiroDashboard = () => {
     }
   };
   
-  // Fetch current balance
   const fetchBalance = async () => {
     try {
       const { data, error } = await supabase
@@ -83,15 +82,12 @@ const FinanceiroDashboard = () => {
     }
   };
   
-  // Fetch monthly income and expense data for the last 6 months
   const fetchMonthlyData = async () => {
     try {
-      // Get current date and calculate 6 months ago
       const today = new Date();
       const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(today.getMonth() - 5); // -5 to include current month
+      sixMonthsAgo.setMonth(today.getMonth() - 5);
       
-      // Create an array of the last 6 months
       const months = [];
       for (let i = 0; i < 6; i++) {
         const month = new Date(sixMonthsAgo);
@@ -113,7 +109,6 @@ const FinanceiroDashboard = () => {
       
       if (expensesError) throw expensesError;
       
-      // Aggregate data by month
       const monthlyStats = months.map(month => {
         const monthlyIncomes = incomes.filter(income => income.reference_month === month);
         const monthlyExpenses = expenses.filter(expense => expense.reference_month === month);
@@ -121,7 +116,6 @@ const FinanceiroDashboard = () => {
         const totalIncome = monthlyIncomes.reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
         const totalExpense = monthlyExpenses.reduce((sum, expense) => sum + BRLToNumber(expense.amount), 0);
         
-        // Extract month and year for display
         const [year, monthNum] = month.split('-');
         const monthName = MONTHS[parseInt(monthNum) - 1];
         
@@ -139,14 +133,11 @@ const FinanceiroDashboard = () => {
     }
   };
   
-  // Fetch units payment status for current month
   const fetchUnitPaymentStatus = async () => {
     try {
-      // Get current month
       const today = new Date();
       const currentMonth = format(today, 'yyyy-MM', { locale: ptBR });
       
-      // Get all units
       const { data: residents, error: residentsError } = await supabase
         .from('residents')
         .select('id, unidade')
@@ -154,7 +145,6 @@ const FinanceiroDashboard = () => {
       
       if (residentsError) throw residentsError;
       
-      // Get paid units for current month (only taxa_condominio)
       const { data: paidUnits, error: paidUnitsError } = await supabase
         .from('financial_incomes')
         .select('unit')
@@ -164,14 +154,11 @@ const FinanceiroDashboard = () => {
       
       if (paidUnitsError) throw paidUnitsError;
       
-      // Count total and paid units
       const totalUnits = residents.length;
       
-      // Create a Set of paid unit names for efficient lookup
       const paidUnitNames = new Set(paidUnits.map(item => item.unit).filter(Boolean));
       const paidUnitsCount = paidUnitNames.size;
       
-      // Calculate unpaid units
       const unpaidUnits = totalUnits - paidUnitsCount;
       
       setUnitStatusData([
@@ -184,7 +171,6 @@ const FinanceiroDashboard = () => {
     }
   };
   
-  // Fetch revenue distribution by category
   const fetchRevenueDistribution = async () => {
     try {
       const { data, error } = await supabase
@@ -194,7 +180,6 @@ const FinanceiroDashboard = () => {
       
       if (error) throw error;
       
-      // Aggregate by category
       const categories: Record<string, number> = {};
       
       data.forEach(income => {
@@ -208,7 +193,6 @@ const FinanceiroDashboard = () => {
         }
       });
       
-      // Convert to array for the chart
       const chartData = Object.entries(categories).map(([name, value]) => ({
         name,
         value
@@ -221,14 +205,11 @@ const FinanceiroDashboard = () => {
     }
   };
   
-  // Fetch pending revenues
   const fetchPendingRevenue = async () => {
     try {
-      // Get current month
       const today = new Date();
       const currentMonth = format(today, 'yyyy-MM', { locale: ptBR });
       
-      // Get all units with their condominium fee
       const { data: residents, error: residentsError } = await supabase
         .from('residents')
         .select('unidade, valor_condominio')
@@ -236,7 +217,6 @@ const FinanceiroDashboard = () => {
       
       if (residentsError) throw residentsError;
       
-      // Get paid units for current month (only taxa_condominio)
       const { data: paidUnits, error: paidUnitsError } = await supabase
         .from('financial_incomes')
         .select('unit, amount')
@@ -246,7 +226,6 @@ const FinanceiroDashboard = () => {
       
       if (paidUnitsError) throw paidUnitsError;
       
-      // Create a map of paid units for efficient lookup
       const paidUnitMap = new Map();
       paidUnits.forEach(item => {
         if (item.unit) {
@@ -254,7 +233,6 @@ const FinanceiroDashboard = () => {
         }
       });
       
-      // Calculate pending amount
       let totalExpected = 0;
       let totalReceived = 0;
       let pendingUnits = 0;
@@ -283,14 +261,11 @@ const FinanceiroDashboard = () => {
     }
   };
   
-  // Fetch annual payment status
   const fetchAnnualPaymentStatus = async () => {
     try {
-      // Get current year
       const today = new Date();
       const currentYear = today.getFullYear();
       
-      // Get all units
       const { data: residents, error: residentsError } = await supabase
         .from('residents')
         .select('unidade')
@@ -298,7 +273,6 @@ const FinanceiroDashboard = () => {
       
       if (residentsError) throw residentsError;
       
-      // Get all taxa_condominio payments for current year
       const { data: payments, error: paymentsError } = await supabase
         .from('financial_incomes')
         .select('unit, reference_month')
@@ -308,7 +282,6 @@ const FinanceiroDashboard = () => {
       
       if (paymentsError) throw paymentsError;
       
-      // Create payment status data structure
       const statusData = residents.map(resident => {
         const unitPayments = payments
           .filter(payment => payment.unit === resident.unidade)
@@ -317,7 +290,6 @@ const FinanceiroDashboard = () => {
             return parseInt(month);
           });
         
-        // Create a record for each month (1-12)
         const monthlyStatus = {};
         for (let i = 1; i <= 12; i++) {
           monthlyStatus[`month${i}`] = unitPayments.includes(i) ? 'paid' : 'unpaid';
@@ -338,7 +310,6 @@ const FinanceiroDashboard = () => {
   
   const handleBalanceChange = async (newBalance: string) => {
     try {
-      // Update the balance in the database
       const { error } = await supabase
         .from('financial_balance')
         .upsert(
@@ -352,7 +323,6 @@ const FinanceiroDashboard = () => {
       
       if (error) throw error;
       
-      // Update local state
       setBalance(newBalance);
       toast.success('Saldo atualizado com sucesso');
     } catch (error) {
@@ -384,12 +354,10 @@ const FinanceiroDashboard = () => {
         <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {/* Current Balance Card */}
           <div>
             <BalanceDisplay balance={balance} onBalanceChange={handleBalanceChange} />
           </div>
           
-          {/* Unit Payment Status Card */}
           <Card className="overflow-hidden border-blue-300 shadow-md">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -420,7 +388,6 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Pending Revenue Card */}
           <Card className="overflow-hidden border-blue-300 shadow-md">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -450,9 +417,7 @@ const FinanceiroDashboard = () => {
           </Card>
         </div>
         
-        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Monthly Revenue and Expense Bar Chart */}
           <Card className="overflow-hidden border-blue-300 shadow-md">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -498,7 +463,6 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Unit Payment Status Bar Chart */}
           <Card className="overflow-hidden border-blue-300 shadow-md">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -544,7 +508,6 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Revenue Distribution Pie Chart */}
           <Card className="overflow-hidden border-blue-300 shadow-md">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -593,7 +556,6 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Annual Payment Status Card */}
           <Card className="overflow-hidden border-blue-300 shadow-md">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -601,34 +563,36 @@ const FinanceiroDashboard = () => {
                 <h3 className="font-semibold text-gray-800">Status de Pagamento Anual</h3>
               </div>
               
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Unidade</th>
-                      {MONTHS.slice(0, 12).map((month, index) => (
-                        <th key={month} className="p-2 text-center">{month.substring(0, 3)}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paymentStatusData.map((row, rowIndex) => (
-                      <tr key={rowIndex} className="border-b last:border-0">
-                        <td className="p-2 font-medium">{row.unit}</td>
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                          <td key={month} className="p-2 text-center">
-                            <div className={`inline-block w-4 h-4 rounded-full ${
-                              row[`month${month}`] === 'paid' 
-                                ? 'bg-green-500' 
-                                : 'bg-red-500'
-                            }`} />
-                          </td>
+              <ScrollArea className="h-[300px] w-full">
+                <div className="min-w-[700px]">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 bg-white z-10">
+                      <tr className="border-b">
+                        <th className="text-left p-2 bg-white">Unidade</th>
+                        {MONTHS.slice(0, 12).map((month, index) => (
+                          <th key={month} className="p-2 text-center bg-white">{month.substring(0, 3)}</th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {paymentStatusData.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
+                          <td className="p-2 font-medium sticky left-0 bg-white">{row.unit}</td>
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                            <td key={month} className="p-2 text-center">
+                              <div className={`inline-block w-4 h-4 rounded-full ${
+                                row[`month${month}`] === 'paid' 
+                                  ? 'bg-green-500' 
+                                  : 'bg-red-500'
+                              }`} />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </ScrollArea>
             </CardContent>
           </Card>
         </div>
