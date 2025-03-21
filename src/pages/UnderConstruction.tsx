@@ -5,11 +5,7 @@ import { Building, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-interface UnderConstructionProps {
-  pageTitle?: string;
-}
-
-const UnderConstruction = ({ pageTitle = "Página" }: UnderConstructionProps) => {
+const UnderConstruction = () => {
   const navigate = useNavigate();
 
   return (
@@ -22,7 +18,7 @@ const UnderConstruction = ({ pageTitle = "Página" }: UnderConstructionProps) =>
           </div>
         </div>
         
-        <h1 className="text-3xl font-bold mb-2">{pageTitle} em Construção</h1>
+        <h1 className="text-3xl font-bold mb-2">Página em Construção</h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-md">
           Esta funcionalidade está sendo implementada e estará disponível em breve.
         </p>
