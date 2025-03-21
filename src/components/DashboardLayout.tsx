@@ -77,14 +77,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   const adminMenuItems: MenuItem[] = [
-    { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
+    { name: 'Visão Geral', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
   ];
 
   const managerMenuItems: MenuItem[] = [
-    { name: 'Dashboard', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
+    { name: 'Visão Geral', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Moradores', icon: <Users className="h-5 w-5" />, path: '/moradores' },
     { name: 'Comunicados', icon: <MessageSquare className="h-5 w-5" />, path: '/comunicados' },
     { name: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
