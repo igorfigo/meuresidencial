@@ -12,6 +12,7 @@ import {
   FileText,
   Bell,
   Truck,
+  UserCircle2,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -33,6 +34,7 @@ export function Sidebar() {
   const { user, logout, isAuthenticated, switchCondominium } = useApp();
   const isMobile = useIsMobile();
   const location = useLocation();
+  const navigate = useNavigate();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -60,12 +62,14 @@ export function Sidebar() {
     { path: '/documentos', label: 'Documentos', icon: <FileText className="h-5 w-5" /> },
     { path: '/dedetizacoes', label: 'Dedetizações', icon: <Truck className="h-5 w-5" /> },
   ];
-  
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const goToProfile = () => {
+    navigate('/perfil');
   };
 
   const renderMenuItems = () => {
@@ -99,29 +103,43 @@ export function Sidebar() {
       <div className="p-4">
         {user ? (
           <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-full text-left flex items-center space-x-2">
-                  <Avatar>
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>{user.nome.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium leading-none dark:text-white">{user.nome}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {user.isAdmin ? 'Administrador' : user.nomeCondominio}
-                    </p>
-                  </div>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  Sair
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center space-x-2 relative">
+              <button
+                onClick={goToProfile}
+                className="absolute right-0 top-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                title="Ver perfil"
+              >
+                <UserCircle2 className="h-5 w-5" />
+              </button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-full text-left flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition duration-150 p-1">
+                    <Avatar>
+                      <AvatarImage src="https://github.com/shadcn.png" />
+                      <AvatarFallback>{user.nome.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium leading-none dark:text-white">{user.nome}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.isAdmin ? 'Administrador' : user.nomeCondominio}
+                      </p>
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={goToProfile}>
+                    <UserCircle2 className="h-4 w-4 mr-2" />
+                    Meu Perfil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
             {!user.isAdmin && user.condominiums && user.condominiums.length > 1 && (
               <SwitchCondominium
