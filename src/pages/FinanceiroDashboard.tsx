@@ -1,0 +1,640 @@
+
+import { useState, useEffect } from 'react';
+import { useApp } from '@/contexts/AppContext';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Card, CardContent } from '@/components/ui/card';
+import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { formatToBRL, BRLToNumber } from '@/utils/currency';
+import { Calendar, Wallet, Home, PieChart, AlertCircle, BarChart3 } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart as RechartsPie,
+  Pie,
+  Cell,
+} from 'recharts';
+
+const FinanceiroDashboard = () => {
+  const { user } = useApp();
+  const [balance, setBalance] = useState('0,00');
+  const [isLoading, setIsLoading] = useState(true);
+  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [unitStatusData, setUnitStatusData] = useState<any[]>([]);
+  const [revenueDistributionData, setRevenueDistributionData] = useState<any[]>([]);
+  const [pendingRevenueData, setPendingRevenueData] = useState<any>({});
+  const [paymentStatusData, setPaymentStatusData] = useState<any[]>([]);
+  
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a163be', '#61dafb', '#f97150', '#4db35e'];
+  const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  
+  useEffect(() => {
+    if (user?.selectedCondominium) {
+      fetchDashboardData();
+    }
+  }, [user?.selectedCondominium]);
+  
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      
+      await Promise.all([
+        fetchBalance(),
+        fetchMonthlyData(),
+        fetchUnitPaymentStatus(),
+        fetchRevenueDistribution(),
+        fetchPendingRevenue(),
+        fetchAnnualPaymentStatus()
+      ]);
+      
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast.error('Erro ao carregar dados do dashboard financeiro');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Fetch current balance
+  const fetchBalance = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('financial_balance')
+        .select('balance')
+        .eq('matricula', user?.selectedCondominium)
+        .single();
+      
+      if (error) throw error;
+      
+      setBalance(data?.balance || '0,00');
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+      setBalance('0,00');
+    }
+  };
+  
+  // Fetch monthly income and expense data for the last 6 months
+  const fetchMonthlyData = async () => {
+    try {
+      // Get current date and calculate 6 months ago
+      const today = new Date();
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(today.getMonth() - 5); // -5 to include current month
+      
+      // Create an array of the last 6 months
+      const months = [];
+      for (let i = 0; i < 6; i++) {
+        const month = new Date(sixMonthsAgo);
+        month.setMonth(sixMonthsAgo.getMonth() + i);
+        months.push(format(month, 'yyyy-MM', { locale: ptBR }));
+      }
+      
+      const { data: incomes, error: incomesError } = await supabase
+        .from('financial_incomes')
+        .select('amount, reference_month')
+        .eq('matricula', user?.selectedCondominium);
+      
+      if (incomesError) throw incomesError;
+      
+      const { data: expenses, error: expensesError } = await supabase
+        .from('financial_expenses')
+        .select('amount, reference_month')
+        .eq('matricula', user?.selectedCondominium);
+      
+      if (expensesError) throw expensesError;
+      
+      // Aggregate data by month
+      const monthlyStats = months.map(month => {
+        const monthlyIncomes = incomes.filter(income => income.reference_month === month);
+        const monthlyExpenses = expenses.filter(expense => expense.reference_month === month);
+        
+        const totalIncome = monthlyIncomes.reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
+        const totalExpense = monthlyExpenses.reduce((sum, expense) => sum + BRLToNumber(expense.amount), 0);
+        
+        // Extract month and year for display
+        const [year, monthNum] = month.split('-');
+        const monthName = MONTHS[parseInt(monthNum) - 1];
+        
+        return {
+          month: `${monthName.substring(0, 3)}/${year.substring(2)}`,
+          receita: totalIncome,
+          despesa: totalExpense,
+        };
+      });
+      
+      setMonthlyData(monthlyStats);
+    } catch (error) {
+      console.error('Error fetching monthly data:', error);
+      setMonthlyData([]);
+    }
+  };
+  
+  // Fetch units payment status for current month
+  const fetchUnitPaymentStatus = async () => {
+    try {
+      // Get current month
+      const today = new Date();
+      const currentMonth = format(today, 'yyyy-MM', { locale: ptBR });
+      
+      // Get all units
+      const { data: residents, error: residentsError } = await supabase
+        .from('residents')
+        .select('id, unidade')
+        .eq('matricula', user?.selectedCondominium);
+      
+      if (residentsError) throw residentsError;
+      
+      // Get paid units for current month (only taxa_condominio)
+      const { data: paidUnits, error: paidUnitsError } = await supabase
+        .from('financial_incomes')
+        .select('unit')
+        .eq('matricula', user?.selectedCondominium)
+        .eq('category', 'taxa_condominio')
+        .eq('reference_month', currentMonth);
+      
+      if (paidUnitsError) throw paidUnitsError;
+      
+      // Count total and paid units
+      const totalUnits = residents.length;
+      
+      // Create a Set of paid unit names for efficient lookup
+      const paidUnitNames = new Set(paidUnits.map(item => item.unit).filter(Boolean));
+      const paidUnitsCount = paidUnitNames.size;
+      
+      // Calculate unpaid units
+      const unpaidUnits = totalUnits - paidUnitsCount;
+      
+      setUnitStatusData([
+        { name: 'Pagas', value: paidUnitsCount },
+        { name: 'Pendentes', value: unpaidUnits }
+      ]);
+    } catch (error) {
+      console.error('Error fetching unit payment status:', error);
+      setUnitStatusData([]);
+    }
+  };
+  
+  // Fetch revenue distribution by category
+  const fetchRevenueDistribution = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('financial_incomes')
+        .select('amount, category')
+        .eq('matricula', user?.selectedCondominium);
+      
+      if (error) throw error;
+      
+      // Aggregate by category
+      const categories: Record<string, number> = {};
+      
+      data.forEach(income => {
+        const category = income.category || 'Outros';
+        const amount = BRLToNumber(income.amount);
+        
+        if (categories[category]) {
+          categories[category] += amount;
+        } else {
+          categories[category] = amount;
+        }
+      });
+      
+      // Convert to array for the chart
+      const chartData = Object.entries(categories).map(([name, value]) => ({
+        name,
+        value
+      }));
+      
+      setRevenueDistributionData(chartData);
+    } catch (error) {
+      console.error('Error fetching revenue distribution:', error);
+      setRevenueDistributionData([]);
+    }
+  };
+  
+  // Fetch pending revenues
+  const fetchPendingRevenue = async () => {
+    try {
+      // Get current month
+      const today = new Date();
+      const currentMonth = format(today, 'yyyy-MM', { locale: ptBR });
+      
+      // Get all units with their condominium fee
+      const { data: residents, error: residentsError } = await supabase
+        .from('residents')
+        .select('unidade, valor_condominio')
+        .eq('matricula', user?.selectedCondominium);
+      
+      if (residentsError) throw residentsError;
+      
+      // Get paid units for current month (only taxa_condominio)
+      const { data: paidUnits, error: paidUnitsError } = await supabase
+        .from('financial_incomes')
+        .select('unit, amount')
+        .eq('matricula', user?.selectedCondominium)
+        .eq('category', 'taxa_condominio')
+        .eq('reference_month', currentMonth);
+      
+      if (paidUnitsError) throw paidUnitsError;
+      
+      // Create a map of paid units for efficient lookup
+      const paidUnitMap = new Map();
+      paidUnits.forEach(item => {
+        if (item.unit) {
+          paidUnitMap.set(item.unit, BRLToNumber(item.amount));
+        }
+      });
+      
+      // Calculate pending amount
+      let totalExpected = 0;
+      let totalReceived = 0;
+      let pendingUnits = 0;
+      
+      residents.forEach(resident => {
+        const fee = BRLToNumber(resident.valor_condominio || '0');
+        totalExpected += fee;
+        
+        if (paidUnitMap.has(resident.unidade)) {
+          totalReceived += paidUnitMap.get(resident.unidade);
+        } else {
+          pendingUnits++;
+        }
+      });
+      
+      const pendingAmount = totalExpected - totalReceived;
+      
+      setPendingRevenueData({
+        pendingAmount,
+        pendingUnits,
+        totalExpected
+      });
+    } catch (error) {
+      console.error('Error fetching pending revenue:', error);
+      setPendingRevenueData({});
+    }
+  };
+  
+  // Fetch annual payment status
+  const fetchAnnualPaymentStatus = async () => {
+    try {
+      // Get current year
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      
+      // Get all units
+      const { data: residents, error: residentsError } = await supabase
+        .from('residents')
+        .select('unidade')
+        .eq('matricula', user?.selectedCondominium);
+      
+      if (residentsError) throw residentsError;
+      
+      // Get all taxa_condominio payments for current year
+      const { data: payments, error: paymentsError } = await supabase
+        .from('financial_incomes')
+        .select('unit, reference_month')
+        .eq('matricula', user?.selectedCondominium)
+        .eq('category', 'taxa_condominio')
+        .ilike('reference_month', `${currentYear}-%`);
+      
+      if (paymentsError) throw paymentsError;
+      
+      // Create payment status data structure
+      const statusData = residents.map(resident => {
+        const unitPayments = payments
+          .filter(payment => payment.unit === resident.unidade)
+          .map(payment => {
+            const [year, month] = payment.reference_month.split('-');
+            return parseInt(month);
+          });
+        
+        // Create a record for each month (1-12)
+        const monthlyStatus = {};
+        for (let i = 1; i <= 12; i++) {
+          monthlyStatus[`month${i}`] = unitPayments.includes(i) ? 'paid' : 'unpaid';
+        }
+        
+        return {
+          unit: resident.unidade,
+          ...monthlyStatus
+        };
+      });
+      
+      setPaymentStatusData(statusData);
+    } catch (error) {
+      console.error('Error fetching annual payment status:', error);
+      setPaymentStatusData([]);
+    }
+  };
+  
+  const handleBalanceChange = async (newBalance: string) => {
+    try {
+      // Update the balance in the database
+      const { error } = await supabase
+        .from('financial_balance')
+        .upsert(
+          { 
+            matricula: user?.selectedCondominium, 
+            balance: newBalance,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'matricula' }
+        );
+      
+      if (error) throw error;
+      
+      // Update local state
+      setBalance(newBalance);
+      toast.success('Saldo atualizado com sucesso');
+    } catch (error) {
+      console.error('Error updating balance:', error);
+      toast.error('Erro ao atualizar saldo');
+    }
+  };
+  
+  const formatTooltipValue = (value: number) => {
+    return formatToBRL(value);
+  };
+  
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto px-4">
+          <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-pulse text-lg text-gray-500">Carregando dados financeiros...</div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <DashboardLayout>
+      <div className="container mx-auto px-4">
+        <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Current Balance Card */}
+          <div>
+            <BalanceDisplay balance={balance} onBalanceChange={handleBalanceChange} />
+          </div>
+          
+          {/* Unit Payment Status Card */}
+          <Card className="overflow-hidden border-blue-300 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Home className="h-5 w-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-800">Status de Pagamentos</h3>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-slate-100 rounded p-2">
+                  <p className="text-xs text-gray-500">Total de Unidades</p>
+                  <p className="text-xl font-bold text-gray-800">
+                    {unitStatusData.reduce((sum, item) => sum + item.value, 0)}
+                  </p>
+                </div>
+                <div className="bg-green-100 rounded p-2">
+                  <p className="text-xs text-gray-500">Unidades Pagas</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {unitStatusData.find(item => item.name === 'Pagas')?.value || 0}
+                  </p>
+                </div>
+                <div className="bg-red-100 rounded p-2">
+                  <p className="text-xs text-gray-500">Unidades Pendentes</p>
+                  <p className="text-xl font-bold text-red-600">
+                    {unitStatusData.find(item => item.name === 'Pendentes')?.value || 0}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Pending Revenue Card */}
+          <Card className="overflow-hidden border-blue-300 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertCircle className="h-5 w-5 text-amber-500" />
+                <h3 className="font-semibold text-gray-800">Receitas Pendentes</h3>
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                <div className="bg-amber-50 rounded p-3">
+                  <p className="text-xs text-gray-500 mb-1">Valor a Receber</p>
+                  <p className="text-xl font-bold text-amber-600">
+                    R$ {formatToBRL(pendingRevenueData.pendingAmount || 0)}
+                  </p>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  <p className="flex justify-between">
+                    <span>Unidades Pendentes:</span> 
+                    <span className="font-medium">{pendingRevenueData.pendingUnits || 0}</span>
+                  </p>
+                  <p className="flex justify-between mt-1">
+                    <span>Valor Esperado Total:</span> 
+                    <span className="font-medium">R$ {formatToBRL(pendingRevenueData.totalExpected || 0)}</span>
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Monthly Revenue and Expense Bar Chart */}
+          <Card className="overflow-hidden border-blue-300 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <BarChart3 className="h-5 w-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-800">Receitas e Despesas Mensais</h3>
+              </div>
+              
+              <div className="h-64">
+                <ChartContainer 
+                  config={{
+                    receita: { color: '#4db35e', label: 'Receita' },
+                    despesa: { color: '#f97150', label: 'Despesa' }
+                  }}
+                >
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={formatTooltipValue} />
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
+                              <p className="text-sm font-medium">{payload[0].payload.month}</p>
+                              {payload.map((entry, index) => (
+                                <p key={index} className="text-sm" style={{ color: entry.color }}>
+                                  {entry.name === 'receita' ? 'Receita: ' : 'Despesa: '}
+                                  R$ {formatToBRL(entry.value as number)}
+                                </p>
+                              ))}
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="receita" fill="#4db35e" name="Receita" />
+                    <Bar dataKey="despesa" fill="#f97150" name="Despesa" />
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Unit Payment Status Bar Chart */}
+          <Card className="overflow-hidden border-blue-300 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Home className="h-5 w-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-800">Status de Pagamento das Unidades</h3>
+              </div>
+              
+              <div className="h-64">
+                <ChartContainer 
+                  config={{
+                    Pagas: { color: '#4db35e', label: 'Unidades Pagas' },
+                    Pendentes: { color: '#f97150', label: 'Unidades Pendentes' }
+                  }}
+                >
+                  <BarChart data={unitStatusData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" />
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
+                              <p className="text-sm font-medium">{payload[0].payload.name}</p>
+                              <p className="text-sm" style={{ color: payload[0].color }}>
+                                Unidades: {payload[0].value}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="value" name="Unidades">
+                      {unitStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.name === 'Pagas' ? '#4db35e' : '#f97150'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Revenue Distribution Pie Chart */}
+          <Card className="overflow-hidden border-blue-300 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <PieChart className="h-5 w-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-800">Distribuição das Receitas</h3>
+              </div>
+              
+              <div className="h-64">
+                <ChartContainer config={{}}>
+                  <RechartsPie>
+                    <Pie
+                      data={revenueDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {revenueDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          const total = revenueDistributionData.reduce((sum, item) => sum + item.value, 0);
+                          const percentage = total > 0 ? (data.value / total * 100).toFixed(1) : '0';
+                          
+                          return (
+                            <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
+                              <p className="text-sm font-medium">{data.name}</p>
+                              <p className="text-sm">Valor: R$ {formatToBRL(data.value)}</p>
+                              <p className="text-sm">Percentual: {percentage}%</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </RechartsPie>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Annual Payment Status Card */}
+          <Card className="overflow-hidden border-blue-300 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Calendar className="h-5 w-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-800">Status de Pagamento Anual</h3>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-2">Unidade</th>
+                      {MONTHS.slice(0, 12).map((month, index) => (
+                        <th key={month} className="p-2 text-center">{month.substring(0, 3)}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paymentStatusData.map((row, rowIndex) => (
+                      <tr key={rowIndex} className="border-b last:border-0">
+                        <td className="p-2 font-medium">{row.unit}</td>
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                          <td key={month} className="p-2 text-center">
+                            <div className={`inline-block w-4 h-4 rounded-full ${
+                              row[`month${month}`] === 'paid' 
+                                ? 'bg-green-500' 
+                                : 'bg-red-500'
+                            }`} />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default FinanceiroDashboard;

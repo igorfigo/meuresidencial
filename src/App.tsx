@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,7 +19,8 @@ import AreasComuns from "./pages/AreasComuns";
 import FaleConosco from "./pages/FaleConosco";
 import MinhaAssinatura from "./pages/MinhaAssinatura";
 import UserProfile from "./pages/UserProfile";
-import FinanceiroReceitasDespesas from "./pages/FinanceiroReceitasDespesas";
+import FinanceiroReceitasDespesas from './pages/FinanceiroReceitasDespesas';
+import FinanceiroDashboard from './pages/FinanceiroDashboard';
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -125,7 +125,7 @@ const App = () => (
             <Route path="/financeiro/dashboard" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction />
+                  <FinanceiroDashboard />
                 </ProtectedRoute>
               </AnimationController>
             } />

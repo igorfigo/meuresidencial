@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
+import { Pencil, Wallet } from 'lucide-react';
 import { formatCurrencyInput } from '@/utils/currency';
 
 interface BalanceDisplayProps {
@@ -49,60 +49,58 @@ export const BalanceDisplay = ({ balance, onBalanceChange }: BalanceDisplayProps
   };
   
   return (
-    <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 ring-2 ring-blue-100">
-      <CardContent className="p-3">
+    <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300">
+      <CardContent className="p-4">
         <div className="flex flex-col items-center">
-          <div className="flex items-center justify-center gap-1 mb-2 w-full">
-            <h2 className="text-base font-semibold text-gray-800">Saldo Atual</h2>
+          <div className="flex items-center justify-center gap-2 mb-3 w-full">
+            <Wallet className="h-5 w-5 text-blue-500" />
+            <h3 className="font-semibold text-gray-800">Saldo Atual</h3>
             {!isEditing && (
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={handleEdit} 
-                className="h-6 w-6 p-0"
+                className="h-6 w-6 p-0 ml-auto"
               >
                 <Pencil size={14} />
               </Button>
             )}
           </div>
           
-          {isEditing && (
-            <div className="flex gap-1 mt-2">
-              <Button variant="outline" size="sm" onClick={handleCancel} className="h-7 text-xs px-2">
-                Cancelar
-              </Button>
-              <Button size="sm" onClick={handleSave} disabled={isSubmitting} className="h-7 text-xs px-2">
-                {isSubmitting ? 'Salvando...' : 'Salvar'}
-              </Button>
-            </div>
-          )}
-        </div>
-        
-        <div className="mt-2">
-          {isEditing ? (
-            <div className="space-y-1">
-              <Label htmlFor="balance" className="text-xs">Saldo</Label>
-              <Input
-                id="balance"
-                isCurrency
-                onChange={(e) => {
-                  const formattedValue = formatCurrencyInput(e.target.value.replace(/\D/g, ''));
-                  setEditBalance(formattedValue);
-                }}
-                value={`R$ ${editBalance}`}
-                className="text-sm font-bold h-8"
-              />
-            </div>
-          ) : (
-            <div className="flex items-center justify-center">
-              <div className="flex items-baseline bg-white/70 px-3 py-1 rounded-md">
-                <span className="text-sm font-bold mr-1 tracking-tight">R$</span>
-                <span className={`text-xl font-bold ${getBalanceClass()}`}>
-                  {balance}
-                </span>
+          <div className="w-full">
+            {isEditing ? (
+              <div className="space-y-2">
+                <Label htmlFor="balance" className="text-xs">Saldo</Label>
+                <Input
+                  id="balance"
+                  value={`R$ ${editBalance}`}
+                  onChange={(e) => {
+                    const formattedValue = formatCurrencyInput(e.target.value.replace(/\D/g, ''));
+                    setEditBalance(formattedValue);
+                  }}
+                  className="text-sm font-bold h-8"
+                />
+                
+                <div className="flex gap-1 mt-2 justify-end">
+                  <Button variant="outline" size="sm" onClick={handleCancel} className="h-7 text-xs px-2">
+                    Cancelar
+                  </Button>
+                  <Button size="sm" onClick={handleSave} disabled={isSubmitting} className="h-7 text-xs px-2">
+                    {isSubmitting ? 'Salvando...' : 'Salvar'}
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center justify-center">
+                <div className="flex items-baseline bg-white/70 px-3 py-2 rounded-md">
+                  <span className="text-sm font-bold mr-1 tracking-tight">R$</span>
+                  <span className={`text-2xl font-bold ${getBalanceClass()}`}>
+                    {balance}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
