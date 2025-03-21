@@ -6,7 +6,7 @@ import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatToBRL, BRLToNumber } from '@/utils/currency';
-import { Calendar, Wallet, Home, PieChart, AlertCircle, BarChart3 } from 'lucide-react';
+import { Calendar, Home, PieChart, AlertCircle, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -374,7 +374,7 @@ const FinanceiroDashboard = () => {
         <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div>
+          <div className="lg:col-span-1 md:col-span-1">
             <BalanceDisplay balance={balance} readOnly={true} className="h-full" />
           </div>
           
