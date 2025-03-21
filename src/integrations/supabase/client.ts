@@ -301,8 +301,7 @@ export const getFinancialIncomes = async (matricula: string) => {
 
 export const saveFinancialIncome = async (income: Omit<FinancialIncome, 'created_at'>): Promise<FinancialIncome[]> => {
   try {
-    // When dealing with dates in the income object, we shouldn't try to adjust them
-    // Just pass them directly to the database
+    // Don't adjust dates, pass them directly to Supabase
     const { data, error } = income.id
       ? await supabase
           .from('financial_incomes')
@@ -311,7 +310,7 @@ export const saveFinancialIncome = async (income: Omit<FinancialIncome, 'created
             category: income.category,
             amount: income.amount,
             reference_month: income.reference_month,
-            payment_date: income.payment_date, // Pass the date as is
+            payment_date: income.payment_date,
             unit: income.unit,
             observations: income.observations,
             updated_at: new Date().toISOString()
@@ -326,7 +325,7 @@ export const saveFinancialIncome = async (income: Omit<FinancialIncome, 'created
               category: income.category,
               amount: income.amount,
               reference_month: income.reference_month,
-              payment_date: income.payment_date, // Pass the date as is
+              payment_date: income.payment_date,
               unit: income.unit,
               observations: income.observations
             }
@@ -343,8 +342,7 @@ export const saveFinancialIncome = async (income: Omit<FinancialIncome, 'created
 
 export const saveFinancialExpense = async (expense: Omit<FinancialExpense, 'created_at'>): Promise<FinancialExpense[]> => {
   try {
-    // When dealing with dates in the expense object, we shouldn't try to adjust them
-    // Just pass them directly to the database
+    // Don't adjust dates, pass them directly to Supabase
     const { data, error } = expense.id
       ? await supabase
           .from('financial_expenses')
@@ -353,8 +351,8 @@ export const saveFinancialExpense = async (expense: Omit<FinancialExpense, 'crea
             category: expense.category,
             amount: expense.amount,
             reference_month: expense.reference_month,
-            due_date: expense.due_date, // Pass the date as is
-            payment_date: expense.payment_date, // Pass the date as is
+            due_date: expense.due_date,
+            payment_date: expense.payment_date,
             unit: expense.unit,
             observations: expense.observations,
             updated_at: new Date().toISOString()
@@ -369,8 +367,8 @@ export const saveFinancialExpense = async (expense: Omit<FinancialExpense, 'crea
               category: expense.category,
               amount: expense.amount,
               reference_month: expense.reference_month,
-              due_date: expense.due_date, // Pass the date as is
-              payment_date: expense.payment_date, // Pass the date as is
+              due_date: expense.due_date,
+              payment_date: expense.payment_date,
               unit: expense.unit,
               observations: expense.observations
             }

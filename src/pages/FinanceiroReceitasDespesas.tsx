@@ -33,6 +33,7 @@ const FinanceiroReceitasDespesas = () => {
   
   const handleIncomeSubmit = async (data: FinancialIncome) => {
     try {
+      // Don't modify the payment_date, pass it directly to avoid timezone issues
       if (data.id) {
         await editIncome(data);
       } else {
@@ -46,7 +47,7 @@ const FinanceiroReceitasDespesas = () => {
   
   const handleExpenseSubmit = async (data: FinancialExpense, attachments?: File[]) => {
     try {
-      // First save the expense
+      // First save the expense - don't modify the dates to avoid timezone issues
       if (data.id) {
         await editExpense(data);
       } else {

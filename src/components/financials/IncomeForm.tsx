@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,7 +53,6 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     }
   });
 
-  // Fetch units for the current condominium
   useEffect(() => {
     const fetchUnits = async () => {
       if (!user?.selectedCondominium) return;
@@ -95,7 +93,6 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
         
       if (error) throw error;
       
-      // If we're editing an existing income, filter out the current income from duplicate check
       const filteredData = initialData?.id 
         ? data.filter(item => item.id !== initialData.id) 
         : data;
@@ -114,7 +111,6 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     
     setIsSubmitting(true);
     try {
-      // Check for duplicates when adding/editing a Taxa de Condomínio
       if (values.category === 'taxa_condominio') {
         const isDuplicate = await checkDuplicateIncome(values);
         
@@ -125,7 +121,6 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
         }
       }
       
-      // If no duplicate, proceed with form submission
       await onSubmit({
         ...values,
         matricula: user.selectedCondominium,

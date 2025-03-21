@@ -53,9 +53,9 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
     defaultValues: initialData || {
       category: '',
       amount: '',
-      reference_month: '', // Empty string instead of current month
-      due_date: '', // Empty string instead of current date
-      payment_date: '', // Empty string instead of current date
+      reference_month: '',
+      due_date: '',
+      payment_date: '',
       observations: '',
       attachments: undefined
     }
@@ -76,8 +76,8 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
           category: expenseData.category,
           amount: expenseData.amount,
           reference_month: expenseData.reference_month,
-          due_date: expenseData.due_date, // Keep the due date as is
-          payment_date: expenseData.payment_date, // Keep the payment date as is
+          due_date: expenseData.due_date,
+          payment_date: expenseData.payment_date,
           id: initialData?.id
         },
         attachmentsList.length > 0 ? attachmentsList : undefined
