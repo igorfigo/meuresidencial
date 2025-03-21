@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
@@ -23,6 +24,7 @@ const FinanceiroDashboard = () => {
   const [pieData, setPieData] = useState<any[]>([]);
   const [unitsData, setUnitsData] = useState<any>({});
 
+  // Function to calculate monthly data for bar chart (last 6 months)
   const calculateMonthlyData = () => {
     if (!incomes.length && !expenses.length) return [];
 
@@ -43,6 +45,7 @@ const FinanceiroDashboard = () => {
         income: totalIncome,
         expense: totalExpense,
         balance: totalIncome - totalExpense,
+        // Format month for display
         displayMonth: format(
           parse(month, 'MM/yyyy', new Date()),
           'MMM/yy',
@@ -54,9 +57,11 @@ const FinanceiroDashboard = () => {
     return data;
   };
 
+  // Function to calculate income distribution for pie chart
   const calculateIncomeDistribution = () => {
     if (!incomes.length) return [];
 
+    // Group by category
     const categories: { [key: string]: number } = {};
     incomes.forEach(income => {
       const category = income.category || 'Outros';
@@ -68,62 +73,55 @@ const FinanceiroDashboard = () => {
       }
     });
 
+    // Convert to array for chart
     return Object.entries(categories).map(([name, value]) => ({
       name,
       value
     }));
   };
 
-  const isCondominiumFee = (income: any) => {
-    const categoryLower = income.category.toLowerCase();
-    return (
-      categoryLower === 'taxa_condominio' || 
-      categoryLower === 'taxa de condominio' || 
-      categoryLower === 'taxa de condomínio' ||
-      categoryLower === 'taxa condominio' ||
-      categoryLower === 'taxa condomínio'
-    );
-  };
-
+  // Function to calculate units payment status
   const calculateUnitsPaymentStatus = () => {
-    if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0, pendingUnits: 0 };
+    if (!residents.length || !incomes.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
 
     const currentMonth = format(new Date(), 'MM/yyyy');
     
+    // Count total units
     const totalUnits = residents.length;
     
+    // Get units that paid this month (based on financial_incomes)
     const paidUnitsMap = new Map();
     
     incomes.forEach(income => {
-      if (income.reference_month === currentMonth && income.unit && isCondominiumFee(income)) {
-        console.log('Found paid unit:', income.unit, 'Category:', income.category);
+      if (income.reference_month === currentMonth && income.unit) {
         paidUnitsMap.set(income.unit, true);
       }
     });
     
     const paidUnits = paidUnitsMap.size;
     
+    // Calculate pending amount (expected - received)
     const expectedTotal = residents.reduce((sum, resident) => {
       return sum + (resident.valor_condominio ? BRLToNumber(resident.valor_condominio) : 0);
     }, 0);
     
     const paidTotal = incomes
-      .filter(income => income.reference_month === currentMonth && isCondominiumFee(income))
+      .filter(income => income.reference_month === currentMonth)
       .reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
     
     const pendingAmount = Math.max(0, expectedTotal - paidTotal);
-    const pendingUnits = totalUnits - paidUnits;
     
     return { 
       totalUnits, 
       paidUnits, 
       pendingAmount,
-      pendingUnits
+      pendingUnits: totalUnits - paidUnits
     };
   };
 
+  // Calculate payment status for all units for each month of the current year
   const calculateYearlyPaymentStatus = () => {
-    if (!residents.length) return {};
+    if (!residents.length || !incomes.length) return {};
 
     const currentYear = new Date().getFullYear();
     const monthsInYear = Array.from({ length: 12 }).map((_, i) => {
@@ -132,6 +130,7 @@ const FinanceiroDashboard = () => {
 
     const paymentStatus: Record<string, Record<string, boolean>> = {};
 
+    // Initialize all residents for all months as not paid
     residents.forEach(resident => {
       paymentStatus[resident.unidade] = {};
       monthsInYear.forEach(month => {
@@ -139,13 +138,10 @@ const FinanceiroDashboard = () => {
       });
     });
 
+    // Mark payments based on income records
     incomes.forEach(income => {
-      if (
-        income.unit && 
-        income.reference_month && 
-        monthsInYear.includes(income.reference_month) &&
-        isCondominiumFee(income)
-      ) {
+      // Only process incomes from current year
+      if (income.unit && income.reference_month && monthsInYear.includes(income.reference_month)) {
         if (paymentStatus[income.unit]) {
           paymentStatus[income.unit][income.reference_month] = true;
         }
@@ -183,6 +179,7 @@ const FinanceiroDashboard = () => {
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          {/* Balance Card */}
           <div className="md:col-span-1">
             <BalanceDisplay 
               balance={balance?.balance || '0,00'} 
@@ -190,6 +187,7 @@ const FinanceiroDashboard = () => {
             />
           </div>
           
+          {/* Units Payment Status Card */}
           <Card className="bg-gradient-to-br from-white to-green-50 border-2 border-green-300 shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-gray-800">Status de Pagamentos</CardTitle>
@@ -212,6 +210,7 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Pending Income Card */}
           <Card className="bg-gradient-to-br from-white to-yellow-50 border-2 border-yellow-300 shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-gray-800">Receitas Pendentes</CardTitle>
@@ -231,6 +230,7 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Any other quick stat that might be useful */}
           <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-gray-800">Taxa de Inadimplência</CardTitle>
@@ -250,7 +250,9 @@ const FinanceiroDashboard = () => {
           </Card>
         </div>
         
+        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Monthly Income vs Expense Chart */}
           <Card className="border-2 border-blue-300">
             <CardHeader>
               <CardTitle>Receitas x Despesas (6 meses)</CardTitle>
@@ -291,6 +293,7 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
+          {/* Income Distribution Pie Chart */}
           <Card className="border-2 border-blue-300">
             <CardHeader>
               <CardTitle>Distribuição de Receitas</CardTitle>
@@ -326,6 +329,7 @@ const FinanceiroDashboard = () => {
           </Card>
         </div>
         
+        {/* Units vs Paid Units Chart */}
         <Card className="mb-6 border-2 border-blue-300">
           <CardHeader>
             <CardTitle>Unidades x Pagamentos no Mês Atual</CardTitle>
@@ -354,6 +358,7 @@ const FinanceiroDashboard = () => {
           </CardContent>
         </Card>
         
+        {/* Yearly Payment Status by Unit */}
         <Card className="mb-6 border-2 border-blue-300">
           <CardHeader>
             <CardTitle>Status de Pagamento por Unidade (Ano Atual)</CardTitle>
@@ -378,6 +383,7 @@ const FinanceiroDashboard = () => {
                       {Array.from({ length: 12 }).map((_, i) => {
                         const monthKey = format(new Date(new Date().getFullYear(), i, 1), 'MM/yyyy');
                         const isPaid = months[monthKey];
+                        // Only show status for months up to current month
                         const isFutureMonth = isAfter(
                           parse(monthKey, 'MM/yyyy', new Date()),
                           new Date()
