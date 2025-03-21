@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -71,7 +70,13 @@ export const RecentTransactions = ({
     
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('pt-BR');
+      
+      return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: 'UTC'
+      }).format(date);
     } catch {
       return dateString;
     }
