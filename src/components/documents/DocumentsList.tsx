@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -195,7 +196,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           </p>
         </div>
       ) : (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
           <Table>
             <TableHeader>
               <TableRow>

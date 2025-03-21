@@ -139,7 +139,6 @@ const Documentos = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

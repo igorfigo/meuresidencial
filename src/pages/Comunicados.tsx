@@ -167,7 +167,7 @@ const Comunicados: React.FC = () => {
         
         <div className="border-t pt-6">
           {showForm ? (
-            <Card>
+            <Card className="border-t-4 border-t-brand-600 shadow-md">
               <AnnouncementForm
                 isNewAnnouncement={!selectedAnnouncement?.id}
                 title={title}
