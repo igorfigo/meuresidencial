@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -25,6 +24,14 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const FinanceiroDashboard = () => {
   const { user } = useApp();
@@ -273,6 +280,9 @@ const FinanceiroDashboard = () => {
     try {
       const today = new Date();
       const currentYear = today.getFullYear();
+      const lastYear = currentYear - 1;
+      
+      const startMonth = today.getMonth() + 1;
       
       const { data: residents, error: residentsError } = await supabase
         .from('residents')
@@ -286,22 +296,29 @@ const FinanceiroDashboard = () => {
         .select('unit, reference_month')
         .eq('matricula', user?.selectedCondominium)
         .eq('category', 'taxa_condominio')
-        .ilike('reference_month', `${currentYear}-%`);
+        .or(`reference_month.ilike.${currentYear}-%, reference_month.ilike.${lastYear}-${startMonth <= 12 ? '%' : ''}`);
       
       if (paymentsError) throw paymentsError;
+      
+      const months = [];
+      for (let i = 0; i < 12; i++) {
+        const month = new Date();
+        month.setMonth(today.getMonth() - i);
+        months.push(format(month, 'yyyy-MM', { locale: ptBR }));
+      }
       
       const statusData = residents.map(resident => {
         const unitPayments = payments
           .filter(payment => payment.unit === resident.unidade)
-          .map(payment => {
-            const [year, month] = payment.reference_month.split('-');
-            return parseInt(month);
-          });
+          .map(payment => payment.reference_month);
         
         const monthlyStatus = {};
-        for (let i = 1; i <= 12; i++) {
-          monthlyStatus[`month${i}`] = unitPayments.includes(i) ? 'paid' : 'unpaid';
-        }
+        months.forEach((month, index) => {
+          monthlyStatus[`month${index}`] = {
+            paid: unitPayments.includes(month),
+            monthLabel: month
+          };
+        });
         
         return {
           unit: resident.unidade,
@@ -343,25 +360,26 @@ const FinanceiroDashboard = () => {
     return formatToBRL(value);
   };
   
-  const getLast6Months = () => {
+  const getLast12Months = () => {
     const result = [];
     const today = new Date();
     
-    for (let i = 5; i >= 0; i--) {
+    for (let i = 0; i < 12; i++) {
       const month = new Date();
       month.setMonth(today.getMonth() - i);
       result.push({
         name: MONTHS[month.getMonth()].substring(0, 3),
-        index: month.getMonth(),
+        index: i,
         year: month.getFullYear(),
-        month: month.getMonth() + 1
+        month: month.getMonth() + 1,
+        fullLabel: `${MONTHS[month.getMonth()].substring(0, 3)}/${month.getFullYear().toString().substring(2)}`
       });
     }
     
     return result;
   };
   
-  const last6Months = getLast6Months();
+  const last12Months = getLast12Months();
 
   if (isLoading) {
     return (
@@ -547,52 +565,52 @@ const FinanceiroDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
-          <Card className="overflow-hidden border-blue-300 shadow-md">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Calendar className="h-5 w-5 text-blue-500" />
-                <h3 className="font-semibold text-gray-800">Status de Pagamento (Últimos 6 Meses)</h3>
-              </div>
-              
-              <ScrollArea className="h-[300px] w-full">
-                <div className="min-w-[700px]">
-                  <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-white z-10">
-                      <tr className="border-b">
-                        <th className="text-left p-2 bg-white sticky left-0 z-20">Unidade</th>
-                        {last6Months.map((monthData) => (
-                          <th key={`${monthData.year}-${monthData.month}`} className="p-2 text-center bg-white">
-                            {monthData.name}/{monthData.year.toString().substring(2)}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paymentStatusData.map((row, rowIndex) => (
-                        <tr key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
-                          <td className="p-2 font-medium sticky left-0 bg-white z-10">{row.unit}</td>
-                          {last6Months.map((monthData) => {
-                            const monthKey = `month${monthData.index + 1}`;
-                            return (
-                              <td key={`${row.unit}-${monthData.year}-${monthData.month}`} className="p-2 text-center">
-                                <div className={`inline-block w-4 h-4 rounded-full ${
-                                  row[monthKey] === 'paid' 
-                                    ? 'bg-green-500' 
-                                    : 'bg-red-500'
-                                }`} />
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
         </div>
+        
+        <Card className="overflow-hidden border-blue-300 shadow-md mb-8">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="h-5 w-5 text-blue-500" />
+              <h3 className="font-semibold text-gray-800">Status de Pagamento (Últimos 12 Meses)</h3>
+            </div>
+            
+            <ScrollArea className="h-[350px] w-full">
+              <div className="min-w-[1000px]">
+                <Table className="text-xs">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="sticky left-0 bg-white z-20 font-semibold">Unidade</TableHead>
+                      {last12Months.map((monthData) => (
+                        <TableHead key={`${monthData.year}-${monthData.month}`} className="text-center bg-white py-1 px-2">
+                          {monthData.fullLabel}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paymentStatusData.map((row, rowIndex) => (
+                      <TableRow key={rowIndex} className="border-b last:border-0 hover:bg-gray-50">
+                        <TableCell className="font-medium sticky left-0 bg-white z-10 py-1 px-2">{row.unit}</TableCell>
+                        {Array.from({ length: 12 }, (_, i) => i).map((monthIndex) => {
+                          const monthKey = `month${monthIndex}`;
+                          return (
+                            <TableCell key={`${row.unit}-${monthIndex}`} className="text-center p-1">
+                              <div className={`inline-block w-3 h-3 rounded-full ${
+                                row[monthKey]?.paid 
+                                  ? 'bg-green-500' 
+                                  : 'bg-red-500'
+                              }`} />
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
