@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -46,24 +45,19 @@ const FinanceiroReceitasDespesas = () => {
   
   const handleExpenseSubmit = async (data: FinancialExpense, attachments?: File[]) => {
     try {
-      // First save the expense
       if (data.id) {
         await editExpense(data);
       } else {
         const result = await addExpense(data);
         
-        // If there are attachments and the expense was saved successfully
         if (attachments && attachments.length > 0 && result && result.length > 0) {
           const expenseId = result[0]?.id;
           
-          // Only proceed if we have a valid expense ID
           if (expenseId) {
-            // Upload each attachment
             for (const file of attachments) {
               const filename = `${Date.now()}-${file.name}`;
               const filePath = `expense-attachments/${user?.selectedCondominium}/${expenseId}/${filename}`;
               
-              // Upload the file to storage
               const { error: uploadError } = await supabase.storage
                 .from('attachments')
                 .upload(filePath, file);
@@ -74,12 +68,10 @@ const FinanceiroReceitasDespesas = () => {
                 continue;
               }
               
-              // Get public URL
               const { data: publicUrlData } = supabase.storage
                 .from('attachments')
                 .getPublicUrl(filePath);
               
-              // Save attachment record
               await supabase.from('expense_attachments').insert({
                 expense_id: expenseId,
                 file_name: file.name,
@@ -145,7 +137,7 @@ const FinanceiroReceitasDespesas = () => {
           </div>
           <div className="w-64">
             <BalanceDisplay 
-              balance={balance?.balance || currentBalance} 
+              balance={balance} 
               onBalanceChange={handleUpdateBalance}
             />
           </div>
