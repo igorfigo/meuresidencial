@@ -3,14 +3,15 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
 import { useFinances } from '@/hooks/use-finances';
-import { useApp } from '@/contexts/AppContext';
-import { useResidents } from '@/hooks/use-residents';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
-import { format, subMonths, parse, isAfter } from 'date-fns';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { format, subMonths, parse, isAfter, startOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useApp } from '@/contexts/AppContext';
+import { useResidents } from '@/hooks/use-residents';
 import { CheckCircle2, XCircle } from 'lucide-react';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#F1C40F', '#3498DB'];
@@ -81,106 +82,71 @@ const FinanceiroDashboard = () => {
 
   // Function to calculate units payment status
   const calculateUnitsPaymentStatus = () => {
-    if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0, pendingUnits: 0 };
-    if (!user?.matricula && !user?.selectedCondominium) {
-      console.error('No matricula found for logged in user');
-      return { totalUnits: 0, paidUnits: 0, pendingAmount: 0, pendingUnits: 0 };
-    }
+    if (!residents.length || !incomes.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
 
     const currentMonth = format(new Date(), 'MM/yyyy');
-    const matricula = user?.selectedCondominium || user?.matricula || '';
     
-    // Count total units from residents table with matching matricula
-    const residentsWithMatricula = residents.filter(resident => resident.matricula === matricula);
-    const totalUnits = residentsWithMatricula.length;
+    // Count total units
+    const totalUnits = residents.length;
     
-    // Count paid units from financial_incomes with category "taxa_condominio"
-    // and reference_month equal to current month and matching matricula
-    const paidUnitsSet = new Set();
+    // Get units that paid this month (based on financial_incomes)
+    const paidUnitsMap = new Map();
     
     incomes.forEach(income => {
-      if (
-        income.reference_month === currentMonth && 
-        income.category === 'taxa_condominio' && 
-        income.unit &&
-        income.matricula === matricula
-      ) {
-        paidUnitsSet.add(income.unit);
+      if (income.reference_month === currentMonth && income.unit) {
+        paidUnitsMap.set(income.unit, true);
       }
     });
     
-    const paidUnits = paidUnitsSet.size;
-    const pendingUnits = totalUnits - paidUnits;
+    const paidUnits = paidUnitsMap.size;
     
     // Calculate pending amount (expected - received)
-    const expectedTotal = residentsWithMatricula.reduce((sum, resident) => {
+    const expectedTotal = residents.reduce((sum, resident) => {
       return sum + (resident.valor_condominio ? BRLToNumber(resident.valor_condominio) : 0);
     }, 0);
     
     const paidTotal = incomes
-      .filter(income => 
-        income.reference_month === currentMonth && 
-        income.category === 'taxa_condominio' &&
-        income.matricula === matricula
-      )
+      .filter(income => income.reference_month === currentMonth)
       .reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
     
     const pendingAmount = Math.max(0, expectedTotal - paidTotal);
-    
-    console.log('Payment status calculation:', { 
-      matricula,
-      totalUnits, 
-      paidUnits, 
-      pendingUnits,
-      pendingAmount,
-      currentMonth,
-      paidUnitsSet: Array.from(paidUnitsSet),
-      residentsCount: residentsWithMatricula.length,
-      incomesForThisMatricula: incomes.filter(i => i.matricula === matricula).length
-    });
     
     return { 
       totalUnits, 
       paidUnits, 
       pendingAmount,
-      pendingUnits
+      pendingUnits: totalUnits - paidUnits
     };
   };
 
   // Calculate payment status for all units for each month of the current year
   const calculateYearlyPaymentStatus = () => {
     if (!residents.length || !incomes.length) return {};
-    if (!user?.matricula && !user?.selectedCondominium) return {};
 
-    const matricula = user?.selectedCondominium || user?.matricula || '';
     const currentYear = new Date().getFullYear();
     const monthsInYear = Array.from({ length: 12 }).map((_, i) => {
       return format(new Date(currentYear, i, 1), 'MM/yyyy');
     });
 
-    // Filter residents by matricula
-    const residentsWithMatricula = residents.filter(resident => resident.matricula === matricula);
     const paymentStatus: Record<string, Record<string, boolean>> = {};
 
     // Initialize all residents for all months as not paid
-    residentsWithMatricula.forEach(resident => {
+    residents.forEach(resident => {
       paymentStatus[resident.unidade] = {};
       monthsInYear.forEach(month => {
         paymentStatus[resident.unidade][month] = false;
       });
     });
 
-    // Mark payments based on income records, filtered by matricula
-    incomes
-      .filter(income => income.matricula === matricula)
-      .forEach(income => {
-        // Only process incomes from current year
-        if (income.unit && income.reference_month && monthsInYear.includes(income.reference_month)) {
-          if (paymentStatus[income.unit]) {
-            paymentStatus[income.unit][income.reference_month] = true;
-          }
+    // Mark payments based on income records
+    incomes.forEach(income => {
+      // Only process incomes from current year
+      if (income.unit && income.reference_month && monthsInYear.includes(income.reference_month)) {
+        if (paymentStatus[income.unit]) {
+          paymentStatus[income.unit][income.reference_month] = true;
         }
-      });
+      }
+    });
 
     return paymentStatus;
   };
@@ -190,16 +156,8 @@ const FinanceiroDashboard = () => {
       setMonthlyData(calculateMonthlyData());
       setPieData(calculateIncomeDistribution());
       setUnitsData(calculateUnitsPaymentStatus());
-      
-      console.log('Finances data loaded:', {
-        matricula: user?.selectedCondominium || user?.matricula,
-        incomesCount: incomes.length,
-        expensesCount: expenses.length,
-        residentsCount: residents.length,
-        currentMonth: format(new Date(), 'MM/yyyy')
-      });
     }
-  }, [isLoading, isLoadingResidents, incomes, expenses, residents, user?.matricula, user?.selectedCondominium]);
+  }, [isLoading, isLoadingResidents, incomes, expenses, residents]);
 
   if (isLoading || isLoadingResidents) {
     return (
@@ -272,7 +230,7 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Taxa de Inadimplência Card */}
+          {/* Any other quick stat that might be useful */}
           <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-gray-800">Taxa de Inadimplência</CardTitle>
