@@ -92,6 +92,7 @@ const FinanceiroDashboard = () => {
     // Get units that paid this month (based on financial_incomes)
     const paidUnitsMap = new Map();
     
+    // Corrigido: Agora verificamos todos os pagamentos do mês atual, independente da categoria
     incomes.forEach(income => {
       if (income.reference_month === currentMonth && income.unit) {
         paidUnitsMap.set(income.unit, true);
