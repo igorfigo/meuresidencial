@@ -53,20 +53,20 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
   };
   
   return (
-    <Card className={`bg-gradient-to-br from-white to-blue-50 border border-blue-200 shadow-sm hover:shadow-md transition-all duration-300 ${className || ''}`}>
-      <CardContent className="p-3">
+    <Card className={`bg-gradient-to-br from-white to-blue-50 border border-blue-100 shadow-sm ${className || ''}`}>
+      <CardContent className="p-2.5">
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Wallet className="h-4 w-4 text-blue-500" />
-            <h3 className="font-medium text-sm text-gray-700">Saldo Atual</h3>
+          <div className="flex items-center gap-1 mb-1.5">
+            <Wallet className="h-3.5 w-3.5 text-blue-500" />
+            <h3 className="font-medium text-xs text-gray-700">Saldo Atual</h3>
             {!readOnly && !isEditing && (
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={handleEdit} 
-                className="h-5 w-5 p-0 ml-auto"
+                className="h-4 w-4 p-0 ml-auto"
               >
-                <Pencil size={12} />
+                <Pencil size={10} />
               </Button>
             )}
             {readOnly && (
@@ -76,7 +76,7 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
           
           <div className="w-full">
             {!readOnly && isEditing ? (
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <Label htmlFor="balance" className="text-xs">Saldo</Label>
                 <Input
                   id="balance"
@@ -85,23 +85,23 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
                     const formattedValue = formatCurrencyInput(e.target.value.replace(/\D/g, ''));
                     setEditBalance(formattedValue);
                   }}
-                  className="text-sm font-medium h-7"
+                  className="text-xs font-medium h-6"
                 />
                 
-                <div className="flex gap-1 mt-1.5 justify-end">
-                  <Button variant="outline" size="sm" onClick={handleCancel} className="h-6 text-xs px-2">
+                <div className="flex gap-1 mt-1 justify-end">
+                  <Button variant="outline" size="sm" onClick={handleCancel} className="h-5 text-xs px-1.5">
                     Cancelar
                   </Button>
-                  <Button size="sm" onClick={handleSave} disabled={isSubmitting} className="h-6 text-xs px-2">
+                  <Button size="sm" onClick={handleSave} disabled={isSubmitting} className="h-5 text-xs px-1.5">
                     {isSubmitting ? 'Salvando...' : 'Salvar'}
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="flex items-center justify-center">
-                <div className="flex items-baseline bg-white/70 px-2.5 py-1.5 rounded-md">
+                <div className="flex items-baseline bg-white/70 px-2 py-1 rounded">
                   <span className="text-xs font-medium mr-0.5 tracking-tight">R$</span>
-                  <span className={`text-lg font-bold ${getBalanceClass()}`}>
+                  <span className={`text-base font-bold ${getBalanceClass()}`}>
                     {balance}
                   </span>
                 </div>
