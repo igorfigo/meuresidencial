@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -43,22 +42,18 @@ export const AccountingReport = () => {
   
   useEffect(() => {
     if (!isLoading) {
-      // Filter incomes based on payment_date instead of reference_month
       const filteredIncomes = incomes.filter(income => {
         if (!income.payment_date) return false;
         
-        // Extract year and month from payment_date
         const paymentDate = new Date(income.payment_date);
         const paymentYearMonth = format(paymentDate, 'yyyy-MM');
         
         return paymentYearMonth === selectedMonth;
       });
       
-      // Filter expenses based on payment_date instead of reference_month
       const filteredExpenses = expenses.filter(expense => {
         if (!expense.payment_date) return false;
         
-        // Extract year and month from payment_date
         const paymentDate = new Date(expense.payment_date);
         const paymentYearMonth = format(paymentDate, 'yyyy-MM');
         
@@ -100,14 +95,12 @@ export const AccountingReport = () => {
       const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
       const currentDate = format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
       
-      // Create new PDF document
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       let yPosition = 15;
       const lineHeight = 7;
       const margin = 15;
       
-      // Header with system information
       doc.setFontSize(10);
       doc.setFont('helvetica', 'italic');
       doc.setTextColor(100, 100, 100);
@@ -115,7 +108,6 @@ export const AccountingReport = () => {
       doc.text(`Relatório gerado em: ${currentDate}`, margin, yPosition);
       yPosition += lineHeight * 2;
       
-      // Title - Improved formatting
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(0, 0, 0);
@@ -123,7 +115,6 @@ export const AccountingReport = () => {
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
       
-      // Condominium Information - Improved spacing
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       doc.text(`Condomínio: ${user?.nomeCondominio || "Nome não disponível"}`, margin, yPosition);
@@ -131,7 +122,6 @@ export const AccountingReport = () => {
       doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, margin, yPosition);
       yPosition += lineHeight * 2;
       
-      // Financial Summary Section - Better formatting
       doc.setFont('helvetica', 'bold');
       doc.text('RESUMO FINANCEIRO', margin, yPosition);
       yPosition += lineHeight * 1.2;
@@ -146,29 +136,23 @@ export const AccountingReport = () => {
       doc.text(`Saldo Final: R$ ${endBalance}`, margin, yPosition);
       yPosition += lineHeight * 2;
       
-      // Update section description to reflect that we're using payment date
       doc.setFont('helvetica', 'bold');
       doc.text('RECEITAS', margin, yPosition);
       yPosition += lineHeight * 1.2;
       
-      // Table headers for incomes with better spacing
-      const incomeColWidths = [45, 25, 45, 30, 50]; // Adjusted column widths
+      const incomeColWidths = [45, 25, 45, 30, 50];
       const tableWidth = pageWidth - (margin * 2);
       
-      // Helper function to draw table lines
       const drawLine = (y: number) => {
         doc.setDrawColor(0);
         doc.line(margin, y, pageWidth - margin, y);
       };
       
-      // Income table headers
       let currentX = margin;
       doc.setFont('helvetica', 'bold');
       
-      // Define header content
       const incomeHeaders = ['Categoria', 'Unidade', 'Data de Pagamento', 'Valor', 'Observações'];
       
-      // Draw header cells
       incomeHeaders.forEach((header, i) => {
         doc.text(header, currentX, yPosition);
         currentX += incomeColWidths[i];
@@ -178,17 +162,14 @@ export const AccountingReport = () => {
       drawLine(yPosition);
       yPosition += lineHeight / 2;
       
-      // Income table rows
       if (monthlyIncomes.length > 0) {
         doc.setFont('helvetica', 'normal');
         
         monthlyIncomes.forEach(income => {
-          // Check if we need a new page
           if (yPosition > 270) {
             doc.addPage();
             yPosition = 20;
             
-            // Add system info to new page
             doc.setFontSize(8);
             doc.setFont('helvetica', 'italic');
             doc.setTextColor(100, 100, 100);
@@ -197,7 +178,6 @@ export const AccountingReport = () => {
           
           currentX = margin;
           
-          // Format and display each cell in the row
           doc.text(income.category || "N/A", currentX, yPosition);
           currentX += incomeColWidths[0];
           
@@ -220,7 +200,6 @@ export const AccountingReport = () => {
           yPosition += lineHeight;
         });
         
-        // Total row
         yPosition += lineHeight / 2;
         drawLine(yPosition);
         yPosition += lineHeight / 2;
@@ -238,36 +217,29 @@ export const AccountingReport = () => {
         yPosition += lineHeight * 2;
       }
       
-      // Check if we need a new page for expenses
       if (yPosition > 220) {
         doc.addPage();
         yPosition = 20;
         
-        // Add system info to new page
         doc.setFontSize(8);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(100, 100, 100);
         doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
       }
       
-      // Expenses Section - Improved table formatting
       doc.setFontSize(11);
       doc.setTextColor(0, 0, 0);
       doc.setFont('helvetica', 'bold');
       doc.text('DESPESAS', margin, yPosition);
       yPosition += lineHeight * 1.2;
       
-      // Table headers for expenses with better spacing
-      const expenseColWidths = [45, 25, 30, 30, 30, 40]; // Adjusted column widths
+      const expenseColWidths = [45, 25, 30, 30, 30, 40];
       
-      // Expense table headers
       currentX = margin;
       doc.setFont('helvetica', 'bold');
       
-      // Define expense header content
       const expenseHeaders = ['Categoria', 'Unidade', 'Vencimento', 'Pagamento', 'Valor', 'Observações'];
       
-      // Draw expense header cells
       expenseHeaders.forEach((header, i) => {
         doc.text(header, currentX, yPosition);
         currentX += expenseColWidths[i];
@@ -277,17 +249,14 @@ export const AccountingReport = () => {
       drawLine(yPosition);
       yPosition += lineHeight / 2;
       
-      // Expense table rows
       if (monthlyExpenses.length > 0) {
         doc.setFont('helvetica', 'normal');
         
         monthlyExpenses.forEach(expense => {
-          // Check if we need a new page
           if (yPosition > 270) {
             doc.addPage();
             yPosition = 20;
             
-            // Add system info to new page
             doc.setFontSize(8);
             doc.setFont('helvetica', 'italic');
             doc.setTextColor(100, 100, 100);
@@ -296,7 +265,6 @@ export const AccountingReport = () => {
           
           currentX = margin;
           
-          // Format and display each cell in the row
           doc.text(expense.category || "N/A", currentX, yPosition);
           currentX += expenseColWidths[0];
           
@@ -322,7 +290,6 @@ export const AccountingReport = () => {
           yPosition += lineHeight;
         });
         
-        // Total row
         yPosition += lineHeight / 2;
         drawLine(yPosition);
         yPosition += lineHeight / 2;
@@ -337,18 +304,15 @@ export const AccountingReport = () => {
         doc.text('Nenhuma despesa registrada para este mês', margin, yPosition);
       }
       
-      // Draw final separator line
       yPosition += lineHeight;
       drawLine(yPosition);
       
-      // Add footer with system information
       const footerPosition = doc.internal.pageSize.getHeight() - 10;
       doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
       doc.setTextColor(100, 100, 100);
       doc.text(`Relatório gerado pelo sistema Meu Residencial - www.meuresidencial.com - ${currentDate}`, pageWidth / 2, footerPosition, { align: 'center' });
       
-      // Save PDF with appropriate month name in filename
       const fileName = `prestacao_contas_${monthName.toLowerCase()}_${year}.pdf`;
       doc.save(fileName);
     } catch (error) {
@@ -410,7 +374,7 @@ export const AccountingReport = () => {
                   <span className="font-medium text-red-600">- R$ {formatToBRL(getTotalExpense())}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-sm font-medium">Saldo Final:</span>
+                  <span className="text-sm text-gray-600">Saldo Final:</span>
                   <span className="font-bold text-brand-600">R$ {endBalance}</span>
                 </div>
               </div>
@@ -423,7 +387,7 @@ export const AccountingReport = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center py-1 border-b">
                   <span className="text-sm text-gray-600">Mês de Referência:</span>
-                  <span className="font-medium">{format(new Date(selectedMonth + '-01'), 'MMMM yyyy', { locale: ptBR })}</span>
+                  <span className="font-medium">{format(parse(selectedMonth + '-01', 'yyyy-MM-dd', new Date()), 'MMMM yyyy', { locale: ptBR })}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b">
                   <span className="text-sm text-gray-600">Receitas Registradas:</span>
@@ -454,7 +418,7 @@ export const AccountingReport = () => {
                     <TableRow>
                       <TableHead>Categoria</TableHead>
                       <TableHead>Unidade</TableHead>
-                      <TableHead>Data</TableHead>
+                      <TableHead>Data de Pagamento</TableHead>
                       <TableHead className="text-right">Valor</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -493,7 +457,7 @@ export const AccountingReport = () => {
                       <TableHead>Categoria</TableHead>
                       <TableHead>Unidade</TableHead>
                       <TableHead>Vencimento</TableHead>
-                      <TableHead>Pagamento</TableHead>
+                      <TableHead>Data de Pagamento</TableHead>
                       <TableHead className="text-right">Valor</TableHead>
                     </TableRow>
                   </TableHeader>
