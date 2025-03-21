@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -41,11 +40,11 @@ const FinanceiroDashboard = () => {
   
   useEffect(() => {
     if (user?.selectedCondominium) {
-      fetchFinancialData();
+      fetchDashboardData();
     }
   }, [user?.selectedCondominium]);
   
-  const fetchFinancialData = async () => {
+  const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
       
@@ -265,16 +264,7 @@ const FinanceiroDashboard = () => {
   const fetchAnnualPaymentStatus = async () => {
     try {
       const today = new Date();
-      
-      // Get the last 6 months
-      const last6Months = [];
-      for (let i = 0; i < 6; i++) {
-        const month = new Date();
-        month.setMonth(today.getMonth() - i);
-        
-        const yearMonth = format(month, 'yyyy-MM', { locale: ptBR });
-        last6Months.unshift(yearMonth); // Add to beginning so they're in chronological order
-      }
+      const currentYear = today.getFullYear();
       
       const { data: residents, error: residentsError } = await supabase
         .from('residents')
@@ -283,28 +273,27 @@ const FinanceiroDashboard = () => {
       
       if (residentsError) throw residentsError;
       
-      // Get all payment records for the last 6 months
       const { data: payments, error: paymentsError } = await supabase
         .from('financial_incomes')
         .select('unit, reference_month')
         .eq('matricula', user?.selectedCondominium)
         .eq('category', 'taxa_condominio')
-        .in('reference_month', last6Months);
+        .ilike('reference_month', `${currentYear}-%`);
       
       if (paymentsError) throw paymentsError;
       
       const statusData = residents.map(resident => {
         const unitPayments = payments
           .filter(payment => payment.unit === resident.unidade)
-          .map(payment => payment.reference_month);
+          .map(payment => {
+            const [year, month] = payment.reference_month.split('-');
+            return parseInt(month);
+          });
         
         const monthlyStatus = {};
-        last6Months.forEach(yearMonth => {
-          const [year, month] = yearMonth.split('-');
-          const monthIndex = parseInt(month) - 1;
-          const monthKey = `month${monthIndex + 1}`;
-          monthlyStatus[monthKey] = unitPayments.includes(yearMonth) ? 'paid' : 'unpaid';
-        });
+        for (let i = 1; i <= 12; i++) {
+          monthlyStatus[`month${i}`] = unitPayments.includes(i) ? 'paid' : 'unpaid';
+        }
         
         return {
           unit: resident.unidade,
@@ -366,12 +355,6 @@ const FinanceiroDashboard = () => {
   
   const last6Months = getLast6Months();
 
-  useEffect(() => {
-    if (user?.selectedCondominium) {
-      fetchFinancialData();
-    }
-  }, [user?.selectedCondominium]);
-
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -390,39 +373,68 @@ const FinanceiroDashboard = () => {
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Saldo Atual - 50% width (1 column of 4 instead of previous size) */}
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div>
             <BalanceDisplay balance={balance} readOnly={true} className="h-full" />
           </div>
           
-          {/* Removed Status de Pagamentos das Unidades card */}
-          
-          {/* Receitas Pendentes - simplified without extra lines */}
-          <div className="lg:col-span-1">
-            <Card className="overflow-hidden border-blue-300 shadow-md h-full">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertCircle className="h-5 w-5 text-amber-500" />
-                  <h3 className="font-semibold text-gray-800">Receitas Pendentes</h3>
+          <Card className="overflow-hidden border-blue-300 shadow-md h-full">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Home className="h-5 w-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-800">Status de Pagamentos</h3>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-slate-100 rounded p-2">
+                  <p className="text-xs text-gray-500">Total de Unidades</p>
+                  <p className="text-xl font-bold text-gray-800">
+                    {unitStatusData.reduce((sum, item) => sum + item.value, 0)}
+                  </p>
                 </div>
-                
-                <div className="flex flex-col gap-2">
-                  <div className="bg-amber-50 rounded p-3">
-                    <p className="text-xs text-gray-500 mb-1">Valor a Receber</p>
-                    <p className="text-xl font-bold text-amber-600">
-                      R$ {formatToBRL(pendingRevenueData.pendingAmount || 0)}
-                    </p>
-                  </div>
-                  {/* Removed extra information as requested */}
+                <div className="bg-green-100 rounded p-2">
+                  <p className="text-xs text-gray-500">Unidades Pagas</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {unitStatusData.find(item => item.name === 'Pagas')?.value || 0}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                <div className="bg-red-100 rounded p-2">
+                  <p className="text-xs text-gray-500">Unidades Pendentes</p>
+                  <p className="text-xl font-bold text-red-600">
+                    {unitStatusData.find(item => item.name === 'Pendentes')?.value || 0}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           
-          <div className="lg:col-span-2">
-            {/* Empty div to maintain grid layout */}
-          </div>
+          <Card className="overflow-hidden border-blue-300 shadow-md h-full">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertCircle className="h-5 w-5 text-amber-500" />
+                <h3 className="font-semibold text-gray-800">Receitas Pendentes</h3>
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                <div className="bg-amber-50 rounded p-3">
+                  <p className="text-xs text-gray-500 mb-1">Valor a Receber</p>
+                  <p className="text-xl font-bold text-amber-600">
+                    R$ {formatToBRL(pendingRevenueData.pendingAmount || 0)}
+                  </p>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  <p className="flex justify-between">
+                    <span>Unidades Pendentes:</span> 
+                    <span className="font-medium">{pendingRevenueData.pendingUnits || 0}</span>
+                  </p>
+                  <p className="flex justify-between mt-1">
+                    <span>Valor Esperado Total:</span> 
+                    <span className="font-medium">R$ {formatToBRL(pendingRevenueData.totalExpected || 0)}</span>
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
