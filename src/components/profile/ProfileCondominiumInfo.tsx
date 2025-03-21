@@ -10,7 +10,7 @@ interface ProfileCondominiumInfoProps {
 
 export const ProfileCondominiumInfo = ({ condominiumData }: ProfileCondominiumInfoProps) => {
   return (
-    <Card className="form-section p-6 mb-6 border-t-brand-600">
+    <Card className="border-t-4 border-t-brand-600 shadow-md p-6 mb-6">
       <h2 className="text-xl font-semibold mb-4">Informações Condomínio</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
