@@ -53,30 +53,30 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
   };
   
   return (
-    <Card className={`bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 ${className || ''}`}>
-      <CardContent className="p-4">
-        <div className="flex flex-col items-center">
-          <div className="flex items-center justify-center gap-2 mb-3 w-full">
-            <Wallet className="h-5 w-5 text-blue-500" />
-            <h3 className="font-semibold text-gray-800">Saldo Atual</h3>
+    <Card className={`bg-gradient-to-br from-white to-blue-50 border border-blue-200 shadow-sm hover:shadow-md transition-all duration-300 ${className || ''}`}>
+      <CardContent className="p-3">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Wallet className="h-4 w-4 text-blue-500" />
+            <h3 className="font-medium text-sm text-gray-700">Saldo Atual</h3>
             {!readOnly && !isEditing && (
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={handleEdit} 
-                className="h-6 w-6 p-0 ml-auto"
+                className="h-5 w-5 p-0 ml-auto"
               >
-                <Pencil size={14} />
+                <Pencil size={12} />
               </Button>
             )}
             {readOnly && (
-              <LockIcon className="h-4 w-4 text-gray-500 ml-auto" />
+              <LockIcon className="h-3 w-3 text-gray-400 ml-auto" />
             )}
           </div>
           
           <div className="w-full">
             {!readOnly && isEditing ? (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="balance" className="text-xs">Saldo</Label>
                 <Input
                   id="balance"
@@ -85,23 +85,23 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
                     const formattedValue = formatCurrencyInput(e.target.value.replace(/\D/g, ''));
                     setEditBalance(formattedValue);
                   }}
-                  className="text-sm font-bold h-8"
+                  className="text-sm font-medium h-7"
                 />
                 
-                <div className="flex gap-1 mt-2 justify-end">
-                  <Button variant="outline" size="sm" onClick={handleCancel} className="h-7 text-xs px-2">
+                <div className="flex gap-1 mt-1.5 justify-end">
+                  <Button variant="outline" size="sm" onClick={handleCancel} className="h-6 text-xs px-2">
                     Cancelar
                   </Button>
-                  <Button size="sm" onClick={handleSave} disabled={isSubmitting} className="h-7 text-xs px-2">
+                  <Button size="sm" onClick={handleSave} disabled={isSubmitting} className="h-6 text-xs px-2">
                     {isSubmitting ? 'Salvando...' : 'Salvar'}
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="flex items-center justify-center">
-                <div className="flex items-baseline bg-white/70 px-3 py-2 rounded-md">
-                  <span className="text-sm font-bold mr-1 tracking-tight">R$</span>
-                  <span className={`text-2xl font-bold ${getBalanceClass()}`}>
+                <div className="flex items-baseline bg-white/70 px-2.5 py-1.5 rounded-md">
+                  <span className="text-xs font-medium mr-0.5 tracking-tight">R$</span>
+                  <span className={`text-lg font-bold ${getBalanceClass()}`}>
                     {balance}
                   </span>
                 </div>
