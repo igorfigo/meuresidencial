@@ -101,6 +101,36 @@ const FinanceiroReceitasDespesas = () => {
   
   const handleUpdateBalance = async (newBalance: string) => {
     try {
+      if (!user?.selectedCondominium) return;
+      
+      // Get the old balance for comparison
+      const oldBalance = balance?.balance || '0';
+      const oldBalanceNum = BRLToNumber(oldBalance);
+      const newBalanceNum = BRLToNumber(newBalance);
+      
+      // Only create a transaction if the balance actually changed
+      if (oldBalanceNum !== newBalanceNum) {
+        // Calculate the difference as the transaction amount
+        const difference = newBalanceNum - oldBalanceNum;
+        const differenceFormatted = formatToBRL(Math.abs(difference));
+        
+        // Get current date and month for reference
+        const today = new Date();
+        const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        
+        // Create a balance adjustment transaction record
+        await supabase.from('balance_adjustments').insert({
+          matricula: user.selectedCondominium,
+          amount: formatToBRL(difference),
+          reference_month: currentMonth,
+          payment_date: today.toISOString().split('T')[0],
+          observations: `Ajuste manual de saldo de ${oldBalance} para ${newBalance}`,
+          previous_balance: oldBalance,
+          new_balance: newBalance
+        });
+      }
+      
+      // Update the balance as normal
       await updateBalance(newBalance);
       toast.success('Saldo atualizado com sucesso');
     } catch (error) {

@@ -10,6 +10,7 @@ import {
   deleteFinancialIncome,
   deleteFinancialExpense,
   updateFinancialBalance,
+  getBalanceAdjustments,
   supabase
 } from '@/integrations/supabase/client';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
@@ -44,6 +45,18 @@ export interface FinancialBalance {
   balance: string;
 }
 
+export interface BalanceAdjustment {
+  id?: string;
+  matricula: string;
+  amount: string;
+  reference_month: string;
+  payment_date: string;
+  observations?: string;
+  previous_balance: string;
+  new_balance: string;
+  created_at?: string;
+}
+
 export const useFinances = () => {
   const { user } = useApp();
   const [isLoading, setIsLoading] = useState(true);
@@ -51,21 +64,24 @@ export const useFinances = () => {
   const [expenses, setExpenses] = useState<FinancialExpense[]>([]);
   const [balance, setBalance] = useState<FinancialBalance | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [balanceAdjustments, setBalanceAdjustments] = useState<BalanceAdjustment[]>([]);
 
   const fetchFinancialData = async () => {
     if (!user?.selectedCondominium) return;
     
     setIsLoading(true);
     try {
-      const [incomesData, expensesData, balanceData] = await Promise.all([
+      const [incomesData, expensesData, balanceData, balanceAdjustmentsData] = await Promise.all([
         getFinancialIncomes(user.selectedCondominium),
         getFinancialExpenses(user.selectedCondominium),
-        getFinancialBalance(user.selectedCondominium)
+        getFinancialBalance(user.selectedCondominium),
+        getBalanceAdjustments(user.selectedCondominium)
       ]);
       
       setIncomes(incomesData);
       setExpenses(expensesData);
       setBalance(balanceData);
+      setBalanceAdjustments(balanceAdjustmentsData);
       
       const allTransactions: Transaction[] = [
         ...incomesData.map(income => ({ 
@@ -77,6 +93,17 @@ export const useFinances = () => {
           ...expense, 
           type: 'expense' as const,
           date: expense.payment_date || expense.due_date || new Date().toISOString()
+        })),
+        ...balanceAdjustmentsData.map(adjustment => ({
+          id: adjustment.id,
+          type: 'balance_adjustment' as const,
+          category: 'ajuste_saldo',
+          amount: adjustment.amount,
+          reference_month: adjustment.reference_month,
+          payment_date: adjustment.payment_date,
+          date: adjustment.payment_date,
+          observations: adjustment.observations,
+          created_at: adjustment.created_at
         }))
       ];
       
@@ -117,6 +144,11 @@ export const useFinances = () => {
           event: '*',
           schema: 'public',
           table: 'financial_balance'
+        }, () => fetchFinancialData())
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'balance_adjustments'
         }, () => fetchFinancialData())
         .subscribe();
       
@@ -255,6 +287,7 @@ export const useFinances = () => {
     expenses,
     balance,
     recentTransactions,
+    balanceAdjustments,
     addIncome,
     editIncome,
     removeIncome,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye, RotateCcw } from 'lucide-react';
 import { BRLToNumber } from '@/utils/currency';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -14,10 +14,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-// Define a more specific Transaction type that includes required fields
 export interface Transaction {
   id?: string;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'balance_adjustment';
   category: string;
   amount: string;
   reference_month: string;
@@ -59,6 +58,7 @@ export const RecentTransactions = ({
       'seguranca': 'Segurança',
       'sistema_condominio': 'Sistema Condomínio',
       
+      'ajuste_saldo': 'Ajuste de Saldo',
       'outros': 'Outros'
     };
     
@@ -82,7 +82,7 @@ export const RecentTransactions = ({
     }
   };
   
-  const formatAmount = (amount: string, type: 'income' | 'expense'): string => {
+  const formatAmount = (amount: string, type: 'income' | 'expense' | 'balance_adjustment'): string => {
     const numAmount = BRLToNumber(amount);
     return numAmount.toLocaleString('pt-BR', {
       style: 'currency',
@@ -117,6 +117,8 @@ export const RecentTransactions = ({
       } else if (transaction.type === 'expense' && onDeleteExpense) {
         await onDeleteExpense(transaction.id);
         toast.success('Despesa excluída com sucesso');
+      } else if (transaction.type === 'balance_adjustment') {
+        toast.error('Não é possível excluir ajustes de saldo');
       }
     } catch (error) {
       console.error('Erro ao excluir transação:', error);
@@ -125,7 +127,11 @@ export const RecentTransactions = ({
   };
   
   const handleView = (transaction: Transaction) => {
-    const typeLabel = transaction.type === 'income' ? 'Receita' : 'Despesa';
+    let typeLabel = 'Transação';
+    if (transaction.type === 'income') typeLabel = 'Receita';
+    else if (transaction.type === 'expense') typeLabel = 'Despesa';
+    else if (transaction.type === 'balance_adjustment') typeLabel = 'Ajuste de Saldo';
+    
     const amountFormatted = formatAmount(transaction.amount, transaction.type);
     
     toast(
@@ -204,10 +210,15 @@ export const RecentTransactions = ({
                     <div className="flex items-center">
                       {transaction.type === 'income' ? (
                         <ArrowUpCircle className="h-4 w-4 mr-2 text-green-500" />
-                      ) : (
+                      ) : transaction.type === 'expense' ? (
                         <ArrowDownCircle className="h-4 w-4 mr-2 text-red-500" />
+                      ) : (
+                        <RotateCcw className="h-4 w-4 mr-2 text-blue-500" />
                       )}
-                      <span>{transaction.type === 'income' ? 'Receita' : 'Despesa'}</span>
+                      <span>
+                        {transaction.type === 'income' ? 'Receita' : 
+                         transaction.type === 'expense' ? 'Despesa' : 'Ajuste de Saldo'}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>{getCategoryLabel(transaction.category)}</TableCell>
@@ -216,7 +227,11 @@ export const RecentTransactions = ({
                   <TableCell>
                     {formatDate(transaction.payment_date || transaction.due_date)}
                   </TableCell>
-                  <TableCell className={`text-center font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                  <TableCell className={`text-center font-medium ${
+                    transaction.type === 'income' ? 'text-green-600' : 
+                    transaction.type === 'expense' ? 'text-red-600' : 
+                    BRLToNumber(transaction.amount) >= 0 ? 'text-blue-600' : 'text-orange-600'
+                  }`}>
                     {formatAmount(transaction.amount, transaction.type)}
                   </TableCell>
                   <TableCell>
@@ -229,14 +244,16 @@ export const RecentTransactions = ({
                       >
                         <Eye className="h-4 w-4 text-blue-500" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleDelete(transaction)}
-                        title="Excluir Transação"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
+                      {transaction.type !== 'balance_adjustment' && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleDelete(transaction)}
+                          title="Excluir Transação"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

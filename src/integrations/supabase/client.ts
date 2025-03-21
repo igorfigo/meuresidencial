@@ -513,3 +513,23 @@ export const getFinancialExpenses = async (matricula: string) => {
     throw error;
   }
 };
+
+export const getBalanceAdjustments = async (matricula: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('balance_adjustments')
+      .select('*')
+      .eq('matricula', matricula)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching balance adjustments:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getBalanceAdjustments:', error);
+    throw error;
+  }
+};
