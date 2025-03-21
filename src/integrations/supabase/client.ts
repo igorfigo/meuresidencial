@@ -449,7 +449,7 @@ export const getFinancialBalance = async (matricula: string) => {
 
 export const updateFinancialBalance = async (matricula: string, balance: string, isManual: boolean = false) => {
   try {
-    // Use a direct update instead of checking if record exists first
+    // Use a direct update with UPSERT for faster processing
     const { data, error } = await supabase
       .from('financial_balance')
       .upsert({

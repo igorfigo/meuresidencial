@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -35,7 +34,6 @@ const FinanceiroReceitasDespesas = () => {
   
   const handleIncomeSubmit = async (data: FinancialIncome) => {
     try {
-      // Don't modify the payment_date, pass it directly to avoid timezone issues
       if (data.id) {
         await editIncome(data);
       } else {
@@ -49,24 +47,19 @@ const FinanceiroReceitasDespesas = () => {
   
   const handleExpenseSubmit = async (data: FinancialExpense, attachments?: File[]) => {
     try {
-      // First save the expense - don't modify the dates to avoid timezone issues
       if (data.id) {
         await editExpense(data);
       } else {
         const result = await addExpense(data);
         
-        // If there are attachments and the expense was saved successfully
         if (attachments && attachments.length > 0 && result && result.length > 0) {
           const expenseId = result[0]?.id;
           
-          // Only proceed if we have a valid expense ID
           if (expenseId) {
-            // Upload each attachment
             for (const file of attachments) {
               const filename = `${Date.now()}-${file.name}`;
               const filePath = `expense-attachments/${user?.selectedCondominium}/${expenseId}/${filename}`;
               
-              // Upload the file to storage
               const { error: uploadError } = await supabase.storage
                 .from('attachments')
                 .upload(filePath, file);
@@ -77,12 +70,10 @@ const FinanceiroReceitasDespesas = () => {
                 continue;
               }
               
-              // Get public URL
               const { data: publicUrlData } = supabase.storage
                 .from('attachments')
                 .getPublicUrl(filePath);
               
-              // Save attachment record
               await supabase.from('expense_attachments').insert({
                 expense_id: expenseId,
                 file_name: file.name,
@@ -105,12 +96,9 @@ const FinanceiroReceitasDespesas = () => {
     try {
       const oldBalance = balance?.balance || '0,00';
       
-      // Optimistically update the UI to improve perceived performance
       const tempBalance = {...balance, balance: newBalance};
       
-      // Start a transaction - use Promise.all to perform both operations nearly simultaneously
       const [balanceAdjustmentResult] = await Promise.all([
-        // Insert record in balance_adjustments table to keep history
         user?.selectedCondominium ? 
           supabase.from('balance_adjustments').insert({
             matricula: user.selectedCondominium,
@@ -119,7 +107,6 @@ const FinanceiroReceitasDespesas = () => {
             adjustment_date: new Date().toISOString()
           }) : Promise.resolve(null),
         
-        // Update the balance - this now marks the balance as manually set
         updateBalance(newBalance)
       ]);
       
@@ -127,14 +114,12 @@ const FinanceiroReceitasDespesas = () => {
         throw balanceAdjustmentResult.error;
       }
       
-      // Refresh data to update the transactions list
       await refreshData();
       
       toast.success('Saldo atualizado com sucesso');
     } catch (error) {
       console.error('Error updating balance:', error);
       toast.error('Erro ao atualizar saldo');
-      // Refresh data to ensure UI is in sync with database
       await refreshData();
     }
   };
@@ -153,29 +138,62 @@ const FinanceiroReceitasDespesas = () => {
   
   const { currentBalance } = calculateFinancialSummary();
 
-  // Optimized deletion handlers with optimistic UI updates
   const handleDeleteIncome = async (id: string) => {
     try {
+      const incomeToDelete = incomes.find(income => income.id === id);
+      
+      if (!incomeToDelete) {
+        throw new Error('Receita não encontrada');
+      }
+      
+      const currentBalanceValue = balance?.balance ? BRLToNumber(balance.balance) : 0;
+      const incomeAmount = BRLToNumber(incomeToDelete.amount);
+      
+      const newBalanceValue = currentBalanceValue - incomeAmount;
+      const newBalanceFormatted = formatToBRL(newBalanceValue);
+      
+      if (balance) {
+        updateBalance(newBalanceFormatted);
+      }
+      
       await removeIncome(id);
-      // Update the balance after deletion is complete
+      
       await calculateAndUpdateBalance();
+      
+      toast.success('Receita excluída com sucesso');
     } catch (error) {
       console.error('Error deleting income:', error);
       toast.error('Erro ao excluir receita');
-      // Refresh data to ensure UI is in sync with database
       await refreshData();
     }
   };
   
   const handleDeleteExpense = async (id: string) => {
     try {
+      const expenseToDelete = expenses.find(expense => expense.id === id);
+      
+      if (!expenseToDelete) {
+        throw new Error('Despesa não encontrada');
+      }
+      
+      const currentBalanceValue = balance?.balance ? BRLToNumber(balance.balance) : 0;
+      const expenseAmount = BRLToNumber(expenseToDelete.amount);
+      
+      const newBalanceValue = currentBalanceValue + expenseAmount;
+      const newBalanceFormatted = formatToBRL(newBalanceValue);
+      
+      if (balance) {
+        updateBalance(newBalanceFormatted);
+      }
+      
       await removeExpense(id);
-      // Update the balance after deletion is complete
+      
       await calculateAndUpdateBalance();
+      
+      toast.success('Despesa excluída com sucesso');
     } catch (error) {
       console.error('Error deleting expense:', error);
       toast.error('Erro ao excluir despesa');
-      // Refresh data to ensure UI is in sync with database
       await refreshData();
     }
   };

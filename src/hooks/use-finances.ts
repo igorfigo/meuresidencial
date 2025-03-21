@@ -161,14 +161,12 @@ export const useFinances = () => {
 
   const removeIncome = async (id: string) => {
     try {
-      const result = await deleteFinancialIncome(id);
-      
       setIncomes(prev => prev.filter(income => income.id !== id));
-      
       setRecentTransactions(prev => prev.filter(transaction => 
         !(transaction.type === 'income' && transaction.id === id))
       );
       
+      const result = await deleteFinancialIncome(id);
       return result;
     } catch (error) {
       console.error('Error removing income:', error);
@@ -205,14 +203,12 @@ export const useFinances = () => {
 
   const removeExpense = async (id: string) => {
     try {
-      const result = await deleteFinancialExpense(id);
-      
       setExpenses(prev => prev.filter(expense => expense.id !== id));
-      
       setRecentTransactions(prev => prev.filter(transaction => 
         !(transaction.type === 'expense' && transaction.id === id))
       );
       
+      const result = await deleteFinancialExpense(id);
       return result;
     } catch (error) {
       console.error('Error removing expense:', error);
@@ -225,10 +221,11 @@ export const useFinances = () => {
     if (!user?.selectedCondominium) return;
     
     try {
-      const currentBalanceData = await getFinancialBalance(user.selectedCondominium);
-      
-      const freshIncomes = await getFinancialIncomes(user.selectedCondominium);
-      const freshExpenses = await getFinancialExpenses(user.selectedCondominium);
+      const [freshIncomes, freshExpenses, currentBalanceData] = await Promise.all([
+        getFinancialIncomes(user.selectedCondominium),
+        getFinancialExpenses(user.selectedCondominium),
+        getFinancialBalance(user.selectedCondominium)
+      ]);
       
       const totalIncome = freshIncomes.reduce((sum, income) => {
         return sum + BRLToNumber(income.amount);
@@ -245,26 +242,7 @@ export const useFinances = () => {
       );
       
       if (isManualBalance) {
-        const currentBalanceValue = BRLToNumber(currentBalanceData.balance);
-        
-        const latestTransactions = [...freshIncomes, ...freshExpenses].sort((a, b) => {
-          const aDate = new Date(a.created_at || new Date());
-          const bDate = new Date(b.created_at || new Date());
-          return bDate.getTime() - aDate.getTime();
-        });
-        
-        if (latestTransactions.length > 0) {
-          const latestTransaction = latestTransactions[0];
-          const transactionAmount = BRLToNumber(latestTransaction.amount);
-          
-          const isIncome = freshIncomes.some(income => income.id === latestTransaction.id);
-          
-          newBalance = isIncome 
-            ? currentBalanceValue + transactionAmount 
-            : currentBalanceValue - transactionAmount;
-        } else {
-          newBalance = currentBalanceValue;
-        }
+        newBalance = totalIncome - totalExpense;
       } else {
         newBalance = totalIncome - totalExpense;
       }
@@ -284,9 +262,38 @@ export const useFinances = () => {
       if (result && result.length > 0) {
         setBalance(result[0]);
       }
+      
+      setIncomes(freshIncomes);
+      setExpenses(freshExpenses);
+      
+      const allTransactions: Transaction[] = [
+        ...freshIncomes.map(income => ({ 
+          ...income, 
+          type: 'income' as const,
+          date: income.payment_date || new Date().toISOString()
+        })),
+        ...freshExpenses.map(expense => ({ 
+          ...expense, 
+          type: 'expense' as const,
+          date: expense.payment_date || expense.due_date || new Date().toISOString()
+        }))
+      ];
+      
+      const sortedTransactions = allTransactions.sort((a, b) => {
+        if (a.created_at && b.created_at) {
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+        
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+      
+      setRecentTransactions(sortedTransactions);
+      
+      return result;
     } catch (error) {
       console.error('Error calculating and updating balance:', error);
       toast.error('Erro ao atualizar saldo');
+      throw error;
     }
   };
 
