@@ -27,7 +27,7 @@ const FinanceiroDashboard = () => {
     
     // Process incomes
     incomes.forEach(income => {
-      const date = new Date(income.date);
+      const date = new Date(income.reference_month);
       const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
       
       if (!monthlyData[monthYear]) {
@@ -39,7 +39,7 @@ const FinanceiroDashboard = () => {
     
     // Process expenses
     expenses.forEach(expense => {
-      const date = new Date(expense.date);
+      const date = new Date(expense.reference_month);
       const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
       
       if (!monthlyData[monthYear]) {
@@ -51,7 +51,11 @@ const FinanceiroDashboard = () => {
     
     // Convert to array and sort by date
     return Object.entries(monthlyData)
-      .map(([month, data]) => ({ month, ...data }))
+      .map(([month, data]) => ({ 
+        month, 
+        income: (data as { income: number, expense: number }).income,
+        expense: (data as { income: number, expense: number }).expense
+      }))
       .sort((a, b) => {
         const [aMonth, aYear] = a.month.split('/').map(Number);
         const [bMonth, bYear] = b.month.split('/').map(Number);
@@ -154,7 +158,7 @@ const FinanceiroDashboard = () => {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis tickFormatter={formatCurrencyValue} />
-                    <Tooltip formatter={formatCurrencyValue} />
+                    <Tooltip formatter={(value) => formatCurrencyValue(value as number)} />
                     <Legend />
                     <Bar dataKey="income" name="Receitas" fill="#4ade80" />
                     <Bar dataKey="expense" name="Despesas" fill="#f87171" />
@@ -195,7 +199,7 @@ const FinanceiroDashboard = () => {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => formatToBRL(value)} />
+                      <Tooltip formatter={(value) => formatCurrencyValue(value as number)} />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
@@ -223,7 +227,7 @@ const FinanceiroDashboard = () => {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => formatToBRL(value)} />
+                      <Tooltip formatter={(value) => formatCurrencyValue(value as number)} />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
