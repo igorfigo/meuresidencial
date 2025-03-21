@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -7,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Download, FileDown } from 'lucide-react';
+import { FileDown } from 'lucide-react';
 import { useFinances } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
+import jsPDF from 'jspdf';
 
 const getLast12Months = () => {
   const months = [];
@@ -75,65 +77,190 @@ export const AccountingReport = () => {
     return monthlyExpenses.reduce((sum, expense) => sum + BRLToNumber(expense.amount), 0);
   };
   
-  const generateCSV = () => {
+  const generatePDF = () => {
     setIsGenerating(true);
     
     try {
       const [year, month] = selectedMonth.split('-');
       const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleString('pt-BR', { month: 'long' });
       
-      let csvContent = "Prestação de Contas - " + monthName.toUpperCase() + " " + year + "\r\n\r\n";
+      // Create new PDF document
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      let yPosition = 20;
+      const lineHeight = 7;
+      const margin = 10;
       
-      csvContent += "Condomínio:," + (user?.nomeCondominio || "Nome não disponível") + "\r\n";
-      csvContent += "Matrícula:," + (user?.selectedCondominium || "Não disponível") + "\r\n\r\n";
+      // Title and Header
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      const title = `Prestação de Contas - ${monthName.toUpperCase()} ${year}`;
+      doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += lineHeight * 2;
       
-      csvContent += "RESUMO FINANCEIRO\r\n";
-      csvContent += "Saldo Inicial:,R$ " + startBalance + "\r\n";
-      csvContent += "Total de Receitas:,R$ " + formatToBRL(getTotalIncome()) + "\r\n";
-      csvContent += "Total de Despesas:,R$ " + formatToBRL(getTotalExpense()) + "\r\n";
-      csvContent += "Saldo Final:,R$ " + endBalance + "\r\n\r\n";
+      // Condominium Information
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Condomínio: ${user?.nomeCondominio || "Nome não disponível"}`, margin, yPosition);
+      yPosition += lineHeight;
+      doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, margin, yPosition);
+      yPosition += lineHeight * 2;
       
-      csvContent += "RECEITAS\r\n";
-      csvContent += "Categoria,Unidade,Data de Pagamento,Valor,Observações\r\n";
+      // Financial Summary Section
+      doc.setFont('helvetica', 'bold');
+      doc.text('RESUMO FINANCEIRO', margin, yPosition);
+      yPosition += lineHeight;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Saldo Inicial: R$ ${startBalance}`, margin, yPosition);
+      yPosition += lineHeight;
+      doc.text(`Total de Receitas: R$ ${formatToBRL(getTotalIncome())}`, margin, yPosition);
+      yPosition += lineHeight;
+      doc.text(`Total de Despesas: R$ ${formatToBRL(getTotalExpense())}`, margin, yPosition);
+      yPosition += lineHeight;
+      doc.text(`Saldo Final: R$ ${endBalance}`, margin, yPosition);
+      yPosition += lineHeight * 2;
       
-      monthlyIncomes.forEach(income => {
-        csvContent += [
-          income.category,
-          income.unit || "N/A",
-          income.payment_date || "N/A",
-          "R$ " + income.amount,
-          income.observations || ""
-        ].join(",") + "\r\n";
+      // Incomes Section
+      doc.setFont('helvetica', 'bold');
+      doc.text('RECEITAS', margin, yPosition);
+      yPosition += lineHeight;
+      
+      // Table headers for incomes
+      const incomeHeaders = ['Categoria', 'Unidade', 'Data de Pagamento', 'Valor', 'Observações'];
+      const incomeColumnWidths = [40, 20, 40, 25, 55];
+      let startX = margin;
+      
+      // Draw income headers
+      incomeHeaders.forEach((header, index) => {
+        doc.text(header, startX, yPosition);
+        startX += incomeColumnWidths[index];
       });
+      yPosition += lineHeight;
       
-      csvContent += "\r\nDESPESAS\r\n";
-      csvContent += "Categoria,Unidade,Data de Vencimento,Data de Pagamento,Valor,Observações\r\n";
+      // Draw separator line
+      doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
       
-      monthlyExpenses.forEach(expense => {
-        csvContent += [
-          expense.category,
-          expense.unit || "N/A",
-          expense.due_date || "N/A",
-          expense.payment_date || "N/A",
-          "R$ " + expense.amount,
-          expense.observations || ""
-        ].join(",") + "\r\n";
+      // Add income rows
+      if (monthlyIncomes.length > 0) {
+        monthlyIncomes.forEach(income => {
+          // Check if we need a new page
+          if (yPosition > 270) {
+            doc.addPage();
+            yPosition = 20;
+          }
+          
+          startX = margin;
+          doc.setFont('helvetica', 'normal');
+          doc.text(income.category?.substring(0, 18) || "N/A", startX, yPosition, { maxWidth: incomeColumnWidths[0] - 2 });
+          startX += incomeColumnWidths[0];
+          
+          doc.text(income.unit || "N/A", startX, yPosition);
+          startX += incomeColumnWidths[1];
+          
+          doc.text(income.payment_date || "N/A", startX, yPosition);
+          startX += incomeColumnWidths[2];
+          
+          doc.text(`R$ ${income.amount}`, startX, yPosition);
+          startX += incomeColumnWidths[3];
+          
+          doc.text(income.observations?.substring(0, 20) || "", startX, yPosition, { maxWidth: incomeColumnWidths[4] - 2 });
+          
+          yPosition += lineHeight;
+        });
+        
+        // Add total row
+        yPosition += lineHeight / 2;
+        doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+        yPosition += lineHeight / 2;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Total', margin, yPosition);
+        doc.text(`R$ ${formatToBRL(getTotalIncome())}`, margin + incomeColumnWidths[0] + incomeColumnWidths[1] + incomeColumnWidths[2], yPosition);
+        
+        yPosition += lineHeight * 2;
+      } else {
+        yPosition += lineHeight;
+        doc.setFont('helvetica', 'italic');
+        doc.text('Nenhuma receita registrada para este mês', margin, yPosition);
+        yPosition += lineHeight * 2;
+      }
+      
+      // Check if we need a new page for expenses
+      if (yPosition > 220) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      // Expenses Section
+      doc.setFont('helvetica', 'bold');
+      doc.text('DESPESAS', margin, yPosition);
+      yPosition += lineHeight;
+      
+      // Table headers for expenses
+      const expenseHeaders = ['Categoria', 'Unidade', 'Vencimento', 'Pagamento', 'Valor', 'Observações'];
+      const expenseColumnWidths = [35, 15, 25, 25, 25, 55];
+      startX = margin;
+      
+      // Draw expense headers
+      expenseHeaders.forEach((header, index) => {
+        doc.text(header, startX, yPosition);
+        startX += expenseColumnWidths[index];
       });
+      yPosition += lineHeight;
       
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
+      // Draw separator line
+      doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
       
-      const link = document.createElement("a");
-      const fileName = `prestacao_contas_${monthName.toLowerCase()}_${year}.csv`;
+      // Add expense rows
+      if (monthlyExpenses.length > 0) {
+        monthlyExpenses.forEach(expense => {
+          // Check if we need a new page
+          if (yPosition > 270) {
+            doc.addPage();
+            yPosition = 20;
+          }
+          
+          startX = margin;
+          doc.setFont('helvetica', 'normal');
+          doc.text(expense.category?.substring(0, 16) || "N/A", startX, yPosition, { maxWidth: expenseColumnWidths[0] - 2 });
+          startX += expenseColumnWidths[0];
+          
+          doc.text(expense.unit || "N/A", startX, yPosition);
+          startX += expenseColumnWidths[1];
+          
+          doc.text(expense.due_date || "N/A", startX, yPosition);
+          startX += expenseColumnWidths[2];
+          
+          doc.text(expense.payment_date || "N/A", startX, yPosition);
+          startX += expenseColumnWidths[3];
+          
+          doc.text(`R$ ${expense.amount}`, startX, yPosition);
+          startX += expenseColumnWidths[4];
+          
+          doc.text(expense.observations?.substring(0, 20) || "", startX, yPosition, { maxWidth: expenseColumnWidths[5] - 2 });
+          
+          yPosition += lineHeight;
+        });
+        
+        // Add total row
+        yPosition += lineHeight / 2;
+        doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+        yPosition += lineHeight / 2;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Total', margin, yPosition);
+        doc.text(`R$ ${formatToBRL(getTotalExpense())}`, margin + expenseColumnWidths[0] + expenseColumnWidths[1] + expenseColumnWidths[2] + expenseColumnWidths[3], yPosition);
+      } else {
+        yPosition += lineHeight;
+        doc.setFont('helvetica', 'italic');
+        doc.text('Nenhuma despesa registrada para este mês', margin, yPosition);
+      }
       
-      link.setAttribute("href", url);
-      link.setAttribute("download", fileName);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Save PDF
+      const fileName = `prestacao_contas_${monthName.toLowerCase()}_${year}.pdf`;
+      doc.save(fileName);
     } catch (error) {
-      console.error("Erro ao gerar CSV:", error);
+      console.error("Erro ao gerar PDF:", error);
     } finally {
       setIsGenerating(false);
     }
@@ -164,12 +291,12 @@ export const AccountingReport = () => {
           </div>
           
           <Button 
-            onClick={generateCSV} 
+            onClick={generatePDF} 
             disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
             className="flex items-center gap-2"
           >
             <FileDown size={16} />
-            {isGenerating ? 'Gerando...' : 'Baixar Relatório'}
+            {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
           </Button>
         </div>
         
