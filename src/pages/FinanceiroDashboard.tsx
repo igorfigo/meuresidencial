@@ -82,7 +82,7 @@ const FinanceiroDashboard = () => {
 
   // Function to calculate units payment status
   const calculateUnitsPaymentStatus = () => {
-    if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
+    if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0, pendingUnits: 0 };
 
     const currentMonth = format(new Date(), 'MM/yyyy');
     
@@ -92,13 +92,14 @@ const FinanceiroDashboard = () => {
     // Get units that paid this month (based on financial_incomes)
     const paidUnitsMap = new Map();
     
-    // Only consider 'taxa_condominio' payments for units
+    // Fixed case sensitivity issue - check for both uppercase and lowercase variations
     incomes.forEach(income => {
-      if (
-        income.reference_month === currentMonth && 
-        income.unit && 
-        income.category.toLowerCase() === 'taxa_condominio'
-      ) {
+      const isCondominiumFee = 
+        income.category.toLowerCase() === 'taxa_condominio' || 
+        income.category.toLowerCase() === 'taxa de condominio' ||
+        income.category.toLowerCase() === 'taxa de condomínio';
+        
+      if (income.reference_month === currentMonth && income.unit && isCondominiumFee) {
         paidUnitsMap.set(income.unit, true);
       }
     });
@@ -111,19 +112,24 @@ const FinanceiroDashboard = () => {
     }, 0);
     
     const paidTotal = incomes
-      .filter(income => 
-        income.reference_month === currentMonth &&
-        income.category.toLowerCase() === 'taxa_condominio'
-      )
+      .filter(income => {
+        const isCondominiumFee = 
+          income.category.toLowerCase() === 'taxa_condominio' || 
+          income.category.toLowerCase() === 'taxa de condominio' ||
+          income.category.toLowerCase() === 'taxa de condomínio';
+        
+        return income.reference_month === currentMonth && isCondominiumFee;
+      })
       .reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
     
     const pendingAmount = Math.max(0, expectedTotal - paidTotal);
+    const pendingUnits = totalUnits - paidUnits;
     
     return { 
       totalUnits, 
       paidUnits, 
       pendingAmount,
-      pendingUnits: totalUnits - paidUnits
+      pendingUnits
     };
   };
 
@@ -146,14 +152,19 @@ const FinanceiroDashboard = () => {
       });
     });
 
-    // Mark payments based on income records - only consider 'taxa_condominio' payments
+    // Mark payments based on income records - fixed case sensitivity issue
     incomes.forEach(income => {
+      const isCondominiumFee = 
+        income.category.toLowerCase() === 'taxa_condominio' || 
+        income.category.toLowerCase() === 'taxa de condominio' ||
+        income.category.toLowerCase() === 'taxa de condomínio';
+        
       // Only process condominium fee incomes from current year
       if (
         income.unit && 
         income.reference_month && 
         monthsInYear.includes(income.reference_month) &&
-        income.category.toLowerCase() === 'taxa_condominio'
+        isCondominiumFee
       ) {
         if (paymentStatus[income.unit]) {
           paymentStatus[income.unit][income.reference_month] = true;
