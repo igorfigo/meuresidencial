@@ -82,7 +82,7 @@ const FinanceiroDashboard = () => {
 
   // Function to calculate units payment status
   const calculateUnitsPaymentStatus = () => {
-    if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
+    if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0, pendingUnits: 0 };
 
     const currentMonth = format(new Date(), 'MM/yyyy');
     
@@ -90,6 +90,7 @@ const FinanceiroDashboard = () => {
     const totalUnits = residents.length;
     
     // Count paid units from financial_incomes with category "taxa_condominio"
+    // and reference_month equal to current month
     const paidUnitsSet = new Set();
     
     incomes.forEach(income => {
@@ -115,6 +116,15 @@ const FinanceiroDashboard = () => {
       .reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
     
     const pendingAmount = Math.max(0, expectedTotal - paidTotal);
+    
+    console.log('Payment status calculation:', { 
+      totalUnits, 
+      paidUnits, 
+      pendingUnits,
+      pendingAmount,
+      currentMonth,
+      paidUnitsSet: Array.from(paidUnitsSet)
+    });
     
     return { 
       totalUnits, 
@@ -161,6 +171,13 @@ const FinanceiroDashboard = () => {
       setMonthlyData(calculateMonthlyData());
       setPieData(calculateIncomeDistribution());
       setUnitsData(calculateUnitsPaymentStatus());
+      
+      console.log('Finances data loaded:', {
+        incomesCount: incomes.length,
+        expensesCount: expenses.length,
+        residentsCount: residents.length,
+        currentMonth: format(new Date(), 'MM/yyyy')
+      });
     }
   }, [isLoading, isLoadingResidents, incomes, expenses, residents]);
 
@@ -235,7 +252,7 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
-          {/* Any other quick stat that might be useful */}
+          {/* Taxa de Inadimplência Card */}
           <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-semibold text-gray-800">Taxa de Inadimplência</CardTitle>
