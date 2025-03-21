@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -15,7 +14,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-// Define a more specific Transaction type that includes required fields
 export interface Transaction {
   id?: string;
   type: 'income' | 'expense';
@@ -37,12 +35,18 @@ interface RecentTransactionsProps {
 }
 
 export const RecentTransactions = ({ 
-  transactions, 
+  transactions: initialTransactions, 
   onDeleteIncome, 
   onDeleteExpense 
 }: RecentTransactionsProps) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const itemsPerPage = 10;
+  
+  if (JSON.stringify(transactions) !== JSON.stringify(initialTransactions)) {
+    setTransactions(initialTransactions);
+  }
   
   const getCategoryLabel = (category: string): string => {
     const categoryMap: Record<string, string> = {
@@ -112,16 +116,27 @@ export const RecentTransactions = ({
     }
     
     try {
+      setDeletingIds(prev => new Set(prev).add(transaction.id!));
+      
+      setTransactions(prev => prev.filter(t => t.id !== transaction.id));
+      
       if (transaction.type === 'income' && onDeleteIncome) {
         await onDeleteIncome(transaction.id);
-        toast.success('Receita excluída com sucesso');
       } else if (transaction.type === 'expense' && onDeleteExpense) {
         await onDeleteExpense(transaction.id);
-        toast.success('Despesa excluída com sucesso');
       }
+      
     } catch (error) {
       console.error('Erro ao excluir transação:', error);
+      
+      setTransactions(initialTransactions);
       toast.error('Erro ao excluir transação');
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(transaction.id!);
+        return newSet;
+      });
     }
   };
   
@@ -169,6 +184,10 @@ export const RecentTransactions = ({
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentTransactions = transactions.slice(indexOfFirstItem, indexOfLastItem);
   
+  if (currentPage > totalPages && totalPages > 0) {
+    setCurrentPage(totalPages);
+  }
+  
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -200,7 +219,7 @@ export const RecentTransactions = ({
               </TableRow>
             ) : (
               currentTransactions.map((transaction, index) => (
-                <TableRow key={transaction.id || index}>
+                <TableRow key={transaction.id || index} className={deletingIds.has(transaction.id || '') ? "opacity-40" : ""}>
                   <TableCell>
                     <div className="flex items-center">
                       {transaction.type === 'income' ? (
@@ -235,6 +254,7 @@ export const RecentTransactions = ({
                         size="icon" 
                         onClick={() => handleDelete(transaction)}
                         title="Excluir Transação"
+                        disabled={deletingIds.has(transaction.id || '')}
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>

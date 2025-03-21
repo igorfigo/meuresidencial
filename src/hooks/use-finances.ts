@@ -161,8 +161,15 @@ export const useFinances = () => {
 
   const removeIncome = async (id: string) => {
     try {
-      await deleteFinancialIncome(id);
-      return true;
+      const result = await deleteFinancialIncome(id);
+      
+      setIncomes(prev => prev.filter(income => income.id !== id));
+      
+      setRecentTransactions(prev => prev.filter(transaction => 
+        !(transaction.type === 'income' && transaction.id === id))
+      );
+      
+      return result;
     } catch (error) {
       console.error('Error removing income:', error);
       toast.error('Erro ao remover receita');
@@ -198,8 +205,15 @@ export const useFinances = () => {
 
   const removeExpense = async (id: string) => {
     try {
-      await deleteFinancialExpense(id);
-      return true;
+      const result = await deleteFinancialExpense(id);
+      
+      setExpenses(prev => prev.filter(expense => expense.id !== id));
+      
+      setRecentTransactions(prev => prev.filter(transaction => 
+        !(transaction.type === 'expense' && transaction.id === id))
+      );
+      
+      return result;
     } catch (error) {
       console.error('Error removing expense:', error);
       toast.error('Erro ao remover despesa');
@@ -226,7 +240,6 @@ export const useFinances = () => {
       
       let newBalance;
       
-      // Type-safe way to check if is_manual property exists and is true
       const isManualBalance = Boolean(
         currentBalanceData && 'is_manual' in currentBalanceData && currentBalanceData.is_manual
       );
@@ -258,12 +271,10 @@ export const useFinances = () => {
       
       const formattedBalance = formatToBRL(newBalance);
       
-      // Safe default for is_manual flag
       const isManual = Boolean(
         currentBalanceData && 'is_manual' in currentBalanceData ? currentBalanceData.is_manual : false
       );
       
-      // Update balance in database and local state immediately
       const result = await updateFinancialBalance(
         user.selectedCondominium, 
         formattedBalance, 
@@ -284,17 +295,14 @@ export const useFinances = () => {
     
     try {
       if (manualBalance) {
-        // Optimistically update the UI state
         setBalance(prev => prev ? {...prev, balance: manualBalance, is_manual: true} : null);
         
-        // Update in database
         const result = await updateFinancialBalance(
           user.selectedCondominium, 
           manualBalance, 
           true
         );
         
-        // Update state with the actual result from the server
         if (result && result.length > 0) {
           setBalance(result[0]);
         }

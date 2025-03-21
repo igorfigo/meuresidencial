@@ -152,28 +152,31 @@ const FinanceiroReceitasDespesas = () => {
   };
   
   const { currentBalance } = calculateFinancialSummary();
-  
+
+  // Optimized deletion handlers with optimistic UI updates
   const handleDeleteIncome = async (id: string) => {
     try {
       await removeIncome(id);
-      // Call calculateAndUpdateBalance to ensure balance is updated
+      // Update the balance after deletion is complete
       await calculateAndUpdateBalance();
-      toast.success('Receita excluída com sucesso');
     } catch (error) {
       console.error('Error deleting income:', error);
       toast.error('Erro ao excluir receita');
+      // Refresh data to ensure UI is in sync with database
+      await refreshData();
     }
   };
   
   const handleDeleteExpense = async (id: string) => {
     try {
       await removeExpense(id);
-      // Call calculateAndUpdateBalance to ensure balance is updated
+      // Update the balance after deletion is complete
       await calculateAndUpdateBalance();
-      toast.success('Despesa excluída com sucesso');
     } catch (error) {
       console.error('Error deleting expense:', error);
       toast.error('Erro ao excluir despesa');
+      // Refresh data to ensure UI is in sync with database
+      await refreshData();
     }
   };
   

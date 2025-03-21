@@ -385,6 +385,7 @@ export const saveFinancialExpense = async (expense: Omit<FinancialExpense, 'crea
 
 export const deleteFinancialIncome = async (id: string) => {
   try {
+    // Execute the deletion immediately without additional checks
     const { error } = await supabase
       .from('financial_incomes')
       .delete()
@@ -404,6 +405,7 @@ export const deleteFinancialIncome = async (id: string) => {
 
 export const deleteFinancialExpense = async (id: string) => {
   try {
+    // Execute the deletion immediately without additional checks
     const { error } = await supabase
       .from('financial_expenses')
       .delete()
