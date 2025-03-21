@@ -1,161 +1,67 @@
-import React, { useState } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { useDocuments } from '@/hooks/use-documents';
-import { DocumentForm } from '@/components/documents/DocumentForm';
-import { DocumentsList } from '@/components/documents/DocumentsList';
-import { Card } from '@/components/ui/card';
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle 
-} from '@/components/ui/alert-dialog';
 
-const ITEMS_PER_PAGE = 10;
+import React from 'react';
+import DashboardLayout from '@/components/DashboardLayout';
+import { useDocuments } from '@/hooks/use-documents';
+import { DocumentsList } from '@/components/documents/DocumentsList';
+import { DocumentForm } from '@/components/documents/DocumentForm';
+import { FileText } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 const Documentos = () => {
-  const { 
-    form, 
-    documents, 
-    isLoading, 
-    resetForm, 
-    onSubmit, 
+  const {
+    documents,
+    isLoading,
+    createDocument,
+    updateDocument,
     deleteDocument,
-    isSubmitting, 
-    isDeleting,
-    attachments,
-    existingAttachments,
-    handleFileChange,
-    removeFile,
-    removeExistingAttachment,
-    getFileUrl,
-    uploadProgress,
-    isUploading,
-    fetchDocuments,
-    fetchAttachments
+    filterDocuments,
+    searchTerm,
+    setSearchTerm,
+    filteredDocuments,
+    sortOrder,
+    setSortOrder,
+    categoriasCount,
+    docType,
+    setDocType,
   } = useDocuments();
-  
-  const [showForm, setShowForm] = useState(false);
-  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = documents ? Math.ceil(documents.length / ITEMS_PER_PAGE) : 1;
-  const paginatedDocuments = documents ? documents.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE, 
-    currentPage * ITEMS_PER_PAGE
-  ) : [];
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleNewDocument = () => {
-    resetForm();
-    setShowForm(true);
-  };
-
-  const handleEditDocument = (document: any) => {
-    resetForm(document);
-    setShowForm(true);
-  };
-
-  const handleCancelForm = () => {
-    resetForm();
-    setShowForm(false);
-  };
-
-  const handleFormSubmit = (data: any) => {
-    onSubmit(data);
-    setShowForm(false);
-  };
-
-  const handleDeleteClick = (id: string) => {
-    setDocumentToDelete(id);
-  };
-
-  const confirmDelete = () => {
-    if (documentToDelete) {
-      deleteDocument(documentToDelete);
-      setDocumentToDelete(null);
-    }
-  };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Documentos Úteis</h1>
-            <p className="text-muted-foreground">
-              Gerencie os documentos úteis do seu condomínio
-            </p>
+      <div className="animate-fade-in">
+        <header className="mb-6">
+          <div className="flex items-center">
+            <FileText className="h-6 w-6 mr-2 text-brand-600" />
+            <h1 className="text-3xl font-bold">Documentos Úteis</h1>
           </div>
-          {!showForm && (
-            <Button onClick={handleNewDocument} className="bg-brand-600 hover:bg-brand-700">
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Documento
-            </Button>
-          )}
-        </div>
+          <p className="text-muted-foreground mt-1">
+            Gerencie documentos importantes do condomínio
+          </p>
+        </header>
 
-        <div className="border-t pt-6">
-          {showForm ? (
-            <Card className="border-t-4 border-t-brand-600 shadow-md">
-              <DocumentForm
-                form={form}
-                onSubmit={handleFormSubmit}
-                isSubmitting={isSubmitting}
-                isEditing={!!form.getValues().id}
-                onCancel={handleCancelForm}
-                attachments={attachments}
-                existingAttachments={existingAttachments}
-                handleFileChange={handleFileChange}
-                removeFile={removeFile}
-                removeExistingAttachment={removeExistingAttachment}
-                getFileUrl={getFileUrl}
-                uploadProgress={uploadProgress}
-                isUploading={isUploading}
-              />
-            </Card>
-          ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
             <DocumentsList
-              documents={paginatedDocuments}
-              onEdit={handleEditDocument}
-              onDelete={handleDeleteClick}
-              isDeleting={isDeleting}
-              getFileUrl={getFileUrl}
-              fetchAttachments={fetchAttachments}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+              documents={filteredDocuments}
+              isLoading={isLoading}
+              onDelete={deleteDocument}
+              onUpdate={updateDocument}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              sortOrder={sortOrder}
+              setSortOrder={setSortOrder}
+              categoriasCount={categoriasCount}
+              docType={docType}
+              setDocType={setDocType}
             />
-          )}
+          </div>
+          <div className="lg:col-span-1">
+            <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
+              <h2 className="text-xl font-semibold mb-4">Novo Documento Útil</h2>
+              <DocumentForm onSubmit={createDocument} />
+            </Card>
+          </div>
         </div>
       </div>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </DashboardLayout>
   );
 };
