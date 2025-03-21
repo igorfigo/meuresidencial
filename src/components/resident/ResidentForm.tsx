@@ -60,7 +60,7 @@ export const ResidentForm = ({
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full border-t-4 border-t-brand-600 shadow-md">
       <CardHeader>
         <CardTitle>{isEditing ? 'Editar Morador' : 'Cadastrar Novo Morador'}</CardTitle>
       </CardHeader>

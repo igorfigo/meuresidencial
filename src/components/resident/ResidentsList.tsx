@@ -27,7 +27,7 @@ export const ResidentsList = ({
   isDeleting
 }: ResidentsListProps) => {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
       <Table>
         <TableHeader>
           <TableRow>
