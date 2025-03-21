@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -167,7 +166,6 @@ export const CadastroPlanos = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
-    // Validate that the value is in the correct format (XX,XX)
     const valorPattern = /^\d{1,3}(\.\d{3})*,\d{2}$/;
     if (!valorPattern.test(data.valor)) {
       toast.error('O valor do plano deve seguir o formato 0.000,00');
@@ -264,7 +262,6 @@ export const CadastroPlanos = () => {
   };
 
   const handleEditPlan = async (plan: Plan) => {
-    // When editing a plan, format the value to remove the R$ prefix
     let planValue = plan.valor;
     if (planValue.startsWith('R$')) {
       planValue = formatToBRL(BRLToNumber(planValue));
@@ -341,7 +338,6 @@ export const CadastroPlanos = () => {
     if (name === 'valor') {
       const numericValue = value.replace(/\D/g, '');
       const formattedValue = formatCurrencyInput(numericValue);
-      // Set only the formatted value without the R$ prefix
       setValue(name as keyof FormFields, formattedValue);
     } else {
       setValue(name as keyof FormFields, value);
