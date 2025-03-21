@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -135,7 +134,6 @@ const Dedetizacoes = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!pestControlToDelete} onOpenChange={(open) => !open && setPestControlToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -112,7 +113,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
           </p>
         </div>
       ) : (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
           <Table>
             <TableHeader>
               <TableRow>

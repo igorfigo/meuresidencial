@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useCommonAreas } from '@/hooks/use-common-areas';
@@ -87,7 +86,7 @@ const AreasComuns = () => {
 
         <div className="border-t pt-6">
           {showForm ? (
-            <Card className="border-t-0">
+            <Card className="border-t-4 border-t-brand-600 shadow-md">
               <CommonAreaForm
                 form={form}
                 onSubmit={handleFormSubmit}
@@ -116,7 +115,6 @@ const AreasComuns = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!areaToDelete} onOpenChange={(open) => !open && setAreaToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

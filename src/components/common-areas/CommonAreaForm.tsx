@@ -50,7 +50,7 @@ export const CommonAreaForm: React.FC<CommonAreaFormProps> = ({
   onCancel
 }) => {
   return (
-    <Card>
+    <Card className="border-t-4 border-t-brand-600 shadow-md">
       <CardHeader>
         <CardTitle>{isEditing ? 'Editar Área Comum' : 'Nova Área Comum'}</CardTitle>
         <CardDescription>
