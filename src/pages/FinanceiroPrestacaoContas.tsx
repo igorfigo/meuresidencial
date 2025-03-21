@@ -15,7 +15,7 @@ const FinanceiroPrestacaoContas = () => {
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-3xl font-bold">Prestação de Contas</h1>
-            <p className="text-gray-500 mt-1">Relatório mensal de receitas e despesas do condomínio</p>
+            <p className="text-gray-500 mt-1">Relatório mensal de receitas e despesas do condomínio por data de pagamento</p>
           </div>
           
           <div className="w-64">

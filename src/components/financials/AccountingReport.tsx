@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -43,13 +43,27 @@ export const AccountingReport = () => {
   
   useEffect(() => {
     if (!isLoading) {
-      const filteredIncomes = incomes.filter(income => 
-        income.reference_month === selectedMonth
-      );
+      // Filter incomes based on payment_date instead of reference_month
+      const filteredIncomes = incomes.filter(income => {
+        if (!income.payment_date) return false;
+        
+        // Extract year and month from payment_date
+        const paymentDate = new Date(income.payment_date);
+        const paymentYearMonth = format(paymentDate, 'yyyy-MM');
+        
+        return paymentYearMonth === selectedMonth;
+      });
       
-      const filteredExpenses = expenses.filter(expense => 
-        expense.reference_month === selectedMonth
-      );
+      // Filter expenses based on payment_date instead of reference_month
+      const filteredExpenses = expenses.filter(expense => {
+        if (!expense.payment_date) return false;
+        
+        // Extract year and month from payment_date
+        const paymentDate = new Date(expense.payment_date);
+        const paymentYearMonth = format(paymentDate, 'yyyy-MM');
+        
+        return paymentYearMonth === selectedMonth;
+      });
       
       setMonthlyIncomes(filteredIncomes);
       setMonthlyExpenses(filteredExpenses);
@@ -132,7 +146,7 @@ export const AccountingReport = () => {
       doc.text(`Saldo Final: R$ ${endBalance}`, margin, yPosition);
       yPosition += lineHeight * 2;
       
-      // Incomes Section - Improved table formatting
+      // Update section description to reflect that we're using payment date
       doc.setFont('helvetica', 'bold');
       doc.text('RECEITAS', margin, yPosition);
       yPosition += lineHeight * 1.2;
