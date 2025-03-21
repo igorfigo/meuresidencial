@@ -21,7 +21,6 @@ import FaleConosco from "./pages/FaleConosco";
 import MinhaAssinatura from "./pages/MinhaAssinatura";
 import UserProfile from "./pages/UserProfile";
 import FinanceiroReceitasDespesas from "./pages/FinanceiroReceitasDespesas";
-import FinanceiroDashboard from "./pages/FinanceiroDashboard";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -126,7 +125,7 @@ const App = () => (
             <Route path="/financeiro/dashboard" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <FinanceiroDashboard />
+                  <UnderConstruction />
                 </ProtectedRoute>
               </AnimationController>
             } />
