@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -40,7 +41,7 @@ const FinanceiroDashboard = () => {
   
   useEffect(() => {
     if (user?.selectedCondominium) {
-      fetchDashboardData();
+      fetchFinancialData();
     }
   }, [user?.selectedCondominium]);
   
