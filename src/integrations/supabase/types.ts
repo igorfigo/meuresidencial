@@ -48,6 +48,39 @@ export type Database = {
         }
         Relationships: []
       }
+      balance_adjustments: {
+        Row: {
+          adjustment_date: string
+          created_at: string
+          id: string
+          matricula: string
+          new_balance: string
+          observations: string | null
+          previous_balance: string
+          updated_at: string
+        }
+        Insert: {
+          adjustment_date?: string
+          created_at?: string
+          id?: string
+          matricula: string
+          new_balance: string
+          observations?: string | null
+          previous_balance: string
+          updated_at?: string
+        }
+        Update: {
+          adjustment_date?: string
+          created_at?: string
+          id?: string
+          matricula?: string
+          new_balance?: string
+          observations?: string | null
+          previous_balance?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       common_area_reservations: {
         Row: {
           common_area_id: string

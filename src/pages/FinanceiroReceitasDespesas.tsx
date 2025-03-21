@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -101,6 +100,19 @@ const FinanceiroReceitasDespesas = () => {
   
   const handleUpdateBalance = async (newBalance: string) => {
     try {
+      const oldBalance = balance?.balance || '0,00';
+      
+      // Insert record in balance_adjustments table to keep history
+      if (user?.selectedCondominium) {
+        await supabase.from('balance_adjustments').insert({
+          matricula: user.selectedCondominium,
+          previous_balance: oldBalance,
+          new_balance: newBalance,
+          adjustment_date: new Date().toISOString()
+        });
+      }
+      
+      // Update the balance
       await updateBalance(newBalance);
       toast.success('Saldo atualizado com sucesso');
     } catch (error) {
@@ -148,6 +160,7 @@ const FinanceiroReceitasDespesas = () => {
             <BalanceDisplay 
               balance={balance?.balance || currentBalance} 
               onBalanceChange={handleUpdateBalance}
+              matricula={user?.selectedCondominium}
             />
           </div>
         </div>
