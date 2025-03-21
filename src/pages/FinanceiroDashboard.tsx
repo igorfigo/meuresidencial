@@ -38,7 +38,7 @@ const FinanceiroDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [unitStatusData, setUnitStatusData] = useState<any[]>([]);
-  const [revenueDistributionData, setRevenueDistributionData] = useState<any[]>([]);
+  const [expensesDistributionData, setExpensesDistributionData] = useState<any[]>([]);
   const [pendingRevenueData, setPendingRevenueData] = useState<any>({});
   const [paymentStatusData, setPaymentStatusData] = useState<any[]>([]);
   
@@ -65,7 +65,7 @@ const FinanceiroDashboard = () => {
         fetchBalance(),
         fetchMonthlyData(),
         fetchUnitPaymentStatus(),
-        fetchRevenueDistribution(),
+        fetchExpensesDistribution(),
         fetchPendingRevenue(),
         fetchAnnualPaymentStatus()
       ]);
@@ -184,10 +184,10 @@ const FinanceiroDashboard = () => {
     }
   };
   
-  const fetchRevenueDistribution = async () => {
+  const fetchExpensesDistribution = async () => {
     try {
       const { data, error } = await supabase
-        .from('financial_incomes')
+        .from('financial_expenses')
         .select('amount, category')
         .eq('matricula', user?.selectedCondominium);
       
@@ -195,9 +195,9 @@ const FinanceiroDashboard = () => {
       
       const categories: Record<string, number> = {};
       
-      data.forEach(income => {
-        const category = income.category || 'Outros';
-        const amount = BRLToNumber(income.amount);
+      data.forEach(expense => {
+        const category = expense.category || 'Outros';
+        const amount = BRLToNumber(expense.amount);
         
         if (categories[category]) {
           categories[category] += amount;
@@ -211,10 +211,10 @@ const FinanceiroDashboard = () => {
         value
       }));
       
-      setRevenueDistributionData(chartData);
+      setExpensesDistributionData(chartData);
     } catch (error) {
-      console.error('Error fetching revenue distribution:', error);
-      setRevenueDistributionData([]);
+      console.error('Error fetching expenses distribution:', error);
+      setExpensesDistributionData([]);
     }
   };
   
@@ -358,9 +358,9 @@ const FinanceiroDashboard = () => {
     const result = [];
     const today = new Date();
     
-    for (let i = 11; i >= 0; i--) {
+    for (let i = 0; i < 12; i++) {
       const month = new Date();
-      month.setMonth(today.getMonth() - i);
+      month.setMonth(today.getMonth() - 11 + i);
       result.push({
         name: MONTHS[month.getMonth()].substring(0, 3),
         index: i,
@@ -442,7 +442,7 @@ const FinanceiroDashboard = () => {
               </div>
               
               <div className="flex flex-col gap-2">
-                <div className="bg-amber-50 rounded p-3">
+                <div className="bg-amber-50 rounded p-3 text-center">
                   <p className="text-xs text-gray-500 mb-1">Valor a Receber</p>
                   <p className="text-xl font-bold text-amber-600">
                     R$ {formatToBRL(pendingRevenueData.pendingAmount || 0)}
@@ -513,7 +513,7 @@ const FinanceiroDashboard = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <PieChart className="h-5 w-5 text-blue-500" />
-                <h3 className="font-semibold text-gray-800">Distribuição das Receitas</h3>
+                <h3 className="font-semibold text-gray-800">Distribuição das Despesas</h3>
                 <span className="ml-auto text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
                   {currentMonthYear}
                 </span>
@@ -523,7 +523,7 @@ const FinanceiroDashboard = () => {
                 <ChartContainer config={{}}>
                   <RechartsPie>
                     <Pie
-                      data={revenueDistributionData}
+                      data={expensesDistributionData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -532,7 +532,7 @@ const FinanceiroDashboard = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {revenueDistributionData.map((entry, index) => (
+                      {expensesDistributionData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -540,7 +540,7 @@ const FinanceiroDashboard = () => {
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           const data = payload[0].payload;
-                          const total = revenueDistributionData.reduce((sum, item) => sum + item.value, 0);
+                          const total = expensesDistributionData.reduce((sum, item) => sum + item.value, 0);
                           const percentage = total > 0 ? (data.value / total * 100).toFixed(1) : '0';
                           
                           return (
