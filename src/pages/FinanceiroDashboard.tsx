@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -37,6 +38,13 @@ const FinanceiroDashboard = () => {
   
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a163be', '#61dafb', '#f97150', '#4db35e'];
   const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  
+  // Get current month and year for display
+  const today = new Date();
+  const currentMonth = MONTHS[today.getMonth()];
+  const currentYear = today.getFullYear();
+  const currentMonthYear = `${currentMonth}/${currentYear}`;
+  const currentMonthYearFormatted = format(today, 'yyyy-MM', { locale: ptBR });
   
   useEffect(() => {
     if (user?.selectedCondominium) {
@@ -383,6 +391,9 @@ const FinanceiroDashboard = () => {
               <div className="flex items-center gap-2 mb-3">
                 <Home className="h-5 w-5 text-blue-500" />
                 <h3 className="font-semibold text-gray-800">Status de Pagamentos</h3>
+                <span className="ml-auto text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                  {currentMonthYear}
+                </span>
               </div>
               
               <div className="grid grid-cols-3 gap-2 text-center">
@@ -413,6 +424,9 @@ const FinanceiroDashboard = () => {
               <div className="flex items-center gap-2 mb-3">
                 <AlertCircle className="h-5 w-5 text-amber-500" />
                 <h3 className="font-semibold text-gray-800">Receitas Pendentes</h3>
+                <span className="ml-auto text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                  {currentMonthYear}
+                </span>
               </div>
               
               <div className="flex flex-col gap-2">
@@ -488,6 +502,9 @@ const FinanceiroDashboard = () => {
               <div className="flex items-center gap-2 mb-3">
                 <PieChart className="h-5 w-5 text-blue-500" />
                 <h3 className="font-semibold text-gray-800">Distribuição das Receitas</h3>
+                <span className="ml-auto text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                  {currentMonthYear}
+                </span>
               </div>
               
               <div className="h-64">
