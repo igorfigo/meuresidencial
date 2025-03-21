@@ -101,22 +101,33 @@ export function Sidebar() {
           <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="w-full text-left flex items-center space-x-2">
+                <button className="w-full text-left flex items-center space-x-2 group">
                   <Avatar>
                     <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback>{user.nome.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm font-medium leading-none dark:text-white">{user.nome}</p>
                     <p className="text-sm text-muted-foreground">
                       {user.isAdmin ? 'Administrador' : user.nomeCondominio}
                     </p>
                   </div>
+                  <Settings 
+                    className="h-4 w-4 text-gray-400 opacity-70 group-hover:opacity-100 transition-opacity" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/perfil');
+                    }}
+                  />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/perfil')}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Perfil
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   Sair
                 </DropdownMenuItem>

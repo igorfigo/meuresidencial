@@ -23,7 +23,8 @@ import {
   Bug,
   MessageSquare,
   KeyRound,
-  Mail
+  Mail,
+  Settings
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -305,6 +306,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 {user?.email || 'email@example.com'}
               </p>
             </NavLink>
+            <NavLink to="/perfil" className="text-white/70 hover:text-white transition-colors">
+              <Settings className="h-4 w-4" />
+            </NavLink>
           </div>
           <Button
             variant="ghost"
@@ -388,25 +392,35 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           !sidebarOpen && "flex flex-col items-center"
         )}>
           {sidebarOpen ? (
-            <NavLink to="/perfil" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
-                {user?.nome?.charAt(0) || 'U'}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white truncate max-w-[140px]">
-                  {user?.nome || 'Usuário'}
-                </p>
-                <p className="text-xs text-gray-300 truncate max-w-[140px]">
-                  {user?.email || 'email@example.com'}
-                </p>
-              </div>
-            </NavLink>
+            <div className="flex items-center space-x-3">
+              <NavLink to="/perfil" className="flex-grow flex items-center space-x-3 hover:opacity-80 transition-opacity">
+                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
+                  {user?.nome?.charAt(0) || 'U'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate max-w-[140px]">
+                    {user?.nome || 'Usuário'}
+                  </p>
+                  <p className="text-xs text-gray-300 truncate max-w-[140px]">
+                    {user?.email || 'email@example.com'}
+                  </p>
+                </div>
+              </NavLink>
+              <NavLink to="/perfil" className="text-white/70 hover:text-white transition-colors" title="Perfil">
+                <Settings className="h-4 w-4" />
+              </NavLink>
+            </div>
           ) : (
-            <NavLink to="/perfil" title="Meu Perfil">
-              <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white mb-2">
-                {user?.nome?.charAt(0) || 'U'}
-              </div>
-            </NavLink>
+            <div className="flex flex-col items-center space-y-2">
+              <NavLink to="/perfil" title="Meu Perfil">
+                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white mb-2">
+                  {user?.nome?.charAt(0) || 'U'}
+                </div>
+              </NavLink>
+              <NavLink to="/perfil" className="text-white/70 hover:text-white transition-colors" title="Configurações">
+                <Settings className="h-4 w-4" />
+              </NavLink>
+            </div>
           )}
           
           <Button
