@@ -22,6 +22,7 @@ import {
   PieChart as RechartsPie,
   Pie,
   Cell,
+  LabelList,
 } from 'recharts';
 import {
   Table,
@@ -395,6 +396,10 @@ const FinanceiroDashboard = () => {
   
   const last12Months = getLast12Months();
 
+  const formatBarLabel = (value: number) => {
+    return value > 0 ? formatToBRL(value) : '';
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -572,8 +577,12 @@ const FinanceiroDashboard = () => {
                       }}
                     />
                     <Legend />
-                    <Bar dataKey="receita" fill="#4db35e" name="Receita" />
-                    <Bar dataKey="despesa" fill="#f97150" name="Despesa" />
+                    <Bar dataKey="receita" fill="#4db35e" name="Receita">
+                      <LabelList dataKey="receita" position="top" formatter={formatBarLabel} fill="#4db35e" fontSize={11} />
+                    </Bar>
+                    <Bar dataKey="despesa" fill="#f97150" name="Despesa">
+                      <LabelList dataKey="despesa" position="top" formatter={formatBarLabel} fill="#f97150" fontSize={11} />
+                    </Bar>
                   </BarChart>
                 </ChartContainer>
               </div>
@@ -680,4 +689,3 @@ const FinanceiroDashboard = () => {
 };
 
 export default FinanceiroDashboard;
-
