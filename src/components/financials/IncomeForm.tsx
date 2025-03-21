@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -227,7 +228,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                 name="payment_date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data de Pagamento</FormLabel>
+                    <FormLabel>Data de Recebimento</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
