@@ -82,23 +82,28 @@ const FinanceiroDashboard = () => {
 
   // Function to calculate units payment status
   const calculateUnitsPaymentStatus = () => {
-    if (!residents.length || !incomes.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
+    if (!residents.length) return { totalUnits: 0, paidUnits: 0, pendingAmount: 0 };
 
     const currentMonth = format(new Date(), 'MM/yyyy');
     
-    // Count total units
+    // Count total units from residents table
     const totalUnits = residents.length;
     
-    // Get units that paid this month (based on financial_incomes)
-    const paidUnitsMap = new Map();
+    // Count paid units from financial_incomes with category "taxa_condominio"
+    const paidUnitsSet = new Set();
     
     incomes.forEach(income => {
-      if (income.reference_month === currentMonth && income.unit) {
-        paidUnitsMap.set(income.unit, true);
+      if (
+        income.reference_month === currentMonth && 
+        income.category === 'taxa_condominio' && 
+        income.unit
+      ) {
+        paidUnitsSet.add(income.unit);
       }
     });
     
-    const paidUnits = paidUnitsMap.size;
+    const paidUnits = paidUnitsSet.size;
+    const pendingUnits = totalUnits - paidUnits;
     
     // Calculate pending amount (expected - received)
     const expectedTotal = residents.reduce((sum, resident) => {
@@ -106,7 +111,7 @@ const FinanceiroDashboard = () => {
     }, 0);
     
     const paidTotal = incomes
-      .filter(income => income.reference_month === currentMonth)
+      .filter(income => income.reference_month === currentMonth && income.category === 'taxa_condominio')
       .reduce((sum, income) => sum + BRLToNumber(income.amount), 0);
     
     const pendingAmount = Math.max(0, expectedTotal - paidTotal);
@@ -115,7 +120,7 @@ const FinanceiroDashboard = () => {
       totalUnits, 
       paidUnits, 
       pendingAmount,
-      pendingUnits: totalUnits - paidUnits
+      pendingUnits
     };
   };
 
