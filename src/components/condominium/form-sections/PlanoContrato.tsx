@@ -70,7 +70,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   }, [setValue]);
 
   return (
-    <Card className="form-section p-6">
+    <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md">
       <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

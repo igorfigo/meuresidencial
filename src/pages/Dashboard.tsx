@@ -155,7 +155,7 @@ const Dashboard = () => {
   const renderAdminDashboard = () => (
     <>
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="card-hover">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Gestores Ativos</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -168,7 +168,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-hover">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Preferência por Nota Fiscal</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -181,7 +181,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-hover">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Distribuição Geográfica</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -231,10 +231,10 @@ const Dashboard = () => {
     </>
   );
 
-  // Manager dashboard content (placeholder for now)
+  // Manager dashboard content
   const renderManagerDashboard = () => (
     <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="card-hover">
+      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
         </CardHeader>

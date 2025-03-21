@@ -363,7 +363,7 @@ export const CadastroPlanos = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <Card className="p-6">
+            <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <h2 className="text-xl font-semibold mb-4">{isExistingRecord ? 'Editar Plano' : 'Novo Plano'}</h2>
                 
@@ -421,7 +421,7 @@ export const CadastroPlanos = () => {
           </div>
           
           <div className="lg:col-span-2">
-            <Card className="p-6">
+            <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
               <h2 className="text-xl font-semibold mb-4">Planos Cadastrados</h2>
               <ScrollArea className="h-80">
                 <Table>

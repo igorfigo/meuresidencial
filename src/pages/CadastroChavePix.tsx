@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -221,7 +222,7 @@ export const CadastroChavePix = () => {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6 h-full">
+          <Card className="p-6 h-full border-t-4 border-t-brand-600 shadow-md">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <h2 className="text-xl font-semibold mb-4">{isExistingRecord ? 'Editar Chave PIX' : 'Nova Chave PIX'}</h2>
               
@@ -311,7 +312,7 @@ export const CadastroChavePix = () => {
             </form>
           </Card>
           
-          <Card className="p-6 h-full">
+          <Card className="p-6 h-full border-t-4 border-t-brand-600 shadow-md">
             <h2 className="text-xl font-semibold mb-4">Chaves PIX Cadastradas</h2>
             <ScrollArea className="h-[calc(100%-3rem)]">
               <Table>
