@@ -231,8 +231,12 @@ export const useFinances = () => {
       
       let newBalance;
       
-      // Check if is_manual exists and is true - fix for TypeScript error
-      if (currentBalanceData && currentBalanceData.is_manual === true) {
+      // Type-safe way to check if is_manual property exists and is true
+      const isManualBalance = Boolean(
+        currentBalanceData && 'is_manual' in currentBalanceData && currentBalanceData.is_manual
+      );
+      
+      if (isManualBalance) {
         const currentBalanceValue = BRLToNumber(currentBalanceData.balance);
         
         const latestTransactions = [...freshIncomes, ...freshExpenses].sort((a, b) => {
@@ -259,8 +263,10 @@ export const useFinances = () => {
       
       const formattedBalance = formatToBRL(newBalance);
       
-      // Use a safe default for is_manual
-      const isManual = currentBalanceData?.is_manual || false;
+      // Safe default for is_manual flag
+      const isManual = Boolean(
+        currentBalanceData && 'is_manual' in currentBalanceData ? currentBalanceData.is_manual : false
+      );
       
       await updateFinancialBalance(
         user.selectedCondominium, 
