@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useApp } from '@/contexts/AppContext';
@@ -163,8 +162,6 @@ export const useFinances = () => {
   const removeIncome = async (id: string) => {
     try {
       await deleteFinancialIncome(id);
-      toast.success('Receita removida com sucesso');
-      await calculateAndUpdateBalance();
       return true;
     } catch (error) {
       console.error('Error removing income:', error);
@@ -202,8 +199,6 @@ export const useFinances = () => {
   const removeExpense = async (id: string) => {
     try {
       await deleteFinancialExpense(id);
-      toast.success('Despesa removida com sucesso');
-      await calculateAndUpdateBalance();
       return true;
     } catch (error) {
       console.error('Error removing expense:', error);
@@ -328,6 +323,7 @@ export const useFinances = () => {
     editExpense,
     removeExpense,
     updateBalance,
-    refreshData: fetchFinancialData
+    refreshData: fetchFinancialData,
+    calculateAndUpdateBalance
   };
 };
