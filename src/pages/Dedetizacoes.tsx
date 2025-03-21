@@ -1,20 +1,33 @@
 
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Plus, Bug } from 'lucide-react';
 import { usePestControl } from '@/hooks/use-pest-control';
 import { PestControlForm } from '@/components/pest-control/PestControlForm';
 import { PestControlsList } from '@/components/pest-control/PestControlsList';
-import { Bug } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from '@/components/ui/alert-dialog';
 
 const Dedetizacoes = () => {
-  const {
-    form,
-    pestControls,
-    isLoading,
-    onSubmit,
+  const { 
+    form, 
+    pestControls, 
+    isLoading, 
+    resetForm, 
+    onSubmit, 
     deletePestControl,
-    isSubmitting,
+    isSubmitting, 
     isDeleting,
     attachments,
     existingAttachments,
@@ -24,54 +37,81 @@ const Dedetizacoes = () => {
     getFileUrl,
     uploadProgress,
     isUploading,
-    resetForm
+    refetch
   } = usePestControl();
   
-  const [isEditing, setIsEditing] = useState(false);
-  
-  const handleEdit = (pestControl: any) => {
-    resetForm(pestControl);
-    setIsEditing(true);
+  const [showForm, setShowForm] = useState(false);
+  const [pestControlToDelete, setPestControlToDelete] = useState<string | null>(null);
+
+  const fetchAttachments = async (pestControlId: string) => {
+    const { data } = await supabase
+      .from('pest_control_attachments')
+      .select('*')
+      .eq('pest_control_id', pestControlId);
+    
+    return data || [];
   };
-  
-  const handleCancel = () => {
+
+  const handleNewPestControl = () => {
     resetForm();
-    setIsEditing(false);
+    setShowForm(true);
+  };
+
+  const handleEditPestControl = (pestControl: any) => {
+    resetForm(pestControl);
+    setShowForm(true);
+  };
+
+  const handleCancelForm = () => {
+    resetForm();
+    setShowForm(false);
+  };
+
+  const handleFormSubmit = (data: any) => {
+    onSubmit(data);
+    setShowForm(false);
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setPestControlToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (pestControlToDelete) {
+      deletePestControl(pestControlToDelete);
+      setPestControlToDelete(null);
+    }
   };
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in">
-        <header className="mb-6">
-          <div className="flex items-center">
-            <Bug className="h-6 w-6 mr-2 text-brand-600" />
-            <h1 className="text-3xl font-bold">Dedetizações</h1>
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dedetizações</h1>
+            <p className="text-muted-foreground">
+              Gerencie as dedetizações do seu condomínio
+            </p>
           </div>
-          <p className="text-muted-foreground mt-1">
-            Gerencie os registros de dedetização no condomínio
-          </p>
-        </header>
+          <div className="flex flex-wrap gap-2">
+            {!showForm && (
+              <Button onClick={handleNewPestControl} className="bg-brand-600 hover:bg-brand-700">
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Dedetização
+              </Button>
+            )}
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <PestControlsList
-              pestControls={pestControls || []}
-              onEdit={handleEdit}
-              onDelete={deletePestControl}
-              isDeleting={isDeleting}
-              getFileUrl={getFileUrl}
-              fetchAttachments={async (id: string) => []}
-            />
-          </div>
-          <div className="lg:col-span-1">
-            <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
-              <h2 className="text-xl font-semibold mb-4">{isEditing ? 'Editar Dedetização' : 'Nova Dedetização'}</h2>
-              <PestControlForm 
+        <div className="border-t pt-6">
+          {showForm ? (
+            <Card className="border-t-4 border-t-brand-600 shadow-md">
+              <PestControlForm
                 form={form}
-                onSubmit={onSubmit}
+                onSubmit={handleFormSubmit}
                 isSubmitting={isSubmitting}
-                isEditing={isEditing}
-                onCancel={handleCancel}
+                isEditing={!!form.getValues().id}
+                onCancel={handleCancelForm}
                 attachments={attachments}
                 existingAttachments={existingAttachments}
                 handleFileChange={handleFileChange}
@@ -82,9 +122,36 @@ const Dedetizacoes = () => {
                 isUploading={isUploading}
               />
             </Card>
-          </div>
+          ) : (
+            <PestControlsList
+              pestControls={pestControls || []}
+              onEdit={handleEditPestControl}
+              onDelete={handleDeleteClick}
+              isDeleting={isDeleting}
+              getFileUrl={getFileUrl}
+              fetchAttachments={fetchAttachments}
+            />
+          )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!pestControlToDelete} onOpenChange={(open) => !open && setPestControlToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta dedetização? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };

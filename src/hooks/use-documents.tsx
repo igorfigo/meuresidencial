@@ -6,7 +6,6 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { UseDocumentsReturn } from '@/types/documents';
 
 export interface DocumentAttachment {
   id: string;
@@ -37,7 +36,7 @@ const documentSchema = z.object({
 
 export type DocumentFormValues = z.infer<typeof documentSchema>;
 
-export function useDocuments(): UseDocumentsReturn {
+export function useDocuments() {
   const { toast } = useToast();
   const { user } = useApp();
   const matricula = user?.selectedCondominium || '';
@@ -61,6 +60,7 @@ export function useDocuments(): UseDocumentsReturn {
     }
   });
   
+  // Fetch documents
   const fetchDocuments = async () => {
     if (!matricula) return;
     
@@ -86,6 +86,7 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
   
+  // Fetch document attachments
   const fetchAttachments = async (documentId: string) => {
     try {
       const { data, error } = await supabase
@@ -101,6 +102,7 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
   
+  // Reset form
   const resetForm = (document?: Document) => {
     setAttachments([]);
     
@@ -112,6 +114,7 @@ export function useDocuments(): UseDocumentsReturn {
         observacoes: document.observacoes,
       });
       
+      // Fetch existing attachments for edit mode
       fetchExistingAttachments(document.id);
     } else {
       form.reset({
@@ -123,6 +126,7 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
   
+  // Fetch existing attachments for a document
   const fetchExistingAttachments = async (documentId: string) => {
     try {
       const attachments = await fetchAttachments(documentId);
@@ -132,9 +136,11 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
   
+  // Submit form
   const onSubmit = async (data: DocumentFormValues) => {
     if (!matricula) return;
     
+    // Check if there are either new attachments or existing attachments (for edit)
     if (attachments.length === 0 && existingAttachments.length === 0) {
       toast({
         title: "Erro ao salvar documento",
@@ -148,9 +154,11 @@ export function useDocuments(): UseDocumentsReturn {
     setUploadProgress(0);
     
     try {
+      // Save or update document
       let documentId = data.id;
       
       if (documentId) {
+        // Update existing document
         const { error } = await supabase
           .from('documents')
           .update({
@@ -163,6 +171,7 @@ export function useDocuments(): UseDocumentsReturn {
         
         if (error) throw error;
       } else {
+        // Create new document
         const { data: newDocument, error } = await supabase
           .from('documents')
           .insert({
@@ -177,6 +186,7 @@ export function useDocuments(): UseDocumentsReturn {
         documentId = newDocument[0].id;
       }
       
+      // Handle file uploads if there are any
       if (attachments.length > 0) {
         setIsUploading(true);
         
@@ -184,12 +194,14 @@ export function useDocuments(): UseDocumentsReturn {
           const file = attachments[i];
           const filePath = `${matricula}/${documentId}/${file.name}`;
           
+          // Upload file to storage
           const { error: uploadError } = await supabase.storage
             .from('document_files')
             .upload(filePath, file);
           
           if (uploadError) throw uploadError;
           
+          // Save attachment record in database
           const { error: attachmentError } = await supabase
             .from('document_attachments')
             .insert({
@@ -201,6 +213,7 @@ export function useDocuments(): UseDocumentsReturn {
           
           if (attachmentError) throw attachmentError;
           
+          // Update progress
           setUploadProgress(Math.round(((i + 1) / attachments.length) * 100));
         }
         
@@ -212,6 +225,7 @@ export function useDocuments(): UseDocumentsReturn {
         description: 'As informações foram salvas com sucesso.',
       });
       
+      // Refresh documents list
       fetchDocuments();
       resetForm();
     } catch (error) {
@@ -227,10 +241,12 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
   
+  // Delete document
   const deleteDocument = async (id: string) => {
     setIsDeleting(true);
     
     try {
+      // Delete document (attachments and files will be deleted via cascade)
       const { error } = await supabase
         .from('documents')
         .delete()
@@ -243,6 +259,7 @@ export function useDocuments(): UseDocumentsReturn {
         description: 'O documento foi excluído com sucesso.',
       });
       
+      // Refresh documents list
       fetchDocuments();
     } catch (error) {
       console.error('Error deleting document:', error);
@@ -256,6 +273,7 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
   
+  // Handle file change
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const fileList = event.target.files;
@@ -264,21 +282,26 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
   
+  // Remove file from attachments
   const removeFile = (index: number) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
   
+  // Remove existing attachment
   const removeExistingAttachment = async (id: string) => {
     try {
+      // Find attachment to get file path
       const attachment = existingAttachments.find(a => a.id === id);
       if (!attachment) return;
       
+      // Delete file from storage
       const { error: storageError } = await supabase.storage
         .from('document_files')
         .remove([attachment.file_path]);
       
       if (storageError) throw storageError;
       
+      // Delete attachment record
       const { error } = await supabase
         .from('document_attachments')
         .delete()
@@ -286,6 +309,7 @@ export function useDocuments(): UseDocumentsReturn {
       
       if (error) throw error;
       
+      // Update existing attachments list
       setExistingAttachments(prev => prev.filter(a => a.id !== id));
       
       toast({
@@ -302,11 +326,12 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
   
+  // Get file URL
   const getFileUrl = async (path: string) => {
     try {
       const { data } = await supabase.storage
         .from('document_files')
-        .createSignedUrl(path, 60);
+        .createSignedUrl(path, 60); // 60 seconds expiry
       
       return data?.signedUrl || '';
     } catch (error) {
@@ -315,6 +340,7 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
   
+  // Fetch documents on mount
   useEffect(() => {
     if (matricula) {
       fetchDocuments();

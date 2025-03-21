@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +7,6 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UsePestControlReturn } from '@/types/pest-control';
 
 // Form validation schema
 export const pestControlSchema = z.object({
@@ -42,7 +42,7 @@ export interface PestControlAttachment {
   created_at?: string;
 }
 
-export const usePestControl = (): UsePestControlReturn => {
+export const usePestControl = () => {
   const { user } = useApp();
   const matricula = user?.matricula || '';
   const queryClient = useQueryClient();
@@ -388,8 +388,9 @@ export const usePestControl = (): UsePestControlReturn => {
 
   return {
     form,
-    pestControls: pestControls || [],
+    pestControls,
     isLoading,
+    error,
     resetForm,
     onSubmit,
     deletePestControl: deleteMutation.mutate,
