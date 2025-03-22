@@ -228,7 +228,7 @@ export const AccountingReport = () => {
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
       
-      doc.setFillColor(244, 247, 254);
+      doc.setFillColor(244, 247, 247);
       doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 35, 3, 3, 'F');
       
       doc.setFontSize(12);
@@ -299,6 +299,7 @@ export const AccountingReport = () => {
         
         let currentX = margin;
         headers.forEach((header, i) => {
+          const headerWidth = columnWidths[i];
           doc.text(header, currentX + (headerWidth / 2), y - 1, { align: 'center' });
           currentX += headerWidth;
         });
