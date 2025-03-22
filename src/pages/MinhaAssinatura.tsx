@@ -1,77 +1,97 @@
-
 import React, { useState, useEffect } from 'react';
-import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { usePlans } from '@/hooks/use-plans';
+import { useApp } from '@/contexts/AppContext';
 import { SubscriptionDetailsCard } from '@/components/minha-assinatura/SubscriptionDetailsCard';
-import { formatCurrencyDisplay, getCurrentPlanDetails } from '@/utils/subscription-utils';
+import { PasswordChangeSection } from '@/components/minha-assinatura/PasswordChangeSection';
+import { PlanUpgradeDialog } from '@/components/minha-assinatura/PlanUpgradeDialog';
+import { getSubscriptionStatus } from '@/utils/subscription-utils';
+import { usePlans } from '@/hooks/use-plans';
+import { toast } from 'sonner';
+import { Separator } from '@/components/ui/separator';
 
 const MinhaAssinatura = () => {
-  const { user, isAuthenticated } = useApp();
+  const { user, updateSubscription } = useApp();
   const { plans, isLoading: isLoadingPlans } = usePlans();
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [condominiumData, setCondominiumData] = useState<any>(null);
-  
-  const fetchCondominiumData = async (matricula: string) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('condominiums')
-        .select('*')
-        .eq('matricula', matricula)
-        .single();
-        
-      if (error) {
-        throw error;
-      }
-      
-      setCondominiumData(data);
-    } catch (error) {
-      console.error('Error fetching condominium data:', error);
-      toast.error('Erro ao carregar dados do condomínio');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+
   useEffect(() => {
-    if (user?.matricula) {
-      fetchCondominiumData(user.matricula);
+    if (user) {
+      const status = getSubscriptionStatus(user);
+      setSubscriptionStatus(status);
     }
   }, [user]);
-  
-  // Create a wrapper function for getCurrentPlanDetails
-  const getPlanDetails = () => {
-    return getCurrentPlanDetails(condominiumData, plans);
+
+  const handleOpenDialog = (planId: string) => {
+    setSelectedPlanId(planId);
+    setIsDialogOpen(true);
   };
 
-  if (!isAuthenticated || !user || user.isAdmin) {
-    return (
-      <DashboardLayout>
-        <div className="container mx-auto py-6">
-          <h1 className="text-2xl font-bold mb-6">Minha Assinatura</h1>
-          <p>Esta página está disponível apenas para usuários de condomínios.</p>
-        </div>
-      </DashboardLayout>
-    );
-  }
-  
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedPlanId(null);
+  };
+
+  const handlePlanUpgrade = async () => {
+    if (!selectedPlanId) {
+      toast.error('Por favor, selecione um plano para atualizar.');
+      return;
+    }
+
+    try {
+      const selectedPlan = plans?.find(plan => plan.id === selectedPlanId);
+
+      if (!selectedPlan) {
+        toast.error('Plano selecionado não encontrado.');
+        return;
+      }
+
+      if (!user) {
+        toast.error('Usuário não autenticado.');
+        return;
+      }
+
+      const updatedUser = {
+        ...user,
+        planId: selectedPlan.id,
+        nomePlano: selectedPlan.name,
+        valorPlano: selectedPlan.price.toString(),
+      };
+
+      await updateSubscription(updatedUser);
+
+      toast.success('Plano atualizado com sucesso!');
+      handleCloseDialog();
+    } catch (error: any) {
+      console.error('Erro ao atualizar o plano:', error);
+      toast.error('Erro ao atualizar o plano. Por favor, tente novamente.');
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Minha Assinatura</h1>
-        
-        {condominiumData && (
-          <SubscriptionDetailsCard 
-            condominiumData={condominiumData}
-            user={{ matricula: user.matricula, email: user.email }}
-            formatCurrencyDisplay={formatCurrencyDisplay}
-            getCurrentPlanDetails={getPlanDetails}
-          />
-        )}
+        <h1 className="text-3xl font-bold mb-2">Minha Assinatura</h1>
+        <Separator className="mb-6" />
+
+        <SubscriptionDetailsCard
+          user={user}
+          subscriptionStatus={subscriptionStatus}
+          onUpgradePlan={handleOpenDialog}
+          isLoading={isLoadingPlans}
+        />
+
+        <PasswordChangeSection />
+
+        <PlanUpgradeDialog
+          isOpen={isDialogOpen}
+          onClose={handleCloseDialog}
+          onUpgrade={handlePlanUpgrade}
+          plans={plans}
+          selectedPlanId={selectedPlanId}
+          isLoading={isLoadingPlans}
+        />
       </div>
     </DashboardLayout>
   );
