@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -914,5 +915,79 @@ export const AccountingReport = () => {
         </div>
       </CardContent>
       
-      <
-
+      <Dialog open={showSendDialog} onOpenChange={setShowSendDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Prestar Contas aos Moradores</DialogTitle>
+            <DialogDescription>
+              Envie o relatório de prestação de contas para todos os moradores do condomínio via e-mail ou WhatsApp.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="sendEmail" 
+                checked={sendViaEmail} 
+                onCheckedChange={(checked) => setSendViaEmail(checked === true)} 
+              />
+              <Label htmlFor="sendEmail">Enviar via E-mail</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="sendWhatsapp" 
+                checked={sendViaWhatsapp} 
+                onCheckedChange={(checked) => setSendViaWhatsapp(checked === true)} 
+              />
+              <Label htmlFor="sendWhatsapp">Enviar via WhatsApp</Label>
+            </div>
+          </div>
+          
+          <DialogFooter className="sm:justify-between">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowSendDialog(false)}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="button" 
+              onClick={() => setShowConfirmDialog(true)}
+              disabled={!sendViaEmail && !sendViaWhatsapp}
+            >
+              Continuar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar envio do relatório?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O relatório de prestação de contas será enviado para todos os moradores cadastrados
+              {sendViaEmail && sendViaWhatsapp 
+                ? ' via e-mail e WhatsApp' 
+                : sendViaEmail 
+                  ? ' via e-mail' 
+                  : ' via WhatsApp'
+              }.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSendReport}
+              disabled={isSending}
+            >
+              {isSending ? 'Enviando...' : 'Confirmar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Card>
+  );
+};
