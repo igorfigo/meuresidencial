@@ -16,6 +16,15 @@ interface User {
   nomeCondominio?: string;
   condominiums?: Condominium[];
   selectedCondominium?: string; // Storing the selected condominium matricula
+  
+  // Address related fields from condominium
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  cep?: string;
 }
 
 interface AppContextType {
@@ -98,6 +107,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         nomecondominio: string;
         nomelegal: string;
         emaillegal: string;
+        rua?: string;
+        numero?: string;
+        complemento?: string;
+        bairro?: string;
+        cidade?: string;
+        estado?: string;
+        cep?: string;
       }>;
       
       // Remove duplicates if any (in case a condominium has the same email and matricula)
@@ -122,7 +138,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           matricula: firstCondo.matricula,
           nomeCondominio: firstCondo.nomecondominio || 'Condomínio',
           condominiums: condosFormatted,
-          selectedCondominium: firstCondo.matricula
+          selectedCondominium: firstCondo.matricula,
+          // Add address details
+          rua: firstCondo.rua,
+          numero: firstCondo.numero,
+          complemento: firstCondo.complemento,
+          bairro: firstCondo.bairro,
+          cidade: firstCondo.cidade,
+          estado: firstCondo.estado,
+          cep: firstCondo.cep,
         };
         
         setUser(managerUser);
@@ -149,16 +173,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const selectedCondo = user.condominiums.find(c => c.matricula === matricula);
     if (!selectedCondo) return;
     
-    const updatedUser = {
-      ...user,
-      matricula: selectedCondo.matricula,
-      nomeCondominio: selectedCondo.nomeCondominio,
-      selectedCondominium: selectedCondo.matricula
-    };
-    
-    setUser(updatedUser);
-    localStorage.setItem('condoUser', JSON.stringify(updatedUser));
-    toast.success(`Condomínio alterado para ${selectedCondo.nomeCondominio}`);
+    // Need to get the full condominium data to include address details
+    supabase.from('condominiums')
+      .select('*')
+      .eq('matricula', matricula)
+      .single()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          console.error("Error fetching condominium details:", error);
+          return;
+        }
+        
+        const updatedUser = {
+          ...user,
+          matricula: selectedCondo.matricula,
+          nomeCondominio: selectedCondo.nomeCondominio,
+          selectedCondominium: selectedCondo.matricula,
+          // Add address details from fetched data
+          rua: data.rua,
+          numero: data.numero,
+          complemento: data.complemento,
+          bairro: data.bairro,
+          cidade: data.cidade,
+          estado: data.estado,
+          cep: data.cep,
+        };
+        
+        setUser(updatedUser);
+        localStorage.setItem('condoUser', JSON.stringify(updatedUser));
+        toast.success(`Condomínio alterado para ${selectedCondo.nomeCondominio}`);
+      });
   };
 
   const logout = () => {

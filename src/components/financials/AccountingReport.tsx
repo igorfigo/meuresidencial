@@ -209,23 +209,26 @@ export const AccountingReport = () => {
       doc.setFont('helvetica', 'normal');
       doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, pageWidth / 2, yPosition + 15, { align: 'center' });
       
-      // Add condominium address
-      if (user?.enderecoCondominio) {
-        doc.text(`Endereço: ${user.enderecoCondominio}`, pageWidth / 2, yPosition + 25, { align: 'center' });
-      } else if (user?.logradouro) {
-        // Fallback to individual address fields if they exist
+      // Prepare address text
+      let addressText = "Endereço não disponível";
+      
+      if (user) {
+        // Collect address parts from the available user data
         const addressParts = [];
-        if (user.logradouro) addressParts.push(user.logradouro);
+        if (user.rua) addressParts.push(user.rua);
         if (user.numero) addressParts.push(user.numero);
         if (user.complemento) addressParts.push(user.complemento);
         if (user.bairro) addressParts.push(user.bairro);
         if (user.cidade) addressParts.push(user.cidade);
-        if (user.uf) addressParts.push(user.uf);
+        if (user.estado) addressParts.push(user.estado);
         if (user.cep) addressParts.push(user.cep);
         
-        const addressStr = addressParts.join(', ');
-        doc.text(`Endereço: ${addressStr}`, pageWidth / 2, yPosition + 25, { align: 'center' });
+        if (addressParts.length > 0) {
+          addressText = addressParts.join(', ');
+        }
       }
+      
+      doc.text(`Endereço: ${addressText}`, pageWidth / 2, yPosition + 25, { align: 'center' });
       
       yPosition += lineHeight * 6;
       
