@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { supabaseAdmin } from "../_shared/supabase-admin.ts";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -38,9 +39,9 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to fetch residents: ${residentsError.message}`);
     }
 
-    const validEmails = residents
-      ?.filter(resident => resident.email && resident.email.includes('@'))
-      .map(resident => resident.email) || [];
+    const validResidents = residents?.filter(resident => resident.email && resident.email.includes('@')) || [];
+    const validEmails = validResidents.map(resident => resident.email);
+    const sentUnits = validResidents.map(resident => resident.unidade).filter(Boolean);
 
     if (validEmails.length === 0) {
       return new Response(
@@ -120,8 +121,37 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Send emails to all residents (simulated for now)
-    console.log(`Would send emails to ${validEmails.length} residents`);
+    // Configuração do cliente SMTP
+    const client = new SMTPClient({
+      connection: {
+        hostname: "smtp.hostinger.com",
+        port: 465,
+        tls: true,
+        auth: {
+          username: "noreply@meuresidencial.com",
+          password: "Bigdream@2025",
+        },
+      },
+    });
+
+    // Send emails to all residents
+    console.log(`Sending emails to ${validEmails.length} residents`);
+    
+    try {
+      await client.send({
+        from: "Prestação de Contas <noreply@meuresidencial.com>",
+        bcc: validEmails,
+        subject: `Prestação de Contas - ${monthName} - ${condominiumName}`,
+        html: emailContent,
+      });
+      
+      await client.close();
+      
+      console.log('Emails enviados com sucesso');
+    } catch (emailError) {
+      console.error("Error sending emails:", emailError);
+      throw new Error(`Failed to send emails: ${emailError.message}`);
+    }
     
     // Log in database
     const { data: logData, error: logError } = await supabaseAdmin
@@ -130,7 +160,8 @@ const handler = async (req: Request): Promise<Response> => {
         report_month: month,
         matricula,
         sent_via: 'email',
-        sent_count: validEmails.length
+        sent_count: validEmails.length,
+        units: sentUnits.join(', ')
       })
       .select();
     
@@ -144,7 +175,8 @@ const handler = async (req: Request): Promise<Response> => {
         success: true,
         message: `Relatório enviado com sucesso para ${validEmails.length} moradores.`,
         recipients: validEmails.length,
-        logId: logData?.[0]?.id
+        logId: logData?.[0]?.id,
+        units: sentUnits
       }),
       {
         status: 200,

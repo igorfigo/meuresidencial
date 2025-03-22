@@ -15,14 +15,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-// Helper interfaces
 interface ReportLog {
   id: string;
   report_month: string;
   sent_via: string;
   sent_count: number;
   created_at: string;
+  units?: string;
 }
 
 export const AccountingReport = () => {
@@ -711,7 +712,23 @@ export const AccountingReport = () => {
                               {log.sent_via === 'email' ? 'Email' : 'WhatsApp'}
                             </TableCell>
                             <TableCell>
-                              {log.sent_count} {log.sent_count === 1 ? 'morador' : 'moradores'}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="underline decoration-dotted cursor-help">
+                                      {log.sent_count} {log.sent_count === 1 ? 'morador' : 'moradores'}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="max-w-xs">
+                                      {log.units ? 
+                                        <>Unidades: {log.units}</> : 
+                                        <>Unidades não registradas</>
+                                      }
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -803,4 +820,3 @@ const getCategoryName = (category) => {
   
   return categoryMap[category] || category;
 };
-
