@@ -8,11 +8,43 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileDown } from 'lucide-react';
+import { 
+  FileDown, 
+  Mail, 
+  Loader2, 
+  Send, 
+  TrashIcon, 
+  AlertCircle, 
+  HistoryIcon,
+  WhatsappIcon,
+  HelpCircle 
+} from 'lucide-react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogTitle, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogFooter, 
+  DialogClose 
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useFinances } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
+import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import jsPDF from 'jspdf';
+import { supabase } from '@/integrations/supabase/client';
 
 const getLast12Months = () => {
   const months = [];
@@ -106,6 +138,15 @@ export const AccountingReport = () => {
   const [startBalance, setStartBalance] = useState('0,00');
   const [endBalance, setEndBalance] = useState('0,00');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sendVia, setSendVia] = useState<'email' | 'whatsapp' | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   
   const months = getLast12Months();
   
@@ -279,9 +320,9 @@ export const AccountingReport = () => {
         let currentX = margin;
         headers.forEach((header, i) => {
           // Center the header text within its column
-          const headerWidth = columnWidths[i];
-          doc.text(header, currentX + (headerWidth / 2), y - 1, { align: 'center' });
-          currentX += headerWidth;
+          const columnWidth = columnWidths[i];
+          doc.text(header, currentX + (columnWidth / 2), y - 1, { align: 'center' });
+          currentX += columnWidth;
         });
         
         return y + 4;
@@ -499,8 +540,117 @@ export const AccountingReport = () => {
       doc.save(fileName);
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao gerar o PDF. Por favor, tente novamente.");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const fetchHistory = async () => {
+    if (!user?.selectedCondominium) return;
+    
+    setIsLoadingHistory(true);
+    try {
+      const { data, error } = await supabase
+        .from('accounting_report_logs')
+        .select('*')
+        .eq('matricula', user.selectedCondominium)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setHistoryData(data || []);
+    } catch (error) {
+      console.error("Erro ao buscar histórico:", error);
+      toast.error("Erro ao carregar o histórico de envios.");
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const handleOpenSendDialog = () => {
+    setIsSendDialogOpen(true);
+    setSendVia(null);
+  };
+
+  const handleOptionSelect = (option: 'email' | 'whatsapp') => {
+    setSendVia(option);
+  };
+
+  const handleConfirmSend = () => {
+    setIsConfirmOpen(true);
+  };
+
+  const sendReport = async () => {
+    if (!sendVia || !user?.selectedCondominium) return;
+    
+    setIsSending(true);
+    setIsConfirmOpen(false);
+    
+    try {
+      // Generate PDF content for sending
+      const [year, month] = selectedMonth.split('-');
+      const monthDate = new Date(parseInt(year), parseInt(month) - 1);
+      const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' });
+      
+      // This would be a URL to where the PDF could be accessed by the residents
+      // For this example, we're just using a placeholder
+      const pdfUrl = `https://www.meuresidencial.com/relatorios/${user?.selectedCondominium}/prestacao_contas_${monthName.toLowerCase()}_${year}.pdf`;
+      
+      const { data, error } = await supabase.functions.invoke('send-accounting-report', {
+        body: {
+          matricula: user.selectedCondominium,
+          pdfUrl,
+          monthName,
+          year,
+          totalIncome: formatToBRL(getTotalIncome()),
+          totalExpense: formatToBRL(getTotalExpense()),
+          balance: endBalance,
+          sendVia
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast.success(data.message || "Relatório enviado com sucesso.");
+      setIsSendDialogOpen(false);
+      setSendVia(null);
+    } catch (error) {
+      console.error("Erro ao enviar relatório:", error);
+      toast.error(`Erro ao enviar relatório: ${error.message}`);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleOpenHistory = () => {
+    fetchHistory();
+    setHistoryDialogOpen(true);
+  };
+  
+  const confirmDeleteHistoryEntry = (id: string) => {
+    setDeleteId(id);
+    setIsDeleteConfirmOpen(true);
+  };
+  
+  const deleteHistoryEntry = async () => {
+    if (!deleteId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('accounting_report_logs')
+        .delete()
+        .eq('id', deleteId);
+        
+      if (error) throw error;
+      
+      toast.success("Registro removido com sucesso.");
+      setHistoryData(prev => prev.filter(item => item.id !== deleteId));
+    } catch (error) {
+      console.error("Erro ao excluir registro:", error);
+      toast.error("Erro ao excluir o registro.");
+    } finally {
+      setIsDeleteConfirmOpen(false);
+      setDeleteId(null);
     }
   };
   
@@ -528,14 +678,34 @@ export const AccountingReport = () => {
             </Select>
           </div>
           
-          <Button 
-            onClick={generatePDF} 
-            disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
-            className="flex items-center gap-2"
-          >
-            <FileDown size={16} />
-            {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={handleOpenHistory}
+              className="flex items-center gap-2"
+            >
+              <HistoryIcon size={16} />
+              Histórico de Envios
+            </Button>
+            
+            <Button 
+              onClick={generatePDF} 
+              disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
+              className="flex items-center gap-2"
+            >
+              <FileDown size={16} />
+              {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
+            </Button>
+            
+            <Button 
+              onClick={handleOpenSendDialog} 
+              disabled={isGenerating || isSending || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+            >
+              <Send size={16} />
+              Prestar Contas aos Moradores
+            </Button>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -674,6 +844,212 @@ export const AccountingReport = () => {
           </div>
         </div>
       </CardContent>
+
+      {/* Send Report Dialog */}
+      <Dialog open={isSendDialogOpen} onOpenChange={setIsSendDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Prestar Contas aos Moradores</DialogTitle>
+            <DialogDescription>
+              Selecione uma opção para enviar a prestação de contas aos moradores do condomínio.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 gap-4 py-4">
+            <div 
+              className={`p-4 border rounded-lg cursor-pointer transition-colors flex gap-3 items-center ${sendVia === 'email' ? 'bg-brand-50 border-brand-300' : 'hover:bg-gray-50'}`}
+              onClick={() => handleOptionSelect('email')}
+            >
+              <Mail className={`${sendVia === 'email' ? 'text-brand-600' : 'text-gray-500'}`} />
+              <div>
+                <h3 className="font-medium">Enviar E-mail aos Moradores</h3>
+                <p className="text-sm text-gray-500">
+                  Enviar prestação de contas por e-mail para todos os moradores cadastrados.
+                </p>
+              </div>
+            </div>
+
+            <div 
+              className={`p-4 border rounded-lg cursor-pointer transition-colors flex gap-3 items-center ${sendVia === 'whatsapp' ? 'bg-brand-50 border-brand-300' : 'hover:bg-gray-50'}`}
+              onClick={() => handleOptionSelect('whatsapp')}
+            >
+              <WhatsappIcon className={`${sendVia === 'whatsapp' ? 'text-brand-600' : 'text-gray-500'}`} />
+              <div>
+                <h3 className="font-medium">Enviar WhatsApp aos Moradores</h3>
+                <p className="text-sm text-gray-500">
+                  Enviar prestação de contas via WhatsApp para todos os moradores cadastrados.
+                </p>
+                <p className="text-xs text-yellow-600 mt-1 italic">
+                  Funcionalidade em desenvolvimento
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="sm:justify-between">
+            <DialogClose asChild>
+              <Button type="button" variant="cancel">
+                Cancelar
+              </Button>
+            </DialogClose>
+            <Button
+              type="button"
+              onClick={handleConfirmSend}
+              disabled={!sendVia || isSending}
+              className={sendVia === 'whatsapp' ? 'bg-green-600 hover:bg-green-700' : ''}
+            >
+              {isSending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Continuar
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-yellow-500" />
+              Confirmar envio
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está prestes a enviar a prestação de contas para todos os moradores. 
+              Esta ação não poderá ser desfeita e ficará registrada no histórico de envios.
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800 text-sm">
+                Apenas moradores com e-mail cadastrado receberão a prestação de contas.
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={sendReport}
+              className={sendVia === 'whatsapp' ? 'bg-green-600 hover:bg-green-700' : 'bg-brand-600 hover:bg-brand-700'}
+            >
+              {sendVia === 'email' ? 'Enviar por E-mail' : 'Enviar por WhatsApp'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* History Dialog */}
+      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Histórico de Envios</DialogTitle>
+            <DialogDescription>
+              Histórico dos relatórios de prestação de contas enviados aos moradores.
+            </DialogDescription>
+          </DialogHeader>
+
+          {isLoadingHistory ? (
+            <div className="py-8 flex justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+            </div>
+          ) : historyData.length === 0 ? (
+            <div className="py-8 flex flex-col items-center text-center">
+              <HelpCircle className="h-12 w-12 text-gray-300 mb-2" />
+              <p className="text-gray-500">Nenhum registro de envio encontrado.</p>
+              <p className="text-gray-400 text-sm mt-2">
+                Os registros aparecerão aqui quando você enviar relatórios aos moradores.
+              </p>
+            </div>
+          ) : (
+            <div className="max-h-96 overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Mês de Referência</TableHead>
+                    <TableHead>Enviado via</TableHead>
+                    <TableHead>Destinatários</TableHead>
+                    <TableHead>Data de Envio</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {historyData.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell className="font-medium">{record.report_month}</TableCell>
+                      <TableCell>
+                        {record.sent_via === 'email' ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            <Mail className="h-3 w-3 mr-1" /> Email
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <WhatsappIcon className="h-3 w-3 mr-1" /> WhatsApp
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip>
+                          <TooltipTrigger className="underline decoration-dotted">
+                            {record.sent_count} moradores
+                          </TooltipTrigger>
+                          <TooltipContent className="p-2 bg-white border shadow-md rounded-md max-w-xs">
+                            <div className="font-normal text-xs">
+                              <span className="font-semibold">Unidades enviadas:</span><br/>
+                              {record.sent_units || "Não especificado"}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        {record.created_at 
+                          ? format(new Date(record.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+                          : "-"
+                        }
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => confirmDeleteHistoryEntry(record.id)}
+                        >
+                          <span className="sr-only">Excluir</span>
+                          <TrashIcon className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir registro de envio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O registro será removido permanentemente do histórico de envios.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteHistoryEntry}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
