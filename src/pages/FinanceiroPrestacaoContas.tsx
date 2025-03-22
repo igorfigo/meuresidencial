@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import AccountingReport from '@/components/financials/AccountingReport';
+import { AccountingReport } from '@/components/financials/AccountingReport';
 import { useFinances } from '@/hooks/use-finances';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
