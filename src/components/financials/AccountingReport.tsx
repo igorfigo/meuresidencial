@@ -209,19 +209,19 @@ export const AccountingReport = () => {
       doc.setFont('helvetica', 'normal');
       doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, pageWidth / 2, yPosition + 15, { align: 'center' });
       
-      // Prepare address text
+      // Prepare address text without CEP and bairro
       let addressText = "Endereço não disponível";
       
       if (user) {
-        // Collect address parts from the available user data
+        // Collect address parts from the available user data, excluding CEP and bairro
         const addressParts = [];
         if (user.rua) addressParts.push(user.rua);
         if (user.numero) addressParts.push(user.numero);
         if (user.complemento) addressParts.push(user.complemento);
-        if (user.bairro) addressParts.push(user.bairro);
+        // Bairro is now removed
         if (user.cidade) addressParts.push(user.cidade);
         if (user.estado) addressParts.push(user.estado);
-        if (user.cep) addressParts.push(user.cep);
+        // CEP is now removed
         
         if (addressParts.length > 0) {
           addressText = addressParts.join(', ');
@@ -279,9 +279,9 @@ export const AccountingReport = () => {
         let currentX = margin;
         headers.forEach((header, i) => {
           // Center the header text within its column
-          const headerWidth = columnWidths[i];
-          doc.text(header, currentX + (headerWidth / 2), y - 1, { align: 'center' });
-          currentX += headerWidth;
+          const columnWidth = columnWidths[i];
+          doc.text(header, currentX + (columnWidth / 2), y - 1, { align: 'center' });
+          currentX += columnWidth;
         });
         
         return y + 4;
