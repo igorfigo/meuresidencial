@@ -8,10 +8,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileDown } from 'lucide-react';
+import { 
+  FileDown, 
+  Send, 
+  Mail, 
+  MessageSquare, 
+  Trash2, 
+  AlertTriangle 
+} from 'lucide-react';
 import { useFinances } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import jsPDF from 'jspdf';
 
 const getLast12Months = () => {
@@ -106,6 +117,14 @@ export const AccountingReport = () => {
   const [startBalance, setStartBalance] = useState('0,00');
   const [endBalance, setEndBalance] = useState('0,00');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [sendOptions, setSendOptions] = useState({
+    email: false,
+    whatsapp: false
+  });
+  const [isSending, setIsSending] = useState(false);
+  const [reportLogs, setReportLogs] = useState<any[]>([]);
+  const [isDeletingLog, setIsDeletingLog] = useState<string | null>(null);
   
   const months = getLast12Months();
   
@@ -142,6 +161,31 @@ export const AccountingReport = () => {
       setEndBalance(balance?.balance || formatToBRL(currentBalance));
     }
   }, [isLoading, selectedMonth, incomes, expenses, balance]);
+  
+  useEffect(() => {
+    fetchReportLogs();
+  }, [user?.selectedCondominium]);
+  
+  const fetchReportLogs = async () => {
+    if (!user?.selectedCondominium) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('accounting_report_logs')
+        .select('*')
+        .eq('matricula', user.selectedCondominium)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching report logs:', error);
+        return;
+      }
+      
+      setReportLogs(data || []);
+    } catch (error) {
+      console.error('Error in fetchReportLogs:', error);
+    }
+  };
   
   const handleMonthChange = (value: string) => {
     setSelectedMonth(value);
@@ -496,11 +540,104 @@ export const AccountingReport = () => {
                pageWidth / 2, pageHeight - 5, { align: 'center' });
       
       const fileName = `prestacao_contas_${monthName.toLowerCase()}_${year}.pdf`;
+      
+      // Return the PDF data as base64 for sending emails
+      const pdfData = doc.output('datauristring');
+      
+      // Save the PDF file for normal download
       doc.save(fileName);
+      
+      return pdfData;
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
+      return null;
     } finally {
       setIsGenerating(false);
+    }
+  };
+  
+  const sendReportToResidents = async () => {
+    if (!sendOptions.email && !sendOptions.whatsapp) {
+      toast.error('Selecione pelo menos uma opção de envio');
+      return;
+    }
+    
+    setIsSending(true);
+    
+    try {
+      const [year, month] = selectedMonth.split('-');
+      const monthDate = new Date(parseInt(year), parseInt(month) - 1);
+      const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' });
+      
+      // Generate the PDF report
+      const pdfData = generatePDF();
+      
+      if (!pdfData) {
+        toast.error('Erro ao gerar o relatório PDF');
+        return;
+      }
+      
+      if (sendOptions.email) {
+        const response = await fetch('https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-accounting-report', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabase.auth.session()?.access_token}`
+          },
+          body: JSON.stringify({
+            matricula: user?.selectedCondominium,
+            report_month: monthName,
+            report_year: year,
+            report_data: pdfData
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          toast.success(`Relatório enviado com sucesso para ${result.sent_count} moradores por e-mail`);
+          fetchReportLogs();
+        } else {
+          toast.error(`Erro ao enviar relatório: ${result.error}`);
+        }
+      }
+      
+      if (sendOptions.whatsapp) {
+        // This would be implemented when the WhatsApp integration is ready
+        toast.info('Envio por WhatsApp será implementado em breve');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar relatório:', error);
+      toast.error(`Erro ao enviar relatório: ${error.message}`);
+    } finally {
+      setIsSending(false);
+      setIsDialogOpen(false);
+      setSendOptions({ email: false, whatsapp: false });
+    }
+  };
+  
+  const deleteReportLog = async (logId: string) => {
+    if (!logId) return;
+    
+    setIsDeletingLog(logId);
+    
+    try {
+      const { error } = await supabase
+        .from('accounting_report_logs')
+        .delete()
+        .eq('id', logId);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Registro de envio excluído com sucesso');
+      setReportLogs(prev => prev.filter(log => log.id !== logId));
+    } catch (error) {
+      console.error('Erro ao excluir registro de envio:', error);
+      toast.error(`Erro ao excluir registro: ${error.message}`);
+    } finally {
+      setIsDeletingLog(null);
     }
   };
   
@@ -509,171 +646,309 @@ export const AccountingReport = () => {
   }
   
   return (
-    <Card className="mb-8">
-      <CardContent className="pt-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-          <div className="w-full sm:w-64 mb-4 sm:mb-0">
-            <Label htmlFor="month" className="mb-1 block">Mês de Referência</Label>
-            <Select value={selectedMonth} onValueChange={handleMonthChange}>
-              <SelectTrigger id="month">
-                <SelectValue placeholder="Selecione o mês" />
-              </SelectTrigger>
-              <SelectContent>
-                {months.map(month => (
-                  <SelectItem key={month.value} value={month.value}>
-                    {month.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <>
+      <Card className="mb-8">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+            <div className="w-full sm:w-64 mb-4 sm:mb-0">
+              <Label htmlFor="month" className="mb-1 block">Mês de Referência</Label>
+              <Select value={selectedMonth} onValueChange={handleMonthChange}>
+                <SelectTrigger id="month">
+                  <SelectValue placeholder="Selecione o mês" />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map(month => (
+                    <SelectItem key={month.value} value={month.value}>
+                      {month.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button 
+                onClick={generatePDF} 
+                disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
+                className="flex items-center gap-2"
+              >
+                <FileDown size={16} />
+                {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
+              </Button>
+              
+              <Button 
+                onClick={() => setIsDialogOpen(true)} 
+                disabled={isGenerating || isSending || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
+                className="flex items-center gap-2 bg-green-500 hover:bg-green-600"
+                variant="default"
+              >
+                <Send size={16} />
+                Prestar Contas aos Moradores
+              </Button>
+            </div>
           </div>
           
-          <Button 
-            onClick={generatePDF} 
-            disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
-            className="flex items-center gap-2"
-          >
-            <FileDown size={16} />
-            {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <Card>
-            <CardContent className="pt-4">
-              <h3 className="font-medium text-lg mb-2">Resumo do Mês</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Saldo Inicial (Estimado):</span>
-                  <span className="font-medium">R$ {startBalance}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <Card>
+              <CardContent className="pt-4">
+                <h3 className="font-medium text-lg mb-2">Resumo do Mês</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center py-1 border-b">
+                    <span className="text-sm text-gray-600">Saldo Inicial (Estimado):</span>
+                    <span className="font-medium">R$ {startBalance}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b">
+                    <span className="text-sm text-gray-600">Total de Receitas:</span>
+                    <span className="font-medium text-green-600">+ R$ {formatToBRL(getTotalIncome())}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b">
+                    <span className="text-sm text-gray-600">Total de Despesas:</span>
+                    <span className="font-medium text-red-600">- R$ {formatToBRL(getTotalExpense())}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-sm text-gray-600">Saldo Final:</span>
+                    <span className="font-bold text-brand-600">R$ {endBalance}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Total de Receitas:</span>
-                  <span className="font-medium text-green-600">+ R$ {formatToBRL(getTotalIncome())}</span>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-4">
+                <h3 className="font-medium text-lg mb-2">Detalhes</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center py-1 border-b">
+                    <span className="text-sm text-gray-600">Mês de Referência:</span>
+                    <span className="font-medium">{format(parse(selectedMonth + '-01', 'yyyy-MM-dd', new Date()), 'MMMM yyyy', { locale: ptBR })}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b">
+                    <span className="text-sm text-gray-600">Receitas Registradas:</span>
+                    <span className="font-medium">{monthlyIncomes.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b">
+                    <span className="text-sm text-gray-600">Despesas Registradas:</span>
+                    <span className="font-medium">{monthlyExpenses.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-sm text-gray-600">Resultado do Mês:</span>
+                    <span className={`font-medium ${getTotalIncome() - getTotalExpense() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      R$ {formatToBRL(getTotalIncome() - getTotalExpense())}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Total de Despesas:</span>
-                  <span className="font-medium text-red-600">- R$ {formatToBRL(getTotalExpense())}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-sm text-gray-600">Saldo Final:</span>
-                  <span className="font-bold text-brand-600">R$ {endBalance}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
           
-          <Card>
-            <CardContent className="pt-4">
-              <h3 className="font-medium text-lg mb-2">Detalhes</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Mês de Referência:</span>
-                  <span className="font-medium">{format(parse(selectedMonth + '-01', 'yyyy-MM-dd', new Date()), 'MMMM yyyy', { locale: ptBR })}</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Receitas Registradas:</span>
-                  <span className="font-medium">{monthlyIncomes.length}</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Despesas Registradas:</span>
-                  <span className="font-medium">{monthlyExpenses.length}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-sm text-gray-600">Resultado do Mês:</span>
-                  <span className={`font-medium ${getTotalIncome() - getTotalExpense() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    R$ {formatToBRL(getTotalIncome() - getTotalExpense())}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="space-y-8">
-          <div>
-            <h3 className="font-medium text-lg mb-4">Receitas do Mês</h3>
-            {monthlyIncomes.length > 0 ? (
-              <div className="rounded-md border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Mês Referência</TableHead>
-                      <TableHead>Data de Pagamento</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {monthlyIncomes.map(income => (
-                      <TableRow key={income.id}>
-                        <TableCell className="font-medium">{getCategoryName(income.category)}</TableCell>
-                        <TableCell>{income.unit || '-'}</TableCell>
-                        <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>
-                        <TableCell>{formatDateToBR(income.payment_date) || '-'}</TableCell>
-                        <TableCell className="text-right text-green-600">R$ {income.amount}</TableCell>
+          {reportLogs.length > 0 && (
+            <Card className="mb-6">
+              <CardContent className="pt-4">
+                <h3 className="font-medium text-lg mb-3">Histórico de Prestações de Contas Enviadas</h3>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data de Envio</TableHead>
+                        <TableHead>Período</TableHead>
+                        <TableHead>Meio de Envio</TableHead>
+                        <TableHead>Unidades Enviadas</TableHead>
+                        <TableHead>Qtd. Enviada</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell colSpan={4} className="font-bold">Total</TableCell>
-                      <TableCell className="text-right font-bold text-green-600">
-                        R$ {formatToBRL(getTotalIncome())}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {reportLogs.map(log => (
+                        <TableRow key={log.id}>
+                          <TableCell>{formatDateToBR(log.created_at)}</TableCell>
+                          <TableCell>{log.report_month}</TableCell>
+                          <TableCell>
+                            {log.sent_via === 'email' ? (
+                              <div className="flex items-center gap-1">
+                                <Mail size={14} className="text-blue-500" />
+                                <span>E-mail</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <MessageSquare size={14} className="text-green-500" />
+                                <span>WhatsApp</span>
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>{log.sent_units || '-'}</TableCell>
+                          <TableCell>{log.sent_count}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => deleteReportLog(log.id)}
+                              disabled={Boolean(isDeletingLog)}
+                            >
+                              {isDeletingLog === log.id ? (
+                                <Skeleton className="h-5 w-5 rounded-full" />
+                              ) : (
+                                <Trash2 size={16} />
+                              )}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          <div className="space-y-8">
+            <div>
+              <h3 className="font-medium text-lg mb-4">Receitas do Mês</h3>
+              {monthlyIncomes.length > 0 ? (
+                <div className="rounded-md border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Categoria</TableHead>
+                        <TableHead>Unidade</TableHead>
+                        <TableHead>Mês Referência</TableHead>
+                        <TableHead>Data de Pagamento</TableHead>
+                        <TableHead className="text-right">Valor</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {monthlyIncomes.map(income => (
+                        <TableRow key={income.id}>
+                          <TableCell className="font-medium">{getCategoryName(income.category)}</TableCell>
+                          <TableCell>{income.unit || '-'}</TableCell>
+                          <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>
+                          <TableCell>{formatDateToBR(income.payment_date) || '-'}</TableCell>
+                          <TableCell className="text-right text-green-600">R$ {income.amount}</TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell colSpan={4} className="font-bold">Total</TableCell>
+                        <TableCell className="text-right font-bold text-green-600">
+                          R$ {formatToBRL(getTotalIncome())}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-gray-50 rounded-md border">
+                  <p className="text-gray-500">Nenhuma receita registrada para este mês</p>
+                </div>
+              )}
+            </div>
+            
+            <div>
+              <h3 className="font-medium text-lg mb-4">Despesas do Mês</h3>
+              {monthlyExpenses.length > 0 ? (
+                <div className="rounded-md border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Categoria</TableHead>
+                        <TableHead>Unidade</TableHead>
+                        <TableHead>Mês Referência</TableHead>
+                        <TableHead>Vencimento</TableHead>
+                        <TableHead>Data de Pagamento</TableHead>
+                        <TableHead className="text-right">Valor</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {monthlyExpenses.map(expense => (
+                        <TableRow key={expense.id}>
+                          <TableCell className="font-medium">{getCategoryName(expense.category)}</TableCell>
+                          <TableCell>{expense.unit || '-'}</TableCell>
+                          <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>
+                          <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>
+                          <TableCell>{formatDateToBR(expense.payment_date) || '-'}</TableCell>
+                          <TableCell className="text-right text-red-600">R$ {expense.amount}</TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell colSpan={5} className="font-bold">Total</TableCell>
+                        <TableCell className="text-right font-bold text-red-600">
+                          R$ {formatToBRL(getTotalExpense())}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-gray-50 rounded-md border">
+                  <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Prestar Contas aos Moradores</DialogTitle>
+            <DialogDescription>
+              Selecione as opções de envio da prestação de contas aos moradores. Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="send-email" 
+                checked={sendOptions.email}
+                onCheckedChange={(checked) => 
+                  setSendOptions(prev => ({...prev, email: checked === true}))
+                }
+              />
+              <label htmlFor="send-email" className="flex gap-2 items-center cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <Mail size={16} className="text-blue-500" />
+                Enviar por E-mail aos Moradores
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="send-whatsapp" 
+                checked={sendOptions.whatsapp}
+                disabled={true} // Temporarily disabled as WhatsApp integration is not implemented yet
+                onCheckedChange={(checked) => 
+                  setSendOptions(prev => ({...prev, whatsapp: checked === true}))
+                }
+              />
+              <label htmlFor="send-whatsapp" className="flex gap-2 items-center cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <MessageSquare size={16} className="text-green-500" />
+                Enviar por WhatsApp aos Moradores (em breve)
+              </label>
+            </div>
+            
+            <div className="bg-amber-50 border border-amber-100 rounded-md p-3 mt-2">
+              <div className="flex items-start gap-2">
+                <AlertTriangle size={18} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-amber-800">
+                  Atenção: O relatório será enviado para todos os moradores que possuem email cadastrado no sistema. Esta ação não pode ser desfeita.
+                </p>
               </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-md border">
-                <p className="text-gray-500">Nenhuma receita registrada para este mês</p>
-              </div>
-            )}
+            </div>
           </div>
           
-          <div>
-            <h3 className="font-medium text-lg mb-4">Despesas do Mês</h3>
-            {monthlyExpenses.length > 0 ? (
-              <div className="rounded-md border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Mês Referência</TableHead>
-                      <TableHead>Vencimento</TableHead>
-                      <TableHead>Data de Pagamento</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {monthlyExpenses.map(expense => (
-                      <TableRow key={expense.id}>
-                        <TableCell className="font-medium">{getCategoryName(expense.category)}</TableCell>
-                        <TableCell>{expense.unit || '-'}</TableCell>
-                        <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>
-                        <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>
-                        <TableCell>{formatDateToBR(expense.payment_date) || '-'}</TableCell>
-                        <TableCell className="text-right text-red-600">R$ {expense.amount}</TableCell>
-                      </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell colSpan={5} className="font-bold">Total</TableCell>
-                      <TableCell className="text-right font-bold text-red-600">
-                        R$ {formatToBRL(getTotalExpense())}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-md border">
-                <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSending}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={sendReportToResidents} 
+              disabled={isSending || (!sendOptions.email && !sendOptions.whatsapp)}
+              className="bg-green-500 hover:bg-green-600"
+            >
+              {isSending ? 'Enviando...' : 'Enviar Prestação de Contas'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
