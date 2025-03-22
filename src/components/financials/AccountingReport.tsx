@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -7,43 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  FileDown, 
-  Mail, 
-  Loader2, 
-  Send, 
-  TrashIcon, 
-  AlertCircle, 
-  HistoryIcon,
-  MessageSquare,
-  HelpCircle 
-} from 'lucide-react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogTitle, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogFooter, 
-  DialogClose 
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { FileDown } from 'lucide-react';
 import { useFinances } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
-import { toast } from 'sonner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import jsPDF from 'jspdf';
-import { supabase } from '@/integrations/supabase/client';
 
 const getLast12Months = () => {
   const months = [];
@@ -137,15 +106,6 @@ export const AccountingReport = () => {
   const [startBalance, setStartBalance] = useState('0,00');
   const [endBalance, setEndBalance] = useState('0,00');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [sendVia, setSendVia] = useState<'email' | 'whatsapp' | null>(null);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
-  const [historyData, setHistoryData] = useState<any[]>([]);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   
   const months = getLast12Months();
   
@@ -319,9 +279,9 @@ export const AccountingReport = () => {
         let currentX = margin;
         headers.forEach((header, i) => {
           // Center the header text within its column
-          const columnWidth = columnWidths[i];
-          doc.text(header, currentX + (columnWidth / 2), y - 1, { align: 'center' });
-          currentX += columnWidth;
+          const headerWidth = columnWidths[i];
+          doc.text(header, currentX + (headerWidth / 2), y - 1, { align: 'center' });
+          currentX += headerWidth;
         });
         
         return y + 4;
@@ -539,117 +499,8 @@ export const AccountingReport = () => {
       doc.save(fileName);
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
-      toast.error("Erro ao gerar o PDF. Por favor, tente novamente.");
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const fetchHistory = async () => {
-    if (!user?.selectedCondominium) return;
-    
-    setIsLoadingHistory(true);
-    try {
-      const { data, error } = await supabase
-        .from('accounting_report_logs')
-        .select('*')
-        .eq('matricula', user.selectedCondominium)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setHistoryData(data || []);
-    } catch (error) {
-      console.error("Erro ao buscar histórico:", error);
-      toast.error("Erro ao carregar o histórico de envios.");
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  };
-
-  const handleOpenSendDialog = () => {
-    setIsSendDialogOpen(true);
-    setSendVia(null);
-  };
-
-  const handleOptionSelect = (option: 'email' | 'whatsapp') => {
-    setSendVia(option);
-  };
-
-  const handleConfirmSend = () => {
-    setIsConfirmOpen(true);
-  };
-
-  const sendReport = async () => {
-    if (!sendVia || !user?.selectedCondominium) return;
-    
-    setIsSending(true);
-    setIsConfirmOpen(false);
-    
-    try {
-      // Generate PDF content for sending
-      const [year, month] = selectedMonth.split('-');
-      const monthDate = new Date(parseInt(year), parseInt(month) - 1);
-      const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' });
-      
-      // This would be a URL to where the PDF could be accessed by the residents
-      // For this example, we're just using a placeholder
-      const pdfUrl = `https://www.meuresidencial.com/relatorios/${user?.selectedCondominium}/prestacao_contas_${monthName.toLowerCase()}_${year}.pdf`;
-      
-      const { data, error } = await supabase.functions.invoke('send-accounting-report', {
-        body: {
-          matricula: user.selectedCondominium,
-          pdfUrl,
-          monthName,
-          year,
-          totalIncome: formatToBRL(getTotalIncome()),
-          totalExpense: formatToBRL(getTotalExpense()),
-          balance: endBalance,
-          sendVia
-        }
-      });
-      
-      if (error) throw error;
-      
-      toast.success(data.message || "Relatório enviado com sucesso.");
-      setIsSendDialogOpen(false);
-      setSendVia(null);
-    } catch (error) {
-      console.error("Erro ao enviar relatório:", error);
-      toast.error(`Erro ao enviar relatório: ${error.message}`);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  const handleOpenHistory = () => {
-    fetchHistory();
-    setHistoryDialogOpen(true);
-  };
-  
-  const confirmDeleteHistoryEntry = (id: string) => {
-    setDeleteId(id);
-    setIsDeleteConfirmOpen(true);
-  };
-  
-  const deleteHistoryEntry = async () => {
-    if (!deleteId) return;
-    
-    try {
-      const { error } = await supabase
-        .from('accounting_report_logs')
-        .delete()
-        .eq('id', deleteId);
-        
-      if (error) throw error;
-      
-      toast.success("Registro removido com sucesso.");
-      setHistoryData(prev => prev.filter(item => item.id !== deleteId));
-    } catch (error) {
-      console.error("Erro ao excluir registro:", error);
-      toast.error("Erro ao excluir o registro.");
-    } finally {
-      setIsDeleteConfirmOpen(false);
-      setDeleteId(null);
     }
   };
   
@@ -677,34 +528,14 @@ export const AccountingReport = () => {
             </Select>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              onClick={handleOpenHistory}
-              className="flex items-center gap-2"
-            >
-              <HistoryIcon size={16} />
-              Histórico de Envios
-            </Button>
-            
-            <Button 
-              onClick={generatePDF} 
-              disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
-              className="flex items-center gap-2"
-            >
-              <FileDown size={16} />
-              {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
-            </Button>
-            
-            <Button 
-              onClick={handleOpenSendDialog} 
-              disabled={isGenerating || isSending || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-            >
-              <Send size={16} />
-              Prestar Contas aos Moradores
-            </Button>
-          </div>
+          <Button 
+            onClick={generatePDF} 
+            disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
+            className="flex items-center gap-2"
+          >
+            <FileDown size={16} />
+            {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
+          </Button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -727,3 +558,122 @@ export const AccountingReport = () => {
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-sm text-gray-600">Saldo Final:</span>
                   <span className="font-bold text-brand-600">R$ {endBalance}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-4">
+              <h3 className="font-medium text-lg mb-2">Detalhes</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center py-1 border-b">
+                  <span className="text-sm text-gray-600">Mês de Referência:</span>
+                  <span className="font-medium">{format(parse(selectedMonth + '-01', 'yyyy-MM-dd', new Date()), 'MMMM yyyy', { locale: ptBR })}</span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b">
+                  <span className="text-sm text-gray-600">Receitas Registradas:</span>
+                  <span className="font-medium">{monthlyIncomes.length}</span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b">
+                  <span className="text-sm text-gray-600">Despesas Registradas:</span>
+                  <span className="font-medium">{monthlyExpenses.length}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-sm text-gray-600">Resultado do Mês:</span>
+                  <span className={`font-medium ${getTotalIncome() - getTotalExpense() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    R$ {formatToBRL(getTotalIncome() - getTotalExpense())}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="space-y-8">
+          <div>
+            <h3 className="font-medium text-lg mb-4">Receitas do Mês</h3>
+            {monthlyIncomes.length > 0 ? (
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Unidade</TableHead>
+                      <TableHead>Mês Referência</TableHead>
+                      <TableHead>Data de Pagamento</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {monthlyIncomes.map(income => (
+                      <TableRow key={income.id}>
+                        <TableCell className="font-medium">{getCategoryName(income.category)}</TableCell>
+                        <TableCell>{income.unit || '-'}</TableCell>
+                        <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(income.payment_date) || '-'}</TableCell>
+                        <TableCell className="text-right text-green-600">R$ {income.amount}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={4} className="font-bold">Total</TableCell>
+                      <TableCell className="text-right font-bold text-green-600">
+                        R$ {formatToBRL(getTotalIncome())}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-md border">
+                <p className="text-gray-500">Nenhuma receita registrada para este mês</p>
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <h3 className="font-medium text-lg mb-4">Despesas do Mês</h3>
+            {monthlyExpenses.length > 0 ? (
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Unidade</TableHead>
+                      <TableHead>Mês Referência</TableHead>
+                      <TableHead>Vencimento</TableHead>
+                      <TableHead>Data de Pagamento</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {monthlyExpenses.map(expense => (
+                      <TableRow key={expense.id}>
+                        <TableCell className="font-medium">{getCategoryName(expense.category)}</TableCell>
+                        <TableCell>{expense.unit || '-'}</TableCell>
+                        <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(expense.payment_date) || '-'}</TableCell>
+                        <TableCell className="text-right text-red-600">R$ {expense.amount}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={5} className="font-bold">Total</TableCell>
+                      <TableCell className="text-right font-bold text-red-600">
+                        R$ {formatToBRL(getTotalExpense())}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-md border">
+                <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
