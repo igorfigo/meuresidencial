@@ -267,19 +267,21 @@ export const AccountingReport = () => {
       
       // Helper function to draw table headers 
       const drawTableHeader = (headers, columnWidths, y, textColor) => {
-        // Table header background - white with border
+        // Table header background
         doc.setDrawColor(200, 200, 200);
-        doc.setFillColor(255, 255, 255);
+        doc.setFillColor(248, 250, 252);
         doc.rect(margin, y - 6, pageWidth - (margin * 2), 8, 'FD');
         
         // Table header text
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(textColor[0], textColor[1], textColor[2]);
         
-        let currentX = margin + 3;
+        let currentX = margin;
         headers.forEach((header, i) => {
-          doc.text(header, currentX, y - 1);
-          currentX += columnWidths[i];
+          // Center the header text within its column
+          const headerWidth = columnWidths[i];
+          doc.text(header, currentX + (headerWidth / 2), y - 1, { align: 'center' });
+          currentX += headerWidth;
         });
         
         return y + 4;
@@ -288,7 +290,6 @@ export const AccountingReport = () => {
       // Helper function to draw table rows with alternating colors
       const drawTableRows = (rows, columnWidths, y, getValue, textColor) => {
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(31, 41, 55); // Gray-800
         
         let currentY = y;
         
@@ -311,25 +312,29 @@ export const AccountingReport = () => {
           // Draw alternating row background
           if (rowIndex % 2 === 0) {
             doc.setFillColor(248, 250, 252); // Slate-50
-            doc.rect(margin, currentY - 4, pageWidth - (margin * 2), 7, 'F');
           } else {
             doc.setFillColor(255, 255, 255); // White for odd rows
-            doc.rect(margin, currentY - 4, pageWidth - (margin * 2), 7, 'F');
           }
+          doc.setDrawColor(200, 200, 200);
+          doc.rect(margin, currentY - 4, pageWidth - (margin * 2), 7, 'FD');
           
-          let currentX = margin + 3;
+          let currentX = margin;
           
           // Get values for each column and draw them
-          getValue(row).forEach((value, colIndex) => {
-            // Different color for amounts
-            if (colIndex === getValue(row).length - 1) {
+          const values = getValue(row);
+          values.forEach((value, colIndex) => {
+            const columnWidth = columnWidths[colIndex];
+            
+            // Different color for amounts (last column)
+            if (colIndex === values.length - 1) {
               doc.setTextColor(textColor[0], textColor[1], textColor[2]);
             } else {
               doc.setTextColor(31, 41, 55); // Gray-800
             }
             
-            doc.text(value, currentX, currentY);
-            currentX += columnWidths[colIndex];
+            // Center the text in each cell
+            doc.text(value, currentX + (columnWidth / 2), currentY, { align: 'center' });
+            currentX += columnWidth;
           });
           
           currentY += lineHeight;
@@ -342,16 +347,24 @@ export const AccountingReport = () => {
       if (monthlyIncomes.length > 0) {
         // Income section title
         doc.setFont('helvetica', 'bold');
-        doc.setFillColor(255, 255, 255);
         doc.setTextColor(16, 122, 87); // Green-700
         doc.text('RECEITAS', margin, yPosition);
         yPosition += 8;
         
+        // Draw table border
         doc.setDrawColor(200, 200, 200);
         doc.rect(margin, yPosition - 8, pageWidth - (margin * 2), monthlyIncomes.length * lineHeight + 15, 'D');
         
         // Income table headers and data
-        const incomeColWidths = [50, 30, 40, 40, 30];
+        const tableWidth = pageWidth - (margin * 2);
+        const incomeColWidths = [
+          tableWidth * 0.25, // Categoria
+          tableWidth * 0.15, // Unidade
+          tableWidth * 0.20, // Mês Referência
+          tableWidth * 0.20, // Data Pagamento
+          tableWidth * 0.20  // Valor
+        ];
+        
         const incomeHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Data Pagamento', 'Valor'];
         
         yPosition = drawTableHeader(incomeHeaders, incomeColWidths, yPosition, [16, 122, 87]); // Green color for header text
@@ -370,10 +383,14 @@ export const AccountingReport = () => {
         
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(16, 122, 87); // Green-700
-        doc.text('Total', margin + 3, yPosition + 3);
-        const totalIncomeXPos = margin + 3 + incomeColWidths[0] + incomeColWidths[1] + 
-                               incomeColWidths[2] + incomeColWidths[3];
-        doc.text(`R$ ${formatToBRL(getTotalIncome())}`, totalIncomeXPos, yPosition + 3);
+        
+        // Draw "Total" text
+        doc.text('Total', margin + (incomeColWidths[0] / 2), yPosition + 3, { align: 'center' });
+        
+        // Draw total amount - centered in the last column
+        const totalAmountX = margin + incomeColWidths[0] + incomeColWidths[1] + 
+                            incomeColWidths[2] + incomeColWidths[3] + (incomeColWidths[4] / 2);
+        doc.text(`R$ ${formatToBRL(getTotalIncome())}`, totalAmountX, yPosition + 3, { align: 'center' });
         
         yPosition += lineHeight * 3;
       } else {
@@ -407,16 +424,25 @@ export const AccountingReport = () => {
       if (monthlyExpenses.length > 0) {
         // Expense section title
         doc.setFont('helvetica', 'bold');
-        doc.setFillColor(255, 255, 255);
         doc.setTextColor(185, 28, 28); // Red-700
         doc.text('DESPESAS', margin, yPosition);
         yPosition += 8;
         
+        // Draw table border
         doc.setDrawColor(200, 200, 200);
         doc.rect(margin, yPosition - 8, pageWidth - (margin * 2), monthlyExpenses.length * lineHeight + 15, 'D');
         
         // Expense table headers and data
-        const expenseColWidths = [45, 25, 35, 30, 30, 30];
+        const tableWidth = pageWidth - (margin * 2);
+        const expenseColWidths = [
+          tableWidth * 0.20, // Categoria
+          tableWidth * 0.12, // Unidade
+          tableWidth * 0.17, // Mês Referência
+          tableWidth * 0.17, // Vencimento
+          tableWidth * 0.17, // Pagamento
+          tableWidth * 0.17  // Valor
+        ];
+        
         const expenseHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Vencimento', 'Pagamento', 'Valor'];
         
         yPosition = drawTableHeader(expenseHeaders, expenseColWidths, yPosition, [185, 28, 28]); // Red color for header text
@@ -436,10 +462,15 @@ export const AccountingReport = () => {
         
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(185, 28, 28); // Red-700
-        doc.text('Total', margin + 3, yPosition + 3);
-        const totalExpenseXPos = margin + 3 + expenseColWidths[0] + expenseColWidths[1] + 
-                                expenseColWidths[2] + expenseColWidths[3] + expenseColWidths[4];
-        doc.text(`R$ ${formatToBRL(getTotalExpense())}`, totalExpenseXPos, yPosition + 3);
+        
+        // Draw "Total" text centered in the first column
+        doc.text('Total', margin + (expenseColWidths[0] / 2), yPosition + 3, { align: 'center' });
+        
+        // Draw total amount - centered in the last column
+        const totalAmountX = margin + expenseColWidths[0] + expenseColWidths[1] + 
+                            expenseColWidths[2] + expenseColWidths[3] + expenseColWidths[4] + 
+                            (expenseColWidths[5] / 2);
+        doc.text(`R$ ${formatToBRL(getTotalExpense())}`, totalAmountX, yPosition + 3, { align: 'center' });
       } else {
         // Empty expenses message
         doc.setFillColor(243, 244, 246); // Gray-100
