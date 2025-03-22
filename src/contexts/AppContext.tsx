@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -15,9 +16,6 @@ interface User {
   nomeCondominio?: string;
   condominiums?: Condominium[];
   selectedCondominium?: string; // Storing the selected condominium matricula
-  planId?: string;
-  nomePlano?: string;
-  valorPlano?: string;
 }
 
 interface AppContextType {
@@ -27,7 +25,6 @@ interface AppContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   switchCondominium: (matricula: string) => void;
-  updateSubscription: (updatedUser: User) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -170,21 +167,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     toast.info("Logout realizado com sucesso");
   };
 
-  const updateSubscription = async (updatedUser: User): Promise<void> => {
-    setUser(updatedUser);
-    localStorage.setItem('condoUser', JSON.stringify(updatedUser));
-  };
-
   return (
-    <AppContext.Provider value={{ 
-      user, 
-      login, 
-      logout, 
-      isAuthenticated: !!user, 
-      isLoading, 
-      switchCondominium,
-      updateSubscription 
-    }}>
+    <AppContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading, switchCondominium }}>
       {children}
     </AppContext.Provider>
   );

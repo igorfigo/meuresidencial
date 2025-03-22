@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Separator } from '@/components/ui/separator';
 import {
   BarChart,
   Bar,
@@ -400,8 +399,7 @@ const FinanceiroDashboard = () => {
     return (
       <DashboardLayout>
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-2">Dashboard Financeiro</h1>
-          <Separator className="mb-6" />
+          <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
           <div className="flex items-center justify-center h-64">
             <div className="animate-pulse text-lg text-gray-500">Carregando dados financeiros...</div>
           </div>
@@ -413,8 +411,7 @@ const FinanceiroDashboard = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-2">Dashboard Financeiro</h1>
-        <Separator className="mb-6" />
+        <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div>
@@ -683,3 +680,4 @@ const FinanceiroDashboard = () => {
 };
 
 export default FinanceiroDashboard;
+
