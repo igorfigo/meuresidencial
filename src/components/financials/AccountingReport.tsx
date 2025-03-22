@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -26,6 +27,51 @@ const getLast12Months = () => {
   }
   
   return months;
+};
+
+// Helper function to format date string to DD/MM/YYYY
+const formatDateToBR = (dateString) => {
+  if (!dateString) return '-';
+  
+  try {
+    // Check if the date is in yyyy-MM-dd format
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      const date = new Date(dateString);
+      return format(date, 'dd/MM/yyyy');
+    }
+    
+    // If already in DD/MM/YYYY format, return as is
+    if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Try to parse the date if it's in another format
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    return format(date, 'dd/MM/yyyy');
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return dateString;
+  }
+};
+
+// Helper function to format reference month
+const formatReferenceMonth = (referenceMonth) => {
+  if (!referenceMonth) return '-';
+  
+  try {
+    // If in yyyy-MM format, convert to MM/yyyy
+    if (/^\d{4}-\d{2}$/.test(referenceMonth)) {
+      const [year, month] = referenceMonth.split('-');
+      return `${month}/${year}`;
+    }
+    
+    return referenceMonth;
+  } catch (error) {
+    console.error("Error formatting reference month:", error);
+    return referenceMonth;
+  }
 };
 
 export const AccountingReport = () => {
@@ -140,7 +186,7 @@ export const AccountingReport = () => {
       doc.text('RECEITAS', margin, yPosition);
       yPosition += lineHeight * 1.2;
       
-      const incomeColWidths = [45, 25, 45, 30, 50];
+      const incomeColWidths = [40, 25, 35, 30, 30, 40];
       const tableWidth = pageWidth - (margin * 2);
       
       const drawLine = (y: number) => {
@@ -151,7 +197,7 @@ export const AccountingReport = () => {
       let currentX = margin;
       doc.setFont('helvetica', 'bold');
       
-      const incomeHeaders = ['Categoria', 'Unidade', 'Data de Pagamento', 'Valor', 'Observações'];
+      const incomeHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Data Pagamento', 'Valor'];
       
       incomeHeaders.forEach((header, i) => {
         doc.text(header, currentX, yPosition);
@@ -184,18 +230,13 @@ export const AccountingReport = () => {
           doc.text(income.unit || "N/A", currentX, yPosition);
           currentX += incomeColWidths[1];
           
-          doc.text(income.payment_date || "N/A", currentX, yPosition);
+          doc.text(formatReferenceMonth(income.reference_month) || "N/A", currentX, yPosition);
           currentX += incomeColWidths[2];
           
-          doc.text(`R$ ${income.amount}`, currentX, yPosition);
+          doc.text(formatDateToBR(income.payment_date) || "N/A", currentX, yPosition);
           currentX += incomeColWidths[3];
           
-          const observations = income.observations ? 
-                              (income.observations.length > 20 ? 
-                              income.observations.substring(0, 20) + '...' : 
-                              income.observations) : 
-                              "";
-          doc.text(observations, currentX, yPosition);
+          doc.text(`R$ ${income.amount}`, currentX, yPosition);
           
           yPosition += lineHeight;
         });
@@ -206,7 +247,7 @@ export const AccountingReport = () => {
         
         doc.setFont('helvetica', 'bold');
         doc.text('Total', margin, yPosition);
-        const totalXPos = margin + incomeColWidths[0] + incomeColWidths[1] + incomeColWidths[2];
+        const totalXPos = margin + incomeColWidths[0] + incomeColWidths[1] + incomeColWidths[2] + incomeColWidths[3];
         doc.text(`R$ ${formatToBRL(getTotalIncome())}`, totalXPos, yPosition);
         
         yPosition += lineHeight * 2;
@@ -233,12 +274,12 @@ export const AccountingReport = () => {
       doc.text('DESPESAS', margin, yPosition);
       yPosition += lineHeight * 1.2;
       
-      const expenseColWidths = [45, 25, 30, 30, 30, 40];
+      const expenseColWidths = [40, 25, 35, 30, 30, 40];
       
       currentX = margin;
       doc.setFont('helvetica', 'bold');
       
-      const expenseHeaders = ['Categoria', 'Unidade', 'Vencimento', 'Pagamento', 'Valor', 'Observações'];
+      const expenseHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Vencimento', 'Pagamento', 'Valor'];
       
       expenseHeaders.forEach((header, i) => {
         doc.text(header, currentX, yPosition);
@@ -271,21 +312,16 @@ export const AccountingReport = () => {
           doc.text(expense.unit || "N/A", currentX, yPosition);
           currentX += expenseColWidths[1];
           
-          doc.text(expense.due_date || "N/A", currentX, yPosition);
+          doc.text(formatReferenceMonth(expense.reference_month) || "N/A", currentX, yPosition);
           currentX += expenseColWidths[2];
           
-          doc.text(expense.payment_date || "N/A", currentX, yPosition);
+          doc.text(formatDateToBR(expense.due_date) || "N/A", currentX, yPosition);
           currentX += expenseColWidths[3];
           
-          doc.text(`R$ ${expense.amount}`, currentX, yPosition);
+          doc.text(formatDateToBR(expense.payment_date) || "N/A", currentX, yPosition);
           currentX += expenseColWidths[4];
           
-          const observations = expense.observations ? 
-                              (expense.observations.length > 15 ? 
-                              expense.observations.substring(0, 15) + '...' : 
-                              expense.observations) : 
-                              "";
-          doc.text(observations, currentX, yPosition);
+          doc.text(`R$ ${expense.amount}`, currentX, yPosition);
           
           yPosition += lineHeight;
         });
@@ -296,7 +332,7 @@ export const AccountingReport = () => {
         
         doc.setFont('helvetica', 'bold');
         doc.text('Total', margin, yPosition);
-        const totalXPos = margin + expenseColWidths[0] + expenseColWidths[1] + expenseColWidths[2] + expenseColWidths[3];
+        const totalXPos = margin + expenseColWidths[0] + expenseColWidths[1] + expenseColWidths[2] + expenseColWidths[3] + expenseColWidths[4];
         doc.text(`R$ ${formatToBRL(getTotalExpense())}`, totalXPos, yPosition);
       } else {
         yPosition += lineHeight;
@@ -418,6 +454,7 @@ export const AccountingReport = () => {
                     <TableRow>
                       <TableHead>Categoria</TableHead>
                       <TableHead>Unidade</TableHead>
+                      <TableHead>Mês Referência</TableHead>
                       <TableHead>Data de Pagamento</TableHead>
                       <TableHead className="text-right">Valor</TableHead>
                     </TableRow>
@@ -427,12 +464,13 @@ export const AccountingReport = () => {
                       <TableRow key={income.id}>
                         <TableCell className="font-medium">{income.category}</TableCell>
                         <TableCell>{income.unit || '-'}</TableCell>
-                        <TableCell>{income.payment_date || '-'}</TableCell>
+                        <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(income.payment_date) || '-'}</TableCell>
                         <TableCell className="text-right text-green-600">R$ {income.amount}</TableCell>
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell colSpan={3} className="font-bold">Total</TableCell>
+                      <TableCell colSpan={4} className="font-bold">Total</TableCell>
                       <TableCell className="text-right font-bold text-green-600">
                         R$ {formatToBRL(getTotalIncome())}
                       </TableCell>
@@ -456,6 +494,7 @@ export const AccountingReport = () => {
                     <TableRow>
                       <TableHead>Categoria</TableHead>
                       <TableHead>Unidade</TableHead>
+                      <TableHead>Mês Referência</TableHead>
                       <TableHead>Vencimento</TableHead>
                       <TableHead>Data de Pagamento</TableHead>
                       <TableHead className="text-right">Valor</TableHead>
@@ -466,13 +505,14 @@ export const AccountingReport = () => {
                       <TableRow key={expense.id}>
                         <TableCell className="font-medium">{expense.category}</TableCell>
                         <TableCell>{expense.unit || '-'}</TableCell>
-                        <TableCell>{expense.due_date || '-'}</TableCell>
-                        <TableCell>{expense.payment_date || '-'}</TableCell>
+                        <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(expense.payment_date) || '-'}</TableCell>
                         <TableCell className="text-right text-red-600">R$ {expense.amount}</TableCell>
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell colSpan={4} className="font-bold">Total</TableCell>
+                      <TableCell colSpan={5} className="font-bold">Total</TableCell>
                       <TableCell className="text-right font-bold text-red-600">
                         R$ {formatToBRL(getTotalExpense())}
                       </TableCell>

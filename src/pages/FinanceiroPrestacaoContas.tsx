@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AccountingReport } from '@/components/financials/AccountingReport';
 import { useFinances } from '@/hooks/use-finances';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 
 const FinanceiroPrestacaoContas = () => {
   const { isLoading, balance } = useFinances();
@@ -14,8 +15,9 @@ const FinanceiroPrestacaoContas = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Prestação de Contas</h1>
-            <p className="text-gray-500 mt-1">Relatório mensal de receitas e despesas do condomínio por data de pagamento</p>
+            <h1 className="text-3xl font-bold mb-2">Prestação de Contas</h1>
+            <Separator className="mb-2" />
+            <p className="text-gray-600 mt-1">Relatório mensal de receitas e despesas do condomínio por data de pagamento</p>
           </div>
           
           <div className="w-64">
