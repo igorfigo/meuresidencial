@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -638,4 +639,124 @@ export const AccountingReport = () => {
                   <span className="font-medium text-green-600">+ R$ {formatToBRL(getTotalIncome())}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-
+                  <span className="text-sm text-gray-600">Total de Despesas:</span>
+                  <span className="font-medium text-red-600">- R$ {formatToBRL(getTotalExpense())}</span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b">
+                  <span className="text-sm text-gray-600">Saldo Final:</span>
+                  <span className="font-medium text-blue-600">R$ {endBalance}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-4">
+              <h3 className="font-medium text-lg mb-2">Estatísticas</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center py-1 border-b">
+                  <span className="text-sm text-gray-600">Total de Receitas:</span>
+                  <span className="font-medium text-green-600">{monthlyIncomes.length} registros</span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b">
+                  <span className="text-sm text-gray-600">Total de Despesas:</span>
+                  <span className="font-medium text-red-600">{monthlyExpenses.length} registros</span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b">
+                  <span className="text-sm text-gray-600">Maior Receita:</span>
+                  <span className="font-medium text-green-600">
+                    {monthlyIncomes.length > 0 
+                      ? `R$ ${formatToBRL(Math.max(...monthlyIncomes.map(i => BRLToNumber(i.amount))))}`
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b">
+                  <span className="text-sm text-gray-600">Maior Despesa:</span>
+                  <span className="font-medium text-red-600">
+                    {monthlyExpenses.length > 0
+                      ? `R$ ${formatToBRL(Math.max(...monthlyExpenses.map(e => BRLToNumber(e.amount))))}`
+                      : 'N/A'}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {monthlyIncomes.length > 0 && (
+          <div className="mb-8">
+            <h3 className="font-medium text-lg mb-3">Receitas do Mês</h3>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Unidade</TableHead>
+                    <TableHead>Mês Referência</TableHead>
+                    <TableHead>Data Pagamento</TableHead>
+                    <TableHead className="text-right">Valor</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {monthlyIncomes.map((income, index) => (
+                    <TableRow key={`income-${index}`}>
+                      <TableCell>{getCategoryName(income.category)}</TableCell>
+                      <TableCell>{income.unit || "-"}</TableCell>
+                      <TableCell>{formatReferenceMonth(income.reference_month) || "-"}</TableCell>
+                      <TableCell>{formatDateToBR(income.payment_date) || "-"}</TableCell>
+                      <TableCell className="text-right font-medium">R$ {income.amount}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="bg-green-50">
+                    <TableCell colSpan={4} className="font-medium">Total</TableCell>
+                    <TableCell className="text-right font-medium text-green-600">
+                      R$ {formatToBRL(getTotalIncome())}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+        
+        {monthlyExpenses.length > 0 && (
+          <div>
+            <h3 className="font-medium text-lg mb-3">Despesas do Mês</h3>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Unidade</TableHead>
+                    <TableHead>Mês Referência</TableHead>
+                    <TableHead>Vencimento</TableHead>
+                    <TableHead>Pagamento</TableHead>
+                    <TableHead className="text-right">Valor</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {monthlyExpenses.map((expense, index) => (
+                    <TableRow key={`expense-${index}`}>
+                      <TableCell>{getCategoryName(expense.category)}</TableCell>
+                      <TableCell>{expense.unit || "-"}</TableCell>
+                      <TableCell>{formatReferenceMonth(expense.reference_month) || "-"}</TableCell>
+                      <TableCell>{formatDateToBR(expense.due_date) || "-"}</TableCell>
+                      <TableCell>{formatDateToBR(expense.payment_date) || "-"}</TableCell>
+                      <TableCell className="text-right font-medium">R$ {expense.amount}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="bg-red-50">
+                    <TableCell colSpan={5} className="font-medium">Total</TableCell>
+                    <TableCell className="text-right font-medium text-red-600">
+                      R$ {formatToBRL(getTotalExpense())}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
