@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -505,6 +506,11 @@ export const AccountingReport = () => {
     }
   };
   
+  // Create a handler function that wraps the generatePDF call for onClick event
+  const handleGeneratePDF = () => {
+    generatePDF(true);
+  };
+  
   const sendReportToResidents = async () => {
     if (!sendOptions.email && !sendOptions.whatsapp) {
       toast.error('Selecione pelo menos uma opção de envio');
@@ -617,7 +623,7 @@ export const AccountingReport = () => {
             
             <div className="flex flex-col sm:flex-row gap-2">
               <Button 
-                onClick={generatePDF} 
+                onClick={handleGeneratePDF} 
                 disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
                 className="flex items-center gap-2"
               >
