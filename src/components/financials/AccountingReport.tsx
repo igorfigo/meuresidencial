@@ -522,37 +522,6 @@ export const AccountingReport = () => {
       const monthDate = new Date(parseInt(year), parseInt(month) - 1);
       const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' });
       
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        throw new Error(`Erro ao obter sessão: ${sessionError.message}`);
-      }
-      
-      console.log("Session data:", sessionData);
-      
-      if (!sessionData?.session) {
-        const { error: refreshError } = await supabase.auth.refreshSession();
-        if (refreshError) {
-          console.error("Failed to refresh session:", refreshError);
-          
-          const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
-          if (anonError) {
-            throw new Error('Não foi possível autenticar. Por favor, faça login novamente.');
-          }
-          
-          if (!anonData?.session) {
-            throw new Error('Falha ao criar sessão anônima');
-          }
-        }
-      }
-      
-      const { data: updatedSession } = await supabase.auth.getSession();
-      const accessToken = updatedSession?.session?.access_token;
-      
-      if (!accessToken) {
-        throw new Error('Você precisa estar autenticado para enviar relatórios');
-      }
-      
       const pdfData = generatePDF(false);
       
       if (!pdfData) {
@@ -561,13 +530,10 @@ export const AccountingReport = () => {
       }
       
       if (sendOptions.email) {
-        console.log("Sending report with access token:", accessToken.substring(0, 10) + "...");
-        
         const response = await fetch('https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-accounting-report', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             matricula: user?.selectedCondominium,
