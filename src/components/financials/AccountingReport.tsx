@@ -197,7 +197,7 @@ export const AccountingReport = () => {
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
       
-      doc.setFillColor(244, 247, 254);
+      doc.setFillColor(244, 247, 247);
       doc.roundedRect(margin, yPosition - 5, pageWidth - (margin * 2), 35, 3, 3, 'F');
       
       doc.setFontSize(12);
@@ -268,8 +268,9 @@ export const AccountingReport = () => {
         
         let currentX = margin;
         headers.forEach((header, i) => {
-          doc.text(header, currentX + (headerWidth / 2), y - 1, { align: 'center' });
-          currentX += headerWidth;
+          const columnWidth = columnWidths[i];
+          doc.text(header, currentX + (columnWidth / 2), y - 1, { align: 'center' });
+          currentX += columnWidth;
         });
         
         return y + 4;
@@ -802,3 +803,4 @@ const getCategoryName = (category) => {
   
   return categoryMap[category] || category;
 };
+
