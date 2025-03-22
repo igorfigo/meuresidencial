@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -196,9 +197,9 @@ export const AccountingReport = () => {
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
       
-      // Increase the height of the info box to fit the address
+      // Condominium Info - Centered with address
       doc.setFillColor(244, 247, 254); // Light blue background
-      doc.roundedRect(margin, yPosition - 5, pageWidth - (margin * 2), 45, 3, 3, 'F');
+      doc.roundedRect(margin, yPosition - 5, pageWidth - (margin * 2), 35, 3, 3, 'F');
       
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
@@ -227,40 +228,9 @@ export const AccountingReport = () => {
         }
       }
       
-      // Create multi-line text if address is too long
-      const maxWidth = pageWidth - (margin * 4); // Use smaller width to ensure it fits
-      if (doc.getTextWidth(addressText) > maxWidth) {
-        const words = addressText.split(' ');
-        let line = 'Endereço: ';
-        let lines = [];
-        
-        words.forEach(word => {
-          const testLine = line + ' ' + word;
-          if (doc.getTextWidth(testLine) < maxWidth) {
-            line = testLine;
-          } else {
-            lines.push(line);
-            line = word;
-          }
-        });
-        
-        if (line) {
-          lines.push(line);
-        }
-        
-        // Add the first line with "Endereço:" prefix
-        doc.text(lines[0], pageWidth / 2, yPosition + 25, { align: 'center' });
-        
-        // Add any subsequent lines
-        for (let i = 1; i < lines.length; i++) {
-          doc.text(lines[i], pageWidth / 2, yPosition + 25 + (i * 7), { align: 'center' });
-        }
-      } else {
-        // If address fits on one line
-        doc.text(`Endereço: ${addressText}`, pageWidth / 2, yPosition + 25, { align: 'center' });
-      }
+      doc.text(`Endereço: ${addressText}`, pageWidth / 2, yPosition + 25, { align: 'center' });
       
-      yPosition += lineHeight * 8; // Increase the Y position to account for the larger info box
+      yPosition += lineHeight * 6;
       
       // Financial Summary Box
       doc.setFillColor(243, 250, 247); // Light green background
@@ -683,4 +653,27 @@ export const AccountingReport = () => {
                         <TableCell>{expense.unit || '-'}</TableCell>
                         <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>
                         <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>
-                        <TableCell>{formatDateToBR(expense.payment_date) || '-'}</TableCell
+                        <TableCell>{formatDateToBR(expense.payment_date) || '-'}</TableCell>
+                        <TableCell className="text-right text-red-600">R$ {expense.amount}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={5} className="font-bold">Total</TableCell>
+                      <TableCell className="text-right font-bold text-red-600">
+                        R$ {formatToBRL(getTotalExpense())}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-md border">
+                <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
