@@ -191,7 +191,7 @@ export const AccountingReport = () => {
     return monthlyExpenses.reduce((sum, expense) => sum + BRLToNumber(expense.amount), 0);
   };
   
-  const generatePDF = () => {
+  const generatePDF = (shouldDownload = true) => {
     setIsGenerating(true);
     
     try {
@@ -492,7 +492,9 @@ export const AccountingReport = () => {
       
       const pdfData = doc.output('datauristring');
       
-      doc.save(fileName);
+      if (shouldDownload) {
+        doc.save(fileName);
+      }
       
       return pdfData;
     } catch (error) {
@@ -518,7 +520,7 @@ export const AccountingReport = () => {
       
       const { data: sessionData } = await supabase.auth.getSession();
       
-      const pdfData = generatePDF();
+      const pdfData = generatePDF(false);
       
       if (!pdfData) {
         toast.error('Erro ao gerar o relatório PDF');
