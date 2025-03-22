@@ -615,11 +615,20 @@ export const AccountingReport = () => {
         throw error;
       }
       
-      toast.success('Registro de envio excluído com sucesso');
+      toast({
+        title: "Sucesso",
+        description: 'Registro de envio excluído com sucesso',
+      });
+      
       setReportLogs(prev => prev.filter(log => log.id !== logId));
     } catch (error) {
       console.error('Erro ao excluir registro de envio:', error);
-      toast.error(`Erro ao excluir registro: ${error.message}`);
+      
+      toast({
+        title: "Erro",
+        description: `Erro ao excluir registro: ${error.message}`,
+        variant: "destructive"
+      });
     } finally {
       setIsDeletingLog(null);
     }
@@ -936,4 +945,3 @@ export const AccountingReport = () => {
     </>
   );
 };
-
