@@ -164,213 +164,287 @@ export const AccountingReport = () => {
       const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
       const currentDate = format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
       
+      // Create document with slightly larger default font size
       const doc = new jsPDF();
+      doc.setFontSize(11);
+      
       const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
       let yPosition = 15;
       const lineHeight = 7;
       const margin = 15;
       
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'italic');
-      doc.setTextColor(100, 100, 100);
-      doc.text("Gerado por: www.meuresidencial.com", pageWidth - margin, yPosition, { align: 'right' });
-      doc.text(`Relatório gerado em: ${currentDate}`, margin, yPosition);
-      yPosition += lineHeight * 2;
+      // Background subtle color for header
+      doc.setFillColor(240, 247, 255);
+      doc.rect(0, 0, pageWidth, 40, 'F');
       
-      doc.setFontSize(16);
+      // Top branding bar
+      doc.setFillColor(59, 130, 246); // Blue brand color
+      doc.rect(0, 0, pageWidth, 5, 'F');
+      
+      // Header - Info line
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139); // Slate-500
+      doc.text("Relatório gerado em: " + currentDate, margin, yPosition);
+      doc.text("Gerado por: www.meuresidencial.com", pageWidth - margin, yPosition, { align: 'right' });
+      yPosition += 10;
+      
+      // Main Title
+      doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(0, 0, 0);
+      doc.setTextColor(31, 41, 55); // Gray-800
       const title = `Prestação de Contas - ${monthName} ${year}`;
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
       
+      // Condominium Info
+      doc.setFillColor(244, 247, 254); // Light blue background
+      doc.roundedRect(margin, yPosition - 5, pageWidth - (margin * 2), 25, 3, 3, 'F');
+      
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Condomínio: ${user?.nomeCondominio || "Nome não disponível"}`, margin, yPosition);
-      yPosition += lineHeight;
-      doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, margin, yPosition);
-      yPosition += lineHeight * 2;
+      doc.setTextColor(31, 41, 55); // Gray-800
+      doc.text(`Condomínio: ${user?.nomeCondominio || "Nome não disponível"}`, margin + 5, yPosition + 5);
+      doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, margin + 5, yPosition + 15);
+      yPosition += lineHeight * 5;
+      
+      // Financial Summary Box
+      doc.setFillColor(243, 250, 247); // Light green background
+      doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 42, 3, 3, 'F');
+      
+      // Summary Title with colored bar
+      doc.setFillColor(45, 122, 128); // Teal color
+      doc.rect(margin, yPosition, pageWidth - (margin * 2), 8, 'F');
       
       doc.setFont('helvetica', 'bold');
-      doc.text('RESUMO FINANCEIRO', margin, yPosition);
-      yPosition += lineHeight * 1.2;
+      doc.setTextColor(255, 255, 255); // White
+      doc.text('RESUMO FINANCEIRO', pageWidth / 2, yPosition + 5.5, { align: 'center' });
+      yPosition += 15;
       
+      // Summary Content
       doc.setFont('helvetica', 'normal');
-      doc.text(`Saldo Inicial: R$ ${startBalance}`, margin, yPosition);
+      doc.setTextColor(31, 41, 55); // Gray-800
+      doc.text(`Saldo Inicial: R$ ${startBalance}`, margin + 10, yPosition);
       yPosition += lineHeight;
-      doc.text(`Total de Receitas: R$ ${formatToBRL(getTotalIncome())}`, margin, yPosition);
-      yPosition += lineHeight;
-      doc.text(`Total de Despesas: R$ ${formatToBRL(getTotalExpense())}`, margin, yPosition);
-      yPosition += lineHeight;
-      doc.text(`Saldo Final: R$ ${endBalance}`, margin, yPosition);
-      yPosition += lineHeight * 2;
       
+      doc.setTextColor(16, 122, 87); // Green-700
+      doc.text(`Total de Receitas: R$ ${formatToBRL(getTotalIncome())}`, margin + 10, yPosition);
+      yPosition += lineHeight;
+      
+      doc.setTextColor(185, 28, 28); // Red-700
+      doc.text(`Total de Despesas: R$ ${formatToBRL(getTotalExpense())}`, margin + 10, yPosition);
+      yPosition += lineHeight;
+      
+      // Final balance with emphasis
       doc.setFont('helvetica', 'bold');
-      doc.text('RECEITAS', margin, yPosition);
-      yPosition += lineHeight * 1.2;
+      doc.setTextColor(31, 41, 55); // Gray-800
+      doc.text(`Saldo Final: R$ ${endBalance}`, margin + 10, yPosition);
+      yPosition += lineHeight * 3;
       
-      const incomeColWidths = [40, 25, 35, 30, 30];
-      const tableWidth = pageWidth - (margin * 2);
-      
-      const drawLine = (y: number) => {
-        doc.setDrawColor(0);
-        doc.line(margin, y, pageWidth - margin, y);
+      // Helper function to draw table headers with colored background
+      const drawTableHeader = (headers, columnWidths, y, color) => {
+        // Table header background
+        doc.setFillColor(...color);
+        doc.rect(margin, y - 6, pageWidth - (margin * 2), 8, 'F');
+        
+        // Table header text
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        
+        let currentX = margin + 3;
+        headers.forEach((header, i) => {
+          doc.text(header, currentX, y - 1);
+          currentX += columnWidths[i];
+        });
+        
+        return y + 4;
       };
       
-      let currentX = margin;
-      doc.setFont('helvetica', 'bold');
-      
-      const incomeHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Data Pagamento', 'Valor'];
-      
-      incomeHeaders.forEach((header, i) => {
-        doc.text(header, currentX, yPosition);
-        currentX += incomeColWidths[i];
-      });
-      
-      yPosition += lineHeight / 2;
-      drawLine(yPosition);
-      yPosition += lineHeight / 2;
-      
-      if (monthlyIncomes.length > 0) {
+      // Helper function to draw table rows with alternating colors
+      const drawTableRows = (rows, columnWidths, y, getValue) => {
         doc.setFont('helvetica', 'normal');
+        doc.setTextColor(31, 41, 55); // Gray-800
         
-        monthlyIncomes.forEach(income => {
-          if (yPosition > 270) {
+        let currentY = y;
+        
+        rows.forEach((row, rowIndex) => {
+          // Check if we need a new page
+          if (currentY > 270) {
             doc.addPage();
-            yPosition = 20;
+            currentY = 20;
+            
+            // Add header to new page
+            doc.setFillColor(59, 130, 246); // Blue brand color
+            doc.rect(0, 0, pageWidth, 5, 'F');
             
             doc.setFontSize(8);
             doc.setFont('helvetica', 'italic');
-            doc.setTextColor(100, 100, 100);
+            doc.setTextColor(100, 116, 139); // Slate-500
             doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
           }
           
-          currentX = margin;
+          // Draw alternating row background
+          if (rowIndex % 2 === 0) {
+            doc.setFillColor(248, 250, 252); // Slate-50
+            doc.rect(margin, currentY - 4, pageWidth - (margin * 2), 7, 'F');
+          }
           
-          doc.text(getCategoryName(income.category), currentX, yPosition);
-          currentX += incomeColWidths[0];
+          let currentX = margin + 3;
           
-          doc.text(income.unit || "N/A", currentX, yPosition);
-          currentX += incomeColWidths[1];
+          // Get values for each column and draw them
+          getValue(row).forEach((value, colIndex) => {
+            // Different color for amounts
+            if (colIndex === getValue(row).length - 1) {
+              if (rows === monthlyIncomes) {
+                doc.setTextColor(16, 122, 87); // Green-700
+              } else {
+                doc.setTextColor(185, 28, 28); // Red-700
+              }
+            } else {
+              doc.setTextColor(31, 41, 55); // Gray-800
+            }
+            
+            doc.text(value, currentX, currentY);
+            currentX += columnWidths[colIndex];
+          });
           
-          doc.text(formatReferenceMonth(income.reference_month) || "N/A", currentX, yPosition);
-          currentX += incomeColWidths[2];
-          
-          doc.text(formatDateToBR(income.payment_date) || "N/A", currentX, yPosition);
-          currentX += incomeColWidths[3];
-          
-          doc.text(`R$ ${income.amount}`, currentX, yPosition);
-          
-          yPosition += lineHeight;
+          currentY += lineHeight;
         });
         
-        yPosition += lineHeight / 2;
-        drawLine(yPosition);
-        yPosition += lineHeight / 2;
+        return currentY;
+      };
+      
+      // Incomes Table
+      if (monthlyIncomes.length > 0) {
+        doc.setFillColor(16, 122, 87, 0.1); // Green with transparency
+        doc.roundedRect(margin - 3, yPosition - 8, pageWidth - (margin * 2) + 6, 
+                       Math.min(monthlyIncomes.length * lineHeight + 20, 100), 3, 3, 'F');
+        
+        // Income section title
+        doc.setFillColor(16, 122, 87); // Green-700
+        doc.rect(margin - 3, yPosition - 8, pageWidth - (margin * 2) + 6, 8, 'F');
         
         doc.setFont('helvetica', 'bold');
-        doc.text('Total', margin, yPosition);
-        const totalXPos = margin + incomeColWidths[0] + incomeColWidths[1] + incomeColWidths[2] + incomeColWidths[3];
-        doc.text(`R$ ${formatToBRL(getTotalIncome())}`, totalXPos, yPosition);
+        doc.setTextColor(255, 255, 255); // White
+        doc.text('RECEITAS', pageWidth / 2, yPosition - 3, { align: 'center' });
+        yPosition += 8;
         
-        yPosition += lineHeight * 2;
+        // Income table headers and data
+        const incomeColWidths = [50, 30, 40, 40, 30];
+        const incomeHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Data Pagamento', 'Valor'];
+        
+        yPosition = drawTableHeader(incomeHeaders, incomeColWidths, yPosition, [16, 122, 87]); // Green-700
+        
+        yPosition = drawTableRows(monthlyIncomes, incomeColWidths, yPosition, (income) => [
+          getCategoryName(income.category),
+          income.unit || "N/A",
+          formatReferenceMonth(income.reference_month) || "N/A",
+          formatDateToBR(income.payment_date) || "N/A",
+          `R$ ${income.amount}`
+        ]);
+        
+        // Total line
+        doc.setFillColor(209, 250, 229); // Green-100
+        doc.rect(margin - 3, yPosition - 2, pageWidth - (margin * 2) + 6, 8, 'F');
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(16, 122, 87); // Green-700
+        doc.text('Total', margin + 3, yPosition + 3);
+        const totalIncomeXPos = margin + 3 + incomeColWidths[0] + incomeColWidths[1] + 
+                               incomeColWidths[2] + incomeColWidths[3];
+        doc.text(`R$ ${formatToBRL(getTotalIncome())}`, totalIncomeXPos, yPosition + 3);
+        
+        yPosition += lineHeight * 3;
       } else {
-        yPosition += lineHeight;
+        // Empty income message
+        doc.setFillColor(243, 244, 246); // Gray-100
+        doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 20, 3, 3, 'F');
+        
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'italic');
-        doc.text('Nenhuma receita registrada para este mês', margin, yPosition);
-        yPosition += lineHeight * 2;
+        doc.setTextColor(107, 114, 128); // Gray-500
+        doc.text('Nenhuma receita registrada para este mês', pageWidth / 2, yPosition + 10, { align: 'center' });
+        
+        yPosition += 30;
       }
       
-      if (yPosition > 220) {
+      // Add a new page if needed before expenses
+      if (yPosition > 230 && monthlyExpenses.length > 0) {
         doc.addPage();
         yPosition = 20;
         
+        doc.setFillColor(59, 130, 246); // Blue brand color
+        doc.rect(0, 0, pageWidth, 5, 'F');
+        
         doc.setFontSize(8);
         doc.setFont('helvetica', 'italic');
-        doc.setTextColor(100, 100, 100);
+        doc.setTextColor(100, 116, 139); // Slate-500
         doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
       }
       
-      doc.setFontSize(11);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont('helvetica', 'bold');
-      doc.text('DESPESAS', margin, yPosition);
-      yPosition += lineHeight * 1.2;
-      
-      const expenseColWidths = [40, 25, 35, 30, 30, 40];
-      
-      currentX = margin;
-      doc.setFont('helvetica', 'bold');
-      
-      const expenseHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Vencimento', 'Pagamento', 'Valor'];
-      
-      expenseHeaders.forEach((header, i) => {
-        doc.text(header, currentX, yPosition);
-        currentX += expenseColWidths[i];
-      });
-      
-      yPosition += lineHeight / 2;
-      drawLine(yPosition);
-      yPosition += lineHeight / 2;
-      
+      // Expenses Table
       if (monthlyExpenses.length > 0) {
-        doc.setFont('helvetica', 'normal');
+        doc.setFillColor(185, 28, 28, 0.1); // Red with transparency
+        doc.roundedRect(margin - 3, yPosition - 8, pageWidth - (margin * 2) + 6, 
+                       Math.min(monthlyExpenses.length * lineHeight + 20, 100), 3, 3, 'F');
         
-        monthlyExpenses.forEach(expense => {
-          if (yPosition > 270) {
-            doc.addPage();
-            yPosition = 20;
-            
-            doc.setFontSize(8);
-            doc.setFont('helvetica', 'italic');
-            doc.setTextColor(100, 100, 100);
-            doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
-          }
-          
-          currentX = margin;
-          
-          doc.text(getCategoryName(expense.category), currentX, yPosition);
-          currentX += expenseColWidths[0];
-          
-          doc.text(expense.unit || "N/A", currentX, yPosition);
-          currentX += expenseColWidths[1];
-          
-          doc.text(formatReferenceMonth(expense.reference_month) || "N/A", currentX, yPosition);
-          currentX += expenseColWidths[2];
-          
-          doc.text(formatDateToBR(expense.due_date) || "N/A", currentX, yPosition);
-          currentX += expenseColWidths[3];
-          
-          doc.text(formatDateToBR(expense.payment_date) || "N/A", currentX, yPosition);
-          currentX += expenseColWidths[4];
-          
-          doc.text(`R$ ${expense.amount}`, currentX, yPosition);
-          
-          yPosition += lineHeight;
-        });
-        
-        yPosition += lineHeight / 2;
-        drawLine(yPosition);
-        yPosition += lineHeight / 2;
+        // Expense section title
+        doc.setFillColor(185, 28, 28); // Red-700
+        doc.rect(margin - 3, yPosition - 8, pageWidth - (margin * 2) + 6, 8, 'F');
         
         doc.setFont('helvetica', 'bold');
-        doc.text('Total', margin, yPosition);
-        const totalXPos = margin + expenseColWidths[0] + expenseColWidths[1] + expenseColWidths[2] + expenseColWidths[3] + expenseColWidths[4];
-        doc.text(`R$ ${formatToBRL(getTotalExpense())}`, totalXPos, yPosition);
+        doc.setTextColor(255, 255, 255); // White
+        doc.text('DESPESAS', pageWidth / 2, yPosition - 3, { align: 'center' });
+        yPosition += 8;
+        
+        // Expense table headers and data
+        const expenseColWidths = [45, 25, 35, 30, 30, 30];
+        const expenseHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Vencimento', 'Pagamento', 'Valor'];
+        
+        yPosition = drawTableHeader(expenseHeaders, expenseColWidths, yPosition, [185, 28, 28]); // Red-700
+        
+        yPosition = drawTableRows(monthlyExpenses, expenseColWidths, yPosition, (expense) => [
+          getCategoryName(expense.category),
+          expense.unit || "N/A",
+          formatReferenceMonth(expense.reference_month) || "N/A",
+          formatDateToBR(expense.due_date) || "N/A",
+          formatDateToBR(expense.payment_date) || "N/A",
+          `R$ ${expense.amount}`
+        ]);
+        
+        // Total line
+        doc.setFillColor(254, 226, 226); // Red-100
+        doc.rect(margin - 3, yPosition - 2, pageWidth - (margin * 2) + 6, 8, 'F');
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(185, 28, 28); // Red-700
+        doc.text('Total', margin + 3, yPosition + 3);
+        const totalExpenseXPos = margin + 3 + expenseColWidths[0] + expenseColWidths[1] + 
+                                expenseColWidths[2] + expenseColWidths[3] + expenseColWidths[4];
+        doc.text(`R$ ${formatToBRL(getTotalExpense())}`, totalExpenseXPos, yPosition + 3);
       } else {
-        yPosition += lineHeight;
+        // Empty expenses message
+        doc.setFillColor(243, 244, 246); // Gray-100
+        doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 20, 3, 3, 'F');
+        
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'italic');
-        doc.text('Nenhuma despesa registrada para este mês', margin, yPosition);
+        doc.setTextColor(107, 114, 128); // Gray-500
+        doc.text('Nenhuma despesa registrada para este mês', pageWidth / 2, yPosition + 10, { align: 'center' });
       }
       
-      yPosition += lineHeight;
-      drawLine(yPosition);
-      
-      const footerPosition = doc.internal.pageSize.getHeight() - 10;
+      // Bottom watermark and footer
       doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Relatório gerado pelo sistema Meu Residencial - www.meuresidencial.com - ${currentDate}`, pageWidth / 2, footerPosition, { align: 'center' });
+      doc.setTextColor(148, 163, 184); // Slate-400
+      
+      // Draw footer with subtle background
+      doc.setFillColor(246, 249, 252); // Slate-50
+      doc.rect(0, pageHeight - 12, pageWidth, 12, 'F');
+      
+      // Footer text
+      doc.text(`Relatório gerado pelo sistema Meu Residencial - www.meuresidencial.com - ${currentDate}`, 
+               pageWidth / 2, pageHeight - 5, { align: 'center' });
       
       const fileName = `prestacao_contas_${monthName.toLowerCase()}_${year}.pdf`;
       doc.save(fileName);
