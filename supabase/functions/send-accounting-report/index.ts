@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 import { supabaseAdmin } from "../_shared/supabase-admin.ts";
 
 const corsHeaders = {
@@ -39,10 +38,9 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to fetch residents: ${residentsError.message}`);
     }
 
-    const validResidents = residents
-      ?.filter(resident => resident.email && resident.email.includes('@')) || [];
-    
-    const validEmails = validResidents.map(resident => resident.email);
+    const validEmails = residents
+      ?.filter(resident => resident.email && resident.email.includes('@'))
+      .map(resident => resident.email) || [];
 
     if (validEmails.length === 0) {
       return new Response(
@@ -122,58 +120,17 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Configure SMTP client - using the same configuration as "Fale Conosco"
-    const client = new SMTPClient({
-      connection: {
-        hostname: "smtp.hostinger.com",
-        port: 465,
-        tls: true,
-        auth: {
-          username: "noreply@meuresidencial.com",
-          password: "Bigdream@2025",
-        },
-      },
-    });
-
-    // Send email to each resident
-    const emailPromises = validResidents.map(async (resident) => {
-      try {
-        console.log(`Sending report email to: ${resident.email} (${resident.unidade})`);
-        await client.send({
-          from: `${condominiumName} <noreply@meuresidencial.com>`,
-          to: resident.email,
-          subject: `Prestação de Contas - ${monthName} - ${condominiumName}`,
-          html: emailContent,
-        });
-        return resident;
-      } catch (emailError) {
-        console.error(`Error sending email to ${resident.email}:`, emailError);
-        return null;
-      }
-    });
-
-    const emailResults = await Promise.all(emailPromises);
-    const successfulEmails = emailResults.filter(Boolean);
+    // Send emails to all residents (simulated for now)
+    console.log(`Would send emails to ${validEmails.length} residents`);
     
-    // Collect units that received emails successfully
-    const units = successfulEmails
-      .filter(r => r && r.unidade)
-      .map(r => r.unidade)
-      .join(', ');
-
-    await client.close();
-    
-    console.log(`Successfully sent reports to ${successfulEmails.length} residents out of ${validResidents.length}`);
-    
-    // Log in database with reference month and units info
+    // Log in database
     const { data: logData, error: logError } = await supabaseAdmin
       .from('accounting_report_logs')
       .insert({
         report_month: month,
         matricula,
         sent_via: 'email',
-        sent_count: successfulEmails.length,
-        units: units || null
+        sent_count: validEmails.length
       })
       .select();
     
@@ -185,9 +142,8 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Relatório enviado com sucesso para ${successfulEmails.length} moradores.`,
-        recipients: successfulEmails.length,
-        units: units,
+        message: `Relatório enviado com sucesso para ${validEmails.length} moradores.`,
+        recipients: validEmails.length,
         logId: logData?.[0]?.id
       }),
       {

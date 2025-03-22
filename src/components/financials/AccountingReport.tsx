@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -15,7 +16,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Helper interfaces
 interface ReportLog {
@@ -24,7 +24,6 @@ interface ReportLog {
   sent_via: string;
   sent_count: number;
   created_at: string;
-  units?: string;
 }
 
 export const AccountingReport = () => {
@@ -158,7 +157,6 @@ export const AccountingReport = () => {
       toast.error(`Erro ao enviar relatório: ${error.message}`);
     } finally {
       setIsSendingReport(false);
-      setIsDialogOpen(false);
     }
   };
   
@@ -511,71 +509,6 @@ export const AccountingReport = () => {
     }
   };
   
-  // Helper functions
-  const formatMonthName = (monthStr: string) => {
-    try {
-      const date = parse(monthStr + '-01', 'yyyy-MM-dd', new Date());
-      return format(date, 'MMMM yyyy', { locale: ptBR });
-    } catch (e) {
-      return monthStr;
-    }
-  };
-  
-  const formatReferenceMonth = (dateStr: string | null) => {
-    if (!dateStr) return null;
-    try {
-      const date = new Date(dateStr);
-      return format(date, 'MMMM yyyy', { locale: ptBR });
-    } catch (e) {
-      return dateStr;
-    }
-  };
-  
-  const formatDateToBR = (dateStr: string | null) => {
-    if (!dateStr) return null;
-    try {
-      const date = new Date(dateStr);
-      return format(date, 'dd/MM/yyyy', { locale: ptBR });
-    } catch (e) {
-      return dateStr;
-    }
-  };
-  
-  const getCategoryName = (categoryId: string) => {
-    // Add your category mapping logic here
-    const categories = {
-      '1': 'Taxa de Condomínio',
-      '2': 'Multa',
-      '3': 'Juros',
-      '4': 'Água',
-      '5': 'Luz',
-      '6': 'Gás',
-      '7': 'Manutenção',
-      '8': 'Limpeza',
-      '9': 'Segurança',
-      '10': 'Outras Receitas',
-      '11': 'Outras Despesas',
-      // Add more categories as needed
-    };
-    
-    return categories[categoryId as keyof typeof categories] || categoryId;
-  };
-  
-  const getLast12Months = () => {
-    const today = new Date();
-    const months = [];
-    
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const value = format(date, 'yyyy-MM');
-      const label = format(date, 'MMMM yyyy', { locale: ptBR });
-      
-      months.push({ value, label });
-    }
-    
-    return months;
-  };
-  
   if (isLoading) {
     return <Skeleton className="w-full h-96" />;
   }
@@ -653,6 +586,42 @@ export const AccountingReport = () => {
           </div>
         </div>
         
+        {reportLogs.length > 0 && (
+          <div className="mb-6">
+            <Card>
+              <CardContent className="pt-4">
+                <h3 className="font-medium text-lg mb-3">Histórico de Envios</h3>
+                <div className="rounded-md border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Método</TableHead>
+                        <TableHead>Destinatários</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {reportLogs.map(log => (
+                        <TableRow key={log.id}>
+                          <TableCell>
+                            {format(new Date(log.created_at), 'dd/MM/yyyy HH:mm')}
+                          </TableCell>
+                          <TableCell>
+                            {log.sent_via === 'email' ? 'Email' : 'WhatsApp'}
+                          </TableCell>
+                          <TableCell>
+                            {log.sent_count} {log.sent_count === 1 ? 'morador' : 'moradores'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Card>
             <CardContent className="pt-4">
@@ -710,4 +679,169 @@ export const AccountingReport = () => {
             <h3 className="font-medium text-lg mb-4">Receitas do Mês</h3>
             {monthlyIncomes.length > 0 ? (
               <div className="rounded-md border overflow-hidden">
-                <
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Unidade</TableHead>
+                      <TableHead>Mês Referência</TableHead>
+                      <TableHead>Data de Pagamento</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {monthlyIncomes.map(income => (
+                      <TableRow key={income.id}>
+                        <TableCell className="font-medium">{getCategoryName(income.category)}</TableCell>
+                        <TableCell>{income.unit || '-'}</TableCell>
+                        <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(income.payment_date) || '-'}</TableCell>
+                        <TableCell className="text-right text-green-600">R$ {income.amount}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={4} className="font-bold">Total</TableCell>
+                      <TableCell className="text-right font-bold text-green-600">
+                        R$ {formatToBRL(getTotalIncome())}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-md border">
+                <p className="text-gray-500">Nenhuma receita registrada para este mês</p>
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <h3 className="font-medium text-lg mb-4">Despesas do Mês</h3>
+            {monthlyExpenses.length > 0 ? (
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Unidade</TableHead>
+                      <TableHead>Mês Referência</TableHead>
+                      <TableHead>Vencimento</TableHead>
+                      <TableHead>Data de Pagamento</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {monthlyExpenses.map(expense => (
+                      <TableRow key={expense.id}>
+                        <TableCell className="font-medium">{getCategoryName(expense.category)}</TableCell>
+                        <TableCell>{expense.unit || '-'}</TableCell>
+                        <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(expense.payment_date) || '-'}</TableCell>
+                        <TableCell className="text-right text-red-600">R$ {expense.amount}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={5} className="font-bold">Total</TableCell>
+                      <TableCell className="text-right font-bold text-red-600">
+                        R$ {formatToBRL(getTotalExpense())}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-md border">
+                <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Helper functions
+const getLast12Months = () => {
+  const months = [];
+  const today = new Date();
+  
+  for (let i = 0; i < 12; i++) {
+    const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    months.push({
+      value: format(date, 'yyyy-MM'),
+      label: format(date, 'MMMM yyyy', { locale: ptBR })
+    });
+  }
+  
+  return months;
+};
+
+// Helper function to format date string to DD/MM/YYYY
+const formatDateToBR = (dateString) => {
+  if (!dateString) return '-';
+  
+  try {
+    // Check if the date is in yyyy-MM-dd format
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      const date = new Date(dateString);
+      return format(date, 'dd/MM/yyyy');
+    }
+    
+    // If already in DD/MM/YYYY format, return as is
+    if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Try to parse the date if it's in another format
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    return format(date, 'dd/MM/yyyy');
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return dateString;
+  }
+};
+
+// Helper function to format reference month
+const formatReferenceMonth = (referenceMonth) => {
+  if (!referenceMonth) return '-';
+  
+  try {
+    // If in yyyy-MM format, convert to MM/yyyy
+    if (/^\d{4}-\d{2}$/.test(referenceMonth)) {
+      const [year, month] = referenceMonth.split('-');
+      return `${month}/${year}`;
+    }
+    
+    return referenceMonth;
+  } catch (error) {
+    console.error("Error formatting reference month:", error);
+    return referenceMonth;
+  }
+};
+
+// Helper function to get friendly category name
+const getCategoryName = (category) => {
+  const categoryMap = {
+    'taxa_condominio': 'Taxa de Condomínio',
+    'reserva_area_comum': 'Reserva Área Comum',
+    'taxa_extra': 'Taxa Extra',
+    'multa': 'Multa',
+    'outros_receita': 'Outros (Receita)',
+    'energia': 'Energia',
+    'agua': 'Água',
+    'manutencao': 'Manutenção',
+    'gas': 'Gás',
+    'limpeza': 'Limpeza',
+    'produtos': 'Produtos',
+    'imposto': 'Imposto',
+    'seguranca': 'Segurança',
+    'sistema_condominio': 'Sistema Condomínio',
+    'outros_despesa': 'Outros (Despesa)'
+  };
+  
+  return categoryMap[category] || category;
+};
