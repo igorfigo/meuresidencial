@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { usePlans } from '@/hooks/use-plans';
+import { Separator } from '@/components/ui/separator';
 import { SubscriptionDetailsCard } from '@/components/minha-assinatura/SubscriptionDetailsCard';
 import { formatCurrencyDisplay, getCurrentPlanDetails } from '@/utils/subscription-utils';
 
@@ -52,7 +53,8 @@ const MinhaAssinatura = () => {
     return (
       <DashboardLayout>
         <div className="container mx-auto py-6">
-          <h1 className="text-2xl font-bold mb-6">Minha Assinatura</h1>
+          <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
+          <Separator className="mb-6" />
           <p>Esta página está disponível apenas para usuários de condomínios.</p>
         </div>
       </DashboardLayout>
@@ -62,7 +64,8 @@ const MinhaAssinatura = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Minha Assinatura</h1>
+        <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
+        <Separator className="mb-6" />
         
         {condominiumData && (
           <SubscriptionDetailsCard 

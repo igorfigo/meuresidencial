@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
 import { ChartContainer } from '@/components/ui/chart';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import { formatToBRL, BRLToNumber } from '@/utils/currency';
 import { Calendar, Wallet, Home, PieChart, AlertCircle, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -399,7 +400,8 @@ const FinanceiroDashboard = () => {
     return (
       <DashboardLayout>
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
+          <h1 className="text-3xl font-bold mb-2">Dashboard Financeiro</h1>
+          <Separator className="mb-6" />
           <div className="flex items-center justify-center h-64">
             <div className="animate-pulse text-lg text-gray-500">Carregando dados financeiros...</div>
           </div>
@@ -411,7 +413,8 @@ const FinanceiroDashboard = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-6">Dashboard Financeiro</h1>
+        <h1 className="text-3xl font-bold mb-2">Dashboard Financeiro</h1>
+        <Separator className="mb-6" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div>
@@ -680,4 +683,3 @@ const FinanceiroDashboard = () => {
 };
 
 export default FinanceiroDashboard;
-

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Loader2, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -67,7 +68,8 @@ const FaleConosco = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6 max-w-3xl">
-        <h1 className="text-3xl font-bold mb-6">Fale Conosco</h1>
+        <h1 className="text-3xl font-bold mb-2">Fale Conosco</h1>
+        <Separator className="mb-6" />
         
         <Card className="border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="pb-3">
