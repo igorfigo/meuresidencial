@@ -69,7 +69,10 @@ const FaleConosco = () => {
     <DashboardLayout>
       <div className="container mx-auto py-6 max-w-3xl">
         <h1 className="text-3xl font-bold mb-2">Fale Conosco</h1>
-        <Separator className="mb-6" />
+        <Separator className="mb-2" />
+        <p className="text-gray-600 mb-6">
+          Entre em contato com nossa equipe de suporte. Responderemos sua mensagem em até 24 horas úteis.
+        </p>
         
         <Card className="border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="pb-3">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -44,7 +43,6 @@ const MinhaAssinatura = () => {
     }
   }, [user]);
   
-  // Create a wrapper function for getCurrentPlanDetails
   const getPlanDetails = () => {
     return getCurrentPlanDetails(condominiumData, plans);
   };
@@ -54,7 +52,10 @@ const MinhaAssinatura = () => {
       <DashboardLayout>
         <div className="container mx-auto py-6">
           <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
-          <Separator className="mb-6" />
+          <Separator className="mb-2" />
+          <p className="text-gray-600 mb-6">
+            Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
+          </p>
           <p>Esta página está disponível apenas para usuários de condomínios.</p>
         </div>
       </DashboardLayout>
@@ -65,7 +66,10 @@ const MinhaAssinatura = () => {
     <DashboardLayout>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
-        <Separator className="mb-6" />
+        <Separator className="mb-2" />
+        <p className="text-gray-600 mb-6">
+          Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
+        </p>
         
         {condominiumData && (
           <SubscriptionDetailsCard 

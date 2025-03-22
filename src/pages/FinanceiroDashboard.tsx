@@ -401,7 +401,10 @@ const FinanceiroDashboard = () => {
       <DashboardLayout>
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-2">Dashboard Financeiro</h1>
-          <Separator className="mb-6" />
+          <Separator className="mb-2" />
+          <p className="text-gray-600 mb-6">
+            Visualize a situação financeira atualizada do seu condomínio, incluindo receitas, despesas e status de pagamentos.
+          </p>
           <div className="flex items-center justify-center h-64">
             <div className="animate-pulse text-lg text-gray-500">Carregando dados financeiros...</div>
           </div>
@@ -414,7 +417,10 @@ const FinanceiroDashboard = () => {
     <DashboardLayout>
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-2">Dashboard Financeiro</h1>
-        <Separator className="mb-6" />
+        <Separator className="mb-2" />
+        <p className="text-gray-600 mb-6">
+          Visualize a situação financeira atualizada do seu condomínio, incluindo receitas, despesas e status de pagamentos.
+        </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div>
