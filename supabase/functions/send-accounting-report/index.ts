@@ -24,6 +24,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log("Received request to send-accounting-report function");
     const { matricula, report_month, report_year, report_data }: SendReportRequest = await req.json();
 
     if (!matricula || !report_month || !report_year || !report_data) {
