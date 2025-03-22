@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -244,7 +243,7 @@ export const AccountingReport = () => {
       // Helper function to draw table headers with colored background
       const drawTableHeader = (headers, columnWidths, y, color) => {
         // Table header background
-        doc.setFillColor(...color);
+        doc.setFillColor(color[0], color[1], color[2]); // Fixed: Passing color values as separate arguments instead of spreading array
         doc.rect(margin, y - 6, pageWidth - (margin * 2), 8, 'F');
         
         // Table header text
@@ -333,7 +332,7 @@ export const AccountingReport = () => {
         const incomeColWidths = [50, 30, 40, 40, 30];
         const incomeHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Data Pagamento', 'Valor'];
         
-        yPosition = drawTableHeader(incomeHeaders, incomeColWidths, yPosition, [16, 122, 87]); // Green-700
+        yPosition = drawTableHeader(incomeHeaders, incomeColWidths, yPosition, [16, 122, 87]); // Fixed: Using array instead of spread
         
         yPosition = drawTableRows(monthlyIncomes, incomeColWidths, yPosition, (income) => [
           getCategoryName(income.category),
@@ -401,7 +400,7 @@ export const AccountingReport = () => {
         const expenseColWidths = [45, 25, 35, 30, 30, 30];
         const expenseHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Vencimento', 'Pagamento', 'Valor'];
         
-        yPosition = drawTableHeader(expenseHeaders, expenseColWidths, yPosition, [185, 28, 28]); // Red-700
+        yPosition = drawTableHeader(expenseHeaders, expenseColWidths, yPosition, [185, 28, 28]); // Fixed: Using array instead of spread
         
         yPosition = drawTableRows(monthlyExpenses, expenseColWidths, yPosition, (expense) => [
           getCategoryName(expense.category),
