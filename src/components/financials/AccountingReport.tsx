@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -506,7 +505,6 @@ export const AccountingReport = () => {
     }
   };
   
-  // Create a handler function that wraps the generatePDF call for onClick event
   const handleGeneratePDF = () => {
     generatePDF(true);
   };
@@ -524,7 +522,17 @@ export const AccountingReport = () => {
       const monthDate = new Date(parseInt(year), parseInt(month) - 1);
       const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' });
       
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        throw new Error(`Erro ao obter sessão: ${sessionError.message}`);
+      }
+      
+      const accessToken = sessionData?.session?.access_token;
+      
+      if (!accessToken) {
+        throw new Error('Você precisa estar autenticado para enviar relatórios');
+      }
       
       const pdfData = generatePDF(false);
       
@@ -538,7 +546,7 @@ export const AccountingReport = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionData.session?.access_token}`
+            'Authorization': `Bearer ${accessToken}`
           },
           body: JSON.stringify({
             matricula: user?.selectedCondominium,
@@ -548,14 +556,15 @@ export const AccountingReport = () => {
           })
         });
         
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erro ao enviar o relatório');
+        }
+        
         const result = await response.json();
         
-        if (response.ok) {
-          toast.success(`Relatório enviado com sucesso para ${result.sent_count} moradores por e-mail`);
-          fetchReportLogs();
-        } else {
-          toast.error(`Erro ao enviar relatório: ${result.error}`);
-        }
+        toast.success(`Relatório enviado com sucesso para ${result.sent_count} moradores por e-mail`);
+        fetchReportLogs();
       }
       
       if (sendOptions.whatsapp) {
