@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -691,3 +692,14 @@ export const AccountingReport = ({ onDeliverReport }: AccountingReportProps) => 
                   </TableBody>
                 </Table>
               </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-md border">
+                <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
