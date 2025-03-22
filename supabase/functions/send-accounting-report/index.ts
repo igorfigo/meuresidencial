@@ -2,7 +2,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 import { supabaseAdmin } from "../_shared/supabase-admin.ts";
-import { decode } from "https://deno.land/std@0.173.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,7 +13,7 @@ interface SendReportRequest {
   matricula: string;
   report_month: string;
   report_year: string;
-  report_data: string; // Base64 encoded PDF
+  report_html: string; // HTML content of the report
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -25,9 +24,9 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     console.log("Received request to send-accounting-report function");
-    const { matricula, report_month, report_year, report_data }: SendReportRequest = await req.json();
+    const { matricula, report_month, report_year, report_html }: SendReportRequest = await req.json();
 
-    if (!matricula || !report_month || !report_year || !report_data) {
+    if (!matricula || !report_month || !report_year || !report_html) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         {
@@ -92,9 +91,6 @@ const handler = async (req: Request): Promise<Response> => {
         }
       );
     }
-
-    // Convert base64 to binary for attachment
-    const binaryPdf = decode(report_data.split(';base64,').pop() || "");
     
     // Configure SMTP client
     const client = new SMTPClient({
@@ -109,7 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
-    // Create email HTML template
+    // Create email HTML template that includes the report content
     const makeEmailTemplate = (residentName: string) => `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -121,7 +117,7 @@ const handler = async (req: Request): Promise<Response> => {
       font-family: Arial, sans-serif;
       line-height: 1.6;
       color: #333;
-      max-width: 600px;
+      max-width: 800px;
       margin: 0 auto;
     }
     .container {
@@ -150,6 +146,11 @@ const handler = async (req: Request): Promise<Response> => {
       padding: 20px;
       background-color: #fff;
     }
+    .report-content {
+      margin-top: 25px;
+      border-top: 1px solid #eaeaea;
+      padding-top: 20px;
+    }
     .footer {
       background-color: #f7f7f7;
       padding: 15px;
@@ -168,8 +169,13 @@ const handler = async (req: Request): Promise<Response> => {
     </div>
     <div class="content">
       <p>Olá, ${residentName}!</p>
-      <p>Segue em anexo a prestação de contas do condomínio referente ao mês de ${report_month}/${report_year}.</p>
+      <p>Segue abaixo a prestação de contas do condomínio referente ao mês de ${report_month}/${report_year}.</p>
       <p>Este é um informativo oficial enviado pelo síndico ou administrador do seu condomínio através do sistema Meu Residencial.</p>
+      
+      <div class="report-content">
+        ${report_html}
+      </div>
+      
       <p>Qualquer dúvida entre em contato com a administração do condomínio.</p>
     </div>
     <div class="footer">
@@ -189,14 +195,7 @@ const handler = async (req: Request): Promise<Response> => {
           from: `${condominiumName} <noreply@meuresidencial.com>`,
           to: resident.email,
           subject: `${condominiumName}: Prestação de Contas - ${report_month}/${report_year}`,
-          html: makeEmailTemplate(resident.nome_completo),
-          attachments: [
-            {
-              content: binaryPdf,
-              filename: `Prestacao_Contas_${report_month}_${report_year}.pdf`,
-              contentType: "application/pdf",
-            },
-          ],
+          html: makeEmailTemplate(resident.nome_completo)
         });
         return resident;
       } catch (emailError) {
