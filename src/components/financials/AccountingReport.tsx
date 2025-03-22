@@ -511,11 +511,7 @@ export const AccountingReport = () => {
     }
   };
   
-  if (isLoading) {
-    return <Skeleton className="w-full h-96" />;
-  }
-  
-  // Helper function to format month name for display
+  // Helper functions
   const formatMonthName = (monthStr: string) => {
     try {
       const date = parse(monthStr + '-01', 'yyyy-MM-dd', new Date());
@@ -524,6 +520,65 @@ export const AccountingReport = () => {
       return monthStr;
     }
   };
+  
+  const formatReferenceMonth = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    try {
+      const date = new Date(dateStr);
+      return format(date, 'MMMM yyyy', { locale: ptBR });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+  
+  const formatDateToBR = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    try {
+      const date = new Date(dateStr);
+      return format(date, 'dd/MM/yyyy', { locale: ptBR });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+  
+  const getCategoryName = (categoryId: string) => {
+    // Add your category mapping logic here
+    const categories = {
+      '1': 'Taxa de Condomínio',
+      '2': 'Multa',
+      '3': 'Juros',
+      '4': 'Água',
+      '5': 'Luz',
+      '6': 'Gás',
+      '7': 'Manutenção',
+      '8': 'Limpeza',
+      '9': 'Segurança',
+      '10': 'Outras Receitas',
+      '11': 'Outras Despesas',
+      // Add more categories as needed
+    };
+    
+    return categories[categoryId as keyof typeof categories] || categoryId;
+  };
+  
+  const getLast12Months = () => {
+    const today = new Date();
+    const months = [];
+    
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const value = format(date, 'yyyy-MM');
+      const label = format(date, 'MMMM yyyy', { locale: ptBR });
+      
+      months.push({ value, label });
+    }
+    
+    return months;
+  };
+  
+  if (isLoading) {
+    return <Skeleton className="w-full h-96" />;
+  }
   
   return (
     <Card className="mb-8">
@@ -655,49 +710,4 @@ export const AccountingReport = () => {
             <h3 className="font-medium text-lg mb-4">Receitas do Mês</h3>
             {monthlyIncomes.length > 0 ? (
               <div className="rounded-md border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Mês Referência</TableHead>
-                      <TableHead>Data de Pagamento</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {monthlyIncomes.map(income => (
-                      <TableRow key={income.id}>
-                        <TableCell className="font-medium">{getCategoryName(income.category)}</TableCell>
-                        <TableCell>{income.unit || '-'}</TableCell>
-                        <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>
-                        <TableCell>{formatDateToBR(income.payment_date) || '-'}</TableCell>
-                        <TableCell className="text-right text-green-600">R$ {income.amount}</TableCell>
-                      </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell colSpan={4} className="font-bold">Total</TableCell>
-                      <TableCell className="text-right font-bold text-green-600">
-                        R$ {formatToBRL(getTotalIncome())}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-md border">
-                <p className="text-gray-500">Nenhuma receita registrada para este mês</p>
-              </div>
-            )}
-          </div>
-          
-          <div>
-            <h3 className="font-medium text-lg mb-4">Despesas do Mês</h3>
-            {monthlyExpenses.length > 0 ? (
-              <div className="rounded-md border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <Table
+                <
