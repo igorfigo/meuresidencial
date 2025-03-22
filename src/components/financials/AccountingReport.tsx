@@ -8,94 +8,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileDown } from 'lucide-react';
+import { FileDown, Users, X } from 'lucide-react';
 import { useFinances } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from 'sonner';
 import jsPDF from 'jspdf';
+import { supabase } from '@/integrations/supabase/client';
 
-const getLast12Months = () => {
-  const months = [];
-  const today = new Date();
-  
-  for (let i = 0; i < 12; i++) {
-    const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    months.push({
-      value: format(date, 'yyyy-MM'),
-      label: format(date, 'MMMM yyyy', { locale: ptBR })
-    });
-  }
-  
-  return months;
-};
-
-// Helper function to format date string to DD/MM/YYYY
-const formatDateToBR = (dateString) => {
-  if (!dateString) return '-';
-  
-  try {
-    // Check if the date is in yyyy-MM-dd format
-    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
-      const date = new Date(dateString);
-      return format(date, 'dd/MM/yyyy');
-    }
-    
-    // If already in DD/MM/YYYY format, return as is
-    if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
-      return dateString;
-    }
-    
-    // Try to parse the date if it's in another format
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    
-    return format(date, 'dd/MM/yyyy');
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return dateString;
-  }
-};
-
-// Helper function to format reference month
-const formatReferenceMonth = (referenceMonth) => {
-  if (!referenceMonth) return '-';
-  
-  try {
-    // If in yyyy-MM format, convert to MM/yyyy
-    if (/^\d{4}-\d{2}$/.test(referenceMonth)) {
-      const [year, month] = referenceMonth.split('-');
-      return `${month}/${year}`;
-    }
-    
-    return referenceMonth;
-  } catch (error) {
-    console.error("Error formatting reference month:", error);
-    return referenceMonth;
-  }
-};
-
-// Helper function to get friendly category name
-const getCategoryName = (category) => {
-  const categoryMap = {
-    'taxa_condominio': 'Taxa de Condomínio',
-    'reserva_area_comum': 'Reserva Área Comum',
-    'taxa_extra': 'Taxa Extra',
-    'multa': 'Multa',
-    'outros_receita': 'Outros (Receita)',
-    'energia': 'Energia',
-    'agua': 'Água',
-    'manutencao': 'Manutenção',
-    'gas': 'Gás',
-    'limpeza': 'Limpeza',
-    'produtos': 'Produtos',
-    'imposto': 'Imposto',
-    'seguranca': 'Segurança',
-    'sistema_condominio': 'Sistema Condomínio',
-    'outros_despesa': 'Outros (Despesa)'
-  };
-  
-  return categoryMap[category] || category;
-};
+// Helper interfaces
+interface ReportLog {
+  id: string;
+  report_month: string;
+  sent_via: string;
+  sent_count: number;
+  created_at: string;
+}
 
 export const AccountingReport = () => {
   const { user } = useApp();
@@ -106,6 +35,10 @@ export const AccountingReport = () => {
   const [startBalance, setStartBalance] = useState('0,00');
   const [endBalance, setEndBalance] = useState('0,00');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSendingReport, setIsSendingReport] = useState(false);
+  const [reportLogs, setReportLogs] = useState<ReportLog[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   
   const months = getLast12Months();
   
@@ -143,6 +76,35 @@ export const AccountingReport = () => {
     }
   }, [isLoading, selectedMonth, incomes, expenses, balance]);
   
+  useEffect(() => {
+    fetchReportLogs();
+  }, [selectedMonth]);
+  
+  const fetchReportLogs = async () => {
+    if (!user?.selectedCondominium) return;
+    
+    setIsLoadingLogs(true);
+    try {
+      const { data, error } = await supabase
+        .from('accounting_report_logs')
+        .select('*')
+        .eq('matricula', user.selectedCondominium)
+        .eq('report_month', selectedMonth)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching report logs:', error);
+        throw error;
+      }
+      
+      setReportLogs(data || []);
+    } catch (error) {
+      console.error('Failed to fetch report logs:', error);
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
+  
   const handleMonthChange = (value: string) => {
     setSelectedMonth(value);
   };
@@ -153,6 +115,49 @@ export const AccountingReport = () => {
   
   const getTotalExpense = () => {
     return monthlyExpenses.reduce((sum, expense) => sum + BRLToNumber(expense.amount), 0);
+  };
+  
+  const sendReportByEmail = async () => {
+    if (!user?.selectedCondominium) {
+      toast.error('Não foi possível identificar o condomínio');
+      return;
+    }
+    
+    setIsSendingReport(true);
+    
+    try {
+      const monthDate = parse(selectedMonth + '-01', 'yyyy-MM-dd', new Date());
+      const monthName = format(monthDate, 'MMMM yyyy', { locale: ptBR });
+      
+      const response = await supabase.functions.invoke('send-accounting-report', {
+        body: {
+          matricula: user.selectedCondominium,
+          month: selectedMonth,
+          monthName,
+          balance: endBalance,
+          totalIncome: formatToBRL(getTotalIncome()),
+          totalExpense: formatToBRL(getTotalExpense())
+        }
+      });
+      
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+      
+      const data = response.data;
+      
+      if (data.success) {
+        toast.success(data.message);
+        await fetchReportLogs();
+      } else {
+        toast.error(data.message || 'Erro ao enviar relatório');
+      }
+    } catch (error: any) {
+      console.error('Error sending report:', error);
+      toast.error(`Erro ao enviar relatório: ${error.message}`);
+    } finally {
+      setIsSendingReport(false);
+    }
   };
   
   const generatePDF = () => {
@@ -528,15 +533,94 @@ export const AccountingReport = () => {
             </Select>
           </div>
           
-          <Button 
-            onClick={generatePDF} 
-            disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
-            className="flex items-center gap-2"
-          >
-            <FileDown size={16} />
-            {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  className="flex items-center gap-2"
+                  variant="secondary"
+                >
+                  <Users size={16} />
+                  Prestar Contas aos Moradores
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Prestar Contas aos Moradores</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="text-sm text-muted-foreground mb-4">
+                    Selecione como deseja prestar contas aos moradores do relatório de {format(parse(selectedMonth + '-01', 'yyyy-MM-dd', new Date()), 'MMMM yyyy', { locale: ptBR })}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-3">
+                    <Button 
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={sendReportByEmail}
+                      disabled={isSendingReport}
+                    >
+                      {isSendingReport ? 'Enviando...' : 'Enviar E-mail aos Moradores'}
+                    </Button>
+                    
+                    <Button 
+                      className="w-full justify-start"
+                      variant="outline"
+                      disabled
+                    >
+                      Enviar WhatsApp aos Moradores
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Button 
+              onClick={generatePDF} 
+              disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
+              className="flex items-center gap-2"
+            >
+              <FileDown size={16} />
+              {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
+            </Button>
+          </div>
         </div>
+        
+        {reportLogs.length > 0 && (
+          <div className="mb-6">
+            <Card>
+              <CardContent className="pt-4">
+                <h3 className="font-medium text-lg mb-3">Histórico de Envios</h3>
+                <div className="rounded-md border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Método</TableHead>
+                        <TableHead>Destinatários</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {reportLogs.map(log => (
+                        <TableRow key={log.id}>
+                          <TableCell>
+                            {format(new Date(log.created_at), 'dd/MM/yyyy HH:mm')}
+                          </TableCell>
+                          <TableCell>
+                            {log.sent_via === 'email' ? 'Email' : 'WhatsApp'}
+                          </TableCell>
+                          <TableCell>
+                            {log.sent_count} {log.sent_count === 1 ? 'morador' : 'moradores'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Card>
@@ -676,4 +760,88 @@ export const AccountingReport = () => {
       </CardContent>
     </Card>
   );
+};
+
+// Helper functions
+const getLast12Months = () => {
+  const months = [];
+  const today = new Date();
+  
+  for (let i = 0; i < 12; i++) {
+    const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    months.push({
+      value: format(date, 'yyyy-MM'),
+      label: format(date, 'MMMM yyyy', { locale: ptBR })
+    });
+  }
+  
+  return months;
+};
+
+// Helper function to format date string to DD/MM/YYYY
+const formatDateToBR = (dateString) => {
+  if (!dateString) return '-';
+  
+  try {
+    // Check if the date is in yyyy-MM-dd format
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      const date = new Date(dateString);
+      return format(date, 'dd/MM/yyyy');
+    }
+    
+    // If already in DD/MM/YYYY format, return as is
+    if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Try to parse the date if it's in another format
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    return format(date, 'dd/MM/yyyy');
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return dateString;
+  }
+};
+
+// Helper function to format reference month
+const formatReferenceMonth = (referenceMonth) => {
+  if (!referenceMonth) return '-';
+  
+  try {
+    // If in yyyy-MM format, convert to MM/yyyy
+    if (/^\d{4}-\d{2}$/.test(referenceMonth)) {
+      const [year, month] = referenceMonth.split('-');
+      return `${month}/${year}`;
+    }
+    
+    return referenceMonth;
+  } catch (error) {
+    console.error("Error formatting reference month:", error);
+    return referenceMonth;
+  }
+};
+
+// Helper function to get friendly category name
+const getCategoryName = (category) => {
+  const categoryMap = {
+    'taxa_condominio': 'Taxa de Condomínio',
+    'reserva_area_comum': 'Reserva Área Comum',
+    'taxa_extra': 'Taxa Extra',
+    'multa': 'Multa',
+    'outros_receita': 'Outros (Receita)',
+    'energia': 'Energia',
+    'agua': 'Água',
+    'manutencao': 'Manutenção',
+    'gas': 'Gás',
+    'limpeza': 'Limpeza',
+    'produtos': 'Produtos',
+    'imposto': 'Imposto',
+    'seguranca': 'Segurança',
+    'sistema_condominio': 'Sistema Condomínio',
+    'outros_despesa': 'Outros (Despesa)'
+  };
+  
+  return categoryMap[category] || category;
 };
