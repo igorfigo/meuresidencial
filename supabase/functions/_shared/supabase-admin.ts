@@ -1,11 +1,9 @@
 
-import { createClient } from "npm:@supabase/supabase-js@2.39.7";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.43.1'
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
-
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    persistSession: false,
-  },
-});
+export const supabaseClient = createClient(
+  // Supabase API URL - env var exported by default when deployed.
+  Deno.env.get('SUPABASE_URL') ?? '',
+  // Supabase API SERVICE ROLE KEY - env var exported by default when deployed.
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+)
