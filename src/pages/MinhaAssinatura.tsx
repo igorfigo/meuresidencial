@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
@@ -40,7 +41,7 @@ const MinhaAssinatura = () => {
     }
 
     try {
-      const selectedPlan = plans?.find(plan => plan.id === selectedPlanId);
+      const selectedPlan = plans?.find(plan => plan.codigo === selectedPlanId);
 
       if (!selectedPlan) {
         toast.error('Plano selecionado não encontrado.');
@@ -54,9 +55,9 @@ const MinhaAssinatura = () => {
 
       const updatedUser = {
         ...user,
-        planId: selectedPlan.id,
-        nomePlano: selectedPlan.name,
-        valorPlano: selectedPlan.price.toString(),
+        planId: selectedPlan.codigo,
+        nomePlano: selectedPlan.nome,
+        valorPlano: selectedPlan.valor.replace('R$ ', ''),
       };
 
       await updateSubscription(updatedUser);
@@ -82,14 +83,16 @@ const MinhaAssinatura = () => {
           isLoading={isLoadingPlans}
         />
 
-        <PasswordChangeSection />
+        {user?.matricula && (
+          <PasswordChangeSection userMatricula={user.matricula} />
+        )}
 
         <PlanUpgradeDialog
-          isOpen={isDialogOpen}
+          open={isDialogOpen}
           onClose={handleCloseDialog}
           onUpgrade={handlePlanUpgrade}
-          plans={plans}
-          selectedPlanId={selectedPlanId}
+          plans={plans || []}
+          selectedPlanId={selectedPlanId || ''}
           isLoading={isLoadingPlans}
         />
       </div>

@@ -20,3 +20,15 @@ export const getCurrentPlanDetails = (condominiumData: any, plans: any[]) => {
     value: plan ? plan.valor : formatCurrencyDisplay(condominiumData.valorplano)
   };
 };
+
+// Add the missing getSubscriptionStatus function
+export const getSubscriptionStatus = (user: any): string | null => {
+  if (!user) return null;
+  
+  // Check if user has a subscription
+  if (user.planId || user.nomePlano) {
+    return 'active';
+  }
+  
+  return 'inactive';
+};
