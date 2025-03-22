@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -8,11 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileDown } from 'lucide-react';
+import { FileDown, Users } from 'lucide-react';
 import { useFinances } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
 import jsPDF from 'jspdf';
+
+interface AccountingReportProps {
+  onDeliverReport?: (month: string, balance: string, totalIncome: string, totalExpense: string) => void;
+}
 
 const getLast12Months = () => {
   const months = [];
@@ -97,7 +100,7 @@ const getCategoryName = (category) => {
   return categoryMap[category] || category;
 };
 
-export const AccountingReport = () => {
+export const AccountingReport = ({ onDeliverReport }: AccountingReportProps) => {
   const { user } = useApp();
   const { incomes, expenses, balance, isLoading, refreshData } = useFinances();
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
@@ -504,6 +507,17 @@ export const AccountingReport = () => {
     }
   };
   
+  const handleDeliverReport = () => {
+    if (onDeliverReport) {
+      onDeliverReport(
+        selectedMonth,
+        endBalance,
+        formatToBRL(getTotalIncome()),
+        formatToBRL(getTotalExpense())
+      );
+    }
+  };
+  
   if (isLoading) {
     return <Skeleton className="w-full h-96" />;
   }
@@ -528,14 +542,25 @@ export const AccountingReport = () => {
             </Select>
           </div>
           
-          <Button 
-            onClick={generatePDF} 
-            disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
-            className="flex items-center gap-2"
-          >
-            <FileDown size={16} />
-            {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              onClick={handleDeliverReport}
+              className="flex items-center gap-2"
+              variant="secondary"
+            >
+              <Users size={16} />
+              Prestar Contas aos Moradores
+            </Button>
+            
+            <Button 
+              onClick={generatePDF} 
+              disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
+              className="flex items-center gap-2"
+            >
+              <FileDown size={16} />
+              {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
+            </Button>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -666,14 +691,3 @@ export const AccountingReport = () => {
                   </TableBody>
                 </Table>
               </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-md border">
-                <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
