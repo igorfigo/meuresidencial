@@ -74,6 +74,29 @@ const formatReferenceMonth = (referenceMonth) => {
   }
 };
 
+// Helper function to get friendly category name
+const getCategoryName = (category) => {
+  const categoryMap = {
+    'taxa_condominio': 'Taxa de Condomínio',
+    'reserva_area_comum': 'Reserva Área Comum',
+    'taxa_extra': 'Taxa Extra',
+    'multa': 'Multa',
+    'outros_receita': 'Outros (Receita)',
+    'energia': 'Energia',
+    'agua': 'Água',
+    'manutencao': 'Manutenção',
+    'gas': 'Gás',
+    'limpeza': 'Limpeza',
+    'produtos': 'Produtos',
+    'imposto': 'Imposto',
+    'seguranca': 'Segurança',
+    'sistema_condominio': 'Sistema Condomínio',
+    'outros_despesa': 'Outros (Despesa)'
+  };
+  
+  return categoryMap[category] || category;
+};
+
 export const AccountingReport = () => {
   const { user } = useApp();
   const { incomes, expenses, balance, isLoading, refreshData } = useFinances();
@@ -186,7 +209,7 @@ export const AccountingReport = () => {
       doc.text('RECEITAS', margin, yPosition);
       yPosition += lineHeight * 1.2;
       
-      const incomeColWidths = [40, 25, 35, 30, 30, 40];
+      const incomeColWidths = [40, 25, 35, 30, 30];
       const tableWidth = pageWidth - (margin * 2);
       
       const drawLine = (y: number) => {
@@ -224,7 +247,7 @@ export const AccountingReport = () => {
           
           currentX = margin;
           
-          doc.text(income.category || "N/A", currentX, yPosition);
+          doc.text(getCategoryName(income.category), currentX, yPosition);
           currentX += incomeColWidths[0];
           
           doc.text(income.unit || "N/A", currentX, yPosition);
@@ -306,7 +329,7 @@ export const AccountingReport = () => {
           
           currentX = margin;
           
-          doc.text(expense.category || "N/A", currentX, yPosition);
+          doc.text(getCategoryName(expense.category), currentX, yPosition);
           currentX += expenseColWidths[0];
           
           doc.text(expense.unit || "N/A", currentX, yPosition);
@@ -462,7 +485,7 @@ export const AccountingReport = () => {
                   <TableBody>
                     {monthlyIncomes.map(income => (
                       <TableRow key={income.id}>
-                        <TableCell className="font-medium">{income.category}</TableCell>
+                        <TableCell className="font-medium">{getCategoryName(income.category)}</TableCell>
                         <TableCell>{income.unit || '-'}</TableCell>
                         <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>
                         <TableCell>{formatDateToBR(income.payment_date) || '-'}</TableCell>
@@ -503,7 +526,7 @@ export const AccountingReport = () => {
                   <TableBody>
                     {monthlyExpenses.map(expense => (
                       <TableRow key={expense.id}>
-                        <TableCell className="font-medium">{expense.category}</TableCell>
+                        <TableCell className="font-medium">{getCategoryName(expense.category)}</TableCell>
                         <TableCell>{expense.unit || '-'}</TableCell>
                         <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>
                         <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>

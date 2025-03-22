@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye, History } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye } from 'lucide-react';
 import { BRLToNumber } from '@/utils/currency';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -53,7 +54,8 @@ export const RecentTransactions = ({
       'taxa_condominio': 'Taxa de Condomínio',
       'reserva_area_comum': 'Reserva Área Comum',
       'taxa_extra': 'Taxa Extra',
-      
+      'multa': 'Multa',
+      'outros_receita': 'Outros (Receita)',
       'energia': 'Energia',
       'agua': 'Água',
       'manutencao': 'Manutenção',
@@ -63,8 +65,7 @@ export const RecentTransactions = ({
       'imposto': 'Imposto',
       'seguranca': 'Segurança',
       'sistema_condominio': 'Sistema Condomínio',
-      
-      'outros': 'Outros'
+      'outros_despesa': 'Outros (Despesa)'
     };
     
     return categoryMap[category] || category;
