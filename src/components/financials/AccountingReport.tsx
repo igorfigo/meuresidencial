@@ -8,16 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileDown, Mail } from 'lucide-react';
+import { FileDown } from 'lucide-react';
 import { useFinances } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
 import jsPDF from 'jspdf';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { Checkbox } from '@/components/ui/checkbox';
 
 const getLast12Months = () => {
   const months = [];
@@ -34,19 +29,23 @@ const getLast12Months = () => {
   return months;
 };
 
+// Helper function to format date string to DD/MM/YYYY
 const formatDateToBR = (dateString) => {
   if (!dateString) return '-';
   
   try {
+    // Check if the date is in yyyy-MM-dd format
     if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
       const date = new Date(dateString);
       return format(date, 'dd/MM/yyyy');
     }
     
+    // If already in DD/MM/YYYY format, return as is
     if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
       return dateString;
     }
     
+    // Try to parse the date if it's in another format
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
     
@@ -57,10 +56,12 @@ const formatDateToBR = (dateString) => {
   }
 };
 
+// Helper function to format reference month
 const formatReferenceMonth = (referenceMonth) => {
   if (!referenceMonth) return '-';
   
   try {
+    // If in yyyy-MM format, convert to MM/yyyy
     if (/^\d{4}-\d{2}$/.test(referenceMonth)) {
       const [year, month] = referenceMonth.split('-');
       return `${month}/${year}`;
@@ -73,6 +74,7 @@ const formatReferenceMonth = (referenceMonth) => {
   }
 };
 
+// Helper function to get friendly category name
 const getCategoryName = (category) => {
   const categoryMap = {
     'taxa_condominio': 'Taxa de Condomínio',
@@ -104,11 +106,6 @@ export const AccountingReport = () => {
   const [startBalance, setStartBalance] = useState('0,00');
   const [endBalance, setEndBalance] = useState('0,00');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showSendDialog, setShowSendDialog] = useState(false);
-  const [sendViaEmail, setSendViaEmail] = useState(true);
-  const [sendViaWhatsapp, setSendViaWhatsapp] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   
   const months = getLast12Months();
   
@@ -167,6 +164,7 @@ export const AccountingReport = () => {
       const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
       const currentDate = format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
       
+      // Create document with slightly larger default font size
       const doc = new jsPDF();
       doc.setFontSize(11);
       
@@ -176,39 +174,46 @@ export const AccountingReport = () => {
       const lineHeight = 7;
       const margin = 15;
       
+      // Background subtle color for header
       doc.setFillColor(240, 247, 255);
       doc.rect(0, 0, pageWidth, 40, 'F');
       
-      doc.setFillColor(59, 130, 246);
+      // Top branding bar
+      doc.setFillColor(59, 130, 246); // Blue brand color
       doc.rect(0, 0, pageWidth, 5, 'F');
       
+      // Header - Info line
       doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
+      doc.setTextColor(100, 116, 139); // Slate-500
       doc.text("Relatório gerado em: " + currentDate, margin, yPosition);
       doc.text("Gerado por: www.meuresidencial.com", pageWidth - margin, yPosition, { align: 'right' });
       yPosition += 10;
       
+      // Main Title
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(31, 41, 55);
+      doc.setTextColor(31, 41, 55); // Gray-800
       const title = `Prestação de Contas - ${monthName} ${year}`;
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
       
-      doc.setFillColor(244, 247, 254);
+      // Condominium Info - Centered with address
+      doc.setFillColor(244, 247, 254); // Light blue background
       doc.roundedRect(margin, yPosition - 5, pageWidth - (margin * 2), 35, 3, 3, 'F');
       
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(31, 41, 55);
+      doc.setTextColor(31, 41, 55); // Gray-800
       doc.text(`Condomínio: ${user?.nomeCondominio || "Nome não disponível"}`, pageWidth / 2, yPosition + 5, { align: 'center' });
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, pageWidth / 2, yPosition + 15, { align: 'center' });
       
+      // Prepare address text
       let addressText = "Endereço não disponível";
       
       if (user) {
+        // Collect address parts from the available user data
         const addressParts = [];
         if (user.rua) addressParts.push(user.rua);
         if (user.numero) addressParts.push(user.numero);
@@ -227,45 +232,53 @@ export const AccountingReport = () => {
       
       yPosition += lineHeight * 6;
       
-      doc.setFillColor(243, 250, 247);
+      // Financial Summary Box
+      doc.setFillColor(243, 250, 247); // Light green background
       doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 42, 3, 3, 'F');
       
-      doc.setFillColor(45, 122, 128);
+      // Summary Title with colored bar
+      doc.setFillColor(45, 122, 128); // Teal color
       doc.rect(margin, yPosition, pageWidth - (margin * 2), 8, 'F');
       
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255, 255, 255);
+      doc.setTextColor(255, 255, 255); // White
       doc.text('RESUMO FINANCEIRO', pageWidth / 2, yPosition + 5.5, { align: 'center' });
       yPosition += 15;
       
+      // Summary Content
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(31, 41, 55);
+      doc.setTextColor(31, 41, 55); // Gray-800
       doc.text(`Saldo Inicial: R$ ${startBalance}`, margin + 10, yPosition);
       yPosition += lineHeight;
       
-      doc.setTextColor(16, 122, 87);
+      doc.setTextColor(16, 122, 87); // Green-700
       doc.text(`Total de Receitas: R$ ${formatToBRL(getTotalIncome())}`, margin + 10, yPosition);
       yPosition += lineHeight;
       
-      doc.setTextColor(185, 28, 28);
+      doc.setTextColor(185, 28, 28); // Red-700
       doc.text(`Total de Despesas: R$ ${formatToBRL(getTotalExpense())}`, margin + 10, yPosition);
       yPosition += lineHeight;
       
+      // Final balance with emphasis
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(31, 41, 55);
+      doc.setTextColor(31, 41, 55); // Gray-800
       doc.text(`Saldo Final: R$ ${endBalance}`, margin + 10, yPosition);
       yPosition += lineHeight * 3;
       
+      // Helper function to draw table headers 
       const drawTableHeader = (headers, columnWidths, y, textColor) => {
+        // Table header background
         doc.setDrawColor(200, 200, 200);
         doc.setFillColor(248, 250, 252);
         doc.rect(margin, y - 6, pageWidth - (margin * 2), 8, 'FD');
         
+        // Table header text
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(textColor[0], textColor[1], textColor[2]);
         
         let currentX = margin;
         headers.forEach((header, i) => {
+          // Center the header text within its column
           const headerWidth = columnWidths[i];
           doc.text(header, currentX + (headerWidth / 2), y - 1, { align: 'center' });
           currentX += headerWidth;
@@ -274,45 +287,52 @@ export const AccountingReport = () => {
         return y + 4;
       };
       
+      // Helper function to draw table rows with alternating colors
       const drawTableRows = (rows, columnWidths, y, getValue, textColor) => {
         doc.setFont('helvetica', 'normal');
         
         let currentY = y;
         
         rows.forEach((row, rowIndex) => {
+          // Check if we need a new page
           if (currentY > 270) {
             doc.addPage();
             currentY = 20;
             
-            doc.setFillColor(59, 130, 246);
+            // Add header to new page
+            doc.setFillColor(59, 130, 246); // Blue brand color
             doc.rect(0, 0, pageWidth, 5, 'F');
             
             doc.setFontSize(8);
             doc.setFont('helvetica', 'italic');
-            doc.setTextColor(100, 116, 139);
+            doc.setTextColor(100, 116, 139); // Slate-500
             doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
           }
           
+          // Draw alternating row background
           if (rowIndex % 2 === 0) {
-            doc.setFillColor(248, 250, 252);
+            doc.setFillColor(248, 250, 252); // Slate-50
           } else {
-            doc.setFillColor(255, 255, 255);
+            doc.setFillColor(255, 255, 255); // White for odd rows
           }
           doc.setDrawColor(200, 200, 200);
           doc.rect(margin, currentY - 4, pageWidth - (margin * 2), 7, 'FD');
           
           let currentX = margin;
           
+          // Get values for each column and draw them
           const values = getValue(row);
           values.forEach((value, colIndex) => {
             const columnWidth = columnWidths[colIndex];
             
+            // Different color for amounts (last column)
             if (colIndex === values.length - 1) {
               doc.setTextColor(textColor[0], textColor[1], textColor[2]);
             } else {
-              doc.setTextColor(31, 41, 55);
+              doc.setTextColor(31, 41, 55); // Gray-800
             }
             
+            // Center the text in each cell
             doc.text(value, currentX + (columnWidth / 2), currentY, { align: 'center' });
             currentX += columnWidth;
           });
@@ -323,27 +343,31 @@ export const AccountingReport = () => {
         return currentY;
       };
       
+      // Incomes Table
       if (monthlyIncomes.length > 0) {
+        // Income section title
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(16, 122, 87);
+        doc.setTextColor(16, 122, 87); // Green-700
         doc.text('RECEITAS', margin, yPosition);
         yPosition += 8;
         
+        // Draw table border
         doc.setDrawColor(200, 200, 200);
         doc.rect(margin, yPosition - 8, pageWidth - (margin * 2), monthlyIncomes.length * lineHeight + 15, 'D');
         
+        // Income table headers and data
         const tableWidth = pageWidth - (margin * 2);
         const incomeColWidths = [
-          tableWidth * 0.25,
-          tableWidth * 0.15,
-          tableWidth * 0.20,
-          tableWidth * 0.20,
-          tableWidth * 0.20
+          tableWidth * 0.25, // Categoria
+          tableWidth * 0.15, // Unidade
+          tableWidth * 0.20, // Mês Referência
+          tableWidth * 0.20, // Data Pagamento
+          tableWidth * 0.20  // Valor
         ];
         
         const incomeHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Data Pagamento', 'Valor'];
         
-        yPosition = drawTableHeader(incomeHeaders, incomeColWidths, yPosition, [16, 122, 87]);
+        yPosition = drawTableHeader(incomeHeaders, incomeColWidths, yPosition, [16, 122, 87]); // Green color for header text
         
         yPosition = drawTableRows(monthlyIncomes, incomeColWidths, yPosition, (income) => [
           getCategoryName(income.category),
@@ -353,66 +377,75 @@ export const AccountingReport = () => {
           `R$ ${income.amount}`
         ], [16, 122, 87]);
         
+        // Total line
         doc.setFillColor(248, 250, 252);
         doc.rect(margin, yPosition - 2, pageWidth - (margin * 2), 8, 'F');
         
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(16, 122, 87);
+        doc.setTextColor(16, 122, 87); // Green-700
         
+        // Draw "Total" text
         doc.text('Total', margin + (incomeColWidths[0] / 2), yPosition + 3, { align: 'center' });
         
+        // Draw total amount - centered in the last column
         const totalAmountX = margin + incomeColWidths[0] + incomeColWidths[1] + 
                             incomeColWidths[2] + incomeColWidths[3] + (incomeColWidths[4] / 2);
         doc.text(`R$ ${formatToBRL(getTotalIncome())}`, totalAmountX, yPosition + 3, { align: 'center' });
         
         yPosition += lineHeight * 3;
       } else {
-        doc.setFillColor(243, 244, 246);
+        // Empty income message
+        doc.setFillColor(243, 244, 246); // Gray-100
         doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 20, 3, 3, 'F');
         
         doc.setFontSize(12);
         doc.setFont('helvetica', 'italic');
-        doc.setTextColor(107, 114, 128);
+        doc.setTextColor(107, 114, 128); // Gray-500
         doc.text('Nenhuma receita registrada para este mês', pageWidth / 2, yPosition + 10, { align: 'center' });
         
         yPosition += 30;
       }
       
+      // Add a new page if needed before expenses
       if (yPosition > 230 && monthlyExpenses.length > 0) {
         doc.addPage();
         yPosition = 20;
         
-        doc.setFillColor(59, 130, 246);
+        doc.setFillColor(59, 130, 246); // Blue brand color
         doc.rect(0, 0, pageWidth, 5, 'F');
         
         doc.setFontSize(8);
         doc.setFont('helvetica', 'italic');
-        doc.setTextColor(100, 116, 139);
+        doc.setTextColor(100, 116, 139); // Slate-500
         doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
       }
       
+      // Expenses Table
       if (monthlyExpenses.length > 0) {
+        // Expense section title
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(185, 28, 28);
+        doc.setTextColor(185, 28, 28); // Red-700
         doc.text('DESPESAS', margin, yPosition);
         yPosition += 8;
         
+        // Draw table border
         doc.setDrawColor(200, 200, 200);
         doc.rect(margin, yPosition - 8, pageWidth - (margin * 2), monthlyExpenses.length * lineHeight + 15, 'D');
         
+        // Expense table headers and data
         const tableWidth = pageWidth - (margin * 2);
         const expenseColWidths = [
-          tableWidth * 0.20,
-          tableWidth * 0.12,
-          tableWidth * 0.17,
-          tableWidth * 0.17,
-          tableWidth * 0.17,
-          tableWidth * 0.17
+          tableWidth * 0.20, // Categoria
+          tableWidth * 0.12, // Unidade
+          tableWidth * 0.17, // Mês Referência
+          tableWidth * 0.17, // Vencimento
+          tableWidth * 0.17, // Pagamento
+          tableWidth * 0.17  // Valor
         ];
         
         const expenseHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Vencimento', 'Pagamento', 'Valor'];
         
-        yPosition = drawTableHeader(expenseHeaders, expenseColWidths, yPosition, [185, 28, 28]);
+        yPosition = drawTableHeader(expenseHeaders, expenseColWidths, yPosition, [185, 28, 28]); // Red color for header text
         
         yPosition = drawTableRows(monthlyExpenses, expenseColWidths, yPosition, (expense) => [
           getCategoryName(expense.category),
@@ -423,35 +456,42 @@ export const AccountingReport = () => {
           `R$ ${expense.amount}`
         ], [185, 28, 28]);
         
+        // Total line
         doc.setFillColor(248, 250, 252);
         doc.rect(margin, yPosition - 2, pageWidth - (margin * 2), 8, 'F');
         
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(185, 28, 28);
+        doc.setTextColor(185, 28, 28); // Red-700
         
+        // Draw "Total" text centered in the first column
         doc.text('Total', margin + (expenseColWidths[0] / 2), yPosition + 3, { align: 'center' });
         
+        // Draw total amount - centered in the last column
         const totalAmountX = margin + expenseColWidths[0] + expenseColWidths[1] + 
                             expenseColWidths[2] + expenseColWidths[3] + expenseColWidths[4] + 
                             (expenseColWidths[5] / 2);
         doc.text(`R$ ${formatToBRL(getTotalExpense())}`, totalAmountX, yPosition + 3, { align: 'center' });
       } else {
-        doc.setFillColor(243, 244, 246);
+        // Empty expenses message
+        doc.setFillColor(243, 244, 246); // Gray-100
         doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 20, 3, 3, 'F');
         
         doc.setFontSize(12);
         doc.setFont('helvetica', 'italic');
-        doc.setTextColor(107, 114, 128);
+        doc.setTextColor(107, 114, 128); // Gray-500
         doc.text('Nenhuma despesa registrada para este mês', pageWidth / 2, yPosition + 10, { align: 'center' });
       }
       
+      // Bottom watermark and footer
       doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
-      doc.setTextColor(148, 163, 184);
+      doc.setTextColor(148, 163, 184); // Slate-400
       
-      doc.setFillColor(246, 249, 252);
+      // Draw footer with subtle background
+      doc.setFillColor(246, 249, 252); // Slate-50
       doc.rect(0, pageHeight - 12, pageWidth, 12, 'F');
       
+      // Footer text
       doc.text(`Relatório gerado pelo sistema Meu Residencial - www.meuresidencial.com - ${currentDate}`, 
                pageWidth / 2, pageHeight - 5, { align: 'center' });
       
@@ -461,274 +501,6 @@ export const AccountingReport = () => {
       console.error("Erro ao gerar PDF:", error);
     } finally {
       setIsGenerating(false);
-    }
-  };
-  
-  const generateReportHtml = () => {
-    const [year, month] = selectedMonth.split('-');
-    const monthDate = new Date(parseInt(year), parseInt(month) - 1);
-    const monthName = monthDate.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
-    const currentDate = format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
-    
-    let addressText = "Endereço não disponível";
-    if (user) {
-      const addressParts = [];
-      if (user.rua) addressParts.push(user.rua);
-      if (user.numero) addressParts.push(user.numero);
-      if (user.complemento) addressParts.push(user.complemento);
-      if (user.bairro) addressParts.push(user.bairro);
-      if (user.cidade) addressParts.push(user.cidade);
-      if (user.estado) addressParts.push(user.estado);
-      if (user.cep) addressParts.push(user.cep);
-      
-      if (addressParts.length > 0) {
-        addressText = addressParts.join(', ');
-      }
-    }
-    
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>Prestação de Contas - ${monthName} ${year}</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            color: #333;
-            line-height: 1.5;
-            max-width: 800px;
-            margin: 0 auto;
-          }
-          .header {
-            padding: 20px 0;
-            border-bottom: 2px solid #3b82f6;
-            margin-bottom: 20px;
-          }
-          .header h1 {
-            text-align: center;
-            margin: 5px 0;
-            color: #1f2937;
-          }
-          .info-box {
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
-          }
-          .summary-box {
-            background-color: #f0fdf4;
-            border: 1px solid #d1fae5;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
-          }
-          .summary-title {
-            background-color: #2d7a80;
-            color: white;
-            padding: 8px;
-            text-align: center;
-            margin: -15px -15px 15px -15px;
-            border-radius: 5px 5px 0 0;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-          }
-          th {
-            background-color: #f3f4f6;
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #e5e7eb;
-          }
-          td {
-            padding: 8px 10px;
-            border: 1px solid #e5e7eb;
-          }
-          tr:nth-child(even) {
-            background-color: #f9fafb;
-          }
-          .income th {
-            color: #166534;
-          }
-          .expense th {
-            color: #b91c1c;
-          }
-          .total-row {
-            font-weight: bold;
-          }
-          .income .amount {
-            color: #166534;
-          }
-          .expense .amount {
-            color: #b91c1c;
-          }
-          .footer {
-            font-size: 0.8em;
-            text-align: center;
-            color: #6b7280;
-            margin-top: 30px;
-            padding-top: 10px;
-            border-top: 1px solid #e5e7eb;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>Prestação de Contas - ${monthName} ${year}</h1>
-          <p style="text-align: center;">Relatório gerado em: ${currentDate}</p>
-        </div>
-        
-        <div class="info-box">
-          <h2>Informações do Condomínio</h2>
-          <p><strong>Condomínio:</strong> ${user?.nomeCondominio || "Nome não disponível"}</p>
-          <p><strong>Matrícula:</strong> ${user?.selectedCondominium || "Não disponível"}</p>
-          <p><strong>Endereço:</strong> ${addressText}</p>
-        </div>
-        
-        <div class="summary-box">
-          <div class="summary-title">RESUMO FINANCEIRO</div>
-          <p><strong>Saldo Inicial:</strong> R$ ${startBalance}</p>
-          <p style="color: #166534;"><strong>Total de Receitas:</strong> R$ ${formatToBRL(getTotalIncome())}</p>
-          <p style="color: #b91c1c;"><strong>Total de Despesas:</strong> R$ ${formatToBRL(getTotalExpense())}</p>
-          <p><strong>Saldo Final:</strong> R$ ${endBalance}</p>
-        </div>
-        
-        <h2>RECEITAS</h2>
-        ${monthlyIncomes.length > 0 ? `
-        <table class="income">
-          <thead>
-            <tr>
-              <th>Categoria</th>
-              <th>Unidade</th>
-              <th>Mês Referência</th>
-              <th>Data Pagamento</th>
-              <th>Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${monthlyIncomes.map(income => `
-            <tr>
-              <td>${getCategoryName(income.category)}</td>
-              <td>${income.unit || '-'}</td>
-              <td>${formatReferenceMonth(income.reference_month) || '-'}</td>
-              <td>${formatDateToBR(income.payment_date) || '-'}</td>
-              <td class="amount">R$ ${income.amount}</td>
-            </tr>
-            `).join('')}
-            <tr class="total-row">
-              <td colspan="4">Total</td>
-              <td class="amount">R$ ${formatToBRL(getTotalIncome())}</td>
-            </tr>
-          </tbody>
-        </table>
-        ` : '<p>Nenhuma receita registrada para este mês</p>'}
-        
-        <h2>DESPESAS</h2>
-        ${monthlyExpenses.length > 0 ? `
-        <table class="expense">
-          <thead>
-            <tr>
-              <th>Categoria</th>
-              <th>Unidade</th>
-              <th>Mês Referência</th>
-              <th>Vencimento</th>
-              <th>Data Pagamento</th>
-              <th>Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${monthlyExpenses.map(expense => `
-            <tr>
-              <td>${getCategoryName(expense.category)}</td>
-              <td>${expense.unit || '-'}</td>
-              <td>${formatReferenceMonth(expense.reference_month) || '-'}</td>
-              <td>${formatDateToBR(expense.due_date) || '-'}</td>
-              <td>${formatDateToBR(expense.payment_date) || '-'}</td>
-              <td class="amount">R$ ${expense.amount}</td>
-            </tr>
-            `).join('')}
-            <tr class="total-row">
-              <td colspan="5">Total</td>
-              <td class="amount">R$ ${formatToBRL(getTotalExpense())}</td>
-            </tr>
-          </tbody>
-        </table>
-        ` : '<p>Nenhuma despesa registrada para este mês</p>'}
-        
-        <div class="footer">
-          <p>Relatório gerado pelo sistema Meu Residencial - www.meuresidencial.com - ${currentDate}</p>
-        </div>
-      </body>
-      </html>
-    `;
-  };
-  
-  const handleSendReport = async () => {
-    setShowSendDialog(false);
-    setShowConfirmDialog(false);
-    
-    if (!sendViaEmail && !sendViaWhatsapp) {
-      toast({
-        title: "Selecione pelo menos um método de envio",
-        description: "Escolha entre e-mail ou WhatsApp para enviar o relatório.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setIsSending(true);
-    
-    try {
-      const [year, month] = selectedMonth.split('-');
-      const monthDate = new Date(parseInt(year), parseInt(month) - 1);
-      const monthLabel = format(monthDate, 'MMMM yyyy', { locale: ptBR });
-      
-      if (sendViaEmail) {
-        const reportHtml = generateReportHtml();
-        
-        const response = await supabase.functions.invoke('send-accounting-report', {
-          body: {
-            matricula: user?.selectedCondominium,
-            month: selectedMonth,
-            reportHtml,
-            monthLabel,
-            condominiumName: user?.nomeCondominio || "Seu Condomínio"
-          }
-        });
-        
-        if (response.error) {
-          throw new Error(response.error.message);
-        }
-        
-        if (response.data.success) {
-          toast({
-            title: "Relatório enviado com sucesso!",
-            description: response.data.message,
-          });
-        } else {
-          throw new Error(response.data.error || "Erro ao enviar relatório");
-        }
-      }
-      
-      if (sendViaWhatsapp) {
-        toast({
-          title: "Envio por WhatsApp",
-          description: "O envio por WhatsApp ainda não está disponível nesta versão.",
-          variant: "default"
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao enviar relatório:", error);
-      toast({
-        title: "Erro ao enviar relatório",
-        description: error.message || "Ocorreu um erro ao enviar o relatório.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSending(false);
     }
   };
   
@@ -756,26 +528,14 @@ export const AccountingReport = () => {
             </Select>
           </div>
           
-          <div className="flex gap-2">
-            <Button 
-              onClick={() => setShowSendDialog(true)} 
-              disabled={isSending || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
-              className="flex items-center gap-2"
-              variant="secondary"
-            >
-              <Mail size={16} />
-              Prestar Contas aos Moradores
-            </Button>
-            
-            <Button 
-              onClick={generatePDF} 
-              disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
-              className="flex items-center gap-2"
-            >
-              <FileDown size={16} />
-              {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
-            </Button>
-          </div>
+          <Button 
+            onClick={generatePDF} 
+            disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
+            className="flex items-center gap-2"
+          >
+            <FileDown size={16} />
+            {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
+          </Button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -914,80 +674,6 @@ export const AccountingReport = () => {
           </div>
         </div>
       </CardContent>
-      
-      <Dialog open={showSendDialog} onOpenChange={setShowSendDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Prestar Contas aos Moradores</DialogTitle>
-            <DialogDescription>
-              Envie o relatório de prestação de contas para todos os moradores do condomínio via e-mail ou WhatsApp.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 pt-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="sendEmail" 
-                checked={sendViaEmail} 
-                onCheckedChange={(checked) => setSendViaEmail(checked === true)} 
-              />
-              <Label htmlFor="sendEmail">Enviar via E-mail</Label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="sendWhatsapp" 
-                checked={sendViaWhatsapp} 
-                onCheckedChange={(checked) => setSendViaWhatsapp(checked === true)} 
-              />
-              <Label htmlFor="sendWhatsapp">Enviar via WhatsApp</Label>
-            </div>
-          </div>
-          
-          <DialogFooter className="sm:justify-between">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setShowSendDialog(false)}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="button" 
-              onClick={() => setShowConfirmDialog(true)}
-              disabled={!sendViaEmail && !sendViaWhatsapp}
-            >
-              Continuar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar envio do relatório?</AlertDialogTitle>
-            <AlertDialogDescription>
-              O relatório de prestação de contas será enviado para todos os moradores cadastrados
-              {sendViaEmail && sendViaWhatsapp 
-                ? ' via e-mail e WhatsApp' 
-                : sendViaEmail 
-                  ? ' via e-mail' 
-                  : ' via WhatsApp'
-              }.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleSendReport}
-              disabled={isSending}
-            >
-              {isSending ? 'Enviando...' : 'Confirmar'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   );
 };
