@@ -638,4 +638,4 @@ export const AccountingReport = () => {
                   <span className="font-medium text-green-600">+ R$ {formatToBRL(getTotalIncome())}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text
+                  <span className="text-sm text-gray-
