@@ -528,7 +528,26 @@ export const AccountingReport = () => {
         throw new Error(`Erro ao obter sessão: ${sessionError.message}`);
       }
       
-      const accessToken = sessionData?.session?.access_token;
+      console.log("Session data:", sessionData);
+      
+      if (!sessionData?.session) {
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.error("Failed to refresh session:", refreshError);
+          
+          const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
+          if (anonError) {
+            throw new Error('Não foi possível autenticar. Por favor, faça login novamente.');
+          }
+          
+          if (!anonData?.session) {
+            throw new Error('Falha ao criar sessão anônima');
+          }
+        }
+      }
+      
+      const { data: updatedSession } = await supabase.auth.getSession();
+      const accessToken = updatedSession?.session?.access_token;
       
       if (!accessToken) {
         throw new Error('Você precisa estar autenticado para enviar relatórios');
@@ -542,6 +561,8 @@ export const AccountingReport = () => {
       }
       
       if (sendOptions.email) {
+        console.log("Sending report with access token:", accessToken.substring(0, 10) + "...");
+        
         const response = await fetch('https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-accounting-report', {
           method: 'POST',
           headers: {
@@ -556,12 +577,21 @@ export const AccountingReport = () => {
           })
         });
         
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Erro ao enviar o relatório');
+        console.log("Response status:", response.status);
+        const responseText = await response.text();
+        console.log("Response text:", responseText);
+        
+        let result;
+        try {
+          result = JSON.parse(responseText);
+        } catch (e) {
+          console.error("Failed to parse response as JSON:", e);
+          throw new Error('Resposta inválida do servidor');
         }
         
-        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || 'Erro ao enviar o relatório');
+        }
         
         toast.success(`Relatório enviado com sucesso para ${result.sent_count} moradores por e-mail`);
         fetchReportLogs();
