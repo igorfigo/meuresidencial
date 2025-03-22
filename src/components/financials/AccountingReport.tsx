@@ -175,15 +175,15 @@ export const AccountingReport = () => {
       const margin = 15;
       
       // Background subtle color for header
-      doc.setFillColor(245, 247, 250); // Lighter background
+      doc.setFillColor(240, 247, 255);
       doc.rect(0, 0, pageWidth, 40, 'F');
       
       // Top branding bar
-      doc.setFillColor(41, 98, 255); // More professional blue
-      doc.rect(0, 0, pageWidth, 6, 'F');
+      doc.setFillColor(59, 130, 246); // Blue brand color
+      doc.rect(0, 0, pageWidth, 5, 'F');
       
       // Header - Info line
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setTextColor(100, 116, 139); // Slate-500
       doc.text("Relatório gerado em: " + currentDate, margin, yPosition);
       doc.text("Gerado por: www.meuresidencial.com", pageWidth - margin, yPosition, { align: 'right' });
@@ -193,30 +193,20 @@ export const AccountingReport = () => {
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(31, 41, 55); // Gray-800
-      const title = `PRESTAÇÃO DE CONTAS - ${monthName} ${year}`;
+      const title = `Prestação de Contas - ${monthName} ${year}`;
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
       
       // Condominium Info - Centered with address
-      doc.setFillColor(235, 245, 255); // Subtle light blue background
+      doc.setFillColor(244, 247, 254); // Light blue background
       doc.roundedRect(margin, yPosition - 5, pageWidth - (margin * 2), 35, 3, 3, 'F');
       
-      // Add small decorative elements to the info box
-      doc.setDrawColor(200, 210, 230);
-      doc.setLineWidth(0.5);
-      doc.line(margin + 5, yPosition - 5, margin + 5, yPosition + 30); // Left vertical line
-      doc.line(pageWidth - margin - 5, yPosition - 5, pageWidth - margin - 5, yPosition + 30); // Right vertical line
-      
-      // Condominium name with larger font and emphasis
-      doc.setFontSize(14);
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(41, 59, 94); // Darker blue
-      doc.text(`${user?.nomeCondominio || "Nome não disponível"}`, pageWidth / 2, yPosition + 5, { align: 'center' });
-      
-      // Registration and address in regular font
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
       doc.setTextColor(31, 41, 55); // Gray-800
+      doc.text(`Condomínio: ${user?.nomeCondominio || "Nome não disponível"}`, pageWidth / 2, yPosition + 5, { align: 'center' });
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
       doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, pageWidth / 2, yPosition + 15, { align: 'center' });
       
       // Prepare address text
@@ -238,93 +228,53 @@ export const AccountingReport = () => {
         }
       }
       
-      // Format address nicely with line wrapping if too long
-      const maxWidth = pageWidth - (margin * 2) - 20;
-      const addressLines = doc.splitTextToSize(addressText, maxWidth);
-      doc.text(addressLines, pageWidth / 2, yPosition + 25, { align: 'center' });
+      doc.text(`Endereço: ${addressText}`, pageWidth / 2, yPosition + 25, { align: 'center' });
       
-      // Adjust y position based on number of address lines
-      const addressLinesCount = addressLines.length;
-      yPosition += lineHeight * 5 + (addressLinesCount > 1 ? (addressLinesCount - 1) * 5 : 0);
+      yPosition += lineHeight * 6;
       
-      // Add a subtle separator line
-      doc.setDrawColor(200, 210, 230);
-      doc.setLineWidth(0.7);
-      doc.line(margin, yPosition + 6, pageWidth - margin, yPosition + 6);
-      yPosition += 12;
+      // Financial Summary Box
+      doc.setFillColor(243, 250, 247); // Light green background
+      doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 42, 3, 3, 'F');
       
-      // Financial Summary Box with enhanced design
-      doc.setFillColor(245, 250, 255); // Light blue-gray background
-      doc.setDrawColor(180, 190, 210);
-      doc.setLineWidth(0.5);
-      doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 45, 3, 3, 'FD');
-      
-      // Summary Title with gradient-like effect
-      doc.setFillColor(41, 98, 255); // Professional blue
+      // Summary Title with colored bar
+      doc.setFillColor(45, 122, 128); // Teal color
       doc.rect(margin, yPosition, pageWidth - (margin * 2), 8, 'F');
-      
-      // Add subtle lines to make it look like a gradient
-      doc.setFillColor(61, 118, 255); // Slightly lighter blue
-      doc.rect(margin, yPosition, pageWidth - (margin * 2), 2, 'F');
       
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(255, 255, 255); // White
       doc.text('RESUMO FINANCEIRO', pageWidth / 2, yPosition + 5.5, { align: 'center' });
       yPosition += 15;
       
-      // Summary Content with enhanced styling
-      doc.setFillColor(250, 252, 255); // Very light background for alternating rows
-      doc.rect(margin + 5, yPosition - 4, pageWidth - (margin * 2) - 10, 7, 'F');
+      // Summary Content
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(31, 41, 55); // Gray-800
-      doc.text(`Saldo Inicial:`, margin + 12, yPosition);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`R$ ${startBalance}`, pageWidth - margin - 12, yPosition, { align: 'right' });
+      doc.text(`Saldo Inicial: R$ ${startBalance}`, margin + 10, yPosition);
       yPosition += lineHeight;
       
-      doc.setFont('helvetica', 'normal');
       doc.setTextColor(16, 122, 87); // Green-700
-      doc.text(`Total de Receitas:`, margin + 12, yPosition);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`R$ ${formatToBRL(getTotalIncome())}`, pageWidth - margin - 12, yPosition, { align: 'right' });
+      doc.text(`Total de Receitas: R$ ${formatToBRL(getTotalIncome())}`, margin + 10, yPosition);
       yPosition += lineHeight;
       
-      doc.setFillColor(250, 252, 255); // Very light background for alternating rows
-      doc.rect(margin + 5, yPosition - 4, pageWidth - (margin * 2) - 10, 7, 'F');
-      doc.setFont('helvetica', 'normal');
       doc.setTextColor(185, 28, 28); // Red-700
-      doc.text(`Total de Despesas:`, margin + 12, yPosition);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`R$ ${formatToBRL(getTotalExpense())}`, pageWidth - margin - 12, yPosition, { align: 'right' });
+      doc.text(`Total de Despesas: R$ ${formatToBRL(getTotalExpense())}`, margin + 10, yPosition);
       yPosition += lineHeight;
       
-      // Final balance with emphasis and background
-      doc.setFillColor(235, 245, 255); // Subtle light blue background
-      doc.rect(margin + 5, yPosition - 4, pageWidth - (margin * 2) - 10, 8, 'F');
-      doc.setDrawColor(180, 190, 210);
-      doc.setLineWidth(0.2);
-      doc.line(margin + 5, yPosition + 4, pageWidth - margin - 5, yPosition + 4);
-      
+      // Final balance with emphasis
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(41, 98, 255); // Professional blue
-      doc.text(`Saldo Final:`, margin + 12, yPosition);
-      doc.text(`R$ ${endBalance}`, pageWidth - margin - 12, yPosition, { align: 'right' });
+      doc.setTextColor(31, 41, 55); // Gray-800
+      doc.text(`Saldo Final: R$ ${endBalance}`, margin + 10, yPosition);
       yPosition += lineHeight * 3;
       
-      // Helper function to draw table headers with enhanced styling
+      // Helper function to draw table headers 
       const drawTableHeader = (headers, columnWidths, y, textColor) => {
-        // Table header background with gradient effect
-        doc.setDrawColor(180, 190, 210);
-        doc.setFillColor(41, 98, 255); // Professional blue
+        // Table header background
+        doc.setDrawColor(200, 200, 200);
+        doc.setFillColor(248, 250, 252);
         doc.rect(margin, y - 6, pageWidth - (margin * 2), 8, 'FD');
-        
-        // Add subtle gradient effect
-        doc.setFillColor(61, 118, 255); // Lighter blue
-        doc.rect(margin, y - 6, pageWidth - (margin * 2), 2, 'F');
         
         // Table header text
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(255, 255, 255); // White text for better contrast
+        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
         
         let currentX = margin;
         headers.forEach((header, i) => {
@@ -337,7 +287,7 @@ export const AccountingReport = () => {
         return y + 4;
       };
       
-      // Helper function to draw table rows with enhanced styling
+      // Helper function to draw table rows with alternating colors
       const drawTableRows = (rows, columnWidths, y, getValue, textColor) => {
         doc.setFont('helvetica', 'normal');
         
@@ -350,23 +300,22 @@ export const AccountingReport = () => {
             currentY = 20;
             
             // Add header to new page
-            doc.setFillColor(41, 98, 255); // Professional blue
-            doc.rect(0, 0, pageWidth, 6, 'F');
+            doc.setFillColor(59, 130, 246); // Blue brand color
+            doc.rect(0, 0, pageWidth, 5, 'F');
             
             doc.setFontSize(8);
             doc.setFont('helvetica', 'italic');
             doc.setTextColor(100, 116, 139); // Slate-500
-            doc.text("Meu Residencial", margin, 10);
-            doc.text("www.meuresidencial.com", pageWidth - margin, 10, { align: 'right' });
+            doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
           }
           
-          // Draw alternating row background with subtle colors
+          // Draw alternating row background
           if (rowIndex % 2 === 0) {
-            doc.setFillColor(245, 247, 250); // Very light blue for even rows
+            doc.setFillColor(248, 250, 252); // Slate-50
           } else {
             doc.setFillColor(255, 255, 255); // White for odd rows
           }
-          doc.setDrawColor(210, 220, 230); // Lighter border color
+          doc.setDrawColor(200, 200, 200);
           doc.rect(margin, currentY - 4, pageWidth - (margin * 2), 7, 'FD');
           
           let currentX = margin;
@@ -379,19 +328,12 @@ export const AccountingReport = () => {
             // Different color for amounts (last column)
             if (colIndex === values.length - 1) {
               doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-              doc.setFont('helvetica', 'bold'); // Make amounts bold
             } else {
               doc.setTextColor(31, 41, 55); // Gray-800
-              doc.setFont('helvetica', 'normal');
             }
             
-            // Center text in each cell except for amount column (right-aligned)
-            const textAlign = colIndex === values.length - 1 ? 'right' : 'center';
-            const xPos = colIndex === values.length - 1 
-              ? currentX + columnWidth - 5 
-              : currentX + (columnWidth / 2);
-            
-            doc.text(value, xPos, currentY, { align: textAlign });
+            // Center the text in each cell
+            doc.text(value, currentX + (columnWidth / 2), currentY, { align: 'center' });
             currentX += columnWidth;
           });
           
@@ -401,28 +343,23 @@ export const AccountingReport = () => {
         return currentY;
       };
       
-      // Incomes Table with enhanced styling
+      // Incomes Table
       if (monthlyIncomes.length > 0) {
-        // Income section title with decorative elements
-        doc.setFillColor(235, 245, 255); // Light blue background
-        doc.roundedRect(margin, yPosition - 4, 80, 8, 2, 2, 'F');
-        
+        // Income section title
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(16, 122, 87); // Green-700
-        doc.text('RECEITAS', margin + 40, yPosition, { align: 'center' });
+        doc.text('RECEITAS', margin, yPosition);
         yPosition += 8;
         
-        // Draw table border with rounded corners
-        doc.setDrawColor(210, 220, 230);
-        doc.setLineWidth(0.5);
-        doc.roundedRect(margin, yPosition - 8, pageWidth - (margin * 2), 
-                      monthlyIncomes.length * lineHeight + 15, 2, 2, 'D');
+        // Draw table border
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(margin, yPosition - 8, pageWidth - (margin * 2), monthlyIncomes.length * lineHeight + 15, 'D');
         
-        // Income table headers and data with adjusted column widths for better spacing
+        // Income table headers and data
         const tableWidth = pageWidth - (margin * 2);
         const incomeColWidths = [
-          tableWidth * 0.28, // Categoria - wider
-          tableWidth * 0.12, // Unidade - narrower
+          tableWidth * 0.25, // Categoria
+          tableWidth * 0.15, // Unidade
           tableWidth * 0.20, // Mês Referência
           tableWidth * 0.20, // Data Pagamento
           tableWidth * 0.20  // Valor
@@ -440,14 +377,9 @@ export const AccountingReport = () => {
           `R$ ${income.amount}`
         ], [16, 122, 87]);
         
-        // Total line with enhanced styling
-        doc.setFillColor(240, 249, 245); // Light green background for total
+        // Total line
+        doc.setFillColor(248, 250, 252);
         doc.rect(margin, yPosition - 2, pageWidth - (margin * 2), 8, 'F');
-        
-        // Add subtle border to total row
-        doc.setDrawColor(180, 215, 200);
-        doc.setLineWidth(0.5);
-        doc.rect(margin, yPosition - 2, pageWidth - (margin * 2), 8, 'D');
         
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(16, 122, 87); // Green-700
@@ -455,19 +387,18 @@ export const AccountingReport = () => {
         // Draw "Total" text
         doc.text('Total', margin + (incomeColWidths[0] / 2), yPosition + 3, { align: 'center' });
         
-        // Draw total amount - aligned right in the last column with padding
+        // Draw total amount - centered in the last column
         const totalAmountX = margin + incomeColWidths[0] + incomeColWidths[1] + 
-                           incomeColWidths[2] + incomeColWidths[3] + incomeColWidths[4] - 5;
-        doc.text(`R$ ${formatToBRL(getTotalIncome())}`, totalAmountX, yPosition + 3, { align: 'right' });
+                            incomeColWidths[2] + incomeColWidths[3] + (incomeColWidths[4] / 2);
+        doc.text(`R$ ${formatToBRL(getTotalIncome())}`, totalAmountX, yPosition + 3, { align: 'center' });
         
         yPosition += lineHeight * 3;
       } else {
-        // Empty income message with nicer styling
-        doc.setFillColor(245, 247, 250); // Light background
-        doc.setDrawColor(210, 220, 230);
-        doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 20, 3, 3, 'FD');
+        // Empty income message
+        doc.setFillColor(243, 244, 246); // Gray-100
+        doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 20, 3, 3, 'F');
         
-        doc.setFontSize(11);
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(107, 114, 128); // Gray-500
         doc.text('Nenhuma receita registrada para este mês', pageWidth / 2, yPosition + 10, { align: 'center' });
@@ -480,43 +411,36 @@ export const AccountingReport = () => {
         doc.addPage();
         yPosition = 20;
         
-        // Add header to new page
-        doc.setFillColor(41, 98, 255); // Professional blue
-        doc.rect(0, 0, pageWidth, 6, 'F');
+        doc.setFillColor(59, 130, 246); // Blue brand color
+        doc.rect(0, 0, pageWidth, 5, 'F');
         
         doc.setFontSize(8);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(100, 116, 139); // Slate-500
-        doc.text("Meu Residencial", margin, 10);
-        doc.text("www.meuresidencial.com", pageWidth - margin, 10, { align: 'right' });
+        doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
       }
       
-      // Expenses Table with enhanced styling
+      // Expenses Table
       if (monthlyExpenses.length > 0) {
-        // Expense section title with decorative elements
-        doc.setFillColor(255, 240, 240); // Very light red background
-        doc.roundedRect(margin, yPosition - 4, 80, 8, 2, 2, 'F');
-        
+        // Expense section title
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(185, 28, 28); // Red-700
-        doc.text('DESPESAS', margin + 40, yPosition, { align: 'center' });
+        doc.text('DESPESAS', margin, yPosition);
         yPosition += 8;
         
-        // Draw table border with rounded corners
-        doc.setDrawColor(210, 220, 230);
-        doc.setLineWidth(0.5);
-        doc.roundedRect(margin, yPosition - 8, pageWidth - (margin * 2), 
-                      monthlyExpenses.length * lineHeight + 15, 2, 2, 'D');
+        // Draw table border
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(margin, yPosition - 8, pageWidth - (margin * 2), monthlyExpenses.length * lineHeight + 15, 'D');
         
-        // Expense table headers and data with adjusted column widths
+        // Expense table headers and data
         const tableWidth = pageWidth - (margin * 2);
         const expenseColWidths = [
-          tableWidth * 0.23, // Categoria - wider
-          tableWidth * 0.10, // Unidade - narrower
+          tableWidth * 0.20, // Categoria
+          tableWidth * 0.12, // Unidade
           tableWidth * 0.17, // Mês Referência
           tableWidth * 0.17, // Vencimento
           tableWidth * 0.17, // Pagamento
-          tableWidth * 0.16  // Valor
+          tableWidth * 0.17  // Valor
         ];
         
         const expenseHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Vencimento', 'Pagamento', 'Valor'];
@@ -532,55 +456,44 @@ export const AccountingReport = () => {
           `R$ ${expense.amount}`
         ], [185, 28, 28]);
         
-        // Total line with enhanced styling
-        doc.setFillColor(255, 240, 240); // Light red background for total
+        // Total line
+        doc.setFillColor(248, 250, 252);
         doc.rect(margin, yPosition - 2, pageWidth - (margin * 2), 8, 'F');
-        
-        // Add subtle border to total row
-        doc.setDrawColor(215, 180, 180);
-        doc.setLineWidth(0.5);
-        doc.rect(margin, yPosition - 2, pageWidth - (margin * 2), 8, 'D');
         
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(185, 28, 28); // Red-700
         
-        // Draw "Total" text
+        // Draw "Total" text centered in the first column
         doc.text('Total', margin + (expenseColWidths[0] / 2), yPosition + 3, { align: 'center' });
         
-        // Draw total amount - aligned right in the last column with padding
+        // Draw total amount - centered in the last column
         const totalAmountX = margin + expenseColWidths[0] + expenseColWidths[1] + 
-                           expenseColWidths[2] + expenseColWidths[3] + expenseColWidths[4] + 
-                           expenseColWidths[5] - 5;
-        doc.text(`R$ ${formatToBRL(getTotalExpense())}`, totalAmountX, yPosition + 3, { align: 'right' });
+                            expenseColWidths[2] + expenseColWidths[3] + expenseColWidths[4] + 
+                            (expenseColWidths[5] / 2);
+        doc.text(`R$ ${formatToBRL(getTotalExpense())}`, totalAmountX, yPosition + 3, { align: 'center' });
       } else {
-        // Empty expenses message with nicer styling
-        doc.setFillColor(245, 247, 250); // Light background
-        doc.setDrawColor(210, 220, 230);
-        doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 20, 3, 3, 'FD');
+        // Empty expenses message
+        doc.setFillColor(243, 244, 246); // Gray-100
+        doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 20, 3, 3, 'F');
         
-        doc.setFontSize(11);
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(107, 114, 128); // Gray-500
         doc.text('Nenhuma despesa registrada para este mês', pageWidth / 2, yPosition + 10, { align: 'center' });
       }
       
-      // Bottom watermark and footer with enhanced styling
+      // Bottom watermark and footer
       doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
-      doc.setTextColor(120, 130, 150); // More professional blue-gray
+      doc.setTextColor(148, 163, 184); // Slate-400
       
-      // Draw footer with subtle gradient-like effect
-      doc.setFillColor(245, 247, 250); // Light blue-gray
+      // Draw footer with subtle background
+      doc.setFillColor(246, 249, 252); // Slate-50
       doc.rect(0, pageHeight - 12, pageWidth, 12, 'F');
       
-      // Add thin line above footer
-      doc.setDrawColor(210, 220, 230);
-      doc.setLineWidth(0.5);
-      doc.line(0, pageHeight - 12, pageWidth, pageHeight - 12);
-      
       // Footer text
-      doc.text(`Relatório oficial gerado pelo sistema Meu Residencial • www.meuresidencial.com • ${currentDate}`, 
-              pageWidth / 2, pageHeight - 5, { align: 'center' });
+      doc.text(`Relatório gerado pelo sistema Meu Residencial - www.meuresidencial.com - ${currentDate}`, 
+               pageWidth / 2, pageHeight - 5, { align: 'center' });
       
       const fileName = `prestacao_contas_${monthName.toLowerCase()}_${year}.pdf`;
       doc.save(fileName);
@@ -642,9 +555,9 @@ export const AccountingReport = () => {
                   <span className="text-sm text-gray-600">Total de Despesas:</span>
                   <span className="font-medium text-red-600">- R$ {formatToBRL(getTotalExpense())}</span>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b">
+                <div className="flex justify-between items-center pt-2">
                   <span className="text-sm text-gray-600">Saldo Final:</span>
-                  <span className="font-medium text-blue-600">R$ {endBalance}</span>
+                  <span className="font-bold text-brand-600">R$ {endBalance}</span>
                 </div>
               </div>
             </CardContent>
@@ -652,30 +565,24 @@ export const AccountingReport = () => {
           
           <Card>
             <CardContent className="pt-4">
-              <h3 className="font-medium text-lg mb-2">Estatísticas</h3>
+              <h3 className="font-medium text-lg mb-2">Detalhes</h3>
               <div className="space-y-2">
                 <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Total de Receitas:</span>
-                  <span className="font-medium text-green-600">{monthlyIncomes.length} registros</span>
+                  <span className="text-sm text-gray-600">Mês de Referência:</span>
+                  <span className="font-medium">{format(parse(selectedMonth + '-01', 'yyyy-MM-dd', new Date()), 'MMMM yyyy', { locale: ptBR })}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Total de Despesas:</span>
-                  <span className="font-medium text-red-600">{monthlyExpenses.length} registros</span>
+                  <span className="text-sm text-gray-600">Receitas Registradas:</span>
+                  <span className="font-medium">{monthlyIncomes.length}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Maior Receita:</span>
-                  <span className="font-medium text-green-600">
-                    {monthlyIncomes.length > 0 
-                      ? `R$ ${formatToBRL(Math.max(...monthlyIncomes.map(i => BRLToNumber(i.amount))))}`
-                      : 'N/A'}
-                  </span>
+                  <span className="text-sm text-gray-600">Despesas Registradas:</span>
+                  <span className="font-medium">{monthlyExpenses.length}</span>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Maior Despesa:</span>
-                  <span className="font-medium text-red-600">
-                    {monthlyExpenses.length > 0
-                      ? `R$ ${formatToBRL(Math.max(...monthlyExpenses.map(e => BRLToNumber(e.amount))))}`
-                      : 'N/A'}
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-sm text-gray-600">Resultado do Mês:</span>
+                  <span className={`font-medium ${getTotalIncome() - getTotalExpense() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    R$ {formatToBRL(getTotalIncome() - getTotalExpense())}
                   </span>
                 </div>
               </div>
@@ -683,79 +590,89 @@ export const AccountingReport = () => {
           </Card>
         </div>
         
-        {monthlyIncomes.length > 0 && (
-          <div className="mb-8">
-            <h3 className="font-medium text-lg mb-3">Receitas do Mês</h3>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Unidade</TableHead>
-                    <TableHead>Mês Referência</TableHead>
-                    <TableHead>Data Pagamento</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {monthlyIncomes.map((income, index) => (
-                    <TableRow key={`income-${index}`}>
-                      <TableCell>{getCategoryName(income.category)}</TableCell>
-                      <TableCell>{income.unit || "-"}</TableCell>
-                      <TableCell>{formatReferenceMonth(income.reference_month) || "-"}</TableCell>
-                      <TableCell>{formatDateToBR(income.payment_date) || "-"}</TableCell>
-                      <TableCell className="text-right font-medium">R$ {income.amount}</TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow className="bg-green-50">
-                    <TableCell colSpan={4} className="font-medium">Total</TableCell>
-                    <TableCell className="text-right font-medium text-green-600">
-                      R$ {formatToBRL(getTotalIncome())}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        )}
-        
-        {monthlyExpenses.length > 0 && (
+        <div className="space-y-8">
           <div>
-            <h3 className="font-medium text-lg mb-3">Despesas do Mês</h3>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Unidade</TableHead>
-                    <TableHead>Mês Referência</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead>Pagamento</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {monthlyExpenses.map((expense, index) => (
-                    <TableRow key={`expense-${index}`}>
-                      <TableCell>{getCategoryName(expense.category)}</TableCell>
-                      <TableCell>{expense.unit || "-"}</TableCell>
-                      <TableCell>{formatReferenceMonth(expense.reference_month) || "-"}</TableCell>
-                      <TableCell>{formatDateToBR(expense.due_date) || "-"}</TableCell>
-                      <TableCell>{formatDateToBR(expense.payment_date) || "-"}</TableCell>
-                      <TableCell className="text-right font-medium">R$ {expense.amount}</TableCell>
+            <h3 className="font-medium text-lg mb-4">Receitas do Mês</h3>
+            {monthlyIncomes.length > 0 ? (
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Unidade</TableHead>
+                      <TableHead>Mês Referência</TableHead>
+                      <TableHead>Data de Pagamento</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
                     </TableRow>
-                  ))}
-                  <TableRow className="bg-red-50">
-                    <TableCell colSpan={5} className="font-medium">Total</TableCell>
-                    <TableCell className="text-right font-medium text-red-600">
-                      R$ {formatToBRL(getTotalExpense())}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {monthlyIncomes.map(income => (
+                      <TableRow key={income.id}>
+                        <TableCell className="font-medium">{getCategoryName(income.category)}</TableCell>
+                        <TableCell>{income.unit || '-'}</TableCell>
+                        <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(income.payment_date) || '-'}</TableCell>
+                        <TableCell className="text-right text-green-600">R$ {income.amount}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={4} className="font-bold">Total</TableCell>
+                      <TableCell className="text-right font-bold text-green-600">
+                        R$ {formatToBRL(getTotalIncome())}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-md border">
+                <p className="text-gray-500">Nenhuma receita registrada para este mês</p>
+              </div>
+            )}
           </div>
-        )}
+          
+          <div>
+            <h3 className="font-medium text-lg mb-4">Despesas do Mês</h3>
+            {monthlyExpenses.length > 0 ? (
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Unidade</TableHead>
+                      <TableHead>Mês Referência</TableHead>
+                      <TableHead>Vencimento</TableHead>
+                      <TableHead>Data de Pagamento</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {monthlyExpenses.map(expense => (
+                      <TableRow key={expense.id}>
+                        <TableCell className="font-medium">{getCategoryName(expense.category)}</TableCell>
+                        <TableCell>{expense.unit || '-'}</TableCell>
+                        <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>
+                        <TableCell>{formatDateToBR(expense.payment_date) || '-'}</TableCell>
+                        <TableCell className="text-right text-red-600">R$ {expense.amount}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={5} className="font-bold">Total</TableCell>
+                      <TableCell className="text-right font-bold text-red-600">
+                        R$ {formatToBRL(getTotalExpense())}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-md border">
+                <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
+              </div>
+            )}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
