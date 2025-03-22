@@ -20,7 +20,7 @@ import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import jsPDF from 'jspdf';
 
@@ -511,7 +511,11 @@ export const AccountingReport = () => {
   
   const sendReportToResidents = async () => {
     if (!sendOptions.email && !sendOptions.whatsapp) {
-      toast.error('Selecione pelo menos uma opção de envio');
+      toast({
+        title: "Selecione uma opção",
+        description: "Selecione pelo menos uma opção de envio",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -525,50 +529,70 @@ export const AccountingReport = () => {
       const pdfData = generatePDF(false);
       
       if (!pdfData) {
-        toast.error('Erro ao gerar o relatório PDF');
+        toast({
+          title: "Erro ao gerar PDF",
+          description: "Não foi possível gerar o relatório PDF",
+          variant: "destructive"
+        });
         return;
       }
       
       if (sendOptions.email) {
-        const response = await fetch('https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-accounting-report', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            matricula: user?.selectedCondominium,
-            report_month: monthName,
-            report_year: year,
-            report_data: pdfData
-          })
-        });
-        
-        console.log("Response status:", response.status);
-        const responseText = await response.text();
-        console.log("Response text:", responseText);
-        
-        let result;
         try {
-          result = JSON.parse(responseText);
-        } catch (e) {
-          console.error("Failed to parse response as JSON:", e);
-          throw new Error('Resposta inválida do servidor');
+          console.log("Sending request to Edge Function");
+          
+          const response = await fetch('https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-accounting-report', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              matricula: user?.selectedCondominium,
+              report_month: monthName,
+              report_year: year,
+              report_data: pdfData
+            })
+          });
+          
+          console.log("Response status:", response.status);
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro ao enviar o relatório');
+          }
+          
+          const result = await response.json();
+          
+          toast({
+            title: "Relatório enviado com sucesso",
+            description: `Relatório enviado com sucesso para ${result.sent_count} moradores por e-mail`,
+          });
+          
+          fetchReportLogs();
+        } catch (error: any) {
+          console.error('Erro ao enviar relatório:', error);
+          toast({
+            title: "Erro ao enviar relatório",
+            description: error.message || "Ocorreu um erro ao enviar o relatório",
+            variant: "destructive"
+          });
+          throw error;
         }
-        
-        if (!response.ok) {
-          throw new Error(result.error || 'Erro ao enviar o relatório');
-        }
-        
-        toast.success(`Relatório enviado com sucesso para ${result.sent_count} moradores por e-mail`);
-        fetchReportLogs();
       }
       
       if (sendOptions.whatsapp) {
-        toast.info('Envio por WhatsApp será implementado em breve');
+        toast({
+          title: "Recurso em desenvolvimento",
+          description: "Envio por WhatsApp será implementado em breve",
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao enviar relatório:', error);
-      toast.error(`Erro ao enviar relatório: ${error.message}`);
+      toast({
+        title: "Erro ao enviar relatório",
+        description: error.message || "Ocorreu um erro ao enviar o relatório",
+        variant: "destructive"
+      });
     } finally {
       setIsSending(false);
       setIsDialogOpen(false);
@@ -912,3 +936,4 @@ export const AccountingReport = () => {
     </>
   );
 };
+
