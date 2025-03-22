@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -196,16 +197,37 @@ export const AccountingReport = () => {
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
       
-      // Condominium Info
+      // Condominium Info - Centered with address
       doc.setFillColor(244, 247, 254); // Light blue background
-      doc.roundedRect(margin, yPosition - 5, pageWidth - (margin * 2), 25, 3, 3, 'F');
+      doc.roundedRect(margin, yPosition - 5, pageWidth - (margin * 2), 35, 3, 3, 'F');
       
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(31, 41, 55); // Gray-800
+      doc.text(`Condomínio: ${user?.nomeCondominio || "Nome não disponível"}`, pageWidth / 2, yPosition + 5, { align: 'center' });
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(31, 41, 55); // Gray-800
-      doc.text(`Condomínio: ${user?.nomeCondominio || "Nome não disponível"}`, margin + 5, yPosition + 5);
-      doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, margin + 5, yPosition + 15);
-      yPosition += lineHeight * 5;
+      doc.text(`Matrícula: ${user?.selectedCondominium || "Não disponível"}`, pageWidth / 2, yPosition + 15, { align: 'center' });
+      
+      // Add condominium address
+      if (user?.enderecoCondominio) {
+        doc.text(`Endereço: ${user.enderecoCondominio}`, pageWidth / 2, yPosition + 25, { align: 'center' });
+      } else if (user?.logradouro) {
+        // Fallback to individual address fields if they exist
+        const addressParts = [];
+        if (user.logradouro) addressParts.push(user.logradouro);
+        if (user.numero) addressParts.push(user.numero);
+        if (user.complemento) addressParts.push(user.complemento);
+        if (user.bairro) addressParts.push(user.bairro);
+        if (user.cidade) addressParts.push(user.cidade);
+        if (user.uf) addressParts.push(user.uf);
+        if (user.cep) addressParts.push(user.cep);
+        
+        const addressStr = addressParts.join(', ');
+        doc.text(`Endereço: ${addressStr}`, pageWidth / 2, yPosition + 25, { align: 'center' });
+      }
+      
+      yPosition += lineHeight * 6;
       
       // Financial Summary Box
       doc.setFillColor(243, 250, 247); // Light green background
@@ -240,15 +262,16 @@ export const AccountingReport = () => {
       doc.text(`Saldo Final: R$ ${endBalance}`, margin + 10, yPosition);
       yPosition += lineHeight * 3;
       
-      // Helper function to draw table headers with colored background
-      const drawTableHeader = (headers, columnWidths, y, color) => {
-        // Table header background
-        doc.setFillColor(color[0], color[1], color[2]); // Fixed: Passing color values as separate arguments instead of spreading array
-        doc.rect(margin, y - 6, pageWidth - (margin * 2), 8, 'F');
+      // Helper function to draw table headers 
+      const drawTableHeader = (headers, columnWidths, y, textColor) => {
+        // Table header background - white with border
+        doc.setDrawColor(200, 200, 200);
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, y - 6, pageWidth - (margin * 2), 8, 'FD');
         
         // Table header text
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(255, 255, 255);
+        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
         
         let currentX = margin + 3;
         headers.forEach((header, i) => {
@@ -260,7 +283,7 @@ export const AccountingReport = () => {
       };
       
       // Helper function to draw table rows with alternating colors
-      const drawTableRows = (rows, columnWidths, y, getValue) => {
+      const drawTableRows = (rows, columnWidths, y, getValue, textColor) => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(31, 41, 55); // Gray-800
         
@@ -286,6 +309,9 @@ export const AccountingReport = () => {
           if (rowIndex % 2 === 0) {
             doc.setFillColor(248, 250, 252); // Slate-50
             doc.rect(margin, currentY - 4, pageWidth - (margin * 2), 7, 'F');
+          } else {
+            doc.setFillColor(255, 255, 255); // White for odd rows
+            doc.rect(margin, currentY - 4, pageWidth - (margin * 2), 7, 'F');
           }
           
           let currentX = margin + 3;
@@ -294,11 +320,7 @@ export const AccountingReport = () => {
           getValue(row).forEach((value, colIndex) => {
             // Different color for amounts
             if (colIndex === getValue(row).length - 1) {
-              if (rows === monthlyIncomes) {
-                doc.setTextColor(16, 122, 87); // Green-700
-              } else {
-                doc.setTextColor(185, 28, 28); // Red-700
-              }
+              doc.setTextColor(textColor[0], textColor[1], textColor[2]);
             } else {
               doc.setTextColor(31, 41, 55); // Gray-800
             }
@@ -315,24 +337,21 @@ export const AccountingReport = () => {
       
       // Incomes Table
       if (monthlyIncomes.length > 0) {
-        doc.setFillColor(16, 122, 87, 0.1); // Green with transparency
-        doc.roundedRect(margin - 3, yPosition - 8, pageWidth - (margin * 2) + 6, 
-                       Math.min(monthlyIncomes.length * lineHeight + 20, 100), 3, 3, 'F');
-        
         // Income section title
-        doc.setFillColor(16, 122, 87); // Green-700
-        doc.rect(margin - 3, yPosition - 8, pageWidth - (margin * 2) + 6, 8, 'F');
-        
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(255, 255, 255); // White
-        doc.text('RECEITAS', pageWidth / 2, yPosition - 3, { align: 'center' });
+        doc.setFillColor(255, 255, 255);
+        doc.setTextColor(16, 122, 87); // Green-700
+        doc.text('RECEITAS', margin, yPosition);
         yPosition += 8;
+        
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(margin, yPosition - 8, pageWidth - (margin * 2), monthlyIncomes.length * lineHeight + 15, 'D');
         
         // Income table headers and data
         const incomeColWidths = [50, 30, 40, 40, 30];
         const incomeHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Data Pagamento', 'Valor'];
         
-        yPosition = drawTableHeader(incomeHeaders, incomeColWidths, yPosition, [16, 122, 87]); // Fixed: Using array instead of spread
+        yPosition = drawTableHeader(incomeHeaders, incomeColWidths, yPosition, [16, 122, 87]); // Green color for header text
         
         yPosition = drawTableRows(monthlyIncomes, incomeColWidths, yPosition, (income) => [
           getCategoryName(income.category),
@@ -340,11 +359,11 @@ export const AccountingReport = () => {
           formatReferenceMonth(income.reference_month) || "N/A",
           formatDateToBR(income.payment_date) || "N/A",
           `R$ ${income.amount}`
-        ]);
+        ], [16, 122, 87]);
         
         // Total line
-        doc.setFillColor(209, 250, 229); // Green-100
-        doc.rect(margin - 3, yPosition - 2, pageWidth - (margin * 2) + 6, 8, 'F');
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, yPosition - 2, pageWidth - (margin * 2), 8, 'F');
         
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(16, 122, 87); // Green-700
@@ -383,24 +402,21 @@ export const AccountingReport = () => {
       
       // Expenses Table
       if (monthlyExpenses.length > 0) {
-        doc.setFillColor(185, 28, 28, 0.1); // Red with transparency
-        doc.roundedRect(margin - 3, yPosition - 8, pageWidth - (margin * 2) + 6, 
-                       Math.min(monthlyExpenses.length * lineHeight + 20, 100), 3, 3, 'F');
-        
         // Expense section title
-        doc.setFillColor(185, 28, 28); // Red-700
-        doc.rect(margin - 3, yPosition - 8, pageWidth - (margin * 2) + 6, 8, 'F');
-        
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(255, 255, 255); // White
-        doc.text('DESPESAS', pageWidth / 2, yPosition - 3, { align: 'center' });
+        doc.setFillColor(255, 255, 255);
+        doc.setTextColor(185, 28, 28); // Red-700
+        doc.text('DESPESAS', margin, yPosition);
         yPosition += 8;
+        
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(margin, yPosition - 8, pageWidth - (margin * 2), monthlyExpenses.length * lineHeight + 15, 'D');
         
         // Expense table headers and data
         const expenseColWidths = [45, 25, 35, 30, 30, 30];
         const expenseHeaders = ['Categoria', 'Unidade', 'Mês Referência', 'Vencimento', 'Pagamento', 'Valor'];
         
-        yPosition = drawTableHeader(expenseHeaders, expenseColWidths, yPosition, [185, 28, 28]); // Fixed: Using array instead of spread
+        yPosition = drawTableHeader(expenseHeaders, expenseColWidths, yPosition, [185, 28, 28]); // Red color for header text
         
         yPosition = drawTableRows(monthlyExpenses, expenseColWidths, yPosition, (expense) => [
           getCategoryName(expense.category),
@@ -409,11 +425,11 @@ export const AccountingReport = () => {
           formatDateToBR(expense.due_date) || "N/A",
           formatDateToBR(expense.payment_date) || "N/A",
           `R$ ${expense.amount}`
-        ]);
+        ], [185, 28, 28]);
         
         // Total line
-        doc.setFillColor(254, 226, 226); // Red-100
-        doc.rect(margin - 3, yPosition - 2, pageWidth - (margin * 2) + 6, 8, 'F');
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, yPosition - 2, pageWidth - (margin * 2), 8, 'F');
         
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(185, 28, 28); // Red-700
