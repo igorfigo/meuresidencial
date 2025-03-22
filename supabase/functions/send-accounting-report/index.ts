@@ -77,27 +77,28 @@ serve(async (req) => {
 
     // Process emails based on sendVia
     if (sendVia === 'email') {
-      // Configuração do cliente SMTP - usando as mesmas configurações do fale conosco
-      const client = new SMTPClient({
-        connection: {
-          hostname: "smtp.hostinger.com",
-          port: 465,
-          tls: true,
-          auth: {
-            username: "noreply@meuresidencial.com",
-            password: "Bigdream@2025",
+      try {
+        // Configuração do cliente SMTP - usando as mesmas configurações do fale conosco
+        const client = new SMTPClient({
+          connection: {
+            hostname: "smtp.hostinger.com",
+            port: 465,
+            tls: true,
+            auth: {
+              username: "noreply@meuresidencial.com",
+              password: "Bigdream@2025",
+            },
           },
-        },
-      });
+        });
 
-      // Create a list of units to record which ones received the email
-      const sentUnits = residents.map(resident => resident.unidade);
+        // Create a list of units to record which ones received the email
+        const sentUnits = residents.map(resident => resident.unidade);
 
-      // Send emails to all residents
-      await Promise.all(residents.map(async (resident) => {
-        try {
-          // Create email content
-          const emailContent = `<!DOCTYPE html>
+        // Send emails to all residents
+        await Promise.all(residents.map(async (resident) => {
+          try {
+            // Create email content
+            const emailContent = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -158,54 +159,58 @@ serve(async (req) => {
 </body>
 </html>`;
 
-          // Send email
-          await client.send({
-            from: `${condominiumName} <noreply@meuresidencial.com>`,
-            to: resident.email,
-            subject: `Prestação de Contas - ${condominiumName} - ${monthName} ${year}`,
-            html: emailContent,
+            // Send email
+            await client.send({
+              from: `${condominiumName} <noreply@meuresidencial.com>`,
+              to: resident.email,
+              subject: `Prestação de Contas - ${condominiumName} - ${monthName} ${year}`,
+              html: emailContent,
+            });
+
+            console.log(`Email enviado com sucesso para ${resident.nome_completo} (${resident.email})`);
+          } catch (error) {
+            console.error(`Erro ao enviar email para ${resident.email}:`, error);
+          }
+        }));
+
+        // Close SMTP connection
+        await client.close();
+
+        // Log this report sending in the database
+        const { error: logError } = await supabaseAdmin
+          .from('accounting_report_logs')
+          .insert({
+            matricula,
+            report_month: `${year}-${monthName}`,
+            sent_via: 'email',
+            sent_count: residents.length,
+            sent_units: sentUnits.join(', ')
           });
 
-          console.log(`Email enviado com sucesso para ${resident.nome_completo} (${resident.email})`);
-        } catch (error) {
-          console.error(`Erro ao enviar email para ${resident.email}:`, error);
+        if (logError) {
+          console.error("Erro ao registrar envio:", logError);
         }
-      }));
 
-      // Close SMTP connection
-      await client.close();
+        console.log('Todos os emails foram enviados com sucesso');
 
-      // Log this report sending in the database
-      const { error: logError } = await supabaseAdmin
-        .from('accounting_report_logs')
-        .insert({
-          matricula,
-          report_month: `${year}-${monthName}`,
-          sent_via: 'email',
-          sent_count: residents.length,
-          sent_units: sentUnits.join(', ')
-        });
-
-      if (logError) {
-        console.error("Erro ao registrar envio:", logError);
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: `Prestação de contas enviada com sucesso para ${residents.length} moradores via email.`,
+            sentUnits
+          }),
+          { 
+            status: 200, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json' 
+            } 
+          }
+        );
+      } catch (error) {
+        console.error('Erro ao enviar emails:', error);
+        throw new Error(`Erro ao enviar emails: ${error.message}`);
       }
-
-      console.log('Todos os emails foram enviados com sucesso');
-
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: `Prestação de contas enviada com sucesso para ${residents.length} moradores via email.`,
-          sentUnits
-        }),
-        { 
-          status: 200, 
-          headers: { 
-            ...corsHeaders, 
-            'Content-Type': 'application/json' 
-          } 
-        }
-      );
     } else if (sendVia === 'whatsapp') {
       // For now, we'll just return that WhatsApp is not implemented
       return new Response(

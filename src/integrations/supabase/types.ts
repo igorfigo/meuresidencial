@@ -16,6 +16,7 @@ export type Database = {
           matricula: string
           report_month: string
           sent_count: number
+          sent_units: string | null
           sent_via: string
         }
         Insert: {
@@ -24,6 +25,7 @@ export type Database = {
           matricula: string
           report_month: string
           sent_count?: number
+          sent_units?: string | null
           sent_via: string
         }
         Update: {
@@ -32,6 +34,7 @@ export type Database = {
           matricula?: string
           report_month?: string
           sent_count?: number
+          sent_units?: string | null
           sent_via?: string
         }
         Relationships: []
