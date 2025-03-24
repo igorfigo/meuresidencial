@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,7 @@ import {
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 6;
 
 const Documentos = () => {
   const { 
