@@ -14,7 +14,6 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
-import { Separator } from '@/components/ui/separator';
 
 interface NewsItem {
   id: string;
@@ -81,18 +80,6 @@ const GerenciarAvisos = () => {
   const onSubmit = async (values: { title: string; short_description: string; full_content: string }) => {
     try {
       setIsLoading(true);
-      
-      // First, update all news items to inactive if creating a new one
-      if (!isEditing) {
-        const { error: updateError } = await supabase
-          .from('news_items')
-          .update({ is_active: false })
-          .eq('is_active', true);
-        
-        if (updateError) {
-          console.error('Error updating existing items:', updateError);
-        }
-      }
       
       if (isEditing && currentItem) {
         // Update existing news item
@@ -203,12 +190,16 @@ const GerenciarAvisos = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col mb-6">
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Gerenciar Avisos</h1>
-          <p className="text-muted-foreground mt-2">
-            Cadastre novidades e avisos importantes para serem exibidos no painel inicial dos gestores.
-          </p>
-          <Separator className="my-4" />
+          <Button 
+            onClick={handleCreateNew} 
+            className="flex items-center space-x-2"
+            disabled={isCreating || isEditing}
+          >
+            <Plus size={16} />
+            <span>Nova Novidade</span>
+          </Button>
         </div>
 
         <div className="space-y-4">
@@ -299,21 +290,11 @@ const GerenciarAvisos = () => {
           )}
           
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Histórico de Novidades</CardTitle>
-                <CardDescription>
-                  Todas as novidades cadastradas no sistema.
-                </CardDescription>
-              </div>
-              <Button 
-                onClick={handleCreateNew} 
-                className="flex items-center space-x-2"
-                disabled={isCreating || isEditing}
-              >
-                <Plus size={16} />
-                <span>Nova Novidade</span>
-              </Button>
+            <CardHeader>
+              <CardTitle>Histórico de Novidades</CardTitle>
+              <CardDescription>
+                Todas as novidades cadastradas no sistema.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading && !isCreating && !isEditing ? (
