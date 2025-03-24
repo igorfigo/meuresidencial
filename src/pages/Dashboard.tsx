@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { AnnouncementCard } from '@/components/dashboard/AnnouncementCard';
 
 interface LocationStats {
   states: [string, number][];
@@ -219,8 +218,6 @@ const Dashboard = () => {
 
   const renderManagerDashboard = () => (
     <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <AnnouncementCard />
-      
       <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
