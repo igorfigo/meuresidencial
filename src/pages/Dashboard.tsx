@@ -461,65 +461,71 @@ const Dashboard = () => {
         
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Últimas Receitas</CardTitle>
-            <ArrowUpCircle className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium">Movimentações Financeiras</CardTitle>
+            <Tabs defaultValue="income" className="w-[120px]">
+              <TabsList className="grid grid-cols-2 h-7">
+                <TabsTrigger value="income" className="text-xs p-0 h-7">
+                  <ArrowUpCircle className="h-4 w-4 text-green-500 mr-1" />
+                </TabsTrigger>
+                <TabsTrigger value="expense" className="text-xs p-0 h-7">
+                  <ArrowDownCircle className="h-4 w-4 text-red-500 mr-1" />
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {recentTransactions && recentTransactions.filter(t => t.type === 'income').slice(0, 5).length > 0 ? (
-                recentTransactions
-                  .filter(t => t.type === 'income')
-                  .slice(0, 5)
-                  .map((income) => (
-                    <div key={income.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">{income.category}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {income.unit ? `Unidade: ${income.unit}` : 'Geral'}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-sm font-medium text-green-600">R$ {income.amount}</span>
-                        <span className="text-xs text-muted-foreground">{income.payment_date ? formatDate(income.payment_date) : '-'}</span>
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <div className="text-sm text-muted-foreground">Nenhuma receita registrada</div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Últimas Despesas</CardTitle>
-            <ArrowDownCircle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {recentTransactions && recentTransactions.filter(t => t.type === 'expense').slice(0, 5).length > 0 ? (
-                recentTransactions
-                  .filter(t => t.type === 'expense')
-                  .slice(0, 5)
-                  .map((expense) => (
-                    <div key={expense.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">{expense.category}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {expense.unit ? `Unidade: ${expense.unit}` : 'Geral'}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-sm font-medium text-red-600">R$ {expense.amount}</span>
-                        <span className="text-xs text-muted-foreground">{expense.payment_date ? formatDate(expense.payment_date) : formatDate(expense.due_date || '')}</span>
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <div className="text-sm text-muted-foreground">Nenhuma despesa registrada</div>
-              )}
-            </div>
+            <Tabs defaultValue="income" className="w-full">
+              <TabsContent value="income" className="mt-0">
+                <div className="space-y-2">
+                  {recentTransactions && recentTransactions.filter(t => t.type === 'income').slice(0, 5).length > 0 ? (
+                    recentTransactions
+                      .filter(t => t.type === 'income')
+                      .slice(0, 5)
+                      .map((income) => (
+                        <div key={income.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{income.category}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {income.unit ? `Unidade: ${income.unit}` : 'Geral'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className="text-sm font-medium text-green-600">R$ {income.amount}</span>
+                            <span className="text-xs text-muted-foreground">{income.payment_date ? formatDate(income.payment_date) : '-'}</span>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Nenhuma receita registrada</div>
+                  )}
+                </div>
+              </TabsContent>
+              <TabsContent value="expense" className="mt-0">
+                <div className="space-y-2">
+                  {recentTransactions && recentTransactions.filter(t => t.type === 'expense').slice(0, 5).length > 0 ? (
+                    recentTransactions
+                      .filter(t => t.type === 'expense')
+                      .slice(0, 5)
+                      .map((expense) => (
+                        <div key={expense.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{expense.category}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {expense.unit ? `Unidade: ${expense.unit}` : 'Geral'}
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className="text-sm font-medium text-red-600">R$ {expense.amount}</span>
+                            <span className="text-xs text-muted-foreground">{expense.payment_date ? formatDate(expense.payment_date) : formatDate(expense.due_date || '')}</span>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Nenhuma despesa registrada</div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </section>
