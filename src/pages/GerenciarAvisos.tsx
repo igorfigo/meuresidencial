@@ -10,10 +10,10 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
-import { Separator } from '@/components/ui/separator';
 
 interface NewsItem {
   id: string;
@@ -88,23 +88,14 @@ const GerenciarAvisos = () => {
           .update({
             title: values.title,
             short_description: values.short_description,
-            full_content: values.full_content,
-            // We're not changing the active status when editing
+            full_content: values.full_content
           })
           .eq('id', currentItem.id);
 
         if (error) throw error;
         toast.success('Novidade atualizada com sucesso!');
       } else {
-        // Create new news item - first deactivate all existing items
-        const { error: updateError } = await supabase
-          .from('news_items')
-          .update({ is_active: false })
-          .neq('id', '00000000-0000-0000-0000-000000000000'); // This ensures all existing items are updated
-        
-        if (updateError) throw updateError;
-        
-        // Then create new news item as active
+        // Create new news item
         const { error } = await supabase
           .from('news_items')
           .insert([
@@ -199,15 +190,8 @@ const GerenciarAvisos = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-4">
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Gerenciar Avisos</h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie as novidades que serão exibidas para os moradores na área de comunicados.
-          </p>
-          <Separator className="my-4" />
-        </div>
-
-        <div className="flex items-center justify-end mb-6">
           <Button 
             onClick={handleCreateNew} 
             className="flex items-center space-x-2"
@@ -321,6 +305,7 @@ const GerenciarAvisos = () => {
                     <TableRow>
                       <TableHead>Título</TableHead>
                       <TableHead>Data</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -329,6 +314,11 @@ const GerenciarAvisos = () => {
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.title}</TableCell>
                         <TableCell>{formatDate(item.created_at)}</TableCell>
+                        <TableCell>
+                          <Badge variant={item.is_active ? "default" : "secondary"}>
+                            {item.is_active ? 'Ativa' : 'Inativa'}
+                          </Badge>
+                        </TableCell>
                         <TableCell className="text-right space-x-2">
                           <Button 
                             variant="ghost" 
