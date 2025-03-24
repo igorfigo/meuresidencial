@@ -186,13 +186,21 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
           {totalPages > 1 && (
             <Pagination className="mt-4">
               <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
+                {/* Replace disabled prop with conditional rendering for Previous button */}
+                {currentPage > 1 ? (
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => {}}
+                      className="pointer-events-none opacity-50"
+                    />
+                  </PaginationItem>
+                )}
                 
                 {Array.from({ length: totalPages }).map((_, i) => (
                   <PaginationItem key={i}>
@@ -205,13 +213,21 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
                   </PaginationItem>
                 ))}
                 
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
+                {/* Replace disabled prop with conditional rendering for Next button */}
+                {currentPage < totalPages ? (
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => {}}
+                      className="pointer-events-none opacity-50"
+                    />
+                  </PaginationItem>
+                )}
               </PaginationContent>
             </Pagination>
           )}
