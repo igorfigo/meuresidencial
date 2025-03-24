@@ -82,16 +82,8 @@ const CadastroChavePix = () => {
       if (error) throw error;
       
       if (data) {
-        const formattedData = data.map(item => ({
-          id: item.id,
-          tipochave: item.tipochave,
-          chavepix: item.chavepix,
-          created_at: item.created_at,
-          updated_at: item.created_at,
-        }));
-        
-        setPixKeys(formattedData);
-        setMaxKeysReached(formattedData.length > 0 && !isEditing);
+        setPixKeys(data);
+        setMaxKeysReached(data.length > 0 && !isEditing);
       } else {
         setPixKeys([]);
       }
@@ -116,6 +108,7 @@ const CadastroChavePix = () => {
           .update({
             tipochave: data.tipochave,
             chavepix: data.chavepix,
+            updated_at: new Date().toISOString()
           })
           .eq('id', selectedPixKey.id);
         
