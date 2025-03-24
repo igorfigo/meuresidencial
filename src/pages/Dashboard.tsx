@@ -492,7 +492,7 @@ const Dashboard = () => {
                             </span>
                           </div>
                           <div className="flex flex-col items-end">
-                            <span className="text-sm font-medium text-green-600">R$ {income.amount}</span>
+                            <span className="text-sm font-medium text-green-600">{income.amount}</span>
                             <span className="text-xs text-muted-foreground">{income.payment_date ? formatDate(income.payment_date) : '-'}</span>
                           </div>
                         </div>
@@ -517,8 +517,8 @@ const Dashboard = () => {
                             </span>
                           </div>
                           <div className="flex flex-col items-end">
-                            <span className="text-sm font-medium text-red-600">R$ {expense.amount}</span>
-                            <span className="text-xs text-muted-foreground">{expense.payment_date ? formatDate(expense.payment_date) : formatDate(expense.due_date || '')}</span>
+                            <span className="text-sm font-medium text-red-600">{expense.amount}</span>
+                            <span className="text-xs text-muted-foreground">{expense.payment_date ? formatDate(expense.payment_date) : (expense.due_date ? formatDate(expense.due_date) : '-')}</span>
                           </div>
                         </div>
                       ))
