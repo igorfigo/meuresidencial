@@ -464,70 +464,49 @@ const Dashboard = () => {
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Movimentações Financeiras</CardTitle>
-            <Tabs defaultValue="income" className="w-[120px]">
-              <TabsList className="grid grid-cols-2 h-7">
-                <TabsTrigger value="income" className="text-xs p-0 h-7">
-                  <ArrowUpCircle className="h-4 w-4 text-green-500 mr-1" />
-                </TabsTrigger>
-                <TabsTrigger value="expense" className="text-xs p-0 h-7">
-                  <ArrowDownCircle className="h-4 w-4 text-red-500 mr-1" />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="flex gap-1">
+              <ArrowUpCircle className="h-4 w-4 text-green-500" />
+              <ArrowDownCircle className="h-4 w-4 text-red-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="income" className="w-full">
-              <TabsContent value="income" className="mt-0">
-                <div className="space-y-2">
-                  {recentTransactions && recentTransactions.filter(t => t.type === 'income').slice(0, 5).length > 0 ? (
-                    recentTransactions
-                      .filter(t => t.type === 'income')
-                      .slice(0, 5)
-                      .map((income) => (
-                        <div key={income.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium">{income.category}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {income.unit ? `Unidade: ${income.unit}` : 'Geral'}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="text-sm font-medium text-green-600">{income.amount}</span>
-                            <span className="text-xs text-muted-foreground">{income.payment_date ? formatDate(income.payment_date) : '-'}</span>
-                          </div>
+            <div className="space-y-2">
+              {recentTransactions && recentTransactions.length > 0 ? (
+                recentTransactions
+                  .slice(0, 5)
+                  .map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                      <div className="flex flex-col">
+                        <div className="flex items-center">
+                          {transaction.type === 'income' ? (
+                            <ArrowUpCircle className="h-3 w-3 text-green-500 mr-1 flex-shrink-0" />
+                          ) : (
+                            <ArrowDownCircle className="h-3 w-3 text-red-500 mr-1 flex-shrink-0" />
+                          )}
+                          <span className="text-sm font-medium truncate max-w-[120px]">{transaction.category}</span>
                         </div>
-                      ))
-                  ) : (
-                    <div className="text-sm text-muted-foreground">Nenhuma receita registrada</div>
-                  )}
-                </div>
-              </TabsContent>
-              <TabsContent value="expense" className="mt-0">
-                <div className="space-y-2">
-                  {recentTransactions && recentTransactions.filter(t => t.type === 'expense').slice(0, 5).length > 0 ? (
-                    recentTransactions
-                      .filter(t => t.type === 'expense')
-                      .slice(0, 5)
-                      .map((expense) => (
-                        <div key={expense.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium">{expense.category}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {expense.unit ? `Unidade: ${expense.unit}` : 'Geral'}
-                            </span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="text-sm font-medium text-red-600">{expense.amount}</span>
-                            <span className="text-xs text-muted-foreground">{expense.payment_date ? formatDate(expense.payment_date) : (expense.due_date ? formatDate(expense.due_date) : '-')}</span>
-                          </div>
-                        </div>
-                      ))
-                  ) : (
-                    <div className="text-sm text-muted-foreground">Nenhuma despesa registrada</div>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
+                        <span className="text-xs text-muted-foreground">
+                          {transaction.unit ? `Unidade: ${transaction.unit}` : 'Geral'}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className={`text-sm font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                          {transaction.amount}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {transaction.payment_date 
+                            ? formatDate(transaction.payment_date) 
+                            : (transaction.due_date 
+                                ? formatDate(transaction.due_date) 
+                                : '-')}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="text-sm text-muted-foreground">Nenhuma movimentação registrada</div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </section>
