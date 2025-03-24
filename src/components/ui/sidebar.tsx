@@ -1,4 +1,3 @@
-
 import {
   Home,
   LayoutDashboard,
@@ -12,7 +11,8 @@ import {
   FileText,
   Bell,
   Truck,
-  Megaphone
+  Megaphone,
+  KeyRound
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -38,7 +38,6 @@ export function Sidebar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Close the menu when the route changes
     setIsMenuOpen(false);
   }, [location.pathname]);
 
@@ -51,6 +50,7 @@ export function Sidebar() {
     { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <UserPlus className="h-5 w-5" /> },
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
+    { path: '/cadastro-chave-pix', label: 'Chave PIX', icon: <KeyRound className="h-5 w-5" /> },
   ];
   
   const managerMenuItems = [
