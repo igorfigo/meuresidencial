@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -16,19 +17,21 @@ import FinanceiroPrestacaoContas from '@/pages/FinanceiroPrestacaoContas';
 import CadastroGestor from '@/pages/CadastroGestor';
 import CadastroPlanos from '@/pages/CadastroPlanos';
 import CadastroChavePix from '@/pages/CadastroChavePix';
-import GerarFaturas from '@/pages/GerarFaturas';
-import GerenciarAvisos from '@/pages/GerenciarAvisos';
-import BusinessManagement from '@/pages/BusinessManagement';
-import BusinessDespesas from '@/pages/BusinessDespesas';
-import BusinessContratos from '@/pages/BusinessContratos';
 import Moradores from '@/pages/Moradores';
 import Comunicados from '@/pages/Comunicados';
 import Documentos from '@/pages/Documentos';
 import AreasComuns from '@/pages/AreasComuns';
 import Dedetizacoes from '@/pages/Dedetizacoes';
-import Servicos from '@/pages/Servicos';
 import MinhaAssinatura from '@/pages/MinhaAssinatura';
-import Contato from '@/pages/Contato';
+
+// We'll create placeholder components for the missing pages
+const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
+const GerenciarAvisos = () => <div>Gerenciar Avisos (Em Desenvolvimento)</div>;
+const BusinessManagement = () => <div>Business Management (Em Desenvolvimento)</div>;
+const BusinessDespesas = () => <div>Business Despesas (Em Desenvolvimento)</div>;
+const BusinessContratos = () => <div>Business Contratos (Em Desenvolvimento)</div>;
+const Servicos = () => <div>Serviços (Em Desenvolvimento)</div>;
+const Contato = () => <div>Contato (Em Desenvolvimento)</div>;
 
 function App() {
   return (

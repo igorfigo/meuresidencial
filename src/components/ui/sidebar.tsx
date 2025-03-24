@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -22,7 +23,8 @@ import {
   FileIcon,
   CalendarDays,
   Bug,
-  Mail
+  Mail,
+  QrCode,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -82,6 +84,17 @@ export function Sidebar() {
   const managerMenuItems: MenuItem[] = [
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <CreditCard className="h-5 w-5" /> },
+    { 
+      path: '/financeiro/dashboard', 
+      label: 'Financeiro', 
+      icon: <PiggyBank className="h-5 w-5" />,
+      submenu: [
+        { path: '/financeiro/dashboard', label: 'Dashboard', icon: <BarChart className="h-5 w-5" /> },
+        { path: '/financeiro/receitas-despesas', label: 'Receitas e Despesas', icon: <Receipt className="h-5 w-5" /> },
+        { path: '/financeiro/recebimento-pix', label: 'Recebimento PIX', icon: <QrCode className="h-5 w-5" /> },
+        { path: '/financeiro/prestacao-contas', label: 'Prestação de Contas', icon: <FileText className="h-5 w-5" /> },
+      ]
+    },
     { path: '/moradores', label: 'Moradores', icon: <Users className="h-5 w-5" /> },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <LayoutDashboard className="h-5 w-5" /> },
     { path: '/comunicados', label: 'Comunicados', icon: <Bell className="h-5 w-5" /> },
