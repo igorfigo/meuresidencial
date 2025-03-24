@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 
 interface LocationStats {
   states: [string, number][];
@@ -243,6 +244,9 @@ const Dashboard = () => {
             {getGreeting()}
           </div>
         </header>
+
+        <h1 className="text-3xl font-bold mb-2">Visão Geral</h1>
+        <Separator className="mb-6" />
 
         {user?.isAdmin ? renderAdminDashboard() : renderManagerDashboard()}
       </div>
