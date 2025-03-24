@@ -511,23 +511,7 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {latestNews && (
-        <Card 
-          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer md:col-span-1 lg:col-span-2"
-          onClick={() => setNewsDialogOpen(true)}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
-            <BellRing className="h-4 w-4 text-brand-600" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">{latestNews.short_description}</p>
-            <div className="mt-2 text-xs text-gray-500">
-              Publicado em: {formatDate(latestNews.created_at)}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Column spanning was removed from here since the news card is now in the header */}
     </section>
   );
 
@@ -542,6 +526,25 @@ const Dashboard = () => {
             </div>
             {getGreeting()}
           </div>
+          
+          {/* Moved announcement card here */}
+          {!user?.isAdmin && latestNews && (
+            <Card 
+              className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer w-full md:w-auto md:min-w-80"
+              onClick={() => setNewsDialogOpen(true)}
+            >
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
+                <BellRing className="h-4 w-4 text-brand-600" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground text-sm">{latestNews.short_description}</p>
+                <div className="mt-2 text-xs text-gray-500">
+                  Publicado em: {formatDate(latestNews.created_at)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </header>
 
         <Separator className="mb-6" />
