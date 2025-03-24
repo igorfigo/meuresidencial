@@ -1,7 +1,8 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Users, FileText, MapPin } from 'lucide-react';
+import { Users, FileText, MapPin, Wallet, Home, Bug, BellRing, FileCheck, Receipt, PiggyBank, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +11,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/utils/currency';
+import { useFinances } from '@/hooks/use-finances';
+import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
+import { format } from 'date-fns';
 
 interface LocationStats {
   states: [string, number][];
@@ -32,12 +37,23 @@ interface NewsItem {
   created_at: string;
 }
 
+interface RecentItem {
+  id: string;
+  title: string;
+  date: string;
+  type: 'announcement' | 'document' | 'pest-control';
+}
+
 const Dashboard = () => {
   const { user } = useApp();
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
   const [latestNews, setLatestNews] = useState<NewsItem | null>(null);
   const [newsDialogOpen, setNewsDialogOpen] = useState(false);
+  const [residentCount, setResidentCount] = useState(0);
+  const [commonAreasCount, setCommonAreasCount] = useState(0);
+  const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
+  const { balance, recentTransactions, isLoading: isFinancesLoading } = useFinances();
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
@@ -53,8 +69,11 @@ const Dashboard = () => {
     fetchDashboardData();
     if (!user?.isAdmin) {
       fetchLatestNews();
+      fetchResidentCount();
+      fetchCommonAreasCount();
+      fetchRecentItems();
     }
-  }, [user?.isAdmin]);
+  }, [user?.isAdmin, user?.selectedCondominium]);
   
   const fetchLatestNews = async () => {
     try {
@@ -76,6 +95,119 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error in fetchLatestNews:', error);
+    }
+  };
+
+  const fetchResidentCount = async () => {
+    if (!user?.selectedCondominium) return;
+    
+    try {
+      const { count, error } = await supabase
+        .from('residents')
+        .select('*', { count: 'exact', head: true })
+        .eq('matricula', user.selectedCondominium);
+        
+      if (error) {
+        console.error('Error fetching resident count:', error);
+        return;
+      }
+      
+      setResidentCount(count || 0);
+    } catch (error) {
+      console.error('Error in fetchResidentCount:', error);
+    }
+  };
+  
+  const fetchCommonAreasCount = async () => {
+    if (!user?.selectedCondominium) return;
+    
+    try {
+      const { count, error } = await supabase
+        .from('common_areas')
+        .select('*', { count: 'exact', head: true })
+        .eq('matricula', user.selectedCondominium);
+        
+      if (error) {
+        console.error('Error fetching common areas count:', error);
+        return;
+      }
+      
+      setCommonAreasCount(count || 0);
+    } catch (error) {
+      console.error('Error in fetchCommonAreasCount:', error);
+    }
+  };
+
+  const fetchRecentItems = async () => {
+    if (!user?.selectedCondominium) return;
+    
+    try {
+      // Fetch recent announcements
+      const { data: announcements, error: announcementsError } = await supabase
+        .from('announcements')
+        .select('id, title, created_at')
+        .eq('matricula', user.selectedCondominium)
+        .order('created_at', { ascending: false })
+        .limit(5);
+        
+      if (announcementsError) {
+        console.error('Error fetching announcements:', announcementsError);
+      }
+      
+      // Fetch recent documents
+      const { data: documents, error: documentsError } = await supabase
+        .from('documents')
+        .select('id, tipo, created_at')
+        .eq('matricula', user.selectedCondominium)
+        .order('created_at', { ascending: false })
+        .limit(5);
+        
+      if (documentsError) {
+        console.error('Error fetching documents:', documentsError);
+      }
+      
+      // Fetch recent pest controls
+      const { data: pestControls, error: pestControlsError } = await supabase
+        .from('pest_controls')
+        .select('id, empresa, data, created_at')
+        .eq('matricula', user.selectedCondominium)
+        .order('created_at', { ascending: false })
+        .limit(5);
+        
+      if (pestControlsError) {
+        console.error('Error fetching pest controls:', pestControlsError);
+      }
+      
+      // Combine all recent items
+      const combinedItems: RecentItem[] = [
+        ...(announcements || []).map(item => ({
+          id: item.id,
+          title: item.title,
+          date: item.created_at,
+          type: 'announcement' as const
+        })),
+        ...(documents || []).map(item => ({
+          id: item.id,
+          title: item.tipo,
+          date: item.created_at,
+          type: 'document' as const
+        })),
+        ...(pestControls || []).map(item => ({
+          id: item.id,
+          title: `Dedetização: ${item.empresa}`,
+          date: item.created_at,
+          type: 'pest-control' as const
+        }))
+      ];
+      
+      // Sort by date (newest first) and limit to 5
+      const sortedItems = combinedItems.sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      ).slice(0, 5);
+      
+      setRecentItems(sortedItems);
+    } catch (error) {
+      console.error('Error in fetchRecentItems:', error);
     }
   };
 
@@ -245,13 +377,148 @@ const Dashboard = () => {
 
   const renderManagerDashboard = () => (
     <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* Balance Card */}
+      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
+          <Wallet className="h-4 w-4 text-brand-600" />
+        </CardHeader>
+        <CardContent>
+          {!isFinancesLoading && balance ? (
+            <div className="text-2xl font-bold">
+              {balance.is_manual ? 'R$ ' + balance.balance : 'R$ ' + balance.balance}
+            </div>
+          ) : (
+            <div className="text-2xl font-bold text-gray-400">Carregando...</div>
+          )}
+        </CardContent>
+      </Card>
+      
+      {/* Residents and Common Areas Count */}
+      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Dados do Condomínio</CardTitle>
+          <Home className="h-4 w-4 text-brand-600" />
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <Users className="h-4 w-4" /> Moradores
+              </span>
+              <span className="font-medium">{residentCount}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <Home className="h-4 w-4" /> Áreas Comuns
+              </span>
+              <span className="font-medium">{commonAreasCount}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Recent Items */}
+      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Últimos Cadastros</CardTitle>
+          <FileCheck className="h-4 w-4 text-brand-600" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {recentItems.length > 0 ? (
+              recentItems.map((item) => (
+                <div key={item.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                  <div className="flex items-center gap-2">
+                    {item.type === 'announcement' && <BellRing className="h-3 w-3 text-blue-500" />}
+                    {item.type === 'document' && <FileText className="h-3 w-3 text-green-500" />}
+                    {item.type === 'pest-control' && <Bug className="h-3 w-3 text-red-500" />}
+                    <span className="text-sm truncate max-w-[150px]">{item.title}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-muted-foreground">Nenhum cadastro recente</div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Latest Incomes */}
+      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Últimas Receitas</CardTitle>
+          <ArrowUpCircle className="h-4 w-4 text-green-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {recentTransactions && recentTransactions.filter(t => t.type === 'income').slice(0, 5).length > 0 ? (
+              recentTransactions
+                .filter(t => t.type === 'income')
+                .slice(0, 5)
+                .map((income) => (
+                  <div key={income.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{income.category}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {income.unit ? `Unidade: ${income.unit}` : 'Geral'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-sm font-medium text-green-600">R$ {income.amount}</span>
+                      <span className="text-xs text-muted-foreground">{income.payment_date ? formatDate(income.payment_date) : '-'}</span>
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <div className="text-sm text-muted-foreground">Nenhuma receita registrada</div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Latest Expenses */}
+      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Últimas Despesas</CardTitle>
+          <ArrowDownCircle className="h-4 w-4 text-red-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {recentTransactions && recentTransactions.filter(t => t.type === 'expense').slice(0, 5).length > 0 ? (
+              recentTransactions
+                .filter(t => t.type === 'expense')
+                .slice(0, 5)
+                .map((expense) => (
+                  <div key={expense.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{expense.category}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {expense.unit ? `Unidade: ${expense.unit}` : 'Geral'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-sm font-medium text-red-600">R$ {expense.amount}</span>
+                      <span className="text-xs text-muted-foreground">{expense.payment_date ? formatDate(expense.payment_date) : formatDate(expense.due_date || '')}</span>
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <div className="text-sm text-muted-foreground">Nenhuma despesa registrada</div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {latestNews && (
         <Card 
-          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer"
+          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer md:col-span-1 lg:col-span-2"
           onClick={() => setNewsDialogOpen(true)}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
+            <BellRing className="h-4 w-4 text-brand-600" />
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">{latestNews.short_description}</p>
@@ -261,17 +528,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       )}
-      
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Este é o seu painel de controle onde você pode gerenciar seu condomínio.
-          </p>
-        </CardContent>
-      </Card>
     </section>
   );
 
