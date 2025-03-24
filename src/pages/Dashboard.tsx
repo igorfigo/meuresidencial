@@ -14,6 +14,13 @@ import { formatToBRL } from '@/utils/currency';
 import { useFinances } from '@/hooks/use-finances';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
 import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { 
+  Tooltip as UITooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
+} from '@/components/ui/tooltip';
 
 interface LocationStats {
   states: [string, number][];
@@ -53,6 +60,7 @@ const Dashboard = () => {
   const [commonAreasCount, setCommonAreasCount] = useState(0);
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
   const { balance, recentTransactions, isLoading: isFinancesLoading } = useFinances();
+  const [unitStatusData, setUnitStatusData] = useState<any[]>([]);
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
@@ -71,6 +79,7 @@ const Dashboard = () => {
       fetchResidentCount();
       fetchCommonAreasCount();
       fetchRecentItems();
+      fetchUnitPaymentStatus();
     }
   }, [user?.isAdmin, user?.selectedCondominium]);
   
@@ -205,6 +214,56 @@ const Dashboard = () => {
     }
   };
 
+  const fetchUnitPaymentStatus = async () => {
+    if (!user?.selectedCondominium) return;
+    
+    try {
+      const today = new Date();
+      const currentMonth = format(today, 'yyyy-MM', { locale: ptBR });
+      
+      const { data: residents, error: residentsError } = await supabase
+        .from('residents')
+        .select('id, unidade')
+        .eq('matricula', user?.selectedCondominium);
+      
+      if (residentsError) throw residentsError;
+      
+      const { data: paidUnits, error: paidUnitsError } = await supabase
+        .from('financial_incomes')
+        .select('unit')
+        .eq('matricula', user?.selectedCondominium)
+        .eq('category', 'taxa_condominio')
+        .eq('reference_month', currentMonth);
+      
+      if (paidUnitsError) throw paidUnitsError;
+      
+      const totalUnits = residents.length;
+      
+      const paidUnitNames = new Set(paidUnits.map(item => item.unit).filter(Boolean));
+      const paidUnitsCount = paidUnitNames.size;
+      
+      const unpaidUnits = totalUnits - paidUnitsCount;
+      
+      const paidUnitsList = residents
+        .filter(resident => paidUnitNames.has(resident.unidade))
+        .map(resident => resident.unidade)
+        .sort();
+        
+      const unpaidUnitsList = residents
+        .filter(resident => !paidUnitNames.has(resident.unidade))
+        .map(resident => resident.unidade)
+        .sort();
+      
+      setUnitStatusData([
+        { name: 'Pagas', value: paidUnitsCount, units: paidUnitsList },
+        { name: 'Pendentes', value: unpaidUnits, units: unpaidUnitsList }
+      ]);
+    } catch (error) {
+      console.error('Error fetching unit payment status:', error);
+      setUnitStatusData([]);
+    }
+  };
+
   async function fetchDashboardData() {
     try {
       const { count: activeCount, error: activeError } = await supabase
@@ -309,7 +368,7 @@ const Dashboard = () => {
     
     try {
       const date = parseISO(dateString);
-      return format(date, 'dd/MM/yyyy');
+      return format(date, 'dd/MM/yyyy', { locale: ptBR });
     } catch (error) {
       console.error('Error formatting date:', error);
       return dateString;
@@ -431,6 +490,90 @@ const Dashboard = () => {
                   </span>
                   <span className="font-medium">{commonAreasCount}</span>
                 </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Home className="h-5 w-5 text-blue-500" />
+              <h3 className="font-semibold text-gray-800">Status de Pagamentos</h3>
+              <span className="ml-auto text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                {format(new Date(), 'MMMM/yyyy', { locale: ptBR })}
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-slate-100 rounded p-2">
+                <p className="text-xs text-gray-500">Total de Unidades</p>
+                <TooltipProvider>
+                  <UITooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-xl font-bold text-gray-800 cursor-help">
+                        {unitStatusData.reduce((sum, item) => sum + item.value, 0)}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs max-h-36 overflow-y-auto">
+                      <div>
+                        <p className="font-semibold">Todas as Unidades:</p>
+                        <div className="grid grid-cols-4 gap-1 mt-1">
+                          {[...new Set([
+                            ...(unitStatusData.find(item => item.name === 'Pagas')?.units || []),
+                            ...(unitStatusData.find(item => item.name === 'Pendentes')?.units || [])
+                          ])].sort().map((unit, idx) => (
+                            <span key={idx} className="text-xs">{unit}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </UITooltip>
+                </TooltipProvider>
+              </div>
+              <div className="bg-green-100 rounded p-2">
+                <p className="text-xs text-gray-500">Unidades Pagas</p>
+                <TooltipProvider>
+                  <UITooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-xl font-bold text-green-600 cursor-help">
+                        {unitStatusData.find(item => item.name === 'Pagas')?.value || 0}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs max-h-36 overflow-y-auto">
+                      <div>
+                        <p className="font-semibold text-green-600">Unidades Pagas:</p>
+                        <div className="grid grid-cols-4 gap-1 mt-1">
+                          {unitStatusData.find(item => item.name === 'Pagas')?.units?.map((unit, idx) => (
+                            <span key={idx} className="text-xs">{unit}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </UITooltip>
+                </TooltipProvider>
+              </div>
+              <div className="bg-red-100 rounded p-2">
+                <p className="text-xs text-gray-500">Unidades Pendentes</p>
+                <TooltipProvider>
+                  <UITooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-xl font-bold text-red-600 cursor-help">
+                        {unitStatusData.find(item => item.name === 'Pendentes')?.value || 0}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs max-h-36 overflow-y-auto">
+                      <div>
+                        <p className="font-semibold text-red-600">Unidades Pendentes:</p>
+                        <div className="grid grid-cols-4 gap-1 mt-1">
+                          {unitStatusData.find(item => item.name === 'Pendentes')?.units?.map((unit, idx) => (
+                            <span key={idx} className="text-xs">{unit}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </UITooltip>
+                </TooltipProvider>
               </div>
             </div>
           </CardContent>
