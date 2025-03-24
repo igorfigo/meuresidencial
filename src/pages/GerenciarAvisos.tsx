@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -26,7 +27,6 @@ interface NewsItem {
 const GerenciarAvisos = () => {
   const { user } = useApp();
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentItem, setCurrentItem] = useState<NewsItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -158,8 +158,11 @@ const GerenciarAvisos = () => {
         toast.success('Novidade cadastrada com sucesso!');
       }
 
-      form.reset();
-      setIsCreating(false);
+      form.reset({
+        title: '',
+        short_description: '',
+        full_content: ''
+      });
       setIsEditing(false);
       setCurrentItem(null);
       
@@ -200,28 +203,19 @@ const GerenciarAvisos = () => {
     }
   };
 
-  const handleCreateNew = () => {
+  const handleEdit = (item: NewsItem) => {
+    setCurrentItem(item);
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setCurrentItem(null);
     form.reset({
       title: '',
       short_description: '',
       full_content: ''
     });
-    setIsCreating(true);
-    setIsEditing(false);
-    setCurrentItem(null);
-  };
-
-  const handleEdit = (item: NewsItem) => {
-    setCurrentItem(item);
-    setIsEditing(true);
-    setIsCreating(false);
-  };
-
-  const handleCancel = () => {
-    setIsCreating(false);
-    setIsEditing(false);
-    setCurrentItem(null);
-    form.reset();
   };
 
   const formatDate = (dateString: string) => {
@@ -240,14 +234,6 @@ const GerenciarAvisos = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-bold">Gerenciar Avisos</h1>
-          <Button 
-            onClick={handleCreateNew} 
-            className="flex items-center space-x-2"
-            disabled={isCreating || isEditing}
-          >
-            <Plus size={16} />
-            <span>Nova Novidade</span>
-          </Button>
         </div>
         <p className="text-muted-foreground mb-4">
           Crie e gerencie as novidades que serão exibidas para os usuários do sistema.
@@ -255,72 +241,72 @@ const GerenciarAvisos = () => {
         <Separator className="mb-6" />
 
         <div className="space-y-4">
-          {(isCreating || isEditing) && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{isEditing ? 'Editar Novidade' : 'Nova Novidade'}</CardTitle>
-                <CardDescription>
-                  {isEditing 
-                    ? 'Altere os detalhes da novidade selecionada.' 
-                    : 'Preencha os campos para adicionar uma nova novidade.'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      rules={{ required: 'O título é obrigatório' }}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Título</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Digite o título da novidade" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="short_description"
-                      rules={{ required: 'A descrição breve é obrigatória' }}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Descrição Breve</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Descrição curta que aparecerá no card" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="full_content"
-                      rules={{ required: 'O conteúdo completo é obrigatório' }}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Conteúdo Completo</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Detalhes completos que serão exibidos ao clicar no card" 
-                              className="min-h-[150px]"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <div className="flex justify-end space-x-2 pt-4">
+          <Card className="border-t-4 border-t-brand-500">
+            <CardHeader>
+              <CardTitle>{isEditing ? 'Editar Novidade' : 'Nova Novidade'}</CardTitle>
+              <CardDescription>
+                {isEditing 
+                  ? 'Altere os detalhes da novidade selecionada.' 
+                  : 'Preencha os campos para adicionar uma nova novidade.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    rules={{ required: 'O título é obrigatório' }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Título</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Digite o título da novidade" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="short_description"
+                    rules={{ required: 'A descrição breve é obrigatória' }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição Breve</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Descrição curta que aparecerá no card" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="full_content"
+                    rules={{ required: 'O conteúdo completo é obrigatório' }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Conteúdo Completo</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Detalhes completos que serão exibidos ao clicar no card" 
+                            className="min-h-[150px]"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex justify-end space-x-2 pt-4">
+                    {isEditing && (
                       <Button 
                         type="button" 
                         variant="outline" 
@@ -328,20 +314,20 @@ const GerenciarAvisos = () => {
                       >
                         Cancelar
                       </Button>
-                      <Button 
-                        type="submit" 
-                        disabled={isLoading}
-                      >
-                        {isLoading ? 'Salvando...' : 'Salvar'}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          )}
+                    )}
+                    <Button 
+                      type="submit" 
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Salvando...' : 'Salvar'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
           
-          <Card>
+          <Card className="border-t-4 border-t-brand-500">
             <CardHeader>
               <CardTitle>Histórico de Novidades</CardTitle>
               <CardDescription>
@@ -349,7 +335,7 @@ const GerenciarAvisos = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading && !isCreating && !isEditing ? (
+              {isLoading && !isEditing ? (
                 <div className="py-8 text-center">Carregando...</div>
               ) : newsItems.length > 0 ? (
                 <Table>
@@ -370,14 +356,14 @@ const GerenciarAvisos = () => {
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleEdit(item)}
-                            disabled={isCreating || isEditing}
+                            disabled={isEditing}
                           >
                             <Edit size={16} />
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            disabled={isCreating || isEditing || isDeleting}
+                            disabled={isEditing || isDeleting}
                             onClick={() => {
                               setCurrentItem(item);
                               setDeleteDialogOpen(true);
