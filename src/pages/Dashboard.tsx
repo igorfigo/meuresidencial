@@ -245,7 +245,6 @@ const Dashboard = () => {
           </div>
         </header>
 
-        <h1 className="text-3xl font-bold mb-2">Visão Geral</h1>
         <Separator className="mb-6" />
 
         {user?.isAdmin ? renderAdminDashboard() : renderManagerDashboard()}
