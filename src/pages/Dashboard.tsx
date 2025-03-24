@@ -581,34 +581,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md h-full flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Últimos Cadastros</CardTitle>
-            <FileCheck className="h-4 w-4 text-brand-600" />
-          </CardHeader>
-          <CardContent className="flex-grow overflow-auto p-3">
-            <div className="space-y-0.5 h-full flex flex-col">
-              {recentItems.length > 0 ? (
-                recentItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between py-1.5 border-b last:border-b-0">
-                    <div className="flex items-center gap-1.5">
-                      {item.type === 'announcement' && <BellRing className="h-3.5 w-3.5 text-blue-500" />}
-                      {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-green-500" />}
-                      {item.type === 'pest-control' && <Bug className="h-3.5 w-3.5 text-red-500" />}
-                      <span className="text-sm truncate max-w-[180px]">{item.title}</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
-                  </div>
-                ))
-              ) : (
-                <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
-                  Nenhum cadastro recente
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Movimentações Financeiras</CardTitle>
@@ -653,6 +625,34 @@ const Dashboard = () => {
                   ))
               ) : (
                 <div className="text-sm text-muted-foreground">Nenhuma movimentação registrada</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md h-full flex flex-col">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Últimos Cadastros</CardTitle>
+            <FileCheck className="h-4 w-4 text-brand-600" />
+          </CardHeader>
+          <CardContent className="flex-grow overflow-auto p-3">
+            <div className="space-y-0.5 h-full flex flex-col">
+              {recentItems.length > 0 ? (
+                recentItems.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between py-1.5 border-b last:border-b-0">
+                    <div className="flex items-center gap-1.5">
+                      {item.type === 'announcement' && <BellRing className="h-3.5 w-3.5 text-blue-500" />}
+                      {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-green-500" />}
+                      {item.type === 'pest-control' && <Bug className="h-3.5 w-3.5 text-red-500" />}
+                      <span className="text-sm truncate max-w-[180px]">{item.title}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
+                  Nenhum cadastro recente
+                </div>
               )}
             </div>
           </CardContent>
