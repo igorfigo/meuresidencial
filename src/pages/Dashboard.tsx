@@ -376,144 +376,11 @@ const Dashboard = () => {
   );
 
   const renderManagerDashboard = () => (
-    <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {/* Balance Card */}
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
-          <Wallet className="h-4 w-4 text-brand-600" />
-        </CardHeader>
-        <CardContent>
-          {!isFinancesLoading && balance ? (
-            <div className="text-2xl font-bold">
-              {balance.is_manual ? 'R$ ' + balance.balance : 'R$ ' + balance.balance}
-            </div>
-          ) : (
-            <div className="text-2xl font-bold text-gray-400">Carregando...</div>
-          )}
-        </CardContent>
-      </Card>
-      
-      {/* Residents and Common Areas Count */}
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Dados do Condomínio</CardTitle>
-          <Home className="h-4 w-4 text-brand-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground flex items-center gap-1">
-                <Users className="h-4 w-4" /> Moradores
-              </span>
-              <span className="font-medium">{residentCount}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground flex items-center gap-1">
-                <Home className="h-4 w-4" /> Áreas Comuns
-              </span>
-              <span className="font-medium">{commonAreasCount}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Recent Items */}
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Últimos Cadastros</CardTitle>
-          <FileCheck className="h-4 w-4 text-brand-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {recentItems.length > 0 ? (
-              recentItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
-                  <div className="flex items-center gap-2">
-                    {item.type === 'announcement' && <BellRing className="h-3 w-3 text-blue-500" />}
-                    {item.type === 'document' && <FileText className="h-3 w-3 text-green-500" />}
-                    {item.type === 'pest-control' && <Bug className="h-3 w-3 text-red-500" />}
-                    <span className="text-sm truncate max-w-[150px]">{item.title}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
-                </div>
-              ))
-            ) : (
-              <div className="text-sm text-muted-foreground">Nenhum cadastro recente</div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Latest Incomes */}
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Últimas Receitas</CardTitle>
-          <ArrowUpCircle className="h-4 w-4 text-green-500" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {recentTransactions && recentTransactions.filter(t => t.type === 'income').slice(0, 5).length > 0 ? (
-              recentTransactions
-                .filter(t => t.type === 'income')
-                .slice(0, 5)
-                .map((income) => (
-                  <div key={income.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">{income.category}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {income.unit ? `Unidade: ${income.unit}` : 'Geral'}
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-sm font-medium text-green-600">R$ {income.amount}</span>
-                      <span className="text-xs text-muted-foreground">{income.payment_date ? formatDate(income.payment_date) : '-'}</span>
-                    </div>
-                  </div>
-                ))
-            ) : (
-              <div className="text-sm text-muted-foreground">Nenhuma receita registrada</div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Latest Expenses */}
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Últimas Despesas</CardTitle>
-          <ArrowDownCircle className="h-4 w-4 text-red-500" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {recentTransactions && recentTransactions.filter(t => t.type === 'expense').slice(0, 5).length > 0 ? (
-              recentTransactions
-                .filter(t => t.type === 'expense')
-                .slice(0, 5)
-                .map((expense) => (
-                  <div key={expense.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">{expense.category}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {expense.unit ? `Unidade: ${expense.unit}` : 'Geral'}
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-sm font-medium text-red-600">R$ {expense.amount}</span>
-                      <span className="text-xs text-muted-foreground">{expense.payment_date ? formatDate(expense.payment_date) : formatDate(expense.due_date || '')}</span>
-                    </div>
-                  </div>
-                ))
-            ) : (
-              <div className="text-sm text-muted-foreground">Nenhuma despesa registrada</div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
+    <>
+      {/* Latest News Card (now first) */}
       {latestNews && (
         <Card 
-          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer md:col-span-1 lg:col-span-2"
+          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer mb-4"
           onClick={() => setNewsDialogOpen(true)}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -528,7 +395,143 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       )}
-    </section>
+      
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {/* Balance Card */}
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
+            <Wallet className="h-4 w-4 text-brand-600" />
+          </CardHeader>
+          <CardContent>
+            {!isFinancesLoading && balance ? (
+              <div className="text-2xl font-bold">
+                {balance.is_manual ? 'R$ ' + balance.balance : 'R$ ' + balance.balance}
+              </div>
+            ) : (
+              <div className="text-2xl font-bold text-gray-400">Carregando...</div>
+            )}
+          </CardContent>
+        </Card>
+        
+        {/* Residents and Common Areas Count */}
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Dados do Condomínio</CardTitle>
+            <Home className="h-4 w-4 text-brand-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                  <Users className="h-4 w-4" /> Moradores
+                </span>
+                <span className="font-medium">{residentCount}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                  <Home className="h-4 w-4" /> Áreas Comuns
+                </span>
+                <span className="font-medium">{commonAreasCount}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Recent Items */}
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Últimos Cadastros</CardTitle>
+            <FileCheck className="h-4 w-4 text-brand-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {recentItems.length > 0 ? (
+                recentItems.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                    <div className="flex items-center gap-2">
+                      {item.type === 'announcement' && <BellRing className="h-3 w-3 text-blue-500" />}
+                      {item.type === 'document' && <FileText className="h-3 w-3 text-green-500" />}
+                      {item.type === 'pest-control' && <Bug className="h-3 w-3 text-red-500" />}
+                      <span className="text-sm truncate max-w-[150px]">{item.title}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-muted-foreground">Nenhum cadastro recente</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Latest Incomes */}
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Últimas Receitas</CardTitle>
+            <ArrowUpCircle className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {recentTransactions && recentTransactions.filter(t => t.type === 'income').slice(0, 5).length > 0 ? (
+                recentTransactions
+                  .filter(t => t.type === 'income')
+                  .slice(0, 5)
+                  .map((income) => (
+                    <div key={income.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{income.category}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {income.unit ? `Unidade: ${income.unit}` : 'Geral'}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-sm font-medium text-green-600">R$ {income.amount}</span>
+                        <span className="text-xs text-muted-foreground">{income.payment_date ? formatDate(income.payment_date) : '-'}</span>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="text-sm text-muted-foreground">Nenhuma receita registrada</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Latest Expenses */}
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Últimas Despesas</CardTitle>
+            <ArrowDownCircle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {recentTransactions && recentTransactions.filter(t => t.type === 'expense').slice(0, 5).length > 0 ? (
+                recentTransactions
+                  .filter(t => t.type === 'expense')
+                  .slice(0, 5)
+                  .map((expense) => (
+                    <div key={expense.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{expense.category}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {expense.unit ? `Unidade: ${expense.unit}` : 'Geral'}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-sm font-medium text-red-600">R$ {expense.amount}</span>
+                        <span className="text-xs text-muted-foreground">{expense.payment_date ? formatDate(expense.payment_date) : formatDate(expense.due_date || '')}</span>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="text-sm text-muted-foreground">Nenhuma despesa registrada</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    </>
   );
 
   return (
