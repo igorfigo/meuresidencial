@@ -9,6 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
@@ -41,7 +49,7 @@ const FinanceiroRecebimentoPix = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [pixKey, setPixKey] = useState<PixKeyFormData | null>(null);
   
-  const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<PixKeyFormData>({
+  const form = useForm<PixKeyFormData>({
     defaultValues: {
       tipochave: 'CPF',
       chavepix: '',
@@ -49,6 +57,13 @@ const FinanceiroRecebimentoPix = () => {
       jurosaodia: '0.033',
     }
   });
+  
+  const watchTipoChave = form.watch('tipochave');
+  
+  useEffect(() => {
+    // Reset the chavepix field when tipochave changes
+    form.setValue('chavepix', '');
+  }, [watchTipoChave, form]);
   
   useEffect(() => {
     if (user?.selectedCondominium) {
@@ -65,7 +80,7 @@ const FinanceiroRecebimentoPix = () => {
       
       if (data) {
         setPixKey(data);
-        reset({
+        form.reset({
           matricula: data.matricula,
           tipochave: data.tipochave,
           chavepix: data.chavepix,
@@ -89,6 +104,12 @@ const FinanceiroRecebimentoPix = () => {
     if (!user?.selectedCondominium) return;
     
     try {
+      // Validate PIX key based on type
+      const isValid = validatePixKey(data.tipochave, data.chavepix);
+      if (!isValid) {
+        return;
+      }
+      
       // Ensure matricula is set to the current condominium
       data.matricula = user.selectedCondominium;
       
@@ -102,13 +123,43 @@ const FinanceiroRecebimentoPix = () => {
     }
   };
   
+  const validatePixKey = (type: string, value: string): boolean => {
+    switch (type) {
+      case 'CPF':
+        if (!/^\d{11}$/.test(value)) {
+          toast.error('CPF deve conter exatamente 11 dígitos numéricos');
+          return false;
+        }
+        break;
+      case 'CNPJ':
+        if (!/^\d{14}$/.test(value)) {
+          toast.error('CNPJ deve conter exatamente 14 dígitos numéricos');
+          return false;
+        }
+        break;
+      case 'EMAIL':
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          toast.error('Email inválido');
+          return false;
+        }
+        break;
+      case 'TELEFONE':
+        if (!/^\d{10,11}$/.test(value)) {
+          toast.error('Telefone deve conter 10 ou 11 dígitos numéricos');
+          return false;
+        }
+        break;
+    }
+    return true;
+  };
+  
   const handleDelete = async () => {
     if (!user?.selectedCondominium) return;
     
     try {
       await deletePixKey(user.selectedCondominium);
       toast.success('Chave PIX excluída com sucesso');
-      reset({
+      form.reset({
         tipochave: 'CPF',
         chavepix: '',
         diavencimento: '10',
@@ -128,7 +179,7 @@ const FinanceiroRecebimentoPix = () => {
   const handleCancel = () => {
     setIsEditing(false);
     if (pixKey) {
-      reset({
+      form.reset({
         matricula: pixKey.matricula,
         tipochave: pixKey.tipochave,
         chavepix: pixKey.chavepix,
@@ -138,12 +189,55 @@ const FinanceiroRecebimentoPix = () => {
         updated_at: pixKey.updated_at,
       });
     } else {
-      reset({
+      form.reset({
         tipochave: 'CPF',
         chavepix: '',
         diavencimento: '10',
         jurosaodia: '0.033',
       });
+    }
+  };
+  
+  const getChavePixMaxLength = (tipoChave: string): number => {
+    switch (tipoChave) {
+      case 'CPF':
+        return 11;
+      case 'CNPJ':
+        return 14;
+      case 'TELEFONE':
+        return 11;
+      case 'EMAIL':
+        return 100; // Reasonable max for email
+      default:
+        return 100;
+    }
+  };
+  
+  const getChavePixInputType = (tipoChave: string): string => {
+    switch (tipoChave) {
+      case 'CPF':
+      case 'CNPJ':
+      case 'TELEFONE':
+        return 'number';
+      case 'EMAIL':
+        return 'email';
+      default:
+        return 'text';
+    }
+  };
+  
+  const getChavePixPlaceholder = (tipoChave: string): string => {
+    switch (tipoChave) {
+      case 'CPF':
+        return '12345678901';
+      case 'CNPJ':
+        return '12345678901234';
+      case 'TELEFONE':
+        return '11987654321';
+      case 'EMAIL':
+        return 'exemplo@email.com';
+      default:
+        return 'Digite a chave PIX';
     }
   };
   
@@ -220,86 +314,115 @@ const FinanceiroRecebimentoPix = () => {
                 <Skeleton className="h-10 w-full" />
               </div>
             ) : isEditing ? (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="tipochave">Tipo da Chave</Label>
-                    <Select 
-                      defaultValue={pixKey?.tipochave || "CPF"}
-                      onValueChange={(value) => setValue('tipochave', value)}
-                    >
-                      <SelectTrigger id="tipochave">
-                        <SelectValue placeholder="Selecione o tipo de chave" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="CPF">CPF</SelectItem>
-                        <SelectItem value="CNPJ">CNPJ</SelectItem>
-                        <SelectItem value="EMAIL">E-mail</SelectItem>
-                        <SelectItem value="TELEFONE">Telefone</SelectItem>
-                      </SelectContent>
-                    </Select>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="tipochave"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo da Chave</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o tipo de chave" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="CPF">CPF</SelectItem>
+                              <SelectItem value="CNPJ">CNPJ</SelectItem>
+                              <SelectItem value="EMAIL">E-mail</SelectItem>
+                              <SelectItem value="TELEFONE">Telefone</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="chavepix"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Chave PIX</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder={getChavePixPlaceholder(watchTipoChave)}
+                              type={getChavePixInputType(watchTipoChave)}
+                              maxLength={getChavePixMaxLength(watchTipoChave)}
+                              numberOnly={['CPF', 'CNPJ', 'TELEFONE'].includes(watchTipoChave)}
+                              onChange={(e) => {
+                                if (['CPF', 'CNPJ', 'TELEFONE'].includes(watchTipoChave)) {
+                                  // Only allow numbers for these types
+                                  const value = e.target.value.replace(/\D/g, '');
+                                  // Limit the length based on type
+                                  const maxLength = getChavePixMaxLength(watchTipoChave);
+                                  field.onChange(value.slice(0, maxLength));
+                                } else {
+                                  field.onChange(e.target.value);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="diavencimento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dia de Vencimento</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              min="1"
+                              max="31"
+                              placeholder="10"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="jurosaodia"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Juros ao Dia (%)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="0.033"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-gray-500">Exemplo: 0.033 para uma taxa de 0,033% ao dia</p>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="chavepix">Chave PIX</Label>
-                    <Input 
-                      id="chavepix"
-                      {...register('chavepix', { required: "A chave PIX é obrigatória" })}
-                      placeholder="Digite a chave PIX"
-                    />
-                    {errors.chavepix && (
-                      <p className="text-sm text-red-500">{errors.chavepix.message}</p>
-                    )}
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button type="button" variant="outline" onClick={handleCancel}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                      {form.formState.isSubmitting ? 'Salvando...' : pixKey ? 'Salvar Alterações' : 'Cadastrar'}
+                    </Button>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="diavencimento">Dia de Vencimento</Label>
-                    <Input 
-                      id="diavencimento"
-                      type="number"
-                      min="1"
-                      max="31"
-                      {...register('diavencimento', { 
-                        required: "O dia de vencimento é obrigatório",
-                        min: { value: 1, message: "O dia deve ser entre 1 e 31" },
-                        max: { value: 31, message: "O dia deve ser entre 1 e 31" }
-                      })}
-                      placeholder="10"
-                    />
-                    {errors.diavencimento && (
-                      <p className="text-sm text-red-500">{errors.diavencimento.message}</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="jurosaodia">Juros ao Dia (%)</Label>
-                    <Input 
-                      id="jurosaodia"
-                      {...register('jurosaodia', { 
-                        required: "O valor de juros é obrigatório",
-                        pattern: {
-                          value: /^[0-9]*\.?[0-9]*$/,
-                          message: "Informe um valor numérico válido"
-                        }
-                      })}
-                      placeholder="0.033"
-                    />
-                    {errors.jurosaodia && (
-                      <p className="text-sm text-red-500">{errors.jurosaodia.message}</p>
-                    )}
-                    <p className="text-xs text-gray-500">Exemplo: 0.033 para uma taxa de 0,033% ao dia</p>
-                  </div>
-                </div>
-                
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="outline" onClick={handleCancel}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Salvando...' : pixKey ? 'Salvar Alterações' : 'Cadastrar'}
-                  </Button>
-                </div>
-              </form>
+                </form>
+              </Form>
             ) : pixKey ? (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
