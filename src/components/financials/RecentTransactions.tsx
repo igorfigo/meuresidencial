@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -43,7 +42,7 @@ export const RecentTransactions = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
-  const itemsPerPage = 10;
+  const itemsPerPage = 6; // Changed from 10 to 6
   
   if (JSON.stringify(transactions) !== JSON.stringify(initialTransactions)) {
     setTransactions(initialTransactions);
