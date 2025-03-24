@@ -12,6 +12,10 @@ import {
   FileText,
   Bell,
   Truck,
+  Megaphone,
+  Briefcase,
+  Receipt,
+  FileContract,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -49,6 +53,16 @@ export function Sidebar() {
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <UserPlus className="h-5 w-5" /> },
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
+    { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
+    { 
+      path: '/business-management', 
+      label: 'Business Management', 
+      icon: <Briefcase className="h-5 w-5" />,
+      submenu: [
+        { path: '/business-management/despesas', label: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" /> },
+        { path: '/business-management/contratos', label: 'Contratos', icon: <FileContract className="h-5 w-5" /> },
+      ]
+    },
   ];
   
   const managerMenuItems = [
@@ -71,17 +85,48 @@ export function Sidebar() {
   const renderMenuItems = () => {
     const menuItems = user?.isAdmin ? adminMenuItems : managerMenuItems;
 
-    return menuItems.map((item) => (
-      <li key={item.label}>
-        <a
-          href={item.path}
-          className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
-        >
-          {item.icon}
-          <span className="ml-3">{item.label}</span>
-        </a>
-      </li>
-    ));
+    return menuItems.map((item) => {
+      if (item.submenu) {
+        return (
+          <li key={item.label} className="mb-1">
+            <div className="flex flex-col">
+              <a
+                href={item.path}
+                className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+              >
+                {item.icon}
+                <span className="ml-3">{item.label}</span>
+              </a>
+              <ul className="pl-8 mt-1 space-y-1">
+                {item.submenu.map((subItem) => (
+                  <li key={subItem.label}>
+                    <a
+                      href={subItem.path}
+                      className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === subItem.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+                    >
+                      {subItem.icon}
+                      <span className="ml-3">{subItem.label}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        );
+      }
+      
+      return (
+        <li key={item.label}>
+          <a
+            href={item.path}
+            className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+          >
+            {item.icon}
+            <span className="ml-3">{item.label}</span>
+          </a>
+        </li>
+      );
+    });
   };
 
   if (!isAuthenticated) {

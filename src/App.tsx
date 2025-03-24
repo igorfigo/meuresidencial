@@ -108,6 +108,38 @@ const App = () => (
             <Route path="/cadastro-planos" element={<CadastroPlanos />} />
             <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
             
+            <Route path="/gerenciar-avisos" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction pageTitle="Gerenciar Avisos" />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/business-management" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction pageTitle="Business Management" />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/business-management/despesas" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction pageTitle="Despesas da Empresa" />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
+            <Route path="/business-management/contratos" element={
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction pageTitle="Contratos" />
+                </ProtectedRoute>
+              </AnimationController>
+            } />
+            
             <Route path="/financeiro" element={
               <AnimationController>
                 <ProtectedRoute>
