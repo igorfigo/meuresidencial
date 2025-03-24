@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import NewsSection from '@/components/dashboard/NewsSection';
 
 interface LocationStats {
   states: [string, number][];
@@ -217,17 +219,8 @@ const Dashboard = () => {
   );
 
   const renderManagerDashboard = () => (
-    <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Este é o seu painel de controle onde você pode gerenciar seu condomínio.
-          </p>
-        </CardContent>
-      </Card>
+    <section className="grid gap-4 md:grid-cols-1">
+      <NewsSection />
     </section>
   );
 

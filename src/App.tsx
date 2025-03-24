@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -80,6 +79,24 @@ const AnimationController = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AdminOnly = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useApp();
+  
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+const GerenciarAvisos = () => {
+  return <div>Gerenciar Avisos</div>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -108,13 +125,7 @@ const App = () => (
             <Route path="/cadastro-planos" element={<CadastroPlanos />} />
             <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
             
-            <Route path="/gerenciar-avisos" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Gerenciar Avisos" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
+            <Route path="/gerenciar-avisos" element={<AdminOnly><GerenciarAvisos /></AdminOnly>} />
             
             <Route path="/business-management" element={
               <AnimationController>
