@@ -12,6 +12,7 @@ import {
   FileText,
   Bell,
   Truck,
+  MessageSquare,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -49,6 +50,7 @@ export function Sidebar() {
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <UserPlus className="h-5 w-5" /> },
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
+    { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Bell className="h-5 w-5" /> },
   ];
   
   const managerMenuItems = [
@@ -56,7 +58,7 @@ export function Sidebar() {
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <CreditCard className="h-5 w-5" /> },
     { path: '/moradores', label: 'Moradores', icon: <Users className="h-5 w-5" /> },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <LayoutDashboard className="h-5 w-5" /> },
-    { path: '/comunicados', label: 'Comunicados', icon: <Bell className="h-5 w-5" /> },
+    { path: '/comunicados', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
     { path: '/documentos', label: 'Documentos', icon: <FileText className="h-5 w-5" /> },
     { path: '/dedetizacoes', label: 'Dedetizações', icon: <Truck className="h-5 w-5" /> },
   ];
