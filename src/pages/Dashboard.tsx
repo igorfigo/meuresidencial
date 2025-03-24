@@ -556,7 +556,7 @@ const Dashboard = () => {
               </div>
             </div>
             
-            <Separator className="my-1" />
+            <Separator className="my-1 bg-blue-300" />
             
             <div>
               <div className="flex flex-row items-center justify-between pb-2">
