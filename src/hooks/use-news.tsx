@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface NewsItem {
   id: string;
@@ -59,8 +60,55 @@ export const useNews = () => {
     }
   };
 
-  const refetchNews = () => {
-    fetchNews();
+  const saveNewsItem = async (newsItem: Omit<NewsItem, 'id' | 'created_at' | 'is_active'>) => {
+    try {
+      // Set all previous news items to inactive
+      const { error: updateError } = await supabase
+        .from('news_items')
+        .update({ is_active: false })
+        .eq('is_active', true);
+        
+      if (updateError) throw updateError;
+
+      // Insert new news item
+      const { error: insertError } = await supabase
+        .from('news_items')
+        .insert({
+          title: newsItem.title,
+          short_description: newsItem.short_description,
+          full_content: newsItem.full_content,
+          is_active: true,
+        });
+        
+      if (insertError) throw insertError;
+      
+      // Refetch news after successful save
+      await fetchNews();
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving news item:', error);
+      return { success: false, error };
+    }
+  };
+
+  const deleteNewsItem = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('news_items')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      // Refetch news after successful deletion
+      await fetchNews();
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting news item:', error);
+      return { success: false, error };
+    }
   };
 
   return {
@@ -68,6 +116,8 @@ export const useNews = () => {
     allNewsItems,
     isLoading,
     error,
-    refetchNews
+    fetchNews,
+    saveNewsItem,
+    deleteNewsItem
   };
 };

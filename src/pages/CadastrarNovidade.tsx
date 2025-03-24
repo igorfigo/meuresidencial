@@ -1,21 +1,19 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useApp } from '@/contexts/AppContext';
-import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import AdminOnly from '@/components/AdminOnly';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { NewsHistory } from '@/components/news/NewsHistory';
-import { supabase } from '@/integrations/supabase/client';
+import { useNews } from '@/hooks/use-news';
+import { Trash } from 'lucide-react';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -28,7 +26,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Trash } from 'lucide-react';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +35,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
 interface NewsFormValues {
@@ -47,23 +43,12 @@ interface NewsFormValues {
   full_content: string;
 }
 
-interface NewsItem {
-  id: string;
-  title: string;
-  short_description: string;
-  full_content: string;
-  created_at: string;
-  is_active: boolean;
-}
-
 const CadastrarNovidade = () => {
   const { user } = useApp();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [isLoadingNews, setIsLoadingNews] = useState(true);
-  const [selectedItem, setSelectedItem] = useState<NewsItem | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { allNewsItems, saveNewsItem, deleteNewsItem, isLoading: isLoadingNews } = useNews();
 
   const form = useForm<NewsFormValues>({
     defaultValues: {
@@ -73,58 +58,23 @@ const CadastrarNovidade = () => {
     },
   });
 
-  useEffect(() => {
-    fetchNewsItems();
-  }, []);
-
-  const fetchNewsItems = async () => {
-    try {
-      setIsLoadingNews(true);
-      const { data, error } = await supabase
-        .from('news_items')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      setNewsItems(data || []);
-    } catch (error) {
-      console.error('Error fetching news items:', error);
-      toast.error('Falha ao carregar novidades');
-    } finally {
-      setIsLoadingNews(false);
-    }
-  };
-
   const onSubmit = async (values: NewsFormValues) => {
     try {
       setIsLoading(true);
-
-      // Set all previous news items to inactive
-      if (newsItems.length > 0) {
-        const { error: updateError } = await supabase
-          .from('news_items')
-          .update({ is_active: false })
-          .eq('is_active', true);
-          
-        if (updateError) throw updateError;
+      
+      // Use the saveNewsItem function from useNews hook
+      const result = await saveNewsItem({
+        title: values.title,
+        short_description: values.short_description,
+        full_content: values.full_content,
+      });
+      
+      if (!result.success) {
+        throw result.error;
       }
-
-      // Insert new news item
-      const { error } = await supabase
-        .from('news_items')
-        .insert({
-          title: values.title,
-          short_description: values.short_description,
-          full_content: values.full_content,
-          is_active: true,
-        });
-        
-      if (error) throw error;
       
       toast.success('Novidade cadastrada com sucesso!');
       form.reset();
-      fetchNewsItems();
     } catch (error) {
       console.error('Error creating news item:', error);
       toast.error('Falha ao cadastrar novidade');
@@ -134,21 +84,21 @@ const CadastrarNovidade = () => {
   };
 
   const handleDelete = async () => {
-    if (!selectedItem) return;
+    if (!selectedItemId) return;
     
     try {
       setIsLoading(true);
-      const { error } = await supabase
-        .from('news_items')
-        .delete()
-        .eq('id', selectedItem.id);
-        
-      if (error) throw error;
+      
+      // Use the deleteNewsItem function from useNews hook
+      const result = await deleteNewsItem(selectedItemId);
+      
+      if (!result.success) {
+        throw result.error;
+      }
       
       toast.success('Novidade excluída com sucesso!');
-      fetchNewsItems();
       setIsDeleteDialogOpen(false);
-      setSelectedItem(null);
+      setSelectedItemId(null);
     } catch (error) {
       console.error('Error deleting news item:', error);
       toast.error('Falha ao excluir novidade');
@@ -157,8 +107,8 @@ const CadastrarNovidade = () => {
     }
   };
 
-  const confirmDelete = (item: NewsItem) => {
-    setSelectedItem(item);
+  const confirmDelete = (id: string) => {
+    setSelectedItemId(id);
     setIsDeleteDialogOpen(true);
   };
 
@@ -268,13 +218,13 @@ const CadastrarNovidade = () => {
                       <div className="h-10 bg-gray-200 rounded"></div>
                       <div className="h-10 bg-gray-200 rounded"></div>
                     </div>
-                  ) : newsItems.length === 0 ? (
+                  ) : allNewsItems.length === 0 ? (
                     <p className="text-center text-gray-500 py-4">
                       Nenhuma novidade cadastrada
                     </p>
                   ) : (
                     <div className="space-y-2">
-                      {newsItems.map((item) => (
+                      {allNewsItems.map((item) => (
                         <div 
                           key={item.id}
                           className="flex items-center justify-between p-3 border rounded hover:bg-gray-50"
@@ -292,7 +242,7 @@ const CadastrarNovidade = () => {
                             <Button 
                               variant="destructive" 
                               size="sm" 
-                              onClick={() => confirmDelete(item)}
+                              onClick={() => confirmDelete(item.id)}
                             >
                               <Trash className="h-4 w-4" />
                             </Button>
