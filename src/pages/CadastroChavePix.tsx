@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -32,16 +33,22 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface PixKeyFormData {
   id?: string;
+  matricula?: string;
   tipochave: string;
   chavepix: string;
+  diavencimento?: string;
+  jurosaodia?: string;
   created_at?: string;
   updated_at?: string;
 }
 
 interface PixKey {
   id: string;
+  matricula?: string;
   tipochave: string;
   chavepix: string;
+  diavencimento?: string;
+  jurosaodia?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -58,6 +65,8 @@ const CadastroChavePix = () => {
     defaultValues: {
       tipochave: 'CPF',
       chavepix: '',
+      diavencimento: '10',
+      jurosaodia: '0.033',
     }
   });
   
@@ -75,7 +84,7 @@ const CadastroChavePix = () => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('pix_keys')
+        .from('pix_receipt_settings')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -104,10 +113,12 @@ const CadastroChavePix = () => {
       
       if (isEditing && selectedPixKey?.id) {
         const { error } = await supabase
-          .from('pix_keys')
+          .from('pix_receipt_settings')
           .update({
             tipochave: data.tipochave,
             chavepix: data.chavepix,
+            diavencimento: data.diavencimento || '10',
+            jurosaodia: data.jurosaodia || '0.033',
             updated_at: new Date().toISOString()
           })
           .eq('id', selectedPixKey.id);
@@ -121,10 +132,12 @@ const CadastroChavePix = () => {
         }
         
         const { error } = await supabase
-          .from('pix_keys')
+          .from('pix_receipt_settings')
           .insert({
             tipochave: data.tipochave,
-            chavepix: data.chavepix
+            chavepix: data.chavepix,
+            diavencimento: data.diavencimento || '10',
+            jurosaodia: data.jurosaodia || '0.033'
           });
         
         if (error) throw error;
@@ -137,6 +150,8 @@ const CadastroChavePix = () => {
       form.reset({
         tipochave: 'CPF',
         chavepix: '',
+        diavencimento: '10',
+        jurosaodia: '0.033',
       });
     } catch (error) {
       console.error('Error saving PIX key:', error);
@@ -177,7 +192,7 @@ const CadastroChavePix = () => {
   const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('pix_keys')
+        .from('pix_receipt_settings')
         .delete()
         .eq('id', id);
       
@@ -198,6 +213,8 @@ const CadastroChavePix = () => {
     form.reset({
       tipochave: pixKey.tipochave,
       chavepix: pixKey.chavepix,
+      diavencimento: pixKey.diavencimento || '10',
+      jurosaodia: pixKey.jurosaodia || '0.033',
     });
   };
   
@@ -207,6 +224,8 @@ const CadastroChavePix = () => {
     form.reset({
       tipochave: 'CPF',
       chavepix: '',
+      diavencimento: '10',
+      jurosaodia: '0.033',
     });
   };
   
@@ -382,6 +401,43 @@ const CadastroChavePix = () => {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="diavencimento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dia de Vencimento</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              min="1"
+                              max="31"
+                              placeholder="10"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="jurosaodia"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Juros ao Dia (%)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="0.033"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-gray-500">Exemplo: 0.033 para uma taxa de 0,033% ao dia</p>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                   
                   <div className="flex justify-end gap-2 pt-4">
@@ -406,6 +462,16 @@ const CadastroChavePix = () => {
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">Chave PIX</h3>
                       <p className="text-base font-medium">{pixKey.chavepix}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">Dia de Vencimento</h3>
+                      <p className="text-base font-medium">{pixKey.diavencimento || '10'}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">Juros ao Dia</h3>
+                      <p className="text-base font-medium">{pixKey.jurosaodia || '0.033'}%</p>
                     </div>
                     
                     <div className="col-span-2">
