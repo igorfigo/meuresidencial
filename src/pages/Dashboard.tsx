@@ -375,6 +375,28 @@ const Dashboard = () => {
     }
   };
 
+  const getCategoryLabel = (category: string): string => {
+    const categoryMap: Record<string, string> = {
+      'taxa_condominio': 'Taxa de Condomínio',
+      'reserva_area_comum': 'Reserva Área Comum',
+      'taxa_extra': 'Taxa Extra',
+      'multa': 'Multa',
+      'outros_receita': 'Outros (Receita)',
+      'energia': 'Energia',
+      'agua': 'Água',
+      'manutencao': 'Manutenção',
+      'gas': 'Gás',
+      'limpeza': 'Limpeza',
+      'produtos': 'Produtos',
+      'imposto': 'Imposto',
+      'seguranca': 'Segurança',
+      'sistema_condominio': 'Sistema Condomínio',
+      'outros_despesa': 'Outros (Despesa)'
+    };
+    
+    return categoryMap[category] || category;
+  };
+
   const renderAdminDashboard = () => (
     <>
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -603,7 +625,9 @@ const Dashboard = () => {
                           ) : (
                             <ArrowDownCircle className="h-3 w-3 text-red-500 mr-1 flex-shrink-0" />
                           )}
-                          <span className="text-sm font-medium truncate max-w-[120px]">{transaction.category}</span>
+                          <span className="text-sm font-medium truncate max-w-[120px]">
+                            {getCategoryLabel(transaction.category)}
+                          </span>
                         </div>
                         <span className="text-xs text-muted-foreground">
                           {transaction.unit ? `Unidade: ${transaction.unit}` : 'Geral'}
