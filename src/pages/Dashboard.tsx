@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { formatToBRL } from '@/utils/currency';
+import { formatToBRL, BRLToNumber } from '@/utils/currency';
 import { useFinances } from '@/hooks/use-finances';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
 import { format, parseISO } from 'date-fns';
@@ -569,7 +569,7 @@ const Dashboard = () => {
               </div>
               <div>
                 {!isFinancesLoading && balance ? (
-                  <div className="text-2xl font-bold">
+                  <div className={`text-2xl font-bold ${BRLToNumber(balance.balance) > 0 ? 'text-green-600' : BRLToNumber(balance.balance) < 0 ? 'text-red-600' : 'text-gray-800'}`}>
                     {balance.is_manual ? 'R$ ' + balance.balance : 'R$ ' + balance.balance}
                   </div>
                 ) : (

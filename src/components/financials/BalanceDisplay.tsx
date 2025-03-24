@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Pencil, Wallet, LockIcon, Search } from 'lucide-react';
-import { formatCurrencyInput } from '@/utils/currency';
+import { formatCurrencyInput, BRLToNumber } from '@/utils/currency';
 import { BalanceHistoryDialog } from './BalanceHistoryDialog';
 
 interface BalanceDisplayProps {
@@ -56,9 +56,9 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
   };
   
   const getBalanceClass = () => {
-    const numBalance = parseFloat(balance.replace(',', '.'));
-    if (numBalance > 0) return 'text-green-500';
-    if (numBalance < 0) return 'text-red-500';
+    const numBalance = BRLToNumber(balance);
+    if (numBalance > 0) return 'text-green-600';
+    if (numBalance < 0) return 'text-red-600';
     return 'text-slate-500';
   };
   
