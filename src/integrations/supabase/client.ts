@@ -516,14 +516,13 @@ export const getBalanceAdjustments = async (matricula: string) => {
   }
 };
 
-// Update the PIX key functions to support the new fields
-export const getPixKey = async () => {
+// Update the PIX key functions to use the new pix_receipt_settings table
+export const getPixKey = async (matricula: string) => {
   try {
     const { data, error } = await supabase
-      .from('pix_keys')
+      .from('pix_receipt_settings')
       .select('*')
-      .order('created_at', { ascending: false })
-      .limit(1)
+      .eq('matricula', matricula)
       .single();
     
     if (error) {
@@ -540,14 +539,27 @@ export const getPixKey = async () => {
 
 export const savePixKey = async (data: any) => {
   try {
-    const { id } = data;
+    const { matricula } = data;
     
-    if (id) {
-      // Update existing PIX key
+    // Check if record exists
+    const { data: existingRecord } = await supabase
+      .from('pix_receipt_settings')
+      .select('*')
+      .eq('matricula', matricula)
+      .single();
+    
+    if (existingRecord) {
+      // Update existing record
       const { error } = await supabase
-        .from('pix_keys')
-        .update(data)
-        .eq('id', id);
+        .from('pix_receipt_settings')
+        .update({
+          tipochave: data.tipochave,
+          chavepix: data.chavepix,
+          diavencimento: data.diavencimento,
+          jurosaodia: data.jurosaodia,
+          updated_at: new Date().toISOString()
+        })
+        .eq('matricula', matricula);
       
       if (error) {
         console.error('Error updating PIX key:', error);
@@ -556,10 +568,16 @@ export const savePixKey = async (data: any) => {
       
       return { success: true };
     } else {
-      // Create new PIX key
+      // Create new record
       const { error } = await supabase
-        .from('pix_keys')
-        .insert(data);
+        .from('pix_receipt_settings')
+        .insert({
+          matricula,
+          tipochave: data.tipochave,
+          chavepix: data.chavepix,
+          diavencimento: data.diavencimento,
+          jurosaodia: data.jurosaodia
+        });
       
       if (error) {
         console.error('Error creating PIX key:', error);
@@ -574,12 +592,12 @@ export const savePixKey = async (data: any) => {
   }
 };
 
-export const deletePixKey = async (id: string) => {
+export const deletePixKey = async (matricula: string) => {
   try {
     const { error } = await supabase
-      .from('pix_keys')
+      .from('pix_receipt_settings')
       .delete()
-      .eq('id', id);
+      .eq('matricula', matricula);
     
     if (error) {
       console.error('Error deleting PIX key:', error);

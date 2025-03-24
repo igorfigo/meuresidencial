@@ -697,26 +697,50 @@ export type Database = {
         Row: {
           chavepix: string
           created_at: string
-          diavencimento: string | null
           id: string
-          jurosaodia: string | null
           tipochave: string
         }
         Insert: {
           chavepix: string
           created_at?: string
-          diavencimento?: string | null
           id?: string
-          jurosaodia?: string | null
           tipochave: string
         }
         Update: {
           chavepix?: string
           created_at?: string
-          diavencimento?: string | null
           id?: string
-          jurosaodia?: string | null
           tipochave?: string
+        }
+        Relationships: []
+      }
+      pix_receipt_settings: {
+        Row: {
+          chavepix: string
+          created_at: string
+          diavencimento: string
+          jurosaodia: string
+          matricula: string
+          tipochave: string
+          updated_at: string
+        }
+        Insert: {
+          chavepix: string
+          created_at?: string
+          diavencimento?: string
+          jurosaodia?: string
+          matricula: string
+          tipochave: string
+          updated_at?: string
+        }
+        Update: {
+          chavepix?: string
+          created_at?: string
+          diavencimento?: string
+          jurosaodia?: string
+          matricula?: string
+          tipochave?: string
+          updated_at?: string
         }
         Relationships: []
       }

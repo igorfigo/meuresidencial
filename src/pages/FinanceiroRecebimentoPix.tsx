@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -25,12 +26,13 @@ import { useApp } from '@/contexts/AppContext';
 import { getPixKey, savePixKey, deletePixKey } from '@/integrations/supabase/client';
 
 interface PixKeyFormData {
-  id?: string;
+  matricula: string;
   tipochave: string;
   chavepix: string;
   diavencimento: string;
   jurosaodia: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 const FinanceiroRecebimentoPix = () => {
@@ -49,23 +51,28 @@ const FinanceiroRecebimentoPix = () => {
   });
   
   useEffect(() => {
-    loadPixKey();
-  }, []);
+    if (user?.selectedCondominium) {
+      loadPixKey();
+    }
+  }, [user?.selectedCondominium]);
   
   const loadPixKey = async () => {
+    if (!user?.selectedCondominium) return;
+    
     try {
       setIsLoading(true);
-      const data = await getPixKey();
+      const data = await getPixKey(user.selectedCondominium);
       
       if (data) {
         setPixKey(data);
         reset({
-          id: data.id,
+          matricula: data.matricula,
           tipochave: data.tipochave,
           chavepix: data.chavepix,
           diavencimento: data.diavencimento || '10',
           jurosaodia: data.jurosaodia || '0.033',
           created_at: data.created_at,
+          updated_at: data.updated_at,
         });
       } else {
         setPixKey(null);
@@ -79,7 +86,12 @@ const FinanceiroRecebimentoPix = () => {
   };
   
   const onSubmit = async (data: PixKeyFormData) => {
+    if (!user?.selectedCondominium) return;
+    
     try {
+      // Ensure matricula is set to the current condominium
+      data.matricula = user.selectedCondominium;
+      
       await savePixKey(data);
       toast.success(pixKey ? 'Chave PIX atualizada com sucesso' : 'Chave PIX cadastrada com sucesso');
       loadPixKey();
@@ -91,10 +103,10 @@ const FinanceiroRecebimentoPix = () => {
   };
   
   const handleDelete = async () => {
-    if (!pixKey?.id) return;
+    if (!user?.selectedCondominium) return;
     
     try {
-      await deletePixKey(pixKey.id);
+      await deletePixKey(user.selectedCondominium);
       toast.success('Chave PIX excluída com sucesso');
       reset({
         tipochave: 'CPF',
@@ -117,12 +129,13 @@ const FinanceiroRecebimentoPix = () => {
     setIsEditing(false);
     if (pixKey) {
       reset({
-        id: pixKey.id,
+        matricula: pixKey.matricula,
         tipochave: pixKey.tipochave,
         chavepix: pixKey.chavepix,
         diavencimento: pixKey.diavencimento || '10',
         jurosaodia: pixKey.jurosaodia || '0.033',
         created_at: pixKey.created_at,
+        updated_at: pixKey.updated_at,
       });
     } else {
       reset({
@@ -336,7 +349,7 @@ const FinanceiroRecebimentoPix = () => {
           {!isLoading && pixKey && !isEditing && (
             <CardFooter className="bg-gray-50 border-t border-gray-100">
               <p className="text-sm text-gray-500">
-                Última atualização: {new Date(pixKey.created_at || new Date()).toLocaleDateString('pt-BR')}
+                Última atualização: {new Date(pixKey.updated_at || pixKey.created_at || new Date()).toLocaleDateString('pt-BR')}
               </p>
             </CardFooter>
           )}
