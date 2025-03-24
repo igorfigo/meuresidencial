@@ -9,6 +9,7 @@ export interface NewsItem {
   full_content: string;
   created_at: string;
   is_active: boolean;
+  matricula?: string;  // Add matricula field to associate news with condominium
 }
 
 export const useNews = () => {
@@ -51,12 +52,34 @@ export const useNews = () => {
       
       console.log('Adding news item:', newsItem);
       
+      // Get the current user session to check if user is authenticated
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Get user's matricula from the profile or session
+      // This assumes the user has a matricula associated with their account
+      // You might need to adjust this based on your authentication setup
+      const activeMatricula = localStorage.getItem('activeMatricula');
+      
+      if (!activeMatricula) {
+        throw new Error('No active matricula found');
+      }
+      
+      // Add matricula to the news item
+      const newsItemWithMatricula = {
+        ...newsItem,
+        matricula: activeMatricula,
+        is_active: true
+      };
+      
+      console.log('Adding news item with matricula:', newsItemWithMatricula);
+      
       const { data, error } = await supabase
         .from('news_items')
-        .insert([{
-          ...newsItem,
-          is_active: true
-        }])
+        .insert([newsItemWithMatricula])
         .select();
       
       if (error) {

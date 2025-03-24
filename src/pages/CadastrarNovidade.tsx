@@ -64,10 +64,25 @@ const CadastrarNovidade = () => {
       
     } catch (error: any) {
       console.error('Erro ao cadastrar novidade:', error);
-      setFormError(error?.message || 'Falha ao cadastrar novidade. Tente novamente.');
+      
+      // Set a more specific error message if available
+      let errorMessage = 'Falha ao cadastrar novidade. Tente novamente.';
+      
+      if (error?.message) {
+        if (error.message.includes('No active matricula')) {
+          errorMessage = 'Nenhuma matrícula ativa foi encontrada. Verifique se você está logado corretamente.';
+        } else if (error.message.includes('User not authenticated')) {
+          errorMessage = 'Você precisa estar autenticado para cadastrar novidades.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setFormError(errorMessage);
+      
       toast({
         title: "Erro",
-        description: "Falha ao cadastrar novidade. Tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
