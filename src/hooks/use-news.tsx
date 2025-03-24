@@ -44,9 +44,40 @@ export const useNews = () => {
     }
   };
 
+  // Function to add a new news item
+  const addNewsItem = async (newsItem: Omit<NewsItem, 'id' | 'created_at'>) => {
+    try {
+      setError(null);
+      
+      console.log('Adding news item:', newsItem);
+      
+      const { data, error } = await supabase
+        .from('news_items')
+        .insert([{
+          ...newsItem,
+          is_active: true
+        }])
+        .select();
+      
+      if (error) {
+        console.error('Error adding news item:', error);
+        throw error;
+      }
+      
+      console.log('News item added successfully:', data);
+      
+      // Return the created news item
+      return data?.[0];
+    } catch (err: any) {
+      console.error('Error adding news item:', err);
+      setError(err?.message || 'Failed to add news item');
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchNews();
   }, []);
 
-  return { news, isLoading, error, fetchNews };
+  return { news, isLoading, error, fetchNews, addNewsItem };
 };

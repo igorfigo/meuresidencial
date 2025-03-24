@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { FileEdit } from 'lucide-react';
+import { FileEdit, AlertTriangle } from 'lucide-react';
+import { useNews } from '@/hooks/use-news';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface NewsFormValues {
   title: string;
@@ -20,7 +21,9 @@ interface NewsFormValues {
 
 const CadastrarNovidade = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { addNewsItem } = useNews();
   
   const form = useForm<NewsFormValues>({
     defaultValues: {
@@ -33,27 +36,18 @@ const CadastrarNovidade = () => {
   const onSubmit = async (values: NewsFormValues) => {
     try {
       setIsLoading(true);
+      setFormError(null);
       
       console.log('Submitting news:', values);
       
-      const { data, error } = await supabase
-        .from('news_items')
-        .insert([
-          {
-            title: values.title,
-            short_description: values.short_description,
-            full_content: values.full_content,
-            is_active: true
-          }
-        ])
-        .select();
+      const result = await addNewsItem({
+        title: values.title,
+        short_description: values.short_description,
+        full_content: values.full_content,
+        is_active: true
+      });
       
-      if (error) {
-        console.error('Erro ao cadastrar novidade:', error);
-        throw error;
-      }
-      
-      console.log('News item created successfully:', data);
+      console.log('News item created successfully:', result);
       
       toast({
         title: "Sucesso",
@@ -68,8 +62,9 @@ const CadastrarNovidade = () => {
         navigate('/dashboard');
       }, 1500);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao cadastrar novidade:', error);
+      setFormError(error?.message || 'Falha ao cadastrar novidade. Tente novamente.');
       toast({
         title: "Erro",
         description: "Falha ao cadastrar novidade. Tente novamente.",
@@ -103,6 +98,14 @@ const CadastrarNovidade = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {formError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Erro</AlertTitle>
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
+            )}
+            
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
