@@ -44,6 +44,7 @@ interface PixKey {
   tipochave: string;
   chavepix: string;
   created_at: string;
+  // Make updated_at optional since it might not exist in the returned data
   updated_at?: string;
 }
 
@@ -83,13 +84,14 @@ const CadastroChavePix = () => {
       if (error) throw error;
       
       if (data) {
-        // Convertendo explicitamente o formato de dados para garantir que tenha o campo id
+        // Map the data and handle the case where updated_at might not exist
         const formattedData: PixKey[] = data.map(item => ({
           id: item.id,
           tipochave: item.tipochave,
           chavepix: item.chavepix,
           created_at: item.created_at,
-          updated_at: item.updated_at
+          // Only include updated_at if it exists in the data
+          ...(item.updated_at && { updated_at: item.updated_at })
         }));
         
         setPixKeys(formattedData);
