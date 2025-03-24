@@ -33,10 +33,10 @@ export const ResidentsList = ({
           <TableRow>
             <TableHead>Nome</TableHead>
             <TableHead className="text-center">CPF</TableHead>
-            <TableHead>Unidade</TableHead>
-            <TableHead>Telefone</TableHead>
+            <TableHead className="text-center">Unidade</TableHead>
+            <TableHead className="text-center">Telefone</TableHead>
             <TableHead className="text-center">E-mail</TableHead>
-            <TableHead>Valor Condomínio</TableHead>
+            <TableHead className="text-center">Valor Condomínio</TableHead>
             <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -52,10 +52,10 @@ export const ResidentsList = ({
               <TableRow key={resident.id}>
                 <TableCell className="font-medium">{resident.nome_completo}</TableCell>
                 <TableCell className="text-center">{resident.cpf}</TableCell>
-                <TableCell>{resident.unidade}</TableCell>
+                <TableCell className="text-center">{resident.unidade}</TableCell>
                 <TableCell>{resident.telefone || '-'}</TableCell>
                 <TableCell className="text-center">{resident.email || '-'}</TableCell>
-                <TableCell>{resident.valor_condominio || '-'}</TableCell>
+                <TableCell className="text-center">{resident.valor_condominio || '-'}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
                     <Button
