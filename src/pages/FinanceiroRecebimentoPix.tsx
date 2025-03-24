@@ -251,7 +251,7 @@ const FinanceiroRecebimentoPix = () => {
           </div>
         </div>
         
-        <Card className="bg-white shadow-md border-blue-100">
+        <Card className="bg-white shadow-md border-brand-500">
           <CardHeader className="bg-blue-50 border-b border-blue-100">
             <div className="flex justify-between items-center">
               <div>
