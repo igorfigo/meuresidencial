@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Plus, Trash2 } from 'lucide-react';
@@ -203,213 +202,156 @@ const GerenciarAvisos = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="all" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="all">Todas Novidades</TabsTrigger>
-            <TabsTrigger value="active">Ativas</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="all" className="space-y-4">
-            {(isCreating || isEditing) && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{isEditing ? 'Editar Novidade' : 'Nova Novidade'}</CardTitle>
-                  <CardDescription>
-                    {isEditing 
-                      ? 'Altere os detalhes da novidade selecionada.' 
-                      : 'Preencha os campos para adicionar uma nova novidade.'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="title"
-                        rules={{ required: 'O título é obrigatório' }}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Título</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Digite o título da novidade" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="short_description"
-                        rules={{ required: 'A descrição breve é obrigatória' }}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Descrição Breve</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Descrição curta que aparecerá no card" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="full_content"
-                        rules={{ required: 'O conteúdo completo é obrigatório' }}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Conteúdo Completo</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Detalhes completos que serão exibidos ao clicar no card" 
-                                className="min-h-[150px]"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <div className="flex justify-end space-x-2 pt-4">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          onClick={handleCancel}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button 
-                          type="submit" 
-                          disabled={isLoading}
-                        >
-                          {isLoading ? 'Salvando...' : 'Salvar'}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            )}
-            
+        <div className="space-y-4">
+          {(isCreating || isEditing) && (
             <Card>
               <CardHeader>
-                <CardTitle>Histórico de Novidades</CardTitle>
+                <CardTitle>{isEditing ? 'Editar Novidade' : 'Nova Novidade'}</CardTitle>
                 <CardDescription>
-                  Todas as novidades cadastradas no sistema.
+                  {isEditing 
+                    ? 'Altere os detalhes da novidade selecionada.' 
+                    : 'Preencha os campos para adicionar uma nova novidade.'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {isLoading && !isCreating && !isEditing ? (
-                  <div className="py-8 text-center">Carregando...</div>
-                ) : newsItems.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Título</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {newsItems.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="font-medium">{item.title}</TableCell>
-                          <TableCell>{formatDate(item.created_at)}</TableCell>
-                          <TableCell>
-                            <Badge variant={item.is_active ? "default" : "secondary"}>
-                              {item.is_active ? 'Ativa' : 'Inativa'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right space-x-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleEdit(item)}
-                              disabled={isCreating || isEditing}
-                            >
-                              <Edit size={16} />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              disabled={isCreating || isEditing || isDeleting}
-                              onClick={() => {
-                                setCurrentItem(item);
-                                setDeleteDialogOpen(true);
-                              }}
-                            >
-                              <Trash2 size={16} />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="py-8 text-center text-muted-foreground">
-                    Nenhuma novidade cadastrada.
-                  </div>
-                )}
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      rules={{ required: 'O título é obrigatório' }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Digite o título da novidade" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="short_description"
+                      rules={{ required: 'A descrição breve é obrigatória' }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição Breve</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Descrição curta que aparecerá no card" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="full_content"
+                      rules={{ required: 'O conteúdo completo é obrigatório' }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Conteúdo Completo</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Detalhes completos que serão exibidos ao clicar no card" 
+                              className="min-h-[150px]"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={handleCancel}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Salvando...' : 'Salvar'}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
           
-          <TabsContent value="active" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Novidades Ativas</CardTitle>
-                <CardDescription>
-                  Novidades que estão atualmente visíveis para os gestores.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="py-8 text-center">Carregando...</div>
-                ) : newsItems.filter(item => item.is_active).length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Título</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
+          <Card>
+            <CardHeader>
+              <CardTitle>Histórico de Novidades</CardTitle>
+              <CardDescription>
+                Todas as novidades cadastradas no sistema.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading && !isCreating && !isEditing ? (
+                <div className="py-8 text-center">Carregando...</div>
+              ) : newsItems.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Título</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {newsItems.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell className="font-medium">{item.title}</TableCell>
+                        <TableCell>{formatDate(item.created_at)}</TableCell>
+                        <TableCell>
+                          <Badge variant={item.is_active ? "default" : "secondary"}>
+                            {item.is_active ? 'Ativa' : 'Inativa'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleEdit(item)}
+                            disabled={isCreating || isEditing}
+                          >
+                            <Edit size={16} />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            disabled={isCreating || isEditing || isDeleting}
+                            onClick={() => {
+                              setCurrentItem(item);
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {newsItems
-                        .filter(item => item.is_active)
-                        .map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell className="font-medium">{item.title}</TableCell>
-                            <TableCell>{formatDate(item.created_at)}</TableCell>
-                            <TableCell className="text-right space-x-2">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => handleEdit(item)}
-                                disabled={isCreating || isEditing}
-                              >
-                                <Edit size={16} />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="py-8 text-center text-muted-foreground">
-                    Nenhuma novidade ativa.
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  Nenhuma novidade cadastrada.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
         
         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <DialogContent>
