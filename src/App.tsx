@@ -22,6 +22,7 @@ import UserProfile from "./pages/UserProfile";
 import FinanceiroReceitasDespesas from './pages/FinanceiroReceitasDespesas';
 import FinanceiroDashboard from './pages/FinanceiroDashboard';
 import FinanceiroPrestacaoContas from './pages/FinanceiroPrestacaoContas';
+import GerenciarAvisos from './pages/GerenciarAvisos';  // Import the actual component
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -91,10 +92,6 @@ const AdminOnly = ({ children }: { children: React.ReactNode }) => {
   }
   
   return <>{children}</>;
-};
-
-const GerenciarAvisos = () => {
-  return <div>Gerenciar Avisos</div>;
 };
 
 const App = () => (
