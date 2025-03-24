@@ -15,7 +15,7 @@ import {
   Megaphone,
   Briefcase,
   Receipt,
-  FileContract,
+  // Replace FileContract with FileText since it doesn't exist
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -33,6 +33,14 @@ import {
 import { Skeleton } from './skeleton';
 import { SwitchCondominium } from './switch-condominium';
 
+// Define interface for menu items with optional submenu
+interface MenuItem {
+  path: string;
+  label: string;
+  icon: React.ReactNode;
+  submenu?: MenuItem[];
+}
+
 export function Sidebar() {
   const { user, logout, isAuthenticated, switchCondominium } = useApp();
   const isMobile = useIsMobile();
@@ -49,7 +57,7 @@ export function Sidebar() {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const adminMenuItems = [
+  const adminMenuItems: MenuItem[] = [
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <UserPlus className="h-5 w-5" /> },
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
@@ -60,12 +68,12 @@ export function Sidebar() {
       icon: <Briefcase className="h-5 w-5" />,
       submenu: [
         { path: '/business-management/despesas', label: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" /> },
-        { path: '/business-management/contratos', label: 'Contratos', icon: <FileContract className="h-5 w-5" /> },
+        { path: '/business-management/contratos', label: 'Contratos', icon: <FileText className="h-5 w-5" /> },
       ]
     },
   ];
   
-  const managerMenuItems = [
+  const managerMenuItems: MenuItem[] = [
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <CreditCard className="h-5 w-5" /> },
     { path: '/moradores', label: 'Moradores', icon: <Users className="h-5 w-5" /> },
