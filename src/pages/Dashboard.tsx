@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +7,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useNews } from '@/hooks/use-news';
-import { NewsCard } from '@/components/news/NewsCard';
 
 interface LocationStats {
   states: [string, number][];
@@ -27,7 +24,6 @@ const Dashboard = () => {
   const { user } = useApp();
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
-  const { news, isLoading: newsLoading } = useNews();
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
@@ -196,10 +192,6 @@ const Dashboard = () => {
         </Card>
       </section>
 
-      <section className="mt-6">
-        <NewsCard news={news} isLoading={newsLoading} />
-      </section>
-
       <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
         <SheetContent>
           <SheetHeader>
@@ -236,10 +228,6 @@ const Dashboard = () => {
           </p>
         </CardContent>
       </Card>
-      
-      <div className="md:col-span-2">
-        <NewsCard news={news} isLoading={newsLoading} />
-      </div>
     </section>
   );
 
