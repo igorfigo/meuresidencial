@@ -1,366 +1,483 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { PlusCircle, Pencil, Trash2, KeyRound } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Save, KeyRound, Trash, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
-import { useForm } from 'react-hook-form';
-import { supabase } from '@/integrations/supabase/client';
-import { useApp } from '@/contexts/AppContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useApp } from '@/contexts/AppContext';
+import { supabase } from '@/integrations/supabase/client';
 
-type FormFields = {
+interface PixKeyFormData {
   id?: string;
-  tipoChave: string;
-  chavePix: string;
-};
+  tipochave: string;
+  chavepix: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 interface PixKey {
   id: string;
-  tipochave: string;  // Match the database column name
-  chavepix: string;   // Match the database column name
+  tipochave: string;
+  chavepix: string;
   created_at: string;
+  updated_at?: string;
 }
 
-export const CadastroChavePix = () => {
+const CadastroChavePix = () => {
   const { user } = useApp();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isExistingRecord, setIsExistingRecord] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [pixKeys, setPixKeys] = useState<PixKey[]>([]);
+  const [selectedPixKey, setSelectedPixKey] = useState<PixKey | null>(null);
   const [maxKeysReached, setMaxKeysReached] = useState(false);
-
-  const form = useForm<FormFields>({
+  
+  const form = useForm<PixKeyFormData>({
     defaultValues: {
-      tipoChave: '',
-      chavePix: ''
+      tipochave: 'CPF',
+      chavepix: '',
     }
   });
-
-  const { reset, handleSubmit, setValue, watch } = form;
-  const tipoChave = watch('tipoChave');
-
-  const fetchPixKeys = async () => {
+  
+  const watchTipoChave = form.watch('tipochave');
+  
+  useEffect(() => {
+    // Reset the chavepix field when tipochave changes
+    form.setValue('chavepix', '');
+  }, [watchTipoChave, form]);
+  
+  useEffect(() => {
+    loadPixKeys();
+  }, []);
+  
+  const loadPixKeys = async () => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('pix_keys')
         .select('*')
-        .order('created_at', { ascending: false }) as { data: PixKey[] | null, error: any };
-
+        .order('created_at', { ascending: false });
+      
       if (error) throw error;
       
-      const keys = data || [];
-      setPixKeys(keys);
-      
-      // Check if max keys limit is reached (only applies for new records)
-      setMaxKeysReached(keys.length > 0 && !isExistingRecord);
+      if (data) {
+        setPixKeys(data);
+        setMaxKeysReached(data.length > 0 && !isEditing);
+      } else {
+        setPixKeys([]);
+      }
     } catch (error) {
-      console.error('Erro ao carregar chaves PIX:', error);
-      toast.error('Erro ao carregar a lista de chaves PIX.');
+      console.error('Error loading PIX keys:', error);
+      toast.error('Erro ao carregar chaves PIX');
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchPixKeys();
-  }, []);
-
-  // Update maxKeysReached whenever isExistingRecord changes
-  useEffect(() => {
-    setMaxKeysReached(pixKeys.length > 0 && !isExistingRecord);
-  }, [isExistingRecord, pixKeys.length]);
-
-  const validatePixKey = (value: string, type: string): boolean => {
-    switch (type) {
-      case 'CPF':
-        return /^\d{11}$/.test(value);
-      case 'CNPJ':
-        return /^\d{14}$/.test(value);
-      case 'EMAIL':
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      case 'TELEFONE':
-        // Accepts format with or without country code
-        return /^\+?\d{10,14}$/.test(value);
-      default:
-        return true;
-    }
-  };
-
-  const onSubmit = async (data: FormFields) => {
-    if (!validatePixKey(data.chavePix, data.tipoChave)) {
-      let errorMessage = 'Formato de chave PIX inválido.';
-      
-      if (data.tipoChave === 'CPF') {
-        errorMessage = 'CPF deve conter exatamente 11 dígitos numéricos.';
-      } else if (data.tipoChave === 'CNPJ') {
-        errorMessage = 'CNPJ deve conter exatamente 14 dígitos numéricos.';
-      } else if (data.tipoChave === 'EMAIL') {
-        errorMessage = 'Email inválido.';
-      } else if (data.tipoChave === 'TELEFONE') {
-        errorMessage = 'Telefone deve conter entre 10 e 14 dígitos numéricos.';
+  
+  const onSubmit = async (data: PixKeyFormData) => {
+    try {
+      // Validate PIX key based on type
+      const isValid = validatePixKey(data.tipochave, data.chavepix);
+      if (!isValid) {
+        return;
       }
       
-      toast.error(errorMessage);
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      // Map our form field names to the database column names
-      const formData = {
-        tipochave: data.tipoChave,  // Changed from tipoChave to tipochave
-        chavepix: data.chavePix     // Changed from chavePix to chavepix
-      };
-      
-      if (isExistingRecord && data.id) {
+      if (isEditing && selectedPixKey?.id) {
+        // Update existing key
         const { error } = await supabase
           .from('pix_keys')
-          .update(formData)
-          .eq('id', data.id) as { error: any };
-
+          .update({
+            tipochave: data.tipochave,
+            chavepix: data.chavepix,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', selectedPixKey.id);
+        
         if (error) throw error;
-        toast.success('Chave PIX atualizada com sucesso!');
+        toast.success('Chave PIX atualizada com sucesso');
       } else {
-        // Check again if we already have a key (in case another client added one)
-        const { data: existingKeys } = await supabase
-          .from('pix_keys')
-          .select('*') as { data: PixKey[] | null };
-          
-        if (existingKeys && existingKeys.length > 0) {
+        // Check if maximum keys limit is reached
+        if (pixKeys.length > 0) {
           toast.error('Já existe uma chave PIX cadastrada. Edite a existente ou exclua-a para adicionar uma nova.');
-          setIsSubmitting(false);
           return;
         }
         
+        // Create new key
         const { error } = await supabase
           .from('pix_keys')
-          .insert(formData) as { error: any };
-
+          .insert({
+            tipochave: data.tipochave,
+            chavepix: data.chavepix
+          });
+        
         if (error) throw error;
-        toast.success('Chave PIX cadastrada com sucesso!');
-        reset({
-          tipoChave: '',
-          chavePix: ''
-        });
+        toast.success('Chave PIX cadastrada com sucesso');
       }
       
-      fetchPixKeys();
-      setIsExistingRecord(false);
+      loadPixKeys();
+      setIsEditing(false);
+      setSelectedPixKey(null);
+      form.reset({
+        tipochave: 'CPF',
+        chavepix: '',
+      });
     } catch (error) {
-      console.error('Erro ao salvar chave PIX:', error);
-      toast.error('Erro ao salvar chave PIX. Tente novamente mais tarde.');
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error saving PIX key:', error);
+      toast.error('Erro ao salvar chave PIX');
     }
   };
-
-  const handleEditPixKey = (pixKey: PixKey) => {
-    reset({
-      id: pixKey.id,
-      tipoChave: pixKey.tipochave,  // Changed from tipoChave to tipochave
-      chavePix: pixKey.chavepix     // Changed from chavePix to chavepix
-    });
-    setIsExistingRecord(true);
-  };
-
-  const handleDeletePixKey = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir esta chave PIX?')) {
-      try {
-        const { error } = await supabase
-          .from('pix_keys')
-          .delete()
-          .eq('id', id) as { error: any };
-        
-        if (error) throw error;
-        
-        toast.success('Chave PIX excluída com sucesso!');
-        fetchPixKeys();
-        
-        if (form.getValues().id === id) {
-          reset({
-            tipoChave: '',
-            chavePix: ''
-          });
-          setIsExistingRecord(false);
+  
+  const validatePixKey = (type: string, value: string): boolean => {
+    switch (type) {
+      case 'CPF':
+        if (!/^\d{11}$/.test(value)) {
+          toast.error('CPF deve conter exatamente 11 dígitos numéricos');
+          return false;
         }
-      } catch (error) {
-        console.error('Erro ao excluir chave PIX:', error);
-        toast.error('Erro ao excluir chave PIX.');
-      }
+        break;
+      case 'CNPJ':
+        if (!/^\d{14}$/.test(value)) {
+          toast.error('CNPJ deve conter exatamente 14 dígitos numéricos');
+          return false;
+        }
+        break;
+      case 'EMAIL':
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          toast.error('Email inválido');
+          return false;
+        }
+        break;
+      case 'TELEFONE':
+        if (!/^\d{10,11}$/.test(value)) {
+          toast.error('Telefone deve conter 10 ou 11 dígitos numéricos');
+          return false;
+        }
+        break;
+    }
+    return true;
+  };
+  
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('pix_keys')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast.success('Chave PIX excluída com sucesso');
+      loadPixKeys();
+      setSelectedPixKey(null);
+    } catch (error) {
+      console.error('Error deleting PIX key:', error);
+      toast.error('Erro ao excluir chave PIX');
     }
   };
-
-  const handleCancelEdit = () => {
-    reset({
-      tipoChave: '',
-      chavePix: ''
+  
+  const handleEdit = (pixKey: PixKey) => {
+    setSelectedPixKey(pixKey);
+    setIsEditing(true);
+    form.reset({
+      tipochave: pixKey.tipochave,
+      chavepix: pixKey.chavepix,
     });
-    setIsExistingRecord(false);
   };
-
+  
+  const handleCancel = () => {
+    setIsEditing(false);
+    setSelectedPixKey(null);
+    form.reset({
+      tipochave: 'CPF',
+      chavepix: '',
+    });
+  };
+  
+  const getChavePixMaxLength = (tipoChave: string): number => {
+    switch (tipoChave) {
+      case 'CPF':
+        return 11;
+      case 'CNPJ':
+        return 14;
+      case 'TELEFONE':
+        return 11;
+      case 'EMAIL':
+        return 100; // Reasonable max for email
+      default:
+        return 100;
+    }
+  };
+  
+  const getChavePixInputType = (tipoChave: string): string => {
+    switch (tipoChave) {
+      case 'CPF':
+      case 'CNPJ':
+      case 'TELEFONE':
+        return 'number';
+      case 'EMAIL':
+        return 'email';
+      default:
+        return 'text';
+    }
+  };
+  
+  const getChavePixPlaceholder = (tipoChave: string): string => {
+    switch (tipoChave) {
+      case 'CPF':
+        return '12345678901';
+      case 'CNPJ':
+        return '12345678901234';
+      case 'TELEFONE':
+        return '11987654321';
+      case 'EMAIL':
+        return 'exemplo@email.com';
+      default:
+        return 'Digite a chave PIX';
+    }
+  };
+  
   return (
     <DashboardLayout>
-      <div className="animate-fade-in">
-        <header className="mb-6">
-          <div className="flex items-center">
-            <KeyRound className="h-6 w-6 mr-2 text-brand-600" />
-            <h1 className="text-3xl font-bold">Cadastro Chave PIX</h1>
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex flex-col md:flex-row justify-between items-start mb-6">
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Cadastro Chave PIX</h1>
+            <p className="text-gray-500">Cadastre e gerencie as chaves PIX disponíveis para recebimento.</p>
           </div>
-          <p className="text-muted-foreground mt-1">
-            Cadastre e gerencie as chaves PIX disponíveis para recebimento.
-          </p>
-        </header>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6 h-full border-t-4 border-t-brand-600 shadow-md">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <h2 className="text-xl font-semibold mb-4">{isExistingRecord ? 'Editar Chave PIX' : 'Nova Chave PIX'}</h2>
+        </div>
+        
+        <Card className="bg-white shadow-md border-blue-100">
+          <CardHeader className="bg-blue-50 border-b border-blue-100">
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-lg font-medium flex items-center">
+                  <KeyRound className="mr-2 h-5 w-5 text-blue-500" />
+                  Dados da Chave PIX
+                </CardTitle>
+                <CardDescription>
+                  Configure a chave PIX para recebimento de pagamentos
+                </CardDescription>
+              </div>
               
-              {maxKeysReached && !isExistingRecord && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertCircle className="h-4 w-4 mr-2" />
-                  <AlertDescription>
-                    Você já possui uma chave PIX cadastrada. Edite a existente ou exclua-a para adicionar uma nova.
-                  </AlertDescription>
-                </Alert>
+              {!isLoading && selectedPixKey && !isEditing && (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(selectedPixKey)}>
+                    <Pencil className="mr-1 h-3 w-3" />
+                    Editar
+                  </Button>
+                  
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="bg-red-50 border-red-200 text-red-600 hover:bg-red-100">
+                        <Trash2 className="mr-1 h-3 w-3" />
+                        Excluir
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir Chave PIX</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja excluir esta chave PIX? Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(selectedPixKey.id)} className="bg-red-600 hover:bg-red-700">
+                          Excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               )}
               
-              <div className="space-y-2">
-                <Label htmlFor="tipoChave">Tipo da Chave</Label>
-                <Select
-                  onValueChange={(value) => setValue('tipoChave', value)}
-                  defaultValue={form.getValues().tipoChave}
-                  value={form.getValues().tipoChave}
-                >
-                  <SelectTrigger id="tipoChave">
-                    <SelectValue placeholder="Selecione o tipo de chave" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CPF">CPF</SelectItem>
-                    <SelectItem value="CNPJ">CNPJ</SelectItem>
-                    <SelectItem value="EMAIL">Email</SelectItem>
-                    <SelectItem value="TELEFONE">Telefone</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="chavePix">Chave PIX</Label>
-                <Input
-                  id="chavePix"
-                  placeholder={
-                    tipoChave === 'CPF' ? '12345678901' :
-                    tipoChave === 'CNPJ' ? '12345678901234' :
-                    tipoChave === 'EMAIL' ? 'email@exemplo.com' :
-                    tipoChave === 'TELEFONE' ? '11987654321' :
-                    'Digite a chave PIX'
-                  }
-                  {...form.register('chavePix', { required: true })}
-                  onKeyDown={(e) => {
-                    // Allow only numbers for CPF, CNPJ and TELEFONE
-                    if ((tipoChave === 'CPF' || tipoChave === 'CNPJ' || tipoChave === 'TELEFONE') && 
-                        !/^\d$/.test(e.key) && 
-                        e.key !== 'Backspace' && 
-                        e.key !== 'Delete' && 
-                        e.key !== 'ArrowLeft' && 
-                        e.key !== 'ArrowRight' && 
-                        e.key !== 'Tab' && 
-                        !e.ctrlKey && 
-                        !e.metaKey) {
-                      e.preventDefault();
-                    }
-                  }}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {tipoChave === 'CPF' && 'Digite apenas os 11 dígitos numéricos do CPF.'}
-                  {tipoChave === 'CNPJ' && 'Digite apenas os 14 dígitos numéricos do CNPJ.'}
-                  {tipoChave === 'EMAIL' && 'Digite um email válido.'}
-                  {tipoChave === 'TELEFONE' && 'Digite apenas números do telefone com DDD.'}
-                </p>
-              </div>
-              
-              <div className="flex space-x-2">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting || !tipoChave || (maxKeysReached && !isExistingRecord)}
-                  className="flex-1 bg-brand-600 hover:bg-brand-700"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Chave PIX' : 'Salvar Chave PIX')}
+              {!isLoading && pixKeys.length === 0 && !isEditing && (
+                <Button onClick={() => setIsEditing(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Cadastrar Chave PIX
                 </Button>
-                
-                {isExistingRecord && (
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={handleCancelEdit}
-                  >
-                    Cancelar
-                  </Button>
-                )}
-              </div>
-            </form>
-          </Card>
+              )}
+            </div>
+          </CardHeader>
           
-          <Card className="p-6 h-full border-t-4 border-t-brand-600 shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Chaves PIX Cadastradas</h2>
-            <ScrollArea className="h-[calc(100%-3rem)]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Chave PIX</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pixKeys.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center py-4">
-                        Nenhuma chave PIX cadastrada.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    pixKeys.map((pixKey) => (
-                      <TableRow key={pixKey.id}>
-                        <TableCell className="font-medium">{pixKey.tipochave}</TableCell>
-                        <TableCell>{pixKey.chavepix}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => handleEditPixKey(pixKey)}
-                            >
-                              Editar
-                            </Button>
-                            <Button 
-                              variant="destructive" 
-                              size="sm" 
-                              onClick={() => handleDeletePixKey(pixKey.id)}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          </Card>
-        </div>
+          <CardContent className="pt-6">
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : isEditing ? (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="tipochave"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo da Chave</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o tipo de chave" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="CPF">CPF</SelectItem>
+                              <SelectItem value="CNPJ">CNPJ</SelectItem>
+                              <SelectItem value="EMAIL">E-mail</SelectItem>
+                              <SelectItem value="TELEFONE">Telefone</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="chavepix"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Chave PIX</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder={getChavePixPlaceholder(watchTipoChave)}
+                              type={getChavePixInputType(watchTipoChave)}
+                              maxLength={getChavePixMaxLength(watchTipoChave)}
+                              onChange={(e) => {
+                                if (['CPF', 'CNPJ', 'TELEFONE'].includes(watchTipoChave)) {
+                                  // Only allow numbers for these types
+                                  const value = e.target.value.replace(/\D/g, '');
+                                  // Limit the length based on type
+                                  const maxLength = getChavePixMaxLength(watchTipoChave);
+                                  field.onChange(value.slice(0, maxLength));
+                                } else {
+                                  field.onChange(e.target.value);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button type="button" variant="outline" onClick={handleCancel}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                      {form.formState.isSubmitting ? 'Salvando...' : selectedPixKey ? 'Salvar Alterações' : 'Cadastrar'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            ) : pixKeys.length > 0 ? (
+              <div className="space-y-6">
+                {pixKeys.map((pixKey) => (
+                  <div key={pixKey.id} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">Tipo da Chave</h3>
+                      <p className="text-base font-medium">{pixKey.tipochave}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">Chave PIX</h3>
+                      <p className="text-base font-medium">{pixKey.chavepix}</p>
+                    </div>
+                    
+                    <div className="col-span-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(pixKey)} className="mr-2">
+                        <Pencil className="mr-1 h-3 w-3" />
+                        Editar
+                      </Button>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="bg-red-50 border-red-200 text-red-600 hover:bg-red-100">
+                            <Trash2 className="mr-1 h-3 w-3" />
+                            Excluir
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir Chave PIX</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir esta chave PIX? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(pixKey.id)} className="bg-red-600 hover:bg-red-700">
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                ))}
+                
+                <div className="bg-blue-50 p-4 rounded-md border border-blue-100 mt-6">
+                  <p className="text-sm text-blue-700">
+                    <strong>Importante:</strong> Esta chave PIX será utilizada para receber os pagamentos. 
+                    Certifique-se de que as informações estão corretas.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <KeyRound className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                <h3 className="text-lg font-medium mb-2">Nenhuma chave PIX cadastrada</h3>
+                <p className="text-gray-500 mb-4">
+                  Para receber pagamentos via PIX, cadastre uma chave PIX.
+                </p>
+                <Button onClick={() => setIsEditing(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Cadastrar Chave PIX
+                </Button>
+              </div>
+            )}
+          </CardContent>
+          
+          {!isLoading && pixKeys.length > 0 && !isEditing && (
+            <CardFooter className="bg-gray-50 border-t border-gray-100">
+              <p className="text-sm text-gray-500">
+                Última atualização: {new Date(pixKeys[0]?.updated_at || pixKeys[0]?.created_at || new Date()).toLocaleDateString('pt-BR')}
+              </p>
+            </CardFooter>
+          )}
+        </Card>
       </div>
     </DashboardLayout>
   );
