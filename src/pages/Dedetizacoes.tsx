@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ const Dedetizacoes = () => {
   
   const [showForm, setShowForm] = useState(false);
   const [pestControlToDelete, setPestControlToDelete] = useState<string | null>(null);
+  const itemsPerPage = 6;
 
   const fetchAttachments = async (pestControlId: string) => {
     const { data } = await supabase
@@ -129,6 +131,7 @@ const Dedetizacoes = () => {
               isDeleting={isDeleting}
               getFileUrl={getFileUrl}
               fetchAttachments={fetchAttachments}
+              itemsPerPage={itemsPerPage}
             />
           )}
         </div>
