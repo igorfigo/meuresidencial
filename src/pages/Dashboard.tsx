@@ -433,67 +433,24 @@ const Dashboard = () => {
 
   const renderManagerDashboard = () => (
     <>
-      {latestNews && (
-        <Card 
-          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer mb-4"
-          onClick={() => setNewsDialogOpen(true)}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
-            <BellRing className="h-4 w-4 text-brand-600" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">{latestNews.short_description}</p>
-            <div className="mt-2 text-xs text-gray-500">
-              Publicado em: {formatDate(latestNews.created_at)}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md md:col-span-1">
-          <CardContent className="p-4 grid gap-4">
-            <div>
-              <div className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
-                <Wallet className="h-4 w-4 text-brand-600" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {latestNews && (
+          <Card 
+            className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer"
+            onClick={() => setNewsDialogOpen(true)}
+          >
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
+              <BellRing className="h-4 w-4 text-brand-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">{latestNews.short_description}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Publicado em: {formatDate(latestNews.created_at)}
               </div>
-              <div>
-                {!isFinancesLoading && balance ? (
-                  <div className="text-2xl font-bold">
-                    {balance.is_manual ? 'R$ ' + balance.balance : 'R$ ' + balance.balance}
-                  </div>
-                ) : (
-                  <div className="text-2xl font-bold text-gray-400">Carregando...</div>
-                )}
-              </div>
-            </div>
-            
-            <Separator className="my-1" />
-            
-            <div>
-              <div className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Dados do Condomínio</CardTitle>
-                <Home className="h-4 w-4 text-brand-600" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Users className="h-4 w-4" /> Moradores
-                  </span>
-                  <span className="font-medium">{residentCount}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Home className="h-4 w-4" /> Áreas Comuns
-                  </span>
-                  <span className="font-medium">{commonAreasCount}</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
         
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardContent className="p-4">
@@ -574,6 +531,51 @@ const Dashboard = () => {
                     </TooltipContent>
                   </UITooltip>
                 </TooltipProvider>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md md:col-span-1">
+          <CardContent className="p-4 grid gap-4">
+            <div>
+              <div className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
+                <Wallet className="h-4 w-4 text-brand-600" />
+              </div>
+              <div>
+                {!isFinancesLoading && balance ? (
+                  <div className="text-2xl font-bold">
+                    {balance.is_manual ? 'R$ ' + balance.balance : 'R$ ' + balance.balance}
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-gray-400">Carregando...</div>
+                )}
+              </div>
+            </div>
+            
+            <Separator className="my-1" />
+            
+            <div>
+              <div className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Dados do Condomínio</CardTitle>
+                <Home className="h-4 w-4 text-brand-600" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Users className="h-4 w-4" /> Moradores
+                  </span>
+                  <span className="font-medium">{residentCount}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Home className="h-4 w-4" /> Áreas Comuns
+                  </span>
+                  <span className="font-medium">{commonAreasCount}</span>
+                </div>
               </div>
             </div>
           </CardContent>
