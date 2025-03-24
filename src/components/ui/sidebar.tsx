@@ -86,14 +86,14 @@ export function Sidebar() {
     { path: '/comunicados', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
     { path: '/documentos', label: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" /> },
     { 
-      name: 'Financeiro', 
-      icon: <PiggyBank className="h-5 w-5" />, 
-      path: '/financeiro',
+      path: '/financeiro', 
+      label: 'Financeiro', 
+      icon: <PiggyBank className="h-5 w-5" />,
       submenu: [
-        { name: 'Dashboard', icon: <BarChart className="h-5 w-5" />, path: '/financeiro/dashboard' },
-        { name: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" />, path: '/financeiro/receitas-despesas' },
-        { name: 'Recebimento PIX', icon: <QrCode className="h-5 w-5" />, path: '/financeiro/recebimento-pix' },
-        { name: 'Prestação de Contas', icon: <FileText className="h-5 w-5" />, path: '/financeiro/prestacao-contas' },
+        { path: '/financeiro/dashboard', label: 'Dashboard', icon: <BarChart className="h-5 w-5" /> },
+        { path: '/financeiro/receitas-despesas', label: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" /> },
+        { path: '/financeiro/recebimento-pix', label: 'Recebimento PIX', icon: <QrCode className="h-5 w-5" /> },
+        { path: '/financeiro/prestacao-contas', label: 'Prestação de Contas', icon: <FileText className="h-5 w-5" /> },
       ] 
     },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
