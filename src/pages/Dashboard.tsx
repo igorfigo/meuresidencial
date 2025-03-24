@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -510,7 +511,23 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Column spanning was removed from here since the news card is now in the header */}
+      {latestNews && (
+        <Card 
+          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer md:col-span-1 lg:col-span-2"
+          onClick={() => setNewsDialogOpen(true)}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
+            <BellRing className="h-4 w-4 text-brand-600" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">{latestNews.short_description}</p>
+            <div className="mt-2 text-xs text-gray-500">
+              Publicado em: {formatDate(latestNews.created_at)}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </section>
   );
 
@@ -525,25 +542,6 @@ const Dashboard = () => {
             </div>
             {getGreeting()}
           </div>
-          
-          {/* Moved announcement card here */}
-          {!user?.isAdmin && latestNews && (
-            <Card 
-              className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer w-full md:w-auto md:max-w-40"
-              onClick={() => setNewsDialogOpen(true)}
-            >
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium truncate">{latestNews.title}</CardTitle>
-                <BellRing className="h-4 w-4 text-brand-600 flex-shrink-0 ml-2" />
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm line-clamp-2">{latestNews.short_description}</p>
-                <div className="mt-2 text-xs text-gray-500">
-                  {formatDate(latestNews.created_at)}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </header>
 
         <Separator className="mb-6" />
