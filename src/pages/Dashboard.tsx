@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { formatCurrency } from '@/utils/currency';
+import { formatToBRL } from '@/utils/currency';
 import { useFinances } from '@/hooks/use-finances';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
 import { format } from 'date-fns';

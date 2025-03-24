@@ -187,11 +187,15 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
             <Pagination className="mt-4">
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                  />
+                  {currentPage === 1 ? (
+                    <span className="pointer-events-none opacity-50">
+                      <PaginationPrevious />
+                    </span>
+                  ) : (
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    />
+                  )}
                 </PaginationItem>
                 
                 {Array.from({ length: totalPages }).map((_, i) => (
@@ -206,11 +210,15 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
                 ))}
                 
                 <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                  />
+                  {currentPage === totalPages ? (
+                    <span className="pointer-events-none opacity-50">
+                      <PaginationNext />
+                    </span>
+                  ) : (
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    />
+                  )}
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
