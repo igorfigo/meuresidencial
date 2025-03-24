@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useApp } from '@/contexts/AppContext';
 
 interface NewsItem {
   id?: string;
@@ -39,6 +40,7 @@ const GerenciarAvisos = () => {
     full_content: ''
   });
   const { toast } = useToast();
+  const { user } = useApp();
 
   useEffect(() => {
     fetchNewsItems();
@@ -53,6 +55,7 @@ const GerenciarAvisos = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Fetched news items:', data);
       setNewsItems(data || []);
     } catch (error) {
       console.error('Error fetching news items:', error);
@@ -109,26 +112,37 @@ const GerenciarAvisos = () => {
         return;
       }
       
+      const matricula = user?.selectedCondominium || '';
+      console.log('Saving with matricula:', matricula);
+      
       if (selectedItem?.id) {
         // Update
-        const { error } = await supabase
+        console.log('Updating news item:', selectedItem.id);
+        const { data, error } = await supabase
           .from('news_items')
           .update({
             title: formData.title,
             short_description: formData.short_description,
             full_content: formData.full_content,
+            updated_at: new Date().toISOString(),
           })
-          .eq('id', selectedItem.id);
+          .eq('id', selectedItem.id)
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
         
+        console.log('Update response:', data);
         toast({
           title: 'Atualizado',
           description: 'Novidade atualizada com sucesso',
         });
       } else {
         // Create
-        const { error } = await supabase
+        console.log('Creating new news item');
+        const { data, error } = await supabase
           .from('news_items')
           .insert([
             {
@@ -136,11 +150,17 @@ const GerenciarAvisos = () => {
               short_description: formData.short_description,
               full_content: formData.full_content,
               is_active: true,
+              matricula: matricula,
             }
-          ]);
+          ])
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
         
+        console.log('Insert response:', data);
         toast({
           title: 'Adicionado',
           description: 'Novidade adicionada com sucesso',
@@ -163,6 +183,7 @@ const GerenciarAvisos = () => {
     if (!selectedItem?.id) return;
     
     try {
+      console.log('Deleting news item:', selectedItem.id);
       const { error } = await supabase
         .from('news_items')
         .delete()
