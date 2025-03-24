@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -65,7 +64,6 @@ const CadastroChavePix = () => {
   const watchTipoChave = form.watch('tipochave');
   
   useEffect(() => {
-    // Reset the chavepix field when tipochave changes
     form.setValue('chavepix', '');
   }, [watchTipoChave, form]);
   
@@ -99,14 +97,12 @@ const CadastroChavePix = () => {
   
   const onSubmit = async (data: PixKeyFormData) => {
     try {
-      // Validate PIX key based on type
       const isValid = validatePixKey(data.tipochave, data.chavepix);
       if (!isValid) {
         return;
       }
       
       if (isEditing && selectedPixKey?.id) {
-        // Update existing key
         const { error } = await supabase
           .from('pix_keys')
           .update({
@@ -119,13 +115,11 @@ const CadastroChavePix = () => {
         if (error) throw error;
         toast.success('Chave PIX atualizada com sucesso');
       } else {
-        // Check if maximum keys limit is reached
         if (pixKeys.length > 0) {
           toast.error('Já existe uma chave PIX cadastrada. Edite a existente ou exclua-a para adicionar uma nova.');
           return;
         }
         
-        // Create new key
         const { error } = await supabase
           .from('pix_keys')
           .insert({
@@ -225,7 +219,7 @@ const CadastroChavePix = () => {
       case 'TELEFONE':
         return 11;
       case 'EMAIL':
-        return 100; // Reasonable max for email
+        return 100;
       default:
         return 100;
     }
@@ -375,9 +369,7 @@ const CadastroChavePix = () => {
                               maxLength={getChavePixMaxLength(watchTipoChave)}
                               onChange={(e) => {
                                 if (['CPF', 'CNPJ', 'TELEFONE'].includes(watchTipoChave)) {
-                                  // Only allow numbers for these types
                                   const value = e.target.value.replace(/\D/g, '');
-                                  // Limit the length based on type
                                   const maxLength = getChavePixMaxLength(watchTipoChave);
                                   field.onChange(value.slice(0, maxLength));
                                 } else {
