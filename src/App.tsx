@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,8 +23,6 @@ import UserProfile from "./pages/UserProfile";
 import FinanceiroReceitasDespesas from './pages/FinanceiroReceitasDespesas';
 import FinanceiroDashboard from './pages/FinanceiroDashboard';
 import FinanceiroPrestacaoContas from './pages/FinanceiroPrestacaoContas';
-import GerenciarAvisos from './pages/GerenciarAvisos';
-import AdminOnly from './components/AdminOnly';
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -81,20 +80,6 @@ const AnimationController = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const AdminOnly = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useApp();
-  
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -124,9 +109,11 @@ const App = () => (
             <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
             
             <Route path="/gerenciar-avisos" element={
-              <AdminOnly>
-                <GerenciarAvisos />
-              </AdminOnly>
+              <AnimationController>
+                <ProtectedRoute>
+                  <UnderConstruction pageTitle="Gerenciar Avisos" />
+                </ProtectedRoute>
+              </AnimationController>
             } />
             
             <Route path="/business-management" element={

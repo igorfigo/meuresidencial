@@ -15,7 +15,7 @@ import {
   Megaphone,
   Briefcase,
   Receipt,
-  ReceiptText
+  ReceiptText  // Changed from FileInvoice to ReceiptText
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
