@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -11,25 +12,6 @@ import {
   FileText,
   Bell,
   Truck,
-  FileEdit,
-  KeyRound,
-  Building,
-  Package,
-  MessageSquare,
-  FileIcon,
-  PiggyBank,
-  BarChart,
-  Receipt,
-  CalendarDays,
-  Bug,
-  Briefcase,
-  Mail,
-  Building2,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-  Menu,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -46,7 +28,6 @@ import {
 } from './dropdown-menu';
 import { Skeleton } from './skeleton';
 import { SwitchCondominium } from './switch-condominium';
-import { cn } from '@/lib/utils';
 
 export function Sidebar() {
   const { user, logout, isAuthenticated, switchCondominium } = useApp();
@@ -68,8 +49,6 @@ export function Sidebar() {
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <UserPlus className="h-5 w-5" /> },
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
-    { path: '/cadastrar-novidade', label: 'Cadastrar Novidade', icon: <FileEdit className="h-5 w-5" /> },
-    { path: '/cadastro-chave-pix', label: 'Chave PIX', icon: <KeyRound className="h-5 w-5" /> },
   ];
   
   const managerMenuItems = [

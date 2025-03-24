@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,8 +24,7 @@ import {
   MessageSquare,
   KeyRound,
   Mail,
-  Settings,
-  FileEdit
+  Settings
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -83,7 +81,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Visão Geral', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
-    { name: 'Cadastrar Novidade', icon: <FileEdit className="h-5 w-5" />, path: '/cadastrar-novidade' },
     { name: 'Chave PIX', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
   ];
 

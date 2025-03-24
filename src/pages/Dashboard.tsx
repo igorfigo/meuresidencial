@@ -1,22 +1,12 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, MapPin, FileEdit } from 'lucide-react';
+import { Users, FileText, MapPin } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useNews } from '@/hooks/use-news';
-import { Button } from '@/components/ui/button';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle 
-} from '@/components/ui/dialog';
 
 interface LocationStats {
   states: [string, number][];
@@ -34,8 +24,6 @@ const Dashboard = () => {
   const { user } = useApp();
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
-  const { fetchNews, news, isLoading } = useNews();
-  const [selectedNews, setSelectedNews] = useState<string | null>(null);
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
@@ -46,10 +34,6 @@ const Dashboard = () => {
       neighborhoods: []
     }
   });
-
-  useEffect(() => {
-    fetchNews();
-  }, []);
   
   useEffect(() => {
     async function fetchDashboardData() {
@@ -126,15 +110,6 @@ const Dashboard = () => {
     
     fetchDashboardData();
   }, []);
-
-  // Check if a news item is new (less than 7 days old)
-  const isNewItem = (createdAt: string) => {
-    const newsDate = new Date(createdAt);
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - newsDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 7;
-  };
 
   const handleStateClick = (state: string) => {
     setSelectedState(state);
@@ -256,100 +231,6 @@ const Dashboard = () => {
     </section>
   );
 
-  const renderNewsSection = () => {
-    if (isLoading) {
-      return (
-        <section className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileEdit className="h-5 w-5" />
-                Novidades
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Carregando novidades...</p>
-            </CardContent>
-          </Card>
-        </section>
-      );
-    }
-
-    if (news.length === 0) {
-      return null;
-    }
-
-    return (
-      <section className="mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileEdit className="h-5 w-5" />
-              Últimas Novidades
-            </CardTitle>
-            <CardDescription>
-              Fique por dentro das últimas atualizações do sistema
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {news.slice(0, 3).map((item) => (
-                <div 
-                  key={item.id} 
-                  className="border rounded-md p-4 space-y-2 cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => setSelectedNews(item.id)}
-                >
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-medium">{item.title}</h3>
-                    {isNewItem(item.created_at) && (
-                      <span className="bg-red-100 text-red-800 text-xs font-semibold px-2 py-0.5 rounded">
-                        NEW!!
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{item.short_description}</p>
-                  <div className="flex justify-between items-center">
-                    <Button variant="link" size="sm" className="p-0 h-auto">
-                      Leia mais
-                    </Button>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(item.created_at).toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {news.length > 3 && (
-              <div className="mt-4">
-                <h4 className="font-medium mb-2">Histórico de Novidades</h4>
-                <div className="space-y-2">
-                  {news.slice(3).map((item) => (
-                    <div 
-                      key={item.id} 
-                      className="border rounded-md p-3 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
-                      onClick={() => setSelectedNews(item.id)}
-                    >
-                      <div>
-                        <h3 className="font-medium text-sm">{item.title}</h3>
-                        <p className="text-xs text-muted-foreground">{item.short_description}</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(item.created_at).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </section>
-    );
-  };
-
-  const selectedNewsItem = news.find(item => item.id === selectedNews);
-
   return (
     <DashboardLayout>
       <div className="flex flex-col space-y-6 pb-6 animate-fade-in">
@@ -364,30 +245,6 @@ const Dashboard = () => {
         </header>
 
         {user?.isAdmin ? renderAdminDashboard() : renderManagerDashboard()}
-        
-        {renderNewsSection()}
-
-        <Dialog 
-          open={!!selectedNews} 
-          onOpenChange={(open) => {
-            if (!open) setSelectedNews(null);
-          }}
-        >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{selectedNewsItem?.title}</DialogTitle>
-              <DialogDescription>
-                {new Date(selectedNewsItem?.created_at || '').toLocaleDateString('pt-BR')}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-4 space-y-4">
-              <p className="text-sm font-medium">{selectedNewsItem?.short_description}</p>
-              <div className="text-sm space-y-2" style={{whiteSpace: 'pre-line'}}>
-                {selectedNewsItem?.full_content}
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </DashboardLayout>
   );
