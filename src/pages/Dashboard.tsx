@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +8,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useManagerAnnouncements } from '@/hooks/use-manager-announcements';
+import ManagerAnnouncementsList from '@/components/announcements/ManagerAnnouncementsList';
 
 interface LocationStats {
   states: [string, number][];
@@ -34,6 +37,8 @@ const Dashboard = () => {
       neighborhoods: []
     }
   });
+
+  const { announcements, isLoading: isLoadingAnnouncements } = useManagerAnnouncements();
   
   useEffect(() => {
     async function fetchDashboardData() {
@@ -218,6 +223,13 @@ const Dashboard = () => {
 
   const renderManagerDashboard = () => (
     <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="md:col-span-2">
+        <ManagerAnnouncementsList 
+          announcements={announcements} 
+          isLoading={isLoadingAnnouncements}
+        />
+      </div>
+      
       <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
