@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -203,12 +202,12 @@ export const RecentTransactions = ({
           <TableHeader>
             <TableRow>
               <TableHead>Tipo</TableHead>
-              <TableHead>Categoria</TableHead>
+              <TableHead className="text-center">Categoria</TableHead>
               <TableHead className="text-center">Unidade</TableHead>
-              <TableHead>Referência</TableHead>
+              <TableHead className="text-center">Referência</TableHead>
               <TableHead>Data de Pgto</TableHead>
               <TableHead className="text-center">Valor</TableHead>
-              <TableHead className="w-[120px]">Ações</TableHead>
+              <TableHead className="text-center w-[120px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -231,17 +230,17 @@ export const RecentTransactions = ({
                       <span>{transaction.type === 'income' ? 'Receita' : 'Despesa'}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{getCategoryLabel(transaction.category)}</TableCell>
+                  <TableCell className="text-center">{getCategoryLabel(transaction.category)}</TableCell>
                   <TableCell className="text-center">{transaction.unit || '-'}</TableCell>
-                  <TableCell>{formatMonth(transaction.reference_month)}</TableCell>
+                  <TableCell className="text-center">{formatMonth(transaction.reference_month)}</TableCell>
                   <TableCell>
                     {formatDate(transaction.payment_date || transaction.due_date)}
                   </TableCell>
                   <TableCell className={`text-center font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                     {formatAmount(transaction.amount, transaction.type)}
                   </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-1">
+                  <TableCell className="text-center">
+                    <div className="flex justify-center space-x-1">
                       <Button 
                         variant="ghost" 
                         size="icon" 
