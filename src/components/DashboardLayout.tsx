@@ -26,7 +26,8 @@ import {
   Mail,
   Settings,
   Megaphone,
-  ReceiptText
+  ReceiptText,
+  QrCode,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -109,6 +110,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       submenu: [
         { name: 'Dashboard', icon: <BarChart className="h-5 w-5" />, path: '/financeiro/dashboard' },
         { name: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" />, path: '/financeiro/receitas-despesas' },
+        { name: 'Recebimento PIX', icon: <QrCode className="h-5 w-5" />, path: '/financeiro/recebimento-pix' },
         { name: 'Prestação de Contas', icon: <FileText className="h-5 w-5" />, path: '/financeiro/prestacao-contas' },
       ] 
     },
