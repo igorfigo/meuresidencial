@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -452,7 +453,7 @@ export const AccountingReport = () => {
   }
   
   return (
-    <Card className="mb-8">
+    <Card className="mb-8 border-t-4 border-t-brand-600">
       <CardContent className="pt-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <div className="w-full sm:w-64 mb-4 sm:mb-0">
