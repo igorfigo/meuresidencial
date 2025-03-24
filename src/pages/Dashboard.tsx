@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -142,7 +141,6 @@ const Dashboard = () => {
     if (!user?.selectedCondominium) return;
     
     try {
-      // Fetch recent announcements
       const { data: announcements, error: announcementsError } = await supabase
         .from('announcements')
         .select('id, title, created_at')
@@ -154,7 +152,6 @@ const Dashboard = () => {
         console.error('Error fetching announcements:', announcementsError);
       }
       
-      // Fetch recent documents
       const { data: documents, error: documentsError } = await supabase
         .from('documents')
         .select('id, tipo, created_at')
@@ -166,7 +163,6 @@ const Dashboard = () => {
         console.error('Error fetching documents:', documentsError);
       }
       
-      // Fetch recent pest controls
       const { data: pestControls, error: pestControlsError } = await supabase
         .from('pest_controls')
         .select('id, empresa, data, created_at')
@@ -178,7 +174,6 @@ const Dashboard = () => {
         console.error('Error fetching pest controls:', pestControlsError);
       }
       
-      // Combine all recent items
       const combinedItems: RecentItem[] = [
         ...(announcements || []).map(item => ({
           id: item.id,
@@ -200,7 +195,6 @@ const Dashboard = () => {
         }))
       ];
       
-      // Sort by date (newest first) and limit to 5
       const sortedItems = combinedItems.sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
       ).slice(0, 5);
@@ -377,7 +371,6 @@ const Dashboard = () => {
 
   const renderManagerDashboard = () => (
     <>
-      {/* Latest News Card (now first) */}
       {latestNews && (
         <Card 
           className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer mb-4"
@@ -397,48 +390,49 @@ const Dashboard = () => {
       )}
       
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Balance Card */}
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
-            <Wallet className="h-4 w-4 text-brand-600" />
-          </CardHeader>
-          <CardContent>
-            {!isFinancesLoading && balance ? (
-              <div className="text-2xl font-bold">
-                {balance.is_manual ? 'R$ ' + balance.balance : 'R$ ' + balance.balance}
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md md:col-span-1">
+          <CardContent className="p-4 grid gap-4">
+            <div>
+              <div className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
+                <Wallet className="h-4 w-4 text-brand-600" />
               </div>
-            ) : (
-              <div className="text-2xl font-bold text-gray-400">Carregando...</div>
-            )}
-          </CardContent>
-        </Card>
-        
-        {/* Residents and Common Areas Count */}
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Dados do Condomínio</CardTitle>
-            <Home className="h-4 w-4 text-brand-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Users className="h-4 w-4" /> Moradores
-                </span>
-                <span className="font-medium">{residentCount}</span>
+              <div>
+                {!isFinancesLoading && balance ? (
+                  <div className="text-2xl font-bold">
+                    {balance.is_manual ? 'R$ ' + balance.balance : 'R$ ' + balance.balance}
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-gray-400">Carregando...</div>
+                )}
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Home className="h-4 w-4" /> Áreas Comuns
-                </span>
-                <span className="font-medium">{commonAreasCount}</span>
+            </div>
+            
+            <Separator className="my-1" />
+            
+            <div>
+              <div className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Dados do Condomínio</CardTitle>
+                <Home className="h-4 w-4 text-brand-600" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Users className="h-4 w-4" /> Moradores
+                  </span>
+                  <span className="font-medium">{residentCount}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Home className="h-4 w-4" /> Áreas Comuns
+                  </span>
+                  <span className="font-medium">{commonAreasCount}</span>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        {/* Recent Items */}
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Últimos Cadastros</CardTitle>
@@ -465,7 +459,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        {/* Latest Incomes */}
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Últimas Receitas</CardTitle>
@@ -498,7 +491,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        {/* Latest Expenses */}
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Últimas Despesas</CardTitle>
