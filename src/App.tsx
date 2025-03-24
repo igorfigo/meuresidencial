@@ -24,10 +24,10 @@ import AreasComuns from '@/pages/AreasComuns';
 import Dedetizacoes from '@/pages/Dedetizacoes';
 import MinhaAssinatura from '@/pages/MinhaAssinatura';
 import FaleConosco from '@/pages/FaleConosco';
-import GerenciarAvisos from '@/pages/GerenciarAvisos';
 
 // We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
+const GerenciarAvisos = () => <div>Gerenciar Avisos (Em Desenvolvimento)</div>;
 const BusinessManagement = () => <div>Business Management (Em Desenvolvimento)</div>;
 const BusinessDespesas = () => <div>Business Despesas (Em Desenvolvimento)</div>;
 const BusinessContratos = () => <div>Business Contratos (Em Desenvolvimento)</div>;
