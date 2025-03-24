@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useNews } from '@/hooks/use-news';
-import { Trash } from 'lucide-react';
+import { Trash, Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -45,10 +45,10 @@ interface NewsFormValues {
 
 const CadastrarNovidade = () => {
   const { user } = useApp();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const { allNewsItems, saveNewsItem, deleteNewsItem, isLoading: isLoadingNews } = useNews();
+  const { allNewsItems, saveNewsItem, deleteNewsItem, isLoading: isLoadingNews, fetchNews } = useNews();
 
   const form = useForm<NewsFormValues>({
     defaultValues: {
@@ -60,7 +60,7 @@ const CadastrarNovidade = () => {
 
   const onSubmit = async (values: NewsFormValues) => {
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
       
       // Use the saveNewsItem function from useNews hook
       const result = await saveNewsItem({
@@ -69,17 +69,14 @@ const CadastrarNovidade = () => {
         full_content: values.full_content,
       });
       
-      if (!result.success) {
-        throw result.error;
+      if (result.success) {
+        form.reset();
       }
-      
-      toast.success('Novidade cadastrada com sucesso!');
-      form.reset();
     } catch (error) {
       console.error('Error creating news item:', error);
       toast.error('Falha ao cadastrar novidade');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -87,23 +84,20 @@ const CadastrarNovidade = () => {
     if (!selectedItemId) return;
     
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
       
       // Use the deleteNewsItem function from useNews hook
       const result = await deleteNewsItem(selectedItemId);
       
-      if (!result.success) {
-        throw result.error;
+      if (result.success) {
+        setIsDeleteDialogOpen(false);
+        setSelectedItemId(null);
       }
-      
-      toast.success('Novidade excluída com sucesso!');
-      setIsDeleteDialogOpen(false);
-      setSelectedItemId(null);
     } catch (error) {
       console.error('Error deleting news item:', error);
       toast.error('Falha ao excluir novidade');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -196,8 +190,17 @@ const CadastrarNovidade = () => {
                       )}
                     />
                     
-                    <Button type="submit" disabled={isLoading} className="w-full">
-                      {isLoading ? 'Salvando...' : 'Cadastrar Novidade'}
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting} 
+                      className="w-full"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : 'Cadastrar Novidade'}
                     </Button>
                   </form>
                 </Form>
@@ -206,11 +209,23 @@ const CadastrarNovidade = () => {
             
             <div className="space-y-4">
               <Card>
-                <CardHeader>
-                  <CardTitle>Gerenciar Novidades</CardTitle>
-                  <CardDescription>
-                    Visualize e gerencie novidades existentes
-                  </CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Gerenciar Novidades</CardTitle>
+                    <CardDescription>
+                      Visualize e gerencie novidades existentes
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => fetchNews()}
+                    disabled={isLoadingNews}
+                  >
+                    {isLoadingNews ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : 'Atualizar'}
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   {isLoadingNews ? (
@@ -243,6 +258,7 @@ const CadastrarNovidade = () => {
                               variant="destructive" 
                               size="sm" 
                               onClick={() => confirmDelete(item.id)}
+                              disabled={isSubmitting}
                             >
                               <Trash className="h-4 w-4" />
                             </Button>
@@ -268,8 +284,17 @@ const CadastrarNovidade = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-500 text-white hover:bg-red-600">
-              Excluir
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              disabled={isSubmitting}
+              className="bg-red-500 text-white hover:bg-red-600"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : 'Excluir'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

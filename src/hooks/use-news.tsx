@@ -55,6 +55,7 @@ export const useNews = () => {
     } catch (error) {
       console.error('Error fetching news:', error);
       setError(error as Error);
+      toast.error('Erro ao carregar novidades');
     } finally {
       setIsLoading(false);
     }
@@ -68,26 +69,37 @@ export const useNews = () => {
         .update({ is_active: false })
         .eq('is_active', true);
         
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating news items:', updateError);
+        toast.error('Erro ao atualizar status das novidades existentes');
+        return { success: false, error: updateError };
+      }
 
       // Insert new news item
-      const { error: insertError } = await supabase
+      const { data, error: insertError } = await supabase
         .from('news_items')
         .insert({
           title: newsItem.title,
           short_description: newsItem.short_description,
           full_content: newsItem.full_content,
           is_active: true,
-        });
+        })
+        .select();
         
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Error inserting news item:', insertError);
+        toast.error('Erro ao cadastrar novidade');
+        return { success: false, error: insertError };
+      }
       
       // Refetch news after successful save
       await fetchNews();
+      toast.success('Novidade cadastrada com sucesso!');
       
-      return { success: true };
+      return { success: true, data };
     } catch (error) {
       console.error('Error saving news item:', error);
+      toast.error('Falha ao cadastrar novidade');
       return { success: false, error };
     }
   };
@@ -99,14 +111,20 @@ export const useNews = () => {
         .delete()
         .eq('id', id);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting news item:', error);
+        toast.error('Erro ao excluir novidade');
+        return { success: false, error };
+      }
       
       // Refetch news after successful deletion
       await fetchNews();
+      toast.success('Novidade excluída com sucesso!');
       
       return { success: true };
     } catch (error) {
       console.error('Error deleting news item:', error);
+      toast.error('Falha ao excluir novidade');
       return { success: false, error };
     }
   };
