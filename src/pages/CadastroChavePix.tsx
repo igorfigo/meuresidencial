@@ -87,7 +87,7 @@ const CadastroChavePix = () => {
           tipochave: item.tipochave,
           chavepix: item.chavepix,
           created_at: item.created_at,
-          updated_at: item.updated_at || item.created_at,
+          updated_at: item.created_at,
         }));
         
         setPixKeys(formattedData);
