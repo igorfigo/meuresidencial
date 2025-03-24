@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
+import { Separator } from '@/components/ui/separator';
 
 interface NewsItem {
   id: string;
@@ -77,37 +78,93 @@ const GerenciarAvisos = () => {
     }
   };
 
+  // New function to deactivate all news items except the most recent one
+  const updateActiveStatus = async (newItemId?: string) => {
+    try {
+      // First, deactivate all news items
+      const { error: deactivateError } = await supabase
+        .from('news_items')
+        .update({ is_active: false })
+        .not('id', 'eq', newItemId || ''); // Skip the new item if it exists
+      
+      if (deactivateError) throw deactivateError;
+      
+      // If we have a new item ID, activate just that one
+      if (newItemId) {
+        const { error: activateError } = await supabase
+          .from('news_items')
+          .update({ is_active: true })
+          .eq('id', newItemId);
+        
+        if (activateError) throw activateError;
+      } else {
+        // If no new item ID, activate the most recent one
+        const { data: latestItems, error: fetchError } = await supabase
+          .from('news_items')
+          .select('id')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (fetchError) throw fetchError;
+        
+        if (latestItems && latestItems.length > 0) {
+          const { error: activateLatestError } = await supabase
+            .from('news_items')
+            .update({ is_active: true })
+            .eq('id', latestItems[0].id);
+          
+          if (activateLatestError) throw activateLatestError;
+        }
+      }
+    } catch (error) {
+      console.error('Error updating active status:', error);
+      toast.error('Erro ao atualizar status ativo das novidades');
+    }
+  };
+
   const onSubmit = async (values: { title: string; short_description: string; full_content: string }) => {
     try {
       setIsLoading(true);
       
       if (isEditing && currentItem) {
         // Update existing news item
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('news_items')
           .update({
             title: values.title,
             short_description: values.short_description,
             full_content: values.full_content
           })
-          .eq('id', currentItem.id);
+          .eq('id', currentItem.id)
+          .select();
 
         if (error) throw error;
+        
+        // If this is the most recent item, make sure it's active
+        await updateActiveStatus();
+        
         toast.success('Novidade atualizada com sucesso!');
       } else {
         // Create new news item
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('news_items')
           .insert([
             {
               title: values.title,
               short_description: values.short_description,
               full_content: values.full_content,
-              is_active: true
+              is_active: true // initially set as active
             }
-          ]);
+          ])
+          .select();
 
         if (error) throw error;
+        
+        // Ensure only this new item is active
+        if (data && data.length > 0) {
+          await updateActiveStatus(data[0].id);
+        }
+        
         toast.success('Novidade cadastrada com sucesso!');
       }
 
@@ -143,6 +200,10 @@ const GerenciarAvisos = () => {
       toast.success('Novidade excluída com sucesso!');
       setDeleteDialogOpen(false);
       setCurrentItem(null);
+      
+      // After deleting, ensure the newest remaining item is set to active
+      await updateActiveStatus();
+      
       fetchNewsItems();
     } catch (error) {
       console.error('Error deleting news item:', error);
@@ -190,7 +251,7 @@ const GerenciarAvisos = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-bold">Gerenciar Avisos</h1>
           <Button 
             onClick={handleCreateNew} 
@@ -201,6 +262,10 @@ const GerenciarAvisos = () => {
             <span>Nova Novidade</span>
           </Button>
         </div>
+        <p className="text-muted-foreground mb-4">
+          Crie e gerencie as novidades que serão exibidas para os usuários do sistema.
+        </p>
+        <Separator className="mb-6" />
 
         <div className="space-y-4">
           {(isCreating || isEditing) && (
