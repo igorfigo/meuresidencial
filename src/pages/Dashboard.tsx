@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { formatToBRL } from '@/utils/currency';
 import { useFinances } from '@/hooks/use-finances';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 interface LocationStats {
   states: [string, number][];
@@ -305,12 +305,15 @@ const Dashboard = () => {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric' 
-    });
+    if (!dateString) return '-';
+    
+    try {
+      const date = parseISO(dateString);
+      return format(date, 'dd/MM/yyyy');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString;
+    }
   };
 
   const renderAdminDashboard = () => (
