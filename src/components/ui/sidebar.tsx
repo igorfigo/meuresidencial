@@ -91,6 +91,11 @@ export function Sidebar() {
   };
 
   const renderMenuItems = () => {
+    // Use isAdmin from user object to determine which menu items to show
+    // Add console.log to help with debugging
+    console.log("User in sidebar:", user);
+    console.log("Is user admin?", user?.isAdmin);
+    
     const menuItems = user?.isAdmin ? adminMenuItems : managerMenuItems;
 
     return menuItems.map((item) => {

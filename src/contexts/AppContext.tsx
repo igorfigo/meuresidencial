@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -47,8 +46,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const storedUser = localStorage.getItem('condoUser');
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        // Add debugging to check the stored user
+        const parsedUser = JSON.parse(storedUser);
+        console.log("Stored user from localStorage:", parsedUser);
+        console.log("Is stored user admin?", parsedUser.isAdmin);
+        setUser(parsedUser);
       } catch (e) {
+        console.error("Error parsing stored user:", e);
         localStorage.removeItem('condoUser');
       }
     }
@@ -66,6 +70,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           isAdmin: true
         };
         
+        console.log("Admin user created:", adminUser);
         setUser(adminUser);
         localStorage.setItem('condoUser', JSON.stringify(adminUser));
         toast.success("Login realizado com sucesso!");
