@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -90,7 +91,7 @@ export function Sidebar() {
       label: 'Financeiro', 
       icon: <PiggyBank className="h-5 w-5" />,
       submenu: [
-        { path: '/financeiro/dashboard', label: 'Dashboard', icon: <BarChart className="h-5 w-5" /> },
+        { path: '/financeiro/dashboard', label: 'Gráficos', icon: <BarChart className="h-5 w-5" /> },
         { path: '/financeiro/receitas-despesas', label: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" /> },
         { path: '/financeiro/recebimento-pix', label: 'Recebimento PIX', icon: <QrCode className="h-5 w-5" /> },
         { path: '/financeiro/prestacao-contas', label: 'Prestação de Contas', icon: <FileText className="h-5 w-5" /> },
