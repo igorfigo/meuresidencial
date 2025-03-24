@@ -433,27 +433,29 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md h-full flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Últimos Cadastros</CardTitle>
             <FileCheck className="h-4 w-4 text-brand-600" />
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+          <CardContent className="flex-grow overflow-auto p-4">
+            <div className="space-y-1 h-full flex flex-col">
               {recentItems.length > 0 ? (
                 recentItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
+                  <div key={item.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
                     <div className="flex items-center gap-2">
-                      {item.type === 'announcement' && <BellRing className="h-3 w-3 text-blue-500" />}
-                      {item.type === 'document' && <FileText className="h-3 w-3 text-green-500" />}
-                      {item.type === 'pest-control' && <Bug className="h-3 w-3 text-red-500" />}
-                      <span className="text-sm truncate max-w-[150px]">{item.title}</span>
+                      {item.type === 'announcement' && <BellRing className="h-3.5 w-3.5 text-blue-500" />}
+                      {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-green-500" />}
+                      {item.type === 'pest-control' && <Bug className="h-3.5 w-3.5 text-red-500" />}
+                      <span className="text-sm truncate max-w-[180px]">{item.title}</span>
                     </div>
                     <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
                   </div>
                 ))
               ) : (
-                <div className="text-sm text-muted-foreground">Nenhum cadastro recente</div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
+                  Nenhum cadastro recente
+                </div>
               )}
             </div>
           </CardContent>
@@ -597,3 +599,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
