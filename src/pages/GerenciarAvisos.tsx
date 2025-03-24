@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -10,7 +9,6 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
@@ -78,18 +76,15 @@ const GerenciarAvisos = () => {
     }
   };
 
-  // New function to deactivate all news items except the most recent one
   const updateActiveStatus = async (newItemId?: string) => {
     try {
-      // First, deactivate all news items
       const { error: deactivateError } = await supabase
         .from('news_items')
         .update({ is_active: false })
-        .not('id', 'eq', newItemId || ''); // Skip the new item if it exists
+        .not('id', 'eq', newItemId || '');
       
       if (deactivateError) throw deactivateError;
       
-      // If we have a new item ID, activate just that one
       if (newItemId) {
         const { error: activateError } = await supabase
           .from('news_items')
@@ -98,7 +93,6 @@ const GerenciarAvisos = () => {
         
         if (activateError) throw activateError;
       } else {
-        // If no new item ID, activate the most recent one
         const { data: latestItems, error: fetchError } = await supabase
           .from('news_items')
           .select('id')
@@ -127,7 +121,6 @@ const GerenciarAvisos = () => {
       setIsLoading(true);
       
       if (isEditing && currentItem) {
-        // Update existing news item
         const { data, error } = await supabase
           .from('news_items')
           .update({
@@ -140,12 +133,10 @@ const GerenciarAvisos = () => {
 
         if (error) throw error;
         
-        // If this is the most recent item, make sure it's active
         await updateActiveStatus();
         
         toast.success('Novidade atualizada com sucesso!');
       } else {
-        // Create new news item
         const { data, error } = await supabase
           .from('news_items')
           .insert([
@@ -153,14 +144,13 @@ const GerenciarAvisos = () => {
               title: values.title,
               short_description: values.short_description,
               full_content: values.full_content,
-              is_active: true // initially set as active
+              is_active: true
             }
           ])
           .select();
 
         if (error) throw error;
         
-        // Ensure only this new item is active
         if (data && data.length > 0) {
           await updateActiveStatus(data[0].id);
         }
@@ -168,13 +158,11 @@ const GerenciarAvisos = () => {
         toast.success('Novidade cadastrada com sucesso!');
       }
 
-      // Reset form and state
       form.reset();
       setIsCreating(false);
       setIsEditing(false);
       setCurrentItem(null);
       
-      // Refresh news items list
       fetchNewsItems();
     } catch (error) {
       console.error('Error saving news item:', error);
@@ -201,7 +189,6 @@ const GerenciarAvisos = () => {
       setDeleteDialogOpen(false);
       setCurrentItem(null);
       
-      // After deleting, ensure the newest remaining item is set to active
       await updateActiveStatus();
       
       fetchNewsItems();
@@ -370,7 +357,6 @@ const GerenciarAvisos = () => {
                     <TableRow>
                       <TableHead>Título</TableHead>
                       <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -379,11 +365,6 @@ const GerenciarAvisos = () => {
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.title}</TableCell>
                         <TableCell>{formatDate(item.created_at)}</TableCell>
-                        <TableCell>
-                          <Badge variant={item.is_active ? "default" : "secondary"}>
-                            {item.is_active ? 'Ativa' : 'Inativa'}
-                          </Badge>
-                        </TableCell>
                         <TableCell className="text-right space-x-2">
                           <Button 
                             variant="ghost" 
