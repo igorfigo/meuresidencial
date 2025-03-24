@@ -1,4 +1,3 @@
-
 import {
   Home,
   LayoutDashboard,
@@ -15,7 +14,15 @@ import {
   Megaphone,
   Briefcase,
   Receipt,
-  ReceiptText  // Changed from FileInvoice to ReceiptText
+  ReceiptText,
+  PiggyBank,
+  BarChart,
+  KeyRound,
+  MessageSquare,
+  FileIcon,
+  CalendarDays,
+  Bug,
+  Mail
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -33,7 +40,6 @@ import {
 import { Skeleton } from './skeleton';
 import { SwitchCondominium } from './switch-condominium';
 
-// Define interface for menu items with optional submenu
 interface MenuItem {
   path: string;
   label: string;
@@ -49,7 +55,6 @@ export function Sidebar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Close the menu when the route changes
     setIsMenuOpen(false);
   }, [location.pathname]);
 
@@ -92,8 +97,6 @@ export function Sidebar() {
   };
 
   const renderMenuItems = () => {
-    // Use isAdmin from user object to determine which menu items to show
-    // Add console.log to help with debugging
     console.log("User in sidebar:", user);
     console.log("Is user admin?", user?.isAdmin);
     

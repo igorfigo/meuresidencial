@@ -1,235 +1,79 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
+import { AppProvider } from '@/contexts/AppContext';
+import { queryClient } from '@/lib/react-query';
+import AuthRequired from '@/components/AuthRequired';
+import Index from '@/pages/Index';
+import Login from '@/pages/Login';
+import Dashboard from '@/pages/Dashboard';
+import UserProfile from '@/pages/UserProfile';
+import FinanceiroDashboard from '@/pages/FinanceiroDashboard';
+import FinanceiroReceitasDespesas from '@/pages/FinanceiroReceitasDespesas';
+import FinanceiroRecebimentoPix from '@/pages/FinanceiroRecebimentoPix';
+import FinanceiroPrestacaoContas from '@/pages/FinanceiroPrestacaoContas';
+import CadastroGestor from '@/pages/CadastroGestor';
+import CadastroPlanos from '@/pages/CadastroPlanos';
+import CadastroChavePix from '@/pages/CadastroChavePix';
+import GerarFaturas from '@/pages/GerarFaturas';
+import GerenciarAvisos from '@/pages/GerenciarAvisos';
+import BusinessManagement from '@/pages/BusinessManagement';
+import BusinessDespesas from '@/pages/BusinessDespesas';
+import BusinessContratos from '@/pages/BusinessContratos';
+import Moradores from '@/pages/Moradores';
+import Comunicados from '@/pages/Comunicados';
+import Documentos from '@/pages/Documentos';
+import AreasComuns from '@/pages/AreasComuns';
+import Dedetizacoes from '@/pages/Dedetizacoes';
+import Servicos from '@/pages/Servicos';
+import MinhaAssinatura from '@/pages/MinhaAssinatura';
+import Contato from '@/pages/Contato';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AppProvider, useApp } from "@/contexts/AppContext";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import CadastroGestor from "./pages/CadastroGestor";
-import CadastroPlanos from "./pages/CadastroPlanos";
-import CadastroChavePix from "./pages/CadastroChavePix";
-import UnderConstruction from "./pages/UnderConstruction";
-import NotFound from "./pages/NotFound";
-import Moradores from "./pages/Moradores";
-import Dedetizacoes from "./pages/Dedetizacoes";
-import Documentos from "./pages/Documentos";
-import Comunicados from "./pages/Comunicados";
-import AreasComuns from "./pages/AreasComuns";
-import FaleConosco from "./pages/FaleConosco";
-import MinhaAssinatura from "./pages/MinhaAssinatura";
-import UserProfile from "./pages/UserProfile";
-import FinanceiroReceitasDespesas from './pages/FinanceiroReceitasDespesas';
-import FinanceiroDashboard from './pages/FinanceiroDashboard';
-import FinanceiroPrestacaoContas from './pages/FinanceiroPrestacaoContas';
-import { useEffect } from "react";
-import AdminOnly from "./components/AdminOnly";
-// Import GerenciarAvisos if it exists in your project
-
-const queryClient = new QueryClient();
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useApp();
-  
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
-const AuthRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useApp();
-  
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
-  }
-  
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
-const AnimationController = ({ children }: { children: React.ReactNode }) => {
-  useEffect(() => {
-    document.body.classList.add('page-transition-enter');
-    document.body.classList.add('page-transition-enter-active');
-    
-    const timeout = setTimeout(() => {
-      document.body.classList.remove('page-transition-enter');
-      document.body.classList.remove('page-transition-enter-active');
-    }, 300);
-    
-    return () => {
-      clearTimeout(timeout);
-      document.body.classList.add('page-transition-exit');
-      document.body.classList.add('page-transition-exit-active');
-      
-      setTimeout(() => {
-        document.body.classList.remove('page-transition-exit');
-        document.body.classList.remove('page-transition-exit-active');
-      }, 300);
-    };
-  }, []);
-  
-  return <>{children}</>;
-};
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AppProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={
-              <AnimationController>
-                <AuthRoute>
-                  <Login />
-                </AuthRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/cadastro-gestor" element={<CadastroGestor />} />
-            <Route path="/minha-assinatura" element={<MinhaAssinatura />} />
-            <Route path="/perfil" element={<UserProfile />} />
-            <Route path="/moradores" element={<Moradores />} />
-            <Route path="/areas-comuns" element={<AreasComuns />} />
-            <Route path="/comunicados" element={<Comunicados />} />
-            <Route path="/documentos" element={<Documentos />} />
-            <Route path="/dedetizacoes" element={<Dedetizacoes />} />
-            <Route path="/cadastro-planos" element={<CadastroPlanos />} />
-            <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
-            
-            <Route path="/gerenciar-avisos" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <AdminOnly>
-                    <UnderConstruction pageTitle="Gerenciar Avisos" />
-                  </AdminOnly>
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/business-management" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Business Management" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/business-management/despesas" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Despesas da Empresa" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/business-management/contratos" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Contratos" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/financeiro" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Financeiro" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/financeiro/receitas-despesas" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <FinanceiroReceitasDespesas />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/financeiro/dashboard" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <FinanceiroDashboard />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/financeiro/prestacao-contas" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <FinanceiroPrestacaoContas />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/financeiro/inadimplencias" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Inadimplências" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/boletos" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Boletos" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/reservas" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Reservas" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/servicos" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Serviços" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/assembleias" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <UnderConstruction pageTitle="Assembleias" />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="/contato" element={
-              <AnimationController>
-                <ProtectedRoute>
-                  <FaleConosco />
-                </ProtectedRoute>
-              </AnimationController>
-            } />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AppProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AppProvider>
+          <div className="app">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={<AuthRequired><Dashboard /></AuthRequired>} />
+              <Route path="/perfil" element={<AuthRequired><UserProfile /></AuthRequired>} />
+              
+              {/* Financeiro Routes */}
+              <Route path="/financeiro/dashboard" element={<AuthRequired><FinanceiroDashboard /></AuthRequired>} />
+              <Route path="/financeiro/receitas-despesas" element={<AuthRequired><FinanceiroReceitasDespesas /></AuthRequired>} />
+              <Route path="/financeiro/recebimento-pix" element={<AuthRequired><FinanceiroRecebimentoPix /></AuthRequired>} />
+              <Route path="/financeiro/prestacao-contas" element={<AuthRequired><FinanceiroPrestacaoContas /></AuthRequired>} />
+              
+              {/* Admin Routes */}
+              <Route path="/cadastro-gestor" element={<AuthRequired><CadastroGestor /></AuthRequired>} />
+              <Route path="/cadastro-planos" element={<AuthRequired><CadastroPlanos /></AuthRequired>} />
+              <Route path="/cadastro-chave-pix" element={<AuthRequired><CadastroChavePix /></AuthRequired>} />
+              <Route path="/gerar-faturas" element={<AuthRequired><GerarFaturas /></AuthRequired>} />
+              <Route path="/gerenciar-avisos" element={<AuthRequired><GerenciarAvisos /></AuthRequired>} />
+              <Route path="/business-management" element={<AuthRequired><BusinessManagement /></AuthRequired>} />
+              <Route path="/business-management/despesas" element={<AuthRequired><BusinessDespesas /></AuthRequired>} />
+              <Route path="/business-management/contratos" element={<AuthRequired><BusinessContratos /></AuthRequired>} />
+              
+              {/* Manager Routes */}
+              <Route path="/moradores" element={<AuthRequired><Moradores /></AuthRequired>} />
+              <Route path="/comunicados" element={<AuthRequired><Comunicados /></AuthRequired>} />
+              <Route path="/documentos" element={<AuthRequired><Documentos /></AuthRequired>} />
+              <Route path="/areas-comuns" element={<AuthRequired><AreasComuns /></AuthRequired>} />
+              <Route path="/dedetizacoes" element={<AuthRequired><Dedetizacoes /></AuthRequired>} />
+              <Route path="/servicos" element={<AuthRequired><Servicos /></AuthRequired>} />
+              <Route path="/minha-assinatura" element={<AuthRequired><MinhaAssinatura /></AuthRequired>} />
+              <Route path="/contato" element={<AuthRequired><Contato /></AuthRequired>} />
+            </Routes>
+            <Toaster />
+          </div>
+        </AppProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+}
 
 export default App;

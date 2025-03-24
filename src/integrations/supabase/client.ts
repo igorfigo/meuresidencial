@@ -515,3 +515,80 @@ export const getBalanceAdjustments = async (matricula: string) => {
     throw error;
   }
 };
+
+// Update the PIX key functions to support the new fields
+export const getPixKey = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('pix_keys')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching PIX key:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in getPixKey:', error);
+    return null;
+  }
+};
+
+export const savePixKey = async (data: any) => {
+  try {
+    const { id } = data;
+    
+    if (id) {
+      // Update existing PIX key
+      const { error } = await supabase
+        .from('pix_keys')
+        .update(data)
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error updating PIX key:', error);
+        throw error;
+      }
+      
+      return { success: true };
+    } else {
+      // Create new PIX key
+      const { error } = await supabase
+        .from('pix_keys')
+        .insert(data);
+      
+      if (error) {
+        console.error('Error creating PIX key:', error);
+        throw error;
+      }
+      
+      return { success: true };
+    }
+  } catch (error) {
+    console.error('Error in savePixKey:', error);
+    throw error;
+  }
+};
+
+export const deletePixKey = async (id: string) => {
+  try {
+    const { error } = await supabase
+      .from('pix_keys')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting PIX key:', error);
+      throw error;
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deletePixKey:', error);
+    throw error;
+  }
+};
