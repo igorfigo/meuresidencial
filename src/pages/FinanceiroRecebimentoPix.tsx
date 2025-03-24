@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -31,6 +30,7 @@ interface PixKeyFormData {
   chavepix: string;
   diavencimento: string;
   jurosaodia: string;
+  created_at?: string;
 }
 
 const FinanceiroRecebimentoPix = () => {
@@ -65,6 +65,7 @@ const FinanceiroRecebimentoPix = () => {
           chavepix: data.chavepix,
           diavencimento: data.diavencimento || '10',
           jurosaodia: data.jurosaodia || '0.033',
+          created_at: data.created_at,
         });
       } else {
         setPixKey(null);
@@ -121,6 +122,7 @@ const FinanceiroRecebimentoPix = () => {
         chavepix: pixKey.chavepix,
         diavencimento: pixKey.diavencimento || '10',
         jurosaodia: pixKey.jurosaodia || '0.033',
+        created_at: pixKey.created_at,
       });
     } else {
       reset({
@@ -334,7 +336,7 @@ const FinanceiroRecebimentoPix = () => {
           {!isLoading && pixKey && !isEditing && (
             <CardFooter className="bg-gray-50 border-t border-gray-100">
               <p className="text-sm text-gray-500">
-                Última atualização: {new Date(pixKey.created_at).toLocaleDateString('pt-BR')}
+                Última atualização: {new Date(pixKey.created_at || new Date()).toLocaleDateString('pt-BR')}
               </p>
             </CardFooter>
           )}
