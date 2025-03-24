@@ -24,7 +24,8 @@ import {
   MessageSquare,
   KeyRound,
   Mail,
-  Settings
+  Settings,
+  Megaphone
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -82,6 +83,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
+    { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
+    { 
+      name: 'Business Management', 
+      icon: <Briefcase className="h-5 w-5" />, 
+      path: '/business-management',
+      submenu: [
+        { name: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" />, path: '/business-management/despesas' },
+        { name: 'Contratos', icon: <FileText className="h-5 w-5" />, path: '/business-management/contratos' },
+      ] 
+    },
   ];
 
   const managerMenuItems: MenuItem[] = [
