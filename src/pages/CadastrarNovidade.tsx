@@ -34,6 +34,8 @@ const CadastrarNovidade = () => {
     try {
       setIsLoading(true);
       
+      console.log('Submitting news:', values);
+      
       const { data, error } = await supabase
         .from('news_items')
         .insert([
@@ -43,9 +45,15 @@ const CadastrarNovidade = () => {
             full_content: values.full_content,
             is_active: true
           }
-        ]);
+        ])
+        .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao cadastrar novidade:', error);
+        throw error;
+      }
+      
+      console.log('News item created successfully:', data);
       
       toast({
         title: "Sucesso",
@@ -54,6 +62,12 @@ const CadastrarNovidade = () => {
       });
       
       form.reset();
+      
+      // Redirect to dashboard after successful submission
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+      
     } catch (error) {
       console.error('Erro ao cadastrar novidade:', error);
       toast({

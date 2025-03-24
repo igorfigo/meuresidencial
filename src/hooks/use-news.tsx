@@ -21,14 +21,20 @@ export const useNews = () => {
       setIsLoading(true);
       setError(null);
       
+      console.log('Fetching news items...');
+      
       const { data, error } = await supabase
         .from('news_items')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching news:', error);
+        throw error;
+      }
       
+      console.log('News items fetched:', data);
       setNews(data || []);
     } catch (err) {
       console.error('Error fetching news:', err);
