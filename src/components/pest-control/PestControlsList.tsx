@@ -25,6 +25,14 @@ import { PestControl, PestControlAttachment } from '@/hooks/use-pest-control';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card } from '@/components/ui/card';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 interface PestControlsListProps {
   pestControls: PestControl[];
@@ -33,6 +41,7 @@ interface PestControlsListProps {
   isDeleting: boolean;
   getFileUrl: (path: string) => Promise<string>;
   fetchAttachments: (id: string) => Promise<PestControlAttachment[]>;
+  itemsPerPage?: number;
 }
 
 export const PestControlsList: React.FC<PestControlsListProps> = ({
@@ -41,11 +50,19 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
   onDelete,
   isDeleting,
   getFileUrl,
-  fetchAttachments
+  fetchAttachments,
+  itemsPerPage = 6
 }) => {
   const [detailView, setDetailView] = useState<PestControl | null>(null);
   const [attachments, setAttachments] = useState<PestControlAttachment[]>([]);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(pestControls.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = pestControls.slice(startIndex, endIndex);
 
   const formatDate = (dateString: string) => {
     try {
@@ -113,56 +130,92 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
           </p>
         </div>
       ) : (
-        <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Empresa</TableHead>
-                <TableHead className="text-center">Data</TableHead>
-                <TableHead>Finalidade</TableHead>
-                <TableHead className="text-center w-[100px]">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pestControls.map((pestControl) => (
-                <TableRow key={pestControl.id}>
-                  <TableCell className="font-medium">{pestControl.empresa}</TableCell>
-                  <TableCell className="text-center">{formatDate(pestControl.data)}</TableCell>
-                  <TableCell>{renderFinalidades(pestControl.finalidade)}</TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center space-x-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleViewDetails(pestControl)}
-                        title="Ver detalhes"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => onEdit(pestControl)}
-                        title="Editar"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => onDelete(pestControl.id!)}
-                        disabled={isDeleting}
-                        title="Excluir"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </TableCell>
+        <div className="space-y-4">
+          <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Empresa</TableHead>
+                  <TableHead className="text-center">Data</TableHead>
+                  <TableHead>Finalidade</TableHead>
+                  <TableHead className="text-center w-[100px]">Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+              </TableHeader>
+              <TableBody>
+                {currentItems.map((pestControl) => (
+                  <TableRow key={pestControl.id}>
+                    <TableCell className="font-medium">{pestControl.empresa}</TableCell>
+                    <TableCell className="text-center">{formatDate(pestControl.data)}</TableCell>
+                    <TableCell>{renderFinalidades(pestControl.finalidade)}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleViewDetails(pestControl)}
+                          title="Ver detalhes"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => onEdit(pestControl)}
+                          title="Editar"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => onDelete(pestControl.id!)}
+                          disabled={isDeleting}
+                          title="Excluir"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(i + 1)}
+                      isActive={currentPage === i + 1}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </div>
       )}
 
       {/* Details dialog */}
