@@ -162,73 +162,71 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
 
   return (
     <>
-      <Card className="overflow-hidden">
-        <Table>
-          <TableHeader>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nome</TableHead>
+            <TableHead>Capacidade</TableHead>
+            <TableHead className="hidden md:table-cell text-center">Disponibilidade</TableHead>
+            <TableHead className="hidden md:table-cell text-center">Horário</TableHead>
+            <TableHead className="text-center">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {commonAreas.length === 0 ? (
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Capacidade</TableHead>
-              <TableHead className="hidden md:table-cell text-center">Disponibilidade</TableHead>
-              <TableHead className="hidden md:table-cell text-center">Horário</TableHead>
-              <TableHead className="text-center">Ações</TableHead>
+              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                Nenhuma área comum cadastrada
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {commonAreas.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  Nenhuma área comum cadastrada
+          ) : (
+            commonAreas.map((area) => (
+              <TableRow key={area.id}>
+                <TableCell className="font-medium">{area.name}</TableCell>
+                <TableCell>{area.capacity || 'Não definido'}</TableCell>
+                <TableCell className="hidden md:table-cell text-center">
+                  {formatWeekdays(area.weekdays)}
+                </TableCell>
+                <TableCell className="hidden md:table-cell text-center">
+                  {formatHours(area.opening_time, area.closing_time)}
+                </TableCell>
+                <TableCell className="text-center">
+                  <div className="flex justify-center gap-2">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
+                      onClick={() => handleViewReservations(area)}
+                      title="Ver reservas"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                      onClick={() => onEdit(area)}
+                      title="Editar"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
+                      onClick={() => onDelete(area.id)}
+                      disabled={isDeleting}
+                      title="Excluir"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
-            ) : (
-              commonAreas.map((area) => (
-                <TableRow key={area.id}>
-                  <TableCell className="font-medium">{area.name}</TableCell>
-                  <TableCell>{area.capacity || 'Não definido'}</TableCell>
-                  <TableCell className="hidden md:table-cell text-center">
-                    {formatWeekdays(area.weekdays)}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-center">
-                    {formatHours(area.opening_time, area.closing_time)}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center gap-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
-                        onClick={() => handleViewReservations(area)}
-                        title="Ver reservas"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                        onClick={() => onEdit(area)}
-                        title="Editar"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
-                        onClick={() => onDelete(area.id)}
-                        disabled={isDeleting}
-                        title="Excluir"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </Card>
+            ))
+          )}
+        </TableBody>
+      </Table>
 
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -240,7 +238,7 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
           </DialogHeader>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            <Card>
+            <Card className="border-t-4 border-t-brand-600">
               <CardHeader>
                 <CardTitle className="text-lg">Detalhes da Área</CardTitle>
               </CardHeader>
@@ -284,7 +282,7 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="border-t-4 border-t-brand-600">
               <CardHeader>
                 <CardTitle className="text-lg">Reservas</CardTitle>
                 <CardDescription>

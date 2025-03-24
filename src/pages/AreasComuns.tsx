@@ -102,13 +102,15 @@ const AreasComuns = () => {
                   Carregando áreas comuns...
                 </div>
               ) : (
-                <CommonAreasList
-                  commonAreas={commonAreas || []}
-                  onEdit={handleEditArea}
-                  onDelete={handleDeleteClick}
-                  isDeleting={isDeleting}
-                  fetchReservations={fetchReservations}
-                />
+                <Card className="border-t-4 border-t-brand-600 shadow-md overflow-hidden">
+                  <CommonAreasList
+                    commonAreas={commonAreas || []}
+                    onEdit={handleEditArea}
+                    onDelete={handleDeleteClick}
+                    isDeleting={isDeleting}
+                    fetchReservations={fetchReservations}
+                  />
+                </Card>
               )}
             </div>
           )}
