@@ -146,7 +146,7 @@ const Dashboard = () => {
         .select('id, title, created_at')
         .eq('matricula', user.selectedCondominium)
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(8);
         
       if (announcementsError) {
         console.error('Error fetching announcements:', announcementsError);
@@ -157,7 +157,7 @@ const Dashboard = () => {
         .select('id, tipo, created_at')
         .eq('matricula', user.selectedCondominium)
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(8);
         
       if (documentsError) {
         console.error('Error fetching documents:', documentsError);
@@ -168,7 +168,7 @@ const Dashboard = () => {
         .select('id, empresa, data, created_at')
         .eq('matricula', user.selectedCondominium)
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(8);
         
       if (pestControlsError) {
         console.error('Error fetching pest controls:', pestControlsError);
@@ -197,7 +197,7 @@ const Dashboard = () => {
       
       const sortedItems = combinedItems.sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
-      ).slice(0, 5);
+      ).slice(0, 8);
       
       setRecentItems(sortedItems);
     } catch (error) {
@@ -438,12 +438,12 @@ const Dashboard = () => {
             <CardTitle className="text-sm font-medium">Últimos Cadastros</CardTitle>
             <FileCheck className="h-4 w-4 text-brand-600" />
           </CardHeader>
-          <CardContent className="flex-grow overflow-auto p-4">
-            <div className="space-y-1 h-full flex flex-col">
+          <CardContent className="flex-grow overflow-auto p-3">
+            <div className="space-y-0.5 h-full flex flex-col">
               {recentItems.length > 0 ? (
                 recentItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                    <div className="flex items-center gap-2">
+                  <div key={item.id} className="flex items-center justify-between py-1.5 border-b last:border-b-0">
+                    <div className="flex items-center gap-1.5">
                       {item.type === 'announcement' && <BellRing className="h-3.5 w-3.5 text-blue-500" />}
                       {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-green-500" />}
                       {item.type === 'pest-control' && <Bug className="h-3.5 w-3.5 text-red-500" />}
@@ -599,4 +599,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
 
