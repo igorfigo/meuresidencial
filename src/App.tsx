@@ -22,7 +22,8 @@ import UserProfile from "./pages/UserProfile";
 import FinanceiroReceitasDespesas from './pages/FinanceiroReceitasDespesas';
 import FinanceiroDashboard from './pages/FinanceiroDashboard';
 import FinanceiroPrestacaoContas from './pages/FinanceiroPrestacaoContas';
-import GerenciarAvisos from './pages/GerenciarAvisos';  // Import the actual component
+import GerenciarAvisos from './pages/GerenciarAvisos';
+import AdminOnly from './components/AdminOnly';
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -122,7 +123,11 @@ const App = () => (
             <Route path="/cadastro-planos" element={<CadastroPlanos />} />
             <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
             
-            <Route path="/gerenciar-avisos" element={<AdminOnly><GerenciarAvisos /></AdminOnly>} />
+            <Route path="/gerenciar-avisos" element={
+              <AdminOnly>
+                <GerenciarAvisos />
+              </AdminOnly>
+            } />
             
             <Route path="/business-management" element={
               <AnimationController>
