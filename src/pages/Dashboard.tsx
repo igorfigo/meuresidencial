@@ -1,7 +1,8 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Users, FileText, MapPin } from 'lucide-react';
+import { Users, FileText, MapPin, Receipt, ArrowUp, ArrowDown } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +11,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { formatToBRL } from '@/utils/currency';
+import { format } from 'date-fns';
 
 interface LocationStats {
   states: [string, number][];
@@ -32,12 +35,23 @@ interface NewsItem {
   created_at: string;
 }
 
+interface Transaction {
+  id: string;
+  type: 'income' | 'expense';
+  category: string;
+  amount: string;
+  date: string;
+  observations?: string;
+  unit?: string;
+}
+
 const Dashboard = () => {
   const { user } = useApp();
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
   const [latestNews, setLatestNews] = useState<NewsItem | null>(null);
   const [newsDialogOpen, setNewsDialogOpen] = useState(false);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
@@ -53,6 +67,7 @@ const Dashboard = () => {
     fetchDashboardData();
     if (!user?.isAdmin) {
       fetchLatestNews();
+      fetchRecentTransactions();
     }
   }, [user?.isAdmin]);
   
@@ -76,6 +91,51 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error in fetchLatestNews:', error);
+    }
+  };
+
+  const fetchRecentTransactions = async () => {
+    if (!user?.selectedCondominium) return;
+    
+    try {
+      const [incomesData, expensesData] = await Promise.all([
+        supabase
+          .from('financial_incomes')
+          .select('*')
+          .eq('matricula', user.selectedCondominium)
+          .order('created_at', { ascending: false })
+          .limit(8),
+        supabase
+          .from('financial_expenses')
+          .select('*')
+          .eq('matricula', user.selectedCondominium)
+          .order('created_at', { ascending: false })
+          .limit(8)
+      ]);
+      
+      if (incomesData.error) throw incomesData.error;
+      if (expensesData.error) throw expensesData.error;
+      
+      const allTransactions: Transaction[] = [
+        ...(incomesData.data || []).map(income => ({ 
+          ...income, 
+          type: 'income' as const,
+          date: income.payment_date || income.created_at
+        })),
+        ...(expensesData.data || []).map(expense => ({ 
+          ...expense, 
+          type: 'expense' as const,
+          date: expense.payment_date || expense.due_date || expense.created_at
+        }))
+      ];
+      
+      const sortedTransactions = allTransactions
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 8);
+      
+      setRecentTransactions(sortedTransactions);
+    } catch (error) {
+      console.error('Error fetching recent transactions:', error);
     }
   };
 
@@ -179,12 +239,25 @@ const Dashboard = () => {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric' 
-    });
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    // TODO: Add more category-specific icons
+    return category.includes('taxa') ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+  };
+
+  const getCategoryColor = (category: string, type: 'income' | 'expense') => {
+    return type === 'income' ? 'text-green-600' : 'text-red-600';
   };
 
   const renderAdminDashboard = () => (
@@ -244,10 +317,10 @@ const Dashboard = () => {
   );
 
   const renderManagerDashboard = () => (
-    <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {latestNews && (
         <Card 
-          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer"
+          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer md:col-span-2"
           onClick={() => setNewsDialogOpen(true)}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -262,16 +335,27 @@ const Dashboard = () => {
         </Card>
       )}
       
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Este é o seu painel de controle onde você pode gerenciar seu condomínio.
-          </p>
-        </CardContent>
-      </Card>
+      {recentTransactions.map(transaction => (
+        <Card key={transaction.id} className="card-hover border-t-4 border-t-brand-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium truncate">
+              {transaction.category.replace('_', ' ')}
+            </CardTitle>
+            <div className={getCategoryColor(transaction.category, transaction.type)}>
+              {transaction.type === 'income' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-xl font-bold ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+              R$ {transaction.amount}
+            </div>
+            <div className="mt-2 flex justify-between text-xs text-gray-500">
+              <span>{formatDate(transaction.date)}</span>
+              {transaction.unit && <span>Unidade: {transaction.unit}</span>}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </section>
   );
 
@@ -340,3 +424,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
