@@ -24,6 +24,8 @@ import FinanceiroReceitasDespesas from './pages/FinanceiroReceitasDespesas';
 import FinanceiroDashboard from './pages/FinanceiroDashboard';
 import FinanceiroPrestacaoContas from './pages/FinanceiroPrestacaoContas';
 import { useEffect } from "react";
+import AdminOnly from "./components/AdminOnly";
+// Import GerenciarAvisos if it exists in your project
 
 const queryClient = new QueryClient();
 
@@ -111,7 +113,9 @@ const App = () => (
             <Route path="/gerenciar-avisos" element={
               <AnimationController>
                 <ProtectedRoute>
-                  <UnderConstruction pageTitle="Gerenciar Avisos" />
+                  <AdminOnly>
+                    <UnderConstruction pageTitle="Gerenciar Avisos" />
+                  </AdminOnly>
                 </ProtectedRoute>
               </AnimationController>
             } />
