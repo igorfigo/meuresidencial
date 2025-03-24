@@ -23,6 +23,7 @@ import Documentos from '@/pages/Documentos';
 import AreasComuns from '@/pages/AreasComuns';
 import Dedetizacoes from '@/pages/Dedetizacoes';
 import MinhaAssinatura from '@/pages/MinhaAssinatura';
+import FaleConosco from '@/pages/FaleConosco';
 
 // We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
@@ -31,7 +32,6 @@ const BusinessManagement = () => <div>Business Management (Em Desenvolvimento)</
 const BusinessDespesas = () => <div>Business Despesas (Em Desenvolvimento)</div>;
 const BusinessContratos = () => <div>Business Contratos (Em Desenvolvimento)</div>;
 const Servicos = () => <div>Serviços (Em Desenvolvimento)</div>;
-const Contato = () => <div>Contato (Em Desenvolvimento)</div>;
 
 function App() {
   return (
@@ -69,7 +69,7 @@ function App() {
               <Route path="/dedetizacoes" element={<AuthRequired><Dedetizacoes /></AuthRequired>} />
               <Route path="/servicos" element={<AuthRequired><Servicos /></AuthRequired>} />
               <Route path="/minha-assinatura" element={<AuthRequired><MinhaAssinatura /></AuthRequired>} />
-              <Route path="/contato" element={<AuthRequired><Contato /></AuthRequired>} />
+              <Route path="/contato" element={<AuthRequired><FaleConosco /></AuthRequired>} />
             </Routes>
             <Toaster />
           </div>

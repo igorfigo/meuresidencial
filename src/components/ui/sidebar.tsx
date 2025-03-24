@@ -82,23 +82,25 @@ export function Sidebar() {
   
   const managerMenuItems: MenuItem[] = [
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
-    { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <CreditCard className="h-5 w-5" /> },
-    { 
-      path: '/financeiro/dashboard', 
-      label: 'Financeiro', 
-      icon: <PiggyBank className="h-5 w-5" />,
-      submenu: [
-        { path: '/financeiro/dashboard', label: 'Dashboard', icon: <BarChart className="h-5 w-5" /> },
-        { path: '/financeiro/receitas-despesas', label: 'Receitas e Despesas', icon: <Receipt className="h-5 w-5" /> },
-        { path: '/financeiro/recebimento-pix', label: 'Recebimento PIX', icon: <QrCode className="h-5 w-5" /> },
-        { path: '/financeiro/prestacao-contas', label: 'Prestação de Contas', icon: <FileText className="h-5 w-5" /> },
-      ]
-    },
     { path: '/moradores', label: 'Moradores', icon: <Users className="h-5 w-5" /> },
-    { path: '/areas-comuns', label: 'Áreas Comuns', icon: <LayoutDashboard className="h-5 w-5" /> },
-    { path: '/comunicados', label: 'Comunicados', icon: <Bell className="h-5 w-5" /> },
-    { path: '/documentos', label: 'Documentos', icon: <FileText className="h-5 w-5" /> },
-    { path: '/dedetizacoes', label: 'Dedetizações', icon: <Truck className="h-5 w-5" /> },
+    { path: '/comunicados', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
+    { path: '/documentos', label: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" /> },
+    { 
+      name: 'Financeiro', 
+      icon: <PiggyBank className="h-5 w-5" />, 
+      path: '/financeiro',
+      submenu: [
+        { name: 'Dashboard', icon: <BarChart className="h-5 w-5" />, path: '/financeiro/dashboard' },
+        { name: 'Receitas/Despesas', icon: <Receipt className="h-5 w-5" />, path: '/financeiro/receitas-despesas' },
+        { name: 'Recebimento PIX', icon: <QrCode className="h-5 w-5" />, path: '/financeiro/recebimento-pix' },
+        { name: 'Prestação de Contas', icon: <FileText className="h-5 w-5" />, path: '/financeiro/prestacao-contas' },
+      ] 
+    },
+    { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
+    { path: '/dedetizacoes', label: 'Dedetizações', icon: <Bug className="h-5 w-5" /> },
+    { path: '/servicos', label: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" /> },
+    { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" /> },
+    { path: '/contato', label: 'Fale Conosco', icon: <Mail className="h-5 w-5" /> },
   ];
   
   const navigate = useNavigate();
