@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -205,7 +206,7 @@ export const RecentTransactions = ({
               <TableHead className="text-center">Categoria</TableHead>
               <TableHead className="text-center">Unidade</TableHead>
               <TableHead className="text-center">Referência</TableHead>
-              <TableHead>Data de Pgto</TableHead>
+              <TableHead className="text-center">Data de Pgto</TableHead>
               <TableHead className="text-center">Valor</TableHead>
               <TableHead className="text-center w-[120px]">Ações</TableHead>
             </TableRow>
@@ -233,7 +234,7 @@ export const RecentTransactions = ({
                   <TableCell className="text-center">{getCategoryLabel(transaction.category)}</TableCell>
                   <TableCell className="text-center">{transaction.unit || '-'}</TableCell>
                   <TableCell className="text-center">{formatMonth(transaction.reference_month)}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
                     {formatDate(transaction.payment_date || transaction.due_date)}
                   </TableCell>
                   <TableCell className={`text-center font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
