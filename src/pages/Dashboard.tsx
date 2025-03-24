@@ -1,13 +1,23 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, MapPin } from 'lucide-react';
+import { Users, FileText, MapPin, BookOpen } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface LocationStats {
   states: [string, number][];
@@ -21,10 +31,21 @@ interface DashboardStats {
   locationStats: LocationStats;
 }
 
+interface NewsItem {
+  id: string;
+  title: string;
+  short_description: string;
+  full_content: string;
+  created_at: string;
+}
+
 const Dashboard = () => {
   const { user } = useApp();
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [selectedNewsItem, setSelectedNewsItem] = useState<NewsItem | null>(null);
+  const [isNewsDetailOpen, setIsNewsDetailOpen] = useState(false);
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
@@ -104,6 +125,9 @@ const Dashboard = () => {
             neighborhoods: topNeighborhoods
           }
         });
+
+        // Fetch news items
+        fetchNewsItems();
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       }
@@ -112,9 +136,39 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
+  const fetchNewsItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('news_items')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      setNewsItems(data || []);
+    } catch (error) {
+      console.error('Error fetching news items:', error);
+    }
+  };
+
   const handleStateClick = (state: string) => {
     setSelectedState(state);
     setIsStateDetailOpen(true);
+  };
+
+  const handleNewsItemClick = (item: NewsItem) => {
+    setSelectedNewsItem(item);
+    setIsNewsDetailOpen(true);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(date);
   };
 
   const getGreeting = () => {
@@ -219,7 +273,7 @@ const Dashboard = () => {
 
   const renderManagerDashboard = () => (
     <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md col-span-full lg:col-span-1">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
         </CardHeader>
@@ -229,6 +283,31 @@ const Dashboard = () => {
           </p>
         </CardContent>
       </Card>
+
+      {newsItems.length > 0 && (
+        <Card className="card-hover border-t-4 border-t-blue-600 shadow-md col-span-full lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Novidades</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {newsItems.slice(0, 1).map((item) => (
+              <div 
+                key={item.id} 
+                className="cursor-pointer hover:bg-gray-50 p-3 rounded-md transition-colors"
+                onClick={() => handleNewsItemClick(item)}
+              >
+                <h3 className="font-medium text-lg mb-1">{item.title}</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {formatDate(item.created_at)}
+                </p>
+                <p className="text-sm">{item.short_description}</p>
+                <p className="text-xs text-blue-600 mt-2">Clique para ler mais</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </section>
   );
 
@@ -249,6 +328,31 @@ const Dashboard = () => {
 
         {user?.isAdmin ? renderAdminDashboard() : renderManagerDashboard()}
       </div>
+
+      <Dialog open={isNewsDetailOpen} onOpenChange={setIsNewsDetailOpen}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>{selectedNewsItem?.title}</DialogTitle>
+            {selectedNewsItem && (
+              <DialogDescription>
+                Publicado em {formatDate(selectedNewsItem.created_at)}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="py-4">
+            <h3 className="font-medium text-sm mb-2">Descrição</h3>
+            <p className="text-sm mb-4">{selectedNewsItem?.short_description}</p>
+            
+            <h3 className="font-medium text-sm mb-2">Conteúdo Completo</h3>
+            <p className="text-sm whitespace-pre-wrap">{selectedNewsItem?.full_content}</p>
+          </div>
+          <div className="flex justify-end">
+            <DialogClose asChild>
+              <Button>Fechar</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
