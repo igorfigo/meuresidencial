@@ -88,7 +88,8 @@ const GerenciarAvisos = () => {
           .update({
             title: values.title,
             short_description: values.short_description,
-            full_content: values.full_content
+            full_content: values.full_content,
+            // We're not changing the active status when editing
           })
           .eq('id', currentItem.id);
 
