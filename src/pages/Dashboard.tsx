@@ -174,7 +174,7 @@ const Dashboard = () => {
       
       const { data: pestControls, error: pestControlsError } = await supabase
         .from('pest_controls')
-        .select('id, empresa, data, created_at')
+        .select('id, data, created_at')
         .eq('matricula', user.selectedCondominium)
         .order('created_at', { ascending: false })
         .limit(8);
@@ -198,7 +198,7 @@ const Dashboard = () => {
         })),
         ...(pestControls || []).map(item => ({
           id: item.id,
-          title: `Dedetização: ${item.empresa}`,
+          title: `Dedetização`,
           date: item.created_at,
           type: 'pest-control' as const
         }))
