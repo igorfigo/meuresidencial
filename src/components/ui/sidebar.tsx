@@ -15,7 +15,7 @@ import {
   Megaphone,
   Briefcase,
   Receipt,
-  FileInvoice  // New import for the invoice icon
+  ReceiptText  // Changed from FileInvoice to ReceiptText
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -61,7 +61,7 @@ export function Sidebar() {
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <UserPlus className="h-5 w-5" /> },
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
-    { path: '/gerar-faturas', label: 'Gerar Faturas', icon: <FileInvoice className="h-5 w-5" /> },
+    { path: '/gerar-faturas', label: 'Gerar Faturas', icon: <ReceiptText className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
     { 
       path: '/business-management', 

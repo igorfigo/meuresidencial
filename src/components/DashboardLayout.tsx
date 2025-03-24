@@ -26,7 +26,7 @@ import {
   Mail,
   Settings,
   Megaphone,
-  FileInvoice
+  ReceiptText
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -84,7 +84,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
-    { name: 'Gerar Faturas', icon: <FileInvoice className="h-5 w-5" />, path: '/gerar-faturas' },
+    { name: 'Gerar Faturas', icon: <ReceiptText className="h-5 w-5" />, path: '/gerar-faturas' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
     { 
       name: 'Business Management', 
