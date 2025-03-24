@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useNews, NewsItem } from '@/hooks/use-news';
@@ -28,7 +27,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { AdminOnly } from '@/components/AdminOnly';
+import AdminOnly from '@/components/AdminOnly';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function GerenciarAvisos() {
   const { newsItems, isLoading, fetchNewsItems, addNewsItem, updateNewsItemStatus, deleteNewsItem } = useNews();
