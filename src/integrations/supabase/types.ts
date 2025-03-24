@@ -587,36 +587,6 @@ export type Database = {
           },
         ]
       }
-      news_items: {
-        Row: {
-          created_at: string
-          full_content: string
-          id: string
-          is_active: boolean | null
-          matricula: string | null
-          short_description: string
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          full_content: string
-          id?: string
-          is_active?: boolean | null
-          matricula?: string | null
-          short_description: string
-          title: string
-        }
-        Update: {
-          created_at?: string
-          full_content?: string
-          id?: string
-          is_active?: boolean | null
-          matricula?: string | null
-          short_description?: string
-          title?: string
-        }
-        Relationships: []
-      }
       pest_control_attachments: {
         Row: {
           created_at: string

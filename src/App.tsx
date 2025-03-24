@@ -23,7 +23,6 @@ import UserProfile from "./pages/UserProfile";
 import FinanceiroReceitasDespesas from './pages/FinanceiroReceitasDespesas';
 import FinanceiroDashboard from './pages/FinanceiroDashboard';
 import FinanceiroPrestacaoContas from './pages/FinanceiroPrestacaoContas';
-import GerenciarAvisos from './pages/GerenciarAvisos';
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -108,7 +107,6 @@ const App = () => (
             <Route path="/dedetizacoes" element={<Dedetizacoes />} />
             <Route path="/cadastro-planos" element={<CadastroPlanos />} />
             <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
-            <Route path="/gerenciar-avisos" element={<GerenciarAvisos />} />
             
             <Route path="/financeiro" element={
               <AnimationController>
