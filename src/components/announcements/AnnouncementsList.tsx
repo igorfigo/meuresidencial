@@ -26,10 +26,20 @@ import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface AnnouncementsListProps {
   onEdit: (announcement: Announcement) => void;
 }
+
+const ITEMS_PER_PAGE = 6;
 
 const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
   const { 
@@ -42,6 +52,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
   
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [detailView, setDetailView] = useState<Announcement | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   
   const formatDate = (dateString: string) => {
     try {
@@ -67,6 +78,17 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
       await removeAnnouncement(deleteId);
       setDeleteId(null);
     }
+  };
+
+  // Calculate pagination
+  const totalPages = Math.ceil(announcements.length / ITEMS_PER_PAGE);
+  const paginatedAnnouncements = announcements.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
   
   if (isLoading) {
@@ -109,7 +131,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {announcements.map((announcement) => (
+              {paginatedAnnouncements.map((announcement) => (
                 <TableRow key={announcement.id}>
                   <TableCell className="font-medium">{announcement.title}</TableCell>
                   <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
@@ -164,6 +186,40 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
               ))}
             </TableBody>
           </Table>
+          
+          {/* Add pagination */}
+          {totalPages > 1 && (
+            <div className="py-4 border-t">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }).map((_, index) => (
+                    <PaginationItem key={index}>
+                      <PaginationLink
+                        isActive={currentPage === index + 1}
+                        onClick={() => handlePageChange(index + 1)}
+                      >
+                        {index + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </div>
       )}
       
