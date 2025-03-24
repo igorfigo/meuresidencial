@@ -1,14 +1,20 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useApp } from '@/contexts/AppContext';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useApp();
   
   useEffect(() => {
-    // Redirect to the login page
-    navigate('/');
-  }, [navigate]);
+    // If user is authenticated, redirect to dashboard
+    // Otherwise, redirect to login page
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
+  }, [navigate, isAuthenticated]);
 
   return null;
 };
