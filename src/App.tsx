@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import CadastroGestor from "./pages/CadastroGestor";
 import CadastroPlanos from "./pages/CadastroPlanos";
 import CadastroChavePix from "./pages/CadastroChavePix";
+import CadastrarNovidade from "./pages/CadastrarNovidade";
 import UnderConstruction from "./pages/UnderConstruction";
 import NotFound from "./pages/NotFound";
 import Moradores from "./pages/Moradores";
@@ -107,6 +107,7 @@ const App = () => (
             <Route path="/dedetizacoes" element={<Dedetizacoes />} />
             <Route path="/cadastro-planos" element={<CadastroPlanos />} />
             <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
+            <Route path="/cadastrar-novidade" element={<CadastrarNovidade />} />
             
             <Route path="/financeiro" element={
               <AnimationController>

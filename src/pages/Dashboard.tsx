@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +8,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { NewsCard } from '@/components/news/NewsCard';
+import { NewsHistory } from '@/components/news/NewsHistory';
+import { useNews } from '@/hooks/use-news';
 
 interface LocationStats {
   states: [string, number][];
@@ -24,6 +28,7 @@ const Dashboard = () => {
   const { user } = useApp();
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
+  const { activeNewsItem, allNewsItems, isLoading: isLoadingNews } = useNews();
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
@@ -192,6 +197,20 @@ const Dashboard = () => {
         </Card>
       </section>
 
+      <section className="mt-6">
+        <NewsCard 
+          newsItem={activeNewsItem} 
+          isLoading={isLoadingNews}
+        />
+      </section>
+
+      <section className="mt-6">
+        <NewsHistory 
+          newsItems={allNewsItems} 
+          isLoading={isLoadingNews}
+        />
+      </section>
+
       <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
         <SheetContent>
           <SheetHeader>
@@ -217,18 +236,27 @@ const Dashboard = () => {
   );
 
   const renderManagerDashboard = () => (
-    <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Este é o seu painel de controle onde você pode gerenciar seu condomínio.
-          </p>
-        </CardContent>
-      </Card>
-    </section>
+    <>
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Bem-vindo ao seu Dashboard</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              Este é o seu painel de controle onde você pode gerenciar seu condomínio.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <NewsCard 
+          newsItem={activeNewsItem} 
+          isLoading={isLoadingNews}
+        />
+      </section>
+    </>
   );
 
   return (
