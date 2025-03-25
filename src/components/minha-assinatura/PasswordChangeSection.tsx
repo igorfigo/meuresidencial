@@ -61,6 +61,17 @@ export const PasswordChangeSection = ({ userMatricula }: PasswordChangeSectionPr
         throw error;
       }
       
+      // Registrar a alteração no histórico de mudanças
+      await supabase.from('condominium_change_logs').insert([
+        {
+          matricula: userMatricula,
+          campo: 'senha',
+          valor_anterior: '********', // Não expor a senha anterior, apenas indicar que foi alterada
+          valor_novo: '********', // Não expor a nova senha, apenas indicar que foi alterada
+          usuario: 'Usuário do Condomínio' // Ou outro identificador adequado
+        }
+      ]);
+      
       toast.success('Senha alterada com sucesso!');
       setCurrentPassword('');
       setNewPassword('');
@@ -118,7 +129,7 @@ export const PasswordChangeSection = ({ userMatricula }: PasswordChangeSectionPr
           onClick={handleChangePassword} 
           disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
         >
-          Alterar Senha
+          {isLoading ? 'Alterando...' : 'Alterar Senha'}
         </Button>
       </div>
     </Card>
