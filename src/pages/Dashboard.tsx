@@ -361,6 +361,17 @@ const Dashboard = () => {
           <p className="text-muted-foreground">Aqui está seu Dashboard Gerencial.</p>
         </>
       );
+    } else if (user?.isResident) {
+      return (
+        <>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Olá {user?.nome || 'Representante'}
+          </h1>
+          <p className="text-muted-foreground">
+            Você está gerenciando o {user?.nomeCondominio || 'Condomínio'}
+          </p>
+        </>
+      );
     } else {
       return (
         <>
@@ -462,6 +473,76 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </section>
+    </>
+  );
+
+  const renderResidentDashboard = () => (
+    <>
+      {latestNews && (
+        <Card 
+          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer mb-4"
+          onClick={() => setNewsDialogOpen(true)}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
+              {isRecentNews(latestNews.created_at) && (
+                <Badge variant="default" className="bg-blue-500 hover:bg-blue-500 flex items-center gap-0.5 px-1.5 py-0.5 h-5">
+                  <Clock className="h-3 w-3 mr-0.5" />
+                  <span>NEW</span>
+                </Badge>
+              )}
+            </div>
+            <BellRing className="h-4 w-4 text-brand-600" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">{latestNews.short_description}</p>
+            <div className="mt-2 text-xs text-gray-500">
+              Publicado em: {formatDate(latestNews.created_at)}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      <Card className="p-6 mb-6 border-t-4 border-t-brand-600 shadow-md">
+        <div className="flex items-center gap-3 mb-6">
+          <Home className="h-5 w-5 text-brand-600" />
+          <h3 className="text-lg font-semibold">Bem-vindo ao seu portal de Morador</h3>
+        </div>
+        <p className="text-gray-600 mb-4">
+          Aqui você pode acessar todas as informações do seu condomínio, comunicados, áreas comuns, 
+          documentos úteis e serviços gerais disponíveis.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="flex items-start gap-2">
+            <MessageSquare className="h-5 w-5 text-blue-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium mb-1">Comunicados</h4>
+              <p className="text-sm text-gray-500">Acesse comunicados importantes do seu condomínio</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <CalendarDays className="h-5 w-5 text-green-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium mb-1">Áreas Comuns</h4>
+              <p className="text-sm text-gray-500">Veja disponibilidade e reserve áreas comuns</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <FileText className="h-5 w-5 text-purple-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium mb-1">Documentos Úteis</h4>
+              <p className="text-sm text-gray-500">Acesse documentos importantes do condomínio</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <Receipt className="h-5 w-5 text-orange-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium mb-1">Minhas Cobranças</h4>
+              <p className="text-sm text-gray-500">Visualize e pague suas contas de condomínio</p>
+            </div>
+          </div>
+        </div>
+      </Card>
     </>
   );
 
@@ -720,7 +801,11 @@ const Dashboard = () => {
 
         <Separator className="mb-6" />
 
-        {user?.isAdmin ? renderAdminDashboard() : renderManagerDashboard()}
+        {user?.isAdmin 
+          ? renderAdminDashboard() 
+          : user?.isResident 
+            ? renderResidentDashboard() 
+            : renderManagerDashboard()}
       </div>
 
       <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
