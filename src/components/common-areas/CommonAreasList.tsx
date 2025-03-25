@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Eye, 
@@ -36,7 +35,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { CommonAreaReservationDialog } from './CommonAreaReservationDialog';
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency, BRLToNumber } from '@/utils/currency';
 
 interface CommonArea {
   id: string;
@@ -141,6 +140,19 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
     if (opening) return `A partir de ${opening}`;
     if (closing) return `Até ${closing}`;
     return 'Não definido';
+  };
+
+  const getValueDisplay = (valor?: string) => {
+    if (!valor) return 'Grátis';
+    
+    // Try to detect if it's already formatted with R$
+    if (valor.includes('R$')) {
+      return valor.trim();
+    }
+    
+    // Otherwise, format it
+    const numValue = parseFloat(valor.replace(',', '.'));
+    return isNaN(numValue) ? 'Grátis' : formatCurrency(numValue);
   };
 
   const getStatusColor = (status: string) => {
@@ -314,7 +326,7 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
                   <div className="flex items-center gap-1.5">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">
-                      {selectedArea?.valor ? formatCurrency(selectedArea.valor) : 'Grátis'}
+                      {selectedArea?.valor ? getValueDisplay(selectedArea.valor) : 'Grátis'}
                     </span>
                   </div>
                 </div>
