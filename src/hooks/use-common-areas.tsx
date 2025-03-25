@@ -18,6 +18,7 @@ const commonAreaSchema = z.object({
   opening_time: z.string().min(1, "Horário de abertura é obrigatório"),
   closing_time: z.string().min(1, "Horário de fechamento é obrigatório"),
   weekdays: z.array(z.string()).optional(),
+  valor: z.string().optional(),
 });
 
 export type CommonAreaFormValues = z.infer<typeof commonAreaSchema>;
@@ -42,6 +43,7 @@ export const useCommonAreas = () => {
       opening_time: '',
       closing_time: '',
       weekdays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+      valor: '0',
     }
   });
 
@@ -106,6 +108,7 @@ export const useCommonAreas = () => {
         opening_time: '',
         closing_time: '',
         weekdays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+        valor: '0',
       });
     }
   };
@@ -132,6 +135,7 @@ export const useCommonAreas = () => {
             opening_time: data.opening_time,
             closing_time: data.closing_time,
             weekdays: data.weekdays,
+            valor: data.valor || '0',
             updated_at: new Date().toISOString(),
           })
           .eq('id', data.id);
@@ -151,6 +155,7 @@ export const useCommonAreas = () => {
             opening_time: data.opening_time,
             closing_time: data.closing_time,
             weekdays: data.weekdays,
+            valor: data.valor || '0',
           });
 
         if (error) throw error;

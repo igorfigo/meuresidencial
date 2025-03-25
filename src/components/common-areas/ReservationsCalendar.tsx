@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, startOfDay, addDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, Clock, User, Home } from 'lucide-react';
+import { Calendar, Clock, User, Home, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import {
@@ -31,6 +31,7 @@ interface Reservation {
   status: string;
   common_area: {
     name: string;
+    valor?: string;
   };
   residents: {
     nome_completo: string;
@@ -78,7 +79,7 @@ export const ReservationsCalendar: React.FC = () => {
         .from('common_area_reservations')
         .select(`
           *,
-          common_area:common_area_id (name),
+          common_area:common_area_id (name, valor),
           residents:resident_id (nome_completo, unidade)
         `)
         .in('common_area_id', areaIds)
@@ -127,6 +128,17 @@ export const ReservationsCalendar: React.FC = () => {
     }
   };
 
+  const formatCurrency = (value: string | undefined) => {
+    if (!value) return 'R$ 0,00';
+    
+    // Convert to number, then format
+    const numValue = parseFloat(value);
+    return numValue.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  };
+
   return (
     <Card className="border-t-4 border-t-brand-600">
       <CardHeader>
@@ -165,6 +177,7 @@ export const ReservationsCalendar: React.FC = () => {
                 <TableHead>Área</TableHead>
                 <TableHead>Horário</TableHead>
                 <TableHead>Morador</TableHead>
+                <TableHead>Valor</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -191,6 +204,12 @@ export const ReservationsCalendar: React.FC = () => {
                         <Home className="h-3 w-3" />
                         {reservation.residents.unidade}
                       </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-3 w-3" />
+                      {formatCurrency(reservation.common_area.valor)}
                     </div>
                   </TableCell>
                   <TableCell>

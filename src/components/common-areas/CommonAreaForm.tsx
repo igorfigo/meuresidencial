@@ -119,43 +119,62 @@ export const CommonAreaForm: React.FC<CommonAreaFormProps> = ({
                 )}
               />
               
-              <div className="grid grid-cols-2 gap-2">
-                <FormField
-                  control={form.control}
-                  name="opening_time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Horário de Abertura <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="time" 
-                          {...field} 
-                          value={field.value || ''}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={form.control}
+                name="valor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valor da Reserva (R$)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        isCurrency
+                        {...field} 
+                        placeholder="R$ 0,00"
+                        value={field.value || '0'} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-                <FormField
-                  control={form.control}
-                  name="closing_time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Horário de Fechamento <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="time" 
-                          {...field} 
-                          value={field.value || ''}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-2">
+              <FormField
+                control={form.control}
+                name="opening_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Horário de Abertura <span className="text-destructive">*</span></FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="time" 
+                        {...field} 
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="closing_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Horário de Fechamento <span className="text-destructive">*</span></FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="time" 
+                        {...field} 
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <FormField
