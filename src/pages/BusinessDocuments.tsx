@@ -117,17 +117,27 @@ const BusinessDocuments = () => {
       const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
       const filePath = `business_documents/${fileName}`;
       
+      console.log('Uploading file to storage bucket:', 'documents');
+      console.log('File path:', filePath);
+      
       // Upload file to Storage
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from('documents')
         .upload(filePath, selectedFile);
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Error uploading to storage:', uploadError);
+        throw uploadError;
+      }
+      
+      console.log('Upload successful:', data);
       
       // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from('documents')
         .getPublicUrl(filePath);
+      
+      console.log('Public URL:', publicUrl);
       
       // Save document metadata to database
       const { error: dbError } = await supabase
@@ -140,7 +150,10 @@ const BusinessDocuments = () => {
           file_type: selectedFile.type,
         });
       
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Error inserting into database:', dbError);
+        throw dbError;
+      }
       
       toast.success('Documento enviado com sucesso!');
       setOpenUploadDialog(false);
@@ -177,10 +190,19 @@ const BusinessDocuments = () => {
         const url = new URL(docData.file_path);
         const storagePath = url.pathname.split('/').slice(2).join('/');
         
+        console.log('Deleting file from storage:', storagePath);
+        
         // Delete from storage
-        await supabase.storage
+        const { error: storageError, data } = await supabase.storage
           .from('documents')
           .remove([storagePath]);
+          
+        if (storageError) {
+          console.warn('Error deleting from storage:', storageError);
+          // Continue with database deletion even if storage deletion fails
+        } else {
+          console.log('Storage deletion result:', data);
+        }
       }
       
       // Delete from database
