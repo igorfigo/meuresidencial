@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -64,13 +63,7 @@ const Login = () => {
             </TabsContent>
             
             <TabsContent value="resident">
-              <Alert className="mb-4 bg-green-50 border-green-200">
-                <AlertCircle className="h-4 w-4 text-green-600" />
-                <AlertTitle>Acesso de Morador</AlertTitle>
-                <AlertDescription>
-                  Use seu email cadastrado e seu CPF como senha.
-                </AlertDescription>
-              </Alert>
+              {/* Alert removed as requested */}
             </TabsContent>
           </Tabs>
           
@@ -114,6 +107,8 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  maxLength={activeTab === 'resident' ? 11 : undefined}
+                  numberOnly={activeTab === 'resident'}
                 />
                 <button
                   type="button"
