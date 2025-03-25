@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,7 +24,7 @@ export type CommonAreaFormValues = z.infer<typeof commonAreaSchema>;
 
 export const useCommonAreas = () => {
   const { user } = useApp();
-  const matricula = user?.selectedCondominium || '';
+  const matricula = user?.selectedCondominium || user?.matricula || '';
   const queryClient = useQueryClient();
   
   const [editingArea, setEditingArea] = useState<CommonAreaFormValues | null>(null);
@@ -48,6 +49,12 @@ export const useCommonAreas = () => {
   const { data: commonAreas, isLoading, refetch } = useQuery({
     queryKey: ['common-areas', matricula],
     queryFn: async () => {
+      if (!matricula) {
+        console.log('No matricula provided for common areas query');
+        return [];
+      }
+      
+      console.log('Fetching common areas for matricula:', matricula);
       const { data, error } = await supabase
         .from('common_areas')
         .select('*')
@@ -59,6 +66,7 @@ export const useCommonAreas = () => {
         throw new Error(error.message);
       }
       
+      console.log('Common areas fetched:', data?.length || 0);
       return data || [];
     },
     enabled: !!matricula,
