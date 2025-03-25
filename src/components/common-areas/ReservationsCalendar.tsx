@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format, startOfDay, addDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar, Clock, User, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,13 +65,11 @@ export const ReservationsCalendar: React.FC = () => {
       }
       
       if (!commonAreas || commonAreas.length === 0) {
-        console.log('No common areas found for matricula:', matricula);
         setLoading(false);
         return;
       }
       
       const areaIds = commonAreas.map(area => area.id);
-      console.log('Fetching reservations for areas:', areaIds);
       
       // Then get all reservations for these areas
       const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
@@ -90,7 +88,6 @@ export const ReservationsCalendar: React.FC = () => {
       if (error) {
         console.error('Error fetching reservations:', error);
       } else {
-        console.log('Fetched reservations:', data);
         setReservations(data || []);
       }
     } catch (error) {
