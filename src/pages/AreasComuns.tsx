@@ -126,8 +126,8 @@ const AreasComuns = () => {
                 </Card>
               )}
               
-              {/* Show calendar view of all reservations */}
-              {commonAreas && commonAreas.length > 0 && (
+              {/* Only show calendar view for residents */}
+              {isResident && commonAreas && commonAreas.length > 0 && (
                 <ReservationsCalendar />
               )}
             </div>
