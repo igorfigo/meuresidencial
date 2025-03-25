@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +29,6 @@ export const useCommonAreas = () => {
   const [editingArea, setEditingArea] = useState<CommonAreaFormValues | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isProcessingReservation, setIsProcessingReservation] = useState(false);
 
   // Initialize form with react-hook-form
   const form = useForm<CommonAreaFormValues>({
@@ -195,72 +193,6 @@ export const useCommonAreas = () => {
     }
   };
 
-  // Approve a reservation
-  const approveReservation = async (id: string) => {
-    setIsProcessingReservation(true);
-    
-    try {
-      const { error } = await supabase
-        .from('common_area_reservations')
-        .update({ status: 'approved' })
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast.success('Reserva aprovada com sucesso');
-      
-    } catch (error: any) {
-      console.error('Error approving reservation:', error);
-      toast.error(`Erro ao aprovar reserva: ${error.message}`);
-    } finally {
-      setIsProcessingReservation(false);
-    }
-  };
-
-  // Reject a reservation
-  const rejectReservation = async (id: string) => {
-    setIsProcessingReservation(true);
-    
-    try {
-      const { error } = await supabase
-        .from('common_area_reservations')
-        .update({ status: 'rejected' })
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast.success('Reserva rejeitada com sucesso');
-      
-    } catch (error: any) {
-      console.error('Error rejecting reservation:', error);
-      toast.error(`Erro ao rejeitar reserva: ${error.message}`);
-    } finally {
-      setIsProcessingReservation(false);
-    }
-  };
-
-  // Cancel a reservation
-  const cancelReservation = async (id: string) => {
-    setIsProcessingReservation(true);
-    
-    try {
-      const { error } = await supabase
-        .from('common_area_reservations')
-        .update({ status: 'cancelled' })
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast.success('Reserva cancelada com sucesso');
-      
-    } catch (error: any) {
-      console.error('Error cancelling reservation:', error);
-      toast.error(`Erro ao cancelar reserva: ${error.message}`);
-    } finally {
-      setIsProcessingReservation(false);
-    }
-  };
-
   return {
     form,
     commonAreas,
@@ -273,9 +205,5 @@ export const useCommonAreas = () => {
     isDeleting,
     fetchReservations,
     refetch,
-    approveReservation,
-    rejectReservation,
-    cancelReservation,
-    isProcessingReservation
   };
 };
