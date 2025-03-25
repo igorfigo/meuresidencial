@@ -35,14 +35,15 @@ import { Card } from '@/components/ui/card';
 
 interface DocumentsListProps {
   documents: Document[];
-  onEdit: (document: Document) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (document: Document) => void;
+  onDelete?: (id: string) => void;
   isDeleting: boolean;
   getFileUrl: (path: string) => Promise<string>;
   fetchAttachments: (id: string) => Promise<DocumentAttachment[]>;
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  isResident?: boolean;
 }
 
 const getDocumentTypeLabel = (tipo: string) => {
@@ -67,7 +68,8 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
   fetchAttachments,
   currentPage,
   totalPages,
-  onPageChange
+  onPageChange,
+  isResident = false
 }) => {
   const [detailView, setDetailView] = useState<Document | null>(null);
   const [attachments, setAttachments] = useState<DocumentAttachment[]>([]);
@@ -190,9 +192,12 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
       {documents.length === 0 ? (
         <div className="text-center py-8 bg-white rounded-md">
           <FileText className="h-10 w-10 mx-auto text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum documento cadastrado</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum documento encontrado</h3>
           <p className="mt-1 text-sm text-gray-500">
-            Comece adicionando um novo documento.
+            {isResident 
+              ? "Não há documentos disponíveis para o seu condomínio."
+              : "Comece adicionando um novo documento."
+            }
           </p>
         </div>
       ) : (
@@ -222,23 +227,29 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => onEdit(document)}
-                        title="Editar"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => onDelete(document.id!)}
-                        disabled={isDeleting}
-                        title="Excluir"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
+                      
+                      {!isResident && onEdit && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => onEdit(document)}
+                          title="Editar"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
+                      
+                      {!isResident && onDelete && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => onDelete(document.id!)}
+                          disabled={isDeleting}
+                          title="Excluir"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

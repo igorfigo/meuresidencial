@@ -7,6 +7,7 @@ import { useDocuments } from '@/hooks/use-documents';
 import { DocumentForm } from '@/components/documents/DocumentForm';
 import { DocumentsList } from '@/components/documents/DocumentsList';
 import { Card } from '@/components/ui/card';
+import { useApp } from '@/contexts/AppContext';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -45,6 +46,10 @@ const Documentos = () => {
   const [showForm, setShowForm] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const { user } = useApp();
+  
+  // Check if the user is a resident
+  const isResident = user?.isResident === true;
 
   const totalPages = documents ? Math.ceil(documents.length / ITEMS_PER_PAGE) : 1;
   const paginatedDocuments = documents ? documents.slice(
@@ -94,10 +99,13 @@ const Documentos = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Documentos Úteis</h1>
             <p className="text-muted-foreground">
-              Gerencie os documentos úteis do seu condomínio
+              {isResident 
+                ? "Veja todos os documentos úteis do seu condomínio." 
+                : "Gerencie os documentos úteis do seu condomínio"
+              }
             </p>
           </div>
-          {!showForm && (
+          {!showForm && !isResident && (
             <Button onClick={handleNewDocument} className="bg-brand-600 hover:bg-brand-700">
               <Plus className="mr-2 h-4 w-4" />
               Novo Documento
@@ -106,7 +114,7 @@ const Documentos = () => {
         </div>
 
         <div className="border-t pt-6">
-          {showForm ? (
+          {showForm && !isResident ? (
             <Card className="border-t-4 border-t-brand-600 shadow-md">
               <DocumentForm
                 form={form}
@@ -127,35 +135,38 @@ const Documentos = () => {
           ) : (
             <DocumentsList
               documents={paginatedDocuments}
-              onEdit={handleEditDocument}
-              onDelete={handleDeleteClick}
+              onEdit={!isResident ? handleEditDocument : undefined}
+              onDelete={!isResident ? handleDeleteClick : undefined}
               isDeleting={isDeleting}
               getFileUrl={getFileUrl}
               fetchAttachments={fetchAttachments}
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={handlePageChange}
+              isResident={isResident}
             />
           )}
         </div>
       </div>
 
-      <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {!isResident && (
+        <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </DashboardLayout>
   );
 };

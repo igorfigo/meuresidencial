@@ -39,7 +39,9 @@ export type DocumentFormValues = z.infer<typeof documentSchema>;
 export function useDocuments() {
   const { toast } = useToast();
   const { user } = useApp();
-  const matricula = user?.selectedCondominium || '';
+  
+  // Get the condominium matricula from user, handling both property manager and resident cases
+  const matricula = user?.selectedCondominium || user?.matricula || '';
   
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,9 +64,14 @@ export function useDocuments() {
   
   // Fetch documents
   const fetchDocuments = async () => {
-    if (!matricula) return;
+    if (!matricula) {
+      console.log("No matricula available, cannot fetch documents");
+      return;
+    }
     
+    console.log("Fetching documents for matricula:", matricula);
     setIsLoading(true);
+    
     try {
       const { data, error } = await supabase
         .from('documents')
@@ -73,6 +80,8 @@ export function useDocuments() {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
+      
+      console.log("Documents fetched:", data?.length || 0);
       setDocuments(data || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -343,7 +352,10 @@ export function useDocuments() {
   // Fetch documents on mount
   useEffect(() => {
     if (matricula) {
+      console.log("Matricula detected, fetching documents:", matricula);
       fetchDocuments();
+    } else {
+      console.log("No matricula available yet");
     }
   }, [matricula]);
   
