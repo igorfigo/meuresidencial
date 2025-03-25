@@ -80,9 +80,12 @@ const Dashboard = () => {
       fetchResidentCount();
       fetchCommonAreasCount();
       fetchRecentItems();
-      fetchUnitPaymentStatus();
+      
+      if (!user?.isResident) {
+        fetchUnitPaymentStatus();
+      }
     }
-  }, [user?.isAdmin, user?.selectedCondominium]);
+  }, [user?.isAdmin, user?.isResident, user?.selectedCondominium]);
   
   const fetchLatestNews = async () => {
     try {
@@ -361,6 +364,17 @@ const Dashboard = () => {
           <p className="text-muted-foreground">Aqui está seu Dashboard Gerencial.</p>
         </>
       );
+    } else if (user?.isResident) {
+      return (
+        <>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Olá {user?.nome || 'Morador(a)'}
+          </h1>
+          <p className="text-muted-foreground">
+            Bem-vindo(a) ao {user?.nomeCondominio || 'Condomínio'} - Unidade {user?.unit || ''}
+          </p>
+        </>
+      );
     } else {
       return (
         <>
@@ -462,6 +476,80 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </section>
+    </>
+  );
+
+  const renderResidentDashboard = () => (
+    <>
+      <div className="grid gap-4">
+        {latestNews && (
+          <Card 
+            className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer"
+            onClick={() => setNewsDialogOpen(true)}
+          >
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
+                {isRecentNews(latestNews.created_at) && (
+                  <Badge variant="default" className="bg-blue-500 hover:bg-blue-500 flex items-center gap-0.5 px-1.5 py-0.5 h-5">
+                    <Clock className="h-3 w-3 mr-0.5" />
+                    <span>NEW</span>
+                  </Badge>
+                )}
+              </div>
+              <BellRing className="h-4 w-4 text-brand-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">{latestNews.short_description}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                Publicado em: {formatDate(latestNews.created_at)}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Bem-vindo ao Portal do Morador</CardTitle>
+            <Home className="h-4 w-4 text-brand-600" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-3">
+              Este é o seu acesso ao portal do condomínio. Aqui você pode:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="flex items-start gap-2 bg-blue-50 p-3 rounded-md">
+                <BellRing className="h-5 w-5 text-blue-500 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-blue-700">Comunicados</h3>
+                  <p className="text-sm text-blue-600">Fique por dentro das notícias do condomínio</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 bg-green-50 p-3 rounded-md">
+                <FileText className="h-5 w-5 text-green-500 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-green-700">Documentos</h3>
+                  <p className="text-sm text-green-600">Acesse regulamentos e atas</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 bg-amber-50 p-3 rounded-md">
+                <Home className="h-5 w-5 text-amber-500 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-amber-700">Áreas Comuns</h3>
+                  <p className="text-sm text-amber-600">Agende o uso de áreas comuns</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 bg-purple-50 p-3 rounded-md">
+                <Bug className="h-5 w-5 text-purple-500 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-purple-700">Dedetizações</h3>
+                  <p className="text-sm text-purple-600">Veja o calendário de dedetizações</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </>
   );
 
@@ -720,7 +808,9 @@ const Dashboard = () => {
 
         <Separator className="mb-6" />
 
-        {user?.isAdmin ? renderAdminDashboard() : renderManagerDashboard()}
+        {user?.isAdmin ? renderAdminDashboard() : (
+          user?.isResident ? renderResidentDashboard() : renderManagerDashboard()
+        )}
       </div>
 
       <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
@@ -770,3 +860,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
