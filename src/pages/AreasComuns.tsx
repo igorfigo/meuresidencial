@@ -1,17 +1,11 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useCommonAreas } from '@/hooks/use-common-areas';
-import { useResidentCommonAreas } from '@/hooks/use-resident-common-areas';
 import { CommonAreaForm } from '@/components/common-areas/CommonAreaForm';
 import { CommonAreasList } from '@/components/common-areas/CommonAreasList';
-import { ResidentCommonAreasList } from '@/components/resident/CommonAreasList';
-import { ReservationForm } from '@/components/resident/ReservationForm';
-import { MyReservationsList } from '@/components/resident/MyReservationsList';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -22,13 +16,8 @@ import {
   AlertDialogHeader, 
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
-import { useApp } from '@/contexts/AppContext';
 
 const AreasComuns = () => {
-  const { isAdmin, isResident } = useApp();
-  const [currentTab, setCurrentTab] = useState<string>(isAdmin ? "manage" : "reserve");
-  
-  // Admin hook for managing common areas
   const { 
     form, 
     commonAreas, 
@@ -43,27 +32,9 @@ const AreasComuns = () => {
     refetch
   } = useCommonAreas();
   
-  // Resident hook for reserving common areas
-  const {
-    form: reservationForm,
-    commonAreas: residentCommonAreas,
-    myReservations,
-    isLoadingAreas,
-    isLoadingReservations,
-    isSubmitting: isSubmittingReservation,
-    isDeleting: isDeletingReservation,
-    onSubmit: onSubmitReservation,
-    onCancelReservation,
-    resetForm: resetReservationForm,
-    selectedCommonArea,
-    selectCommonArea
-  } = useResidentCommonAreas();
-  
   const [showForm, setShowForm] = useState(false);
-  const [showReservationForm, setShowReservationForm] = useState(false);
   const [areaToDelete, setAreaToDelete] = useState<string | null>(null);
 
-  // Admin handlers
   const handleNewArea = () => {
     resetForm();
     setShowForm(true);
@@ -95,22 +66,6 @@ const AreasComuns = () => {
     }
   };
 
-  // Resident handlers
-  const handleSelectArea = (area: any) => {
-    selectCommonArea(area);
-    setShowReservationForm(true);
-  };
-
-  const handleCancelReservationForm = () => {
-    resetReservationForm();
-    setShowReservationForm(false);
-  };
-
-  const handleReservationSubmit = (data: any) => {
-    onSubmitReservation(data);
-    setShowReservationForm(false);
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -118,12 +73,10 @@ const AreasComuns = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Áreas Comuns</h1>
             <p className="text-muted-foreground">
-              {isAdmin 
-                ? "Gerencie as áreas comuns do seu condomínio" 
-                : "Visualize e reserve áreas comuns do seu condomínio"}
+              Gerencie as áreas comuns do seu condomínio
             </p>
           </div>
-          {isAdmin && !showForm && (
+          {!showForm && (
             <Button onClick={handleNewArea} className="bg-brand-600 hover:bg-brand-700">
               <Plus className="mr-2 h-4 w-4" />
               Nova Área Comum
@@ -132,72 +85,34 @@ const AreasComuns = () => {
         </div>
 
         <div className="border-t pt-6">
-          {isAdmin ? (
-            // Admin View
-            <>
-              {showForm ? (
-                <Card className="border-t-4 border-t-brand-600 shadow-md">
-                  <CommonAreaForm
-                    form={form}
-                    onSubmit={handleFormSubmit}
-                    isSubmitting={isSubmitting}
-                    isEditing={!!editingArea}
-                    onCancel={handleCancelForm}
+          {showForm ? (
+            <Card className="border-t-4 border-t-brand-600 shadow-md">
+              <CommonAreaForm
+                form={form}
+                onSubmit={handleFormSubmit}
+                isSubmitting={isSubmitting}
+                isEditing={!!editingArea}
+                onCancel={handleCancelForm}
+              />
+            </Card>
+          ) : (
+            <div>
+              {isLoading ? (
+                <div className="py-10 text-center text-muted-foreground">
+                  Carregando áreas comuns...
+                </div>
+              ) : (
+                <Card className="border-t-4 border-t-brand-600 shadow-md overflow-hidden">
+                  <CommonAreasList
+                    commonAreas={commonAreas || []}
+                    onEdit={handleEditArea}
+                    onDelete={handleDeleteClick}
+                    isDeleting={isDeleting}
+                    fetchReservations={fetchReservations}
                   />
                 </Card>
-              ) : (
-                <div>
-                  {isLoading ? (
-                    <div className="py-10 text-center text-muted-foreground">
-                      Carregando áreas comuns...
-                    </div>
-                  ) : (
-                    <Card className="border-t-4 border-t-brand-600 shadow-md overflow-hidden">
-                      <CommonAreasList
-                        commonAreas={commonAreas || []}
-                        onEdit={handleEditArea}
-                        onDelete={handleDeleteClick}
-                        isDeleting={isDeleting}
-                        fetchReservations={fetchReservations}
-                      />
-                    </Card>
-                  )}
-                </div>
               )}
-            </>
-          ) : (
-            // Resident View
-            <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="reserve">Reservar</TabsTrigger>
-                <TabsTrigger value="my-reservations">Minhas Reservas</TabsTrigger>
-              </TabsList>
-              <TabsContent value="reserve" className="pt-4">
-                {showReservationForm ? (
-                  <ReservationForm
-                    form={reservationForm}
-                    onSubmit={handleReservationSubmit}
-                    onCancel={handleCancelReservationForm}
-                    isSubmitting={isSubmittingReservation}
-                    selectedArea={selectedCommonArea}
-                  />
-                ) : (
-                  <ResidentCommonAreasList
-                    commonAreas={residentCommonAreas || []}
-                    isLoading={isLoadingAreas}
-                    onSelect={handleSelectArea}
-                  />
-                )}
-              </TabsContent>
-              <TabsContent value="my-reservations" className="pt-4">
-                <MyReservationsList
-                  reservations={myReservations || []}
-                  isLoading={isLoadingReservations}
-                  onCancel={onCancelReservation}
-                  isDeleting={isDeletingReservation}
-                />
-              </TabsContent>
-            </Tabs>
+            </div>
           )}
         </div>
       </div>
