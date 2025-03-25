@@ -6,7 +6,7 @@ import { ChartContainer } from '@/components/ui/chart';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { formatToBRL, BRLToNumber } from '@/utils/currency';
 
@@ -180,25 +180,25 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
               <div className="animate-pulse text-lg text-gray-500">Carregando dados...</div>
             </div>
           ) : chartData.length > 0 ? (
-            <ChartContainer 
-              config={{
-                value: { color: '#f97150', label: 'Valor' }
-              }}
-            >
-              <BarChart data={chartData} barCategoryGap={5}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+                barCategoryGap={5}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="month" 
                   tick={{ fontSize: 12 }}
-                  axisLine={true}
-                  tickLine={true}
+                  axisLine={{ stroke: '#e5e7eb' }}
+                  tickLine={{ stroke: '#e5e7eb' }}
                 />
                 <YAxis 
                   tickFormatter={formatTooltipValue} 
                   tick={{ fontSize: 11 }}
                   domain={[0, 'auto']}
-                  axisLine={true}
-                  tickLine={true}
+                  axisLine={{ stroke: '#e5e7eb' }}
+                  tickLine={{ stroke: '#e5e7eb' }}
                 />
                 <Tooltip 
                   content={({ active, payload }) => {
@@ -224,7 +224,7 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
-            </ChartContainer>
+            </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500">Nenhum dado disponível para esta categoria nos últimos 6 meses.</p>
