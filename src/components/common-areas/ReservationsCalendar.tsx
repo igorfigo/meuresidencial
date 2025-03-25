@@ -65,6 +65,7 @@ export const ReservationsCalendar: React.FC = () => {
       }
       
       if (!commonAreas || commonAreas.length === 0) {
+        console.log('No common areas found for matricula:', matricula);
         setLoading(false);
         return;
       }

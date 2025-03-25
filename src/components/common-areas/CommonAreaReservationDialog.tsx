@@ -87,6 +87,22 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
     setIsSubmitting(true);
     
     try {
+      // Get resident information first
+      const { data: resident, error: residentError } = await supabase
+        .from('residents')
+        .select('*')
+        .eq('id', user.residentId)
+        .single();
+        
+      if (residentError) {
+        console.error('Error fetching resident information:', residentError);
+        toast.error(`Erro ao obter informações do morador: ${residentError.message}`);
+        setIsSubmitting(false);
+        return;
+      }
+      
+      console.log('Resident information:', resident);
+      
       const reservationData = {
         common_area_id: commonArea.id,
         resident_id: user.residentId,
@@ -110,25 +126,30 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
       if (checkError) {
         console.error('Error checking existing reservations:', checkError);
         toast.error('Erro ao verificar disponibilidade');
+        setIsSubmitting(false);
         return;
       }
       
       if (existingReservations && existingReservations.length > 0) {
         toast.error('Este horário já está reservado. Por favor, escolha outro horário.');
+        setIsSubmitting(false);
         return;
       }
       
       // Create the reservation
-      const { error } = await supabase
+      const { data: newReservation, error } = await supabase
         .from('common_area_reservations')
-        .insert(reservationData);
+        .insert(reservationData)
+        .select();
       
       if (error) {
         console.error('Error creating reservation:', error);
         toast.error(`Erro ao criar reserva: ${error.message}`);
+        setIsSubmitting(false);
         return;
       }
       
+      console.log('Reservation created successfully:', newReservation);
       toast.success('Reserva criada com sucesso!');
       form.reset();
       onSuccess();
