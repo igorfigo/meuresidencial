@@ -93,6 +93,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       submenu: [
         { name: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" />, path: '/business-management/despesas' },
         { name: 'Contratos', icon: <FileText className="h-5 w-5" />, path: '/business-management/contratos' },
+        { name: 'Documentos', icon: <FileIcon className="h-5 w-5" />, path: '/business-management/documentos' },
       ] 
     },
   ];
