@@ -11,6 +11,19 @@ export const formatToBRL = (value: number | string): string => {
   return numValue.toFixed(2).replace('.', ',');
 };
 
+// Format a number to currency (with R$ prefix)
+export const formatCurrency = (value: number | string): string => {
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  
+  if (isNaN(numValue)) return 'R$ 0,00';
+  
+  // Format to BRL format with R$ prefix
+  return `R$ ${numValue.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+};
+
 // Convert from BRL format (with comma) to number
 export const BRLToNumber = (value: string): number => {
   if (!value || value === '') return 0;
