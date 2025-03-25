@@ -6,12 +6,14 @@ import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useApp } from '@/contexts/AppContext';
 
 interface PasswordChangeSectionProps {
   userMatricula: string;
 }
 
 export const PasswordChangeSection = ({ userMatricula }: PasswordChangeSectionProps) => {
+  const { user } = useApp();
   const [isLoading, setIsLoading] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -61,14 +63,14 @@ export const PasswordChangeSection = ({ userMatricula }: PasswordChangeSectionPr
         throw error;
       }
       
-      // Registrar a alteração no histórico de mudanças
+      // Registrar a alteração no histórico de mudanças com o email do usuário
       await supabase.from('condominium_change_logs').insert([
         {
           matricula: userMatricula,
           campo: 'senha',
           valor_anterior: '********', // Não expor a senha anterior, apenas indicar que foi alterada
           valor_novo: '********', // Não expor a nova senha, apenas indicar que foi alterada
-          usuario: 'Usuário do Condomínio' // Ou outro identificador adequado
+          usuario: user?.email || 'Usuário do Condomínio' // Usar o email do usuário autenticado
         }
       ]);
       
