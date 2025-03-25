@@ -97,9 +97,6 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         status: 'pending',
       };
       
-      // Log the reservation data for debugging
-      console.log('Creating reservation with data:', reservationData);
-      
       // Check for existing reservations
       const { data: existingReservations, error: checkError } = await supabase
         .from('common_area_reservations')
