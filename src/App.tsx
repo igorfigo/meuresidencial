@@ -25,13 +25,12 @@ import Dedetizacoes from '@/pages/Dedetizacoes';
 import MinhaAssinatura from '@/pages/MinhaAssinatura';
 import FaleConosco from '@/pages/FaleConosco';
 import GerenciarAvisos from '@/pages/GerenciarAvisos';
-import BusinessManagement from '@/pages/BusinessManagement';
-import BusinessDespesas from '@/pages/BusinessDespesas';
-import BusinessContratos from '@/pages/BusinessContratos';
-import BusinessDocumentos from '@/pages/BusinessDocumentos';
 
 // We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
+const BusinessManagement = () => <div>Business Management (Em Desenvolvimento)</div>;
+const BusinessDespesas = () => <div>Business Despesas (Em Desenvolvimento)</div>;
+const BusinessContratos = () => <div>Business Contratos (Em Desenvolvimento)</div>;
 const Servicos = () => <div>Serviços (Em Desenvolvimento)</div>;
 
 function App() {
@@ -61,7 +60,6 @@ function App() {
               <Route path="/business-management" element={<AuthRequired><BusinessManagement /></AuthRequired>} />
               <Route path="/business-management/despesas" element={<AuthRequired><BusinessDespesas /></AuthRequired>} />
               <Route path="/business-management/contratos" element={<AuthRequired><BusinessContratos /></AuthRequired>} />
-              <Route path="/business-management/documentos" element={<AuthRequired><BusinessDocumentos /></AuthRequired>} />
               
               {/* Manager Routes */}
               <Route path="/moradores" element={<AuthRequired><Moradores /></AuthRequired>} />
