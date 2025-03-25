@@ -77,6 +77,7 @@ export function Sidebar() {
       submenu: [
         { path: '/business-management/despesas', label: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" /> },
         { path: '/business-management/contratos', label: 'Contratos', icon: <FileText className="h-5 w-5" /> },
+        { path: '/business-management/documentos', label: 'Documentos', icon: <FileIcon className="h-5 w-5" /> }
       ]
     },
   ];

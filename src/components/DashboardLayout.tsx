@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -95,6 +94,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       submenu: [
         { name: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" />, path: '/business-management/despesas' },
         { name: 'Contratos', icon: <FileText className="h-5 w-5" />, path: '/business-management/contratos' },
+        { name: 'Documentos', icon: <FileIcon className="h-5 w-5" />, path: '/business-management/documentos' },
       ] 
     },
   ];
