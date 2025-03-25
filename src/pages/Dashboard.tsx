@@ -361,17 +361,6 @@ const Dashboard = () => {
           <p className="text-muted-foreground">Aqui está seu Dashboard Gerencial.</p>
         </>
       );
-    } else if (user?.isResident) {
-      return (
-        <>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Olá {user?.nome || 'Morador'}
-          </h1>
-          <p className="text-muted-foreground">
-            Bem-vindo ao portal do seu condomínio
-          </p>
-        </>
-      );
     } else {
       return (
         <>
@@ -473,77 +462,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </section>
-    </>
-  );
-
-  const renderResidentDashboard = () => (
-    <>
-      {latestNews && (
-        <Card 
-          className="card-hover border-t-4 border-t-brand-600 shadow-md cursor-pointer mb-4"
-          onClick={() => setNewsDialogOpen(true)}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
-              {isRecentNews(latestNews.created_at) && (
-                <Badge variant="default" className="bg-blue-500 hover:bg-blue-500 flex items-center gap-0.5 px-1.5 py-0.5 h-5">
-                  <Clock className="h-3 w-3 mr-0.5" />
-                  <span>NEW</span>
-                </Badge>
-              )}
-            </div>
-            <BellRing className="h-4 w-4 text-brand-600" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">{latestNews.short_description}</p>
-            <div className="mt-2 text-xs text-gray-500">
-              Publicado em: {formatDate(latestNews.created_at)}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      <Card className="p-6 mb-6 border-t-4 border-t-brand-600 shadow-md">
-        <div className="flex items-center gap-3 mb-6">
-          <Home className="h-5 w-5 text-brand-600" />
-          <h3 className="text-lg font-semibold">Bem-vindo ao seu portal de Morador</h3>
-        </div>
-        <p className="text-gray-600 mb-4">
-          Aqui você pode acessar todas as informações do seu condomínio, comunicados, áreas comuns, 
-          documentos úteis e serviços gerais disponíveis.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div className="flex items-start gap-2">
-            <MessageSquare className="h-5 w-5 text-blue-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium mb-1">Comunicados</h4>
-              <p className="text-sm text-gray-500">Acesse comunicados importantes do seu condomínio</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <CalendarDays className="h-5 w-5 text-green-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium mb-1">Áreas Comuns</h4>
-              <p className="text-sm text-gray-500">Veja disponibilidade e reserve áreas comuns</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <FileText className="h-5 w-5 text-purple-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium mb-1">Documentos Úteis</h4>
-              <p className="text-sm text-gray-500">Acesse documentos importantes do condomínio</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <Receipt className="h-5 w-5 text-orange-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium mb-1">Minhas Cobranças</h4>
-              <p className="text-sm text-gray-500">Visualize e pague suas contas de condomínio</p>
-            </div>
-          </div>
-        </div>
-      </Card>
     </>
   );
 
@@ -769,4 +687,86 @@ const Dashboard = () => {
                     <div className="flex items-center gap-1.5">
                       {item.type === 'announcement' && <BellRing className="h-3.5 w-3.5 text-blue-500" />}
                       {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-green-500" />}
-                      {item.type === 'pest-control' && <
+                      {item.type === 'pest-control' && <Bug className="h-3.5 w-3.5 text-red-500" />}
+                      <span className="text-sm truncate max-w-[180px]">{item.title}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
+                  Nenhum cadastro recente
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    </>
+  );
+
+  return (
+    <DashboardLayout>
+      <div className="flex flex-col space-y-6 pb-6 animate-fade-in">
+        <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center rounded-lg bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800 mb-2">
+              <span className="mr-2">👋</span>
+              <span>Bem-vindo de volta</span>
+            </div>
+            {getGreeting()}
+          </div>
+        </header>
+
+        <Separator className="mb-6" />
+
+        {user?.isAdmin ? renderAdminDashboard() : renderManagerDashboard()}
+      </div>
+
+      <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Cidades em {selectedState}</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            {selectedState && stats.locationStats.cities[selectedState] ? (
+              <ul className="space-y-2">
+                {stats.locationStats.cities[selectedState].map(([city, count]) => (
+                  <li key={city} className="flex justify-between items-center py-2 border-b">
+                    <span>{city}</span>
+                    <span className="font-medium">{count}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground">Sem dados de cidades para este estado.</p>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {latestNews && (
+        <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
+          <DialogContent className="sm:max-w-[525px]">
+            <DialogHeader>
+              <DialogTitle>{latestNews.title}</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4 space-y-4">
+              <p className="text-muted-foreground">
+                {latestNews.full_content}
+              </p>
+              <div className="text-sm text-gray-500">
+                Publicado em: {formatDate(latestNews.created_at)}
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setNewsDialogOpen(false)}>Fechar</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </DashboardLayout>
+  );
+};
+
+export default Dashboard;
