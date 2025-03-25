@@ -30,16 +30,22 @@ export function useAnnouncements() {
   const { toast } = useToast();
   const { user } = useApp();
 
-  const selectedCondominium = user?.selectedCondominium || '';
+  // Get the condominium matricula from user, handling both property manager and resident cases
+  const condominiumMatricula = user?.selectedCondominium || user?.matricula || '';
 
   const fetchAnnouncements = async () => {
-    if (!selectedCondominium) return;
+    if (!condominiumMatricula) {
+      console.log("No condominium matricula available, cannot fetch announcements");
+      return;
+    }
     
+    console.log("Fetching announcements for matricula:", condominiumMatricula);
     setIsLoading(true);
     setError(null);
     
     try {
-      const data = await getAnnouncements(selectedCondominium);
+      const data = await getAnnouncements(condominiumMatricula);
+      console.log("Announcements fetched:", data);
       setAnnouncements(data as Announcement[] || []);
     } catch (err) {
       console.error("Error fetching announcements:", err);
@@ -97,7 +103,7 @@ export function useAnnouncements() {
       
       const result = await saveAnnouncement({
         ...dataToSave,
-        matricula: selectedCondominium,
+        matricula: condominiumMatricula,
         sent_by_email: announcementData.sent_by_email || false,
         sent_by_whatsapp: announcementData.sent_by_whatsapp || false
       });
@@ -107,7 +113,7 @@ export function useAnnouncements() {
         try {
           await sendEmailToResidents({
             ...dataToSave,
-            matricula: selectedCondominium
+            matricula: condominiumMatricula
           });
           
           toast({
@@ -216,10 +222,13 @@ export function useAnnouncements() {
   };
 
   useEffect(() => {
-    if (selectedCondominium) {
+    if (condominiumMatricula) {
+      console.log("Condominium matricula detected, fetching announcements:", condominiumMatricula);
       fetchAnnouncements();
+    } else {
+      console.log("No condominium matricula available yet");
     }
-  }, [selectedCondominium]);
+  }, [condominiumMatricula]);
 
   return {
     announcements,
