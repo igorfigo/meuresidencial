@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Document, DocumentAttachment } from '@/hooks/use-documents';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   Pagination,
@@ -75,23 +75,10 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
   const [attachments, setAttachments] = useState<DocumentAttachment[]>([]);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
 
-  // Improved formatDate function to handle different date formats and prevent off-by-one day issue
   const formatDate = (dateString: string) => {
     try {
-      if (!dateString) return '';
-      
-      // For YYYY-MM-DD format, use parseISO to avoid timezone issues
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        return format(parseISO(dateString), 'dd/MM/yyyy', { locale: ptBR });
-      }
-      
-      // For ISO strings or other date formats, ensure noon time to prevent timezone issues
-      const date = new Date(dateString);
-      // Set the time to noon to avoid timezone issues
-      date.setHours(12, 0, 0, 0);
-      return format(date, 'dd/MM/yyyy', { locale: ptBR });
+      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
     } catch (error) {
-      console.error('Error formatting date:', error, dateString);
       return dateString;
     }
   };
