@@ -21,6 +21,7 @@ import Moradores from '@/pages/Moradores';
 import Comunicados from '@/pages/Comunicados';
 import Documentos from '@/pages/Documentos';
 import AreasComuns from '@/pages/AreasComuns';
+import AreasComunsResidente from '@/pages/AreasComunsResidente';
 import Dedetizacoes from '@/pages/Dedetizacoes';
 import MinhaAssinatura from '@/pages/MinhaAssinatura';
 import FaleConosco from '@/pages/FaleConosco';
@@ -74,6 +75,7 @@ function App() {
               
               {/* Resident Routes */}
               <Route path="/minhas-cobrancas" element={<AuthRequired><MinhasCobrancas /></AuthRequired>} />
+              <Route path="/areas-comuns-residente" element={<AuthRequired><AreasComunsResidente /></AuthRequired>} />
             </Routes>
             <Toaster />
           </div>
