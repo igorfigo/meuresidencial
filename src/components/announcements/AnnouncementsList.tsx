@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/pagination";
 
 interface AnnouncementsListProps {
-  onEdit: (announcement: Announcement) => void;
+  onEdit?: (announcement: Announcement) => void;
 }
 
 const ITEMS_PER_PAGE = 6;
@@ -173,13 +173,15 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => announcement.id && handleDeleteClick(announcement.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
+                      {onEdit && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => announcement.id && handleDeleteClick(announcement.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

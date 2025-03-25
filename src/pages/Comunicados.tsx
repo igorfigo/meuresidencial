@@ -147,6 +147,9 @@ const Comunicados: React.FC = () => {
     setDate(e.target.value);
   };
 
+  // Check if the user is a resident
+  const isResident = user?.isResident;
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -154,10 +157,12 @@ const Comunicados: React.FC = () => {
           <div>
             <h1 className="text-3xl font-bold">Comunicados</h1>
             <p className="text-muted-foreground">
-              Gerencie e envie comunicados aos moradores do seu condomínio.
+              {isResident 
+                ? "Veja os comunicados do seu condomínio." 
+                : "Gerencie e envie comunicados aos moradores do seu condomínio."}
             </p>
           </div>
-          {!showForm && (
+          {!showForm && !isResident && (
             <Button onClick={handleNewAnnouncement} className="bg-brand-600 hover:bg-brand-700">
               <PlusCircle className="mr-2 h-4 w-4" />
               Novo Comunicado
@@ -166,7 +171,7 @@ const Comunicados: React.FC = () => {
         </div>
         
         <div className="border-t pt-6">
-          {showForm ? (
+          {showForm && !isResident ? (
             <Card className="border-t-4 border-t-brand-600 shadow-md">
               <AnnouncementForm
                 isNewAnnouncement={!selectedAnnouncement?.id}
@@ -189,17 +194,19 @@ const Comunicados: React.FC = () => {
             </Card>
           ) : (
             <AnnouncementsList 
-              onEdit={handleEditAnnouncement}
+              onEdit={isResident ? undefined : handleEditAnnouncement}
             />
           )}
         </div>
       </div>
       
-      <AnnouncementConfirmDialog
-        open={showConfirmDialog}
-        onOpenChange={setShowConfirmDialog}
-        onConfirm={saveAnnouncement}
-      />
+      {!isResident && (
+        <AnnouncementConfirmDialog
+          open={showConfirmDialog}
+          onOpenChange={setShowConfirmDialog}
+          onConfirm={saveAnnouncement}
+        />
+      )}
     </DashboardLayout>
   );
 };
