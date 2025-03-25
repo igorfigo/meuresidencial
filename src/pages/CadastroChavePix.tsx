@@ -424,21 +424,21 @@ const CadastroChavePix = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Tipo da Chave</h3>
-                    <p className="text-base font-medium">{pixKey.tipochave}</p>
+                    <p className="text-base font-medium">{pixKeys[0].tipochave}</p>
                   </div>
                   
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Chave PIX</h3>
-                    <p className="text-base font-medium">{pixKey.chavepix}</p>
+                    <p className="text-base font-medium">{pixKeys[0].chavepix}</p>
                   </div>
                   
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Juros ao Dia</h3>
-                    <p className="text-base font-medium">{pixKey.jurosaodia || '0.033'}%</p>
+                    <p className="text-base font-medium">{pixKeys[0].jurosaodia || '0.033'}%</p>
                   </div>
                     
                   <div className="col-span-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(pixKey)} className="mr-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(pixKeys[0])} className="mr-2">
                       <Pencil className="mr-1 h-3 w-3" />
                       Editar
                     </Button>
@@ -459,7 +459,7 @@ const CadastroChavePix = () => {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDelete(pixKey.id)} className="bg-red-600 hover:bg-red-700">
+                          <AlertDialogAction onClick={() => handleDelete(pixKeys[0].id)} className="bg-red-600 hover:bg-red-700">
                             Excluir
                           </AlertDialogAction>
                         </AlertDialogFooter>
