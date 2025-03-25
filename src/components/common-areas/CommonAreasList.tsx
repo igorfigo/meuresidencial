@@ -199,13 +199,14 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
             <TableHead className="text-center">Capacidade</TableHead>
             <TableHead className="hidden md:table-cell text-center">Disponibilidade</TableHead>
             <TableHead className="hidden md:table-cell text-center">Horário</TableHead>
+            <TableHead className="text-center">Valor</TableHead>
             <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {commonAreas.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                 Nenhuma área comum cadastrada
               </TableCell>
             </TableRow>
@@ -219,6 +220,9 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-center">
                   {formatHours(area.opening_time, area.closing_time)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {getValueDisplay(area.valor)}
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex justify-center gap-2">
