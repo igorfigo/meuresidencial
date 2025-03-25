@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ExpenseEvolutionChart } from '@/components/financials/ExpenseEvolutionChart';
 import {
   BarChart,
   Bar,
@@ -639,6 +640,10 @@ const FinanceiroDashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+        
+        <div className="mb-8">
+          <ExpenseEvolutionChart matricula={user?.selectedCondominium || ''} />
         </div>
         
         <Card className="overflow-hidden border-blue-300 shadow-md mb-8 w-full">
