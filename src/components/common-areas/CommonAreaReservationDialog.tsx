@@ -27,8 +27,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Popover,
   PopoverContent,
@@ -54,9 +52,6 @@ const formSchema = z.object({
   reservation_date: z.date({
     required_error: "A data da reserva é obrigatória",
   }),
-  start_time: z.string().min(1, "Hora inicial é obrigatória"),
-  end_time: z.string().min(1, "Hora final é obrigatória"),
-  notes: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -72,11 +67,6 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      start_time: commonArea.opening_time || "08:00",
-      end_time: commonArea.closing_time || "18:00",
-      notes: "",
-    },
   });
 
   const onSubmit = async (data: FormValues) => {
@@ -92,9 +82,8 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         common_area_id: commonArea.id,
         resident_id: user.residentId,
         reservation_date: format(data.reservation_date, 'yyyy-MM-dd'),
-        start_time: data.start_time,
-        end_time: data.end_time,
-        notes: data.notes,
+        start_time: commonArea.opening_time || "08:00",
+        end_time: commonArea.closing_time || "18:00",
         status: 'pending',
       };
       
@@ -103,8 +92,7 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         .from('common_area_reservations')
         .select('*')
         .eq('common_area_id', commonArea.id)
-        .eq('reservation_date', reservationData.reservation_date)
-        .or(`start_time.lte."${data.end_time}",end_time.gte."${data.start_time}"`);
+        .eq('reservation_date', reservationData.reservation_date);
       
       if (checkError) {
         console.error('Error checking existing reservations:', checkError);
@@ -113,7 +101,7 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
       }
       
       if (existingReservations && existingReservations.length > 0) {
-        toast.error('Este horário já está reservado. Por favor, escolha outro horário.');
+        toast.error('Esta área já está reservada nesta data. Por favor, escolha outra data.');
         return;
       }
       
@@ -214,54 +202,6 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
                   <FormDescription>
                     Escolha a data para sua reserva
                   </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="start_time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hora Início</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="end_time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hora Fim</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Informações adicionais sobre a reserva..." 
-                      className="h-24 resize-none"
-                      {...field} 
-                    />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
