@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
@@ -119,7 +120,7 @@ export function useDocuments() {
       form.reset({
         id: document.id,
         tipo: document.tipo,
-        data_cadastro: document.data_cadastro || format(new Date(), 'yyyy-MM-dd'),
+        data_cadastro: document.data_cadastro ? document.data_cadastro.substring(0, 10) : format(new Date(), 'yyyy-MM-dd'),
         observacoes: document.observacoes,
       });
       

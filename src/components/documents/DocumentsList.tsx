@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -20,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Document, DocumentAttachment } from '@/hooks/use-documents';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   Pagination,
@@ -77,8 +76,12 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
 
   const formatDate = (dateString: string) => {
     try {
+      if (dateString.includes('T')) {
+        return format(parseISO(dateString), 'dd/MM/yyyy', { locale: ptBR });
+      }
       return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
     } catch (error) {
+      console.error('Error formatting date:', error, dateString);
       return dateString;
     }
   };
