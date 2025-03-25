@@ -111,68 +111,39 @@ export type Database = {
         }
         Relationships: []
       }
-      business_document_attachments: {
+      business_documents: {
         Row: {
           created_at: string
-          document_id: string
           file_name: string
           file_path: string
           file_type: string
           id: string
+          observations: string | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
         }
         Insert: {
           created_at?: string
-          document_id: string
           file_name: string
           file_path: string
           file_type: string
           id?: string
+          observations?: string | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
         }
         Update: {
           created_at?: string
-          document_id?: string
           file_name?: string
           file_path?: string
           file_type?: string
           id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_document_attachments_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "business_documents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      business_documents: {
-        Row: {
-          created_at: string
-          data_cadastro: string
-          id: string
-          matricula: string
-          observacoes: string | null
-          tipo: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          data_cadastro: string
-          id?: string
-          matricula: string
-          observacoes?: string | null
-          tipo: string
+          observations?: string | null
+          title?: string
           updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          data_cadastro?: string
-          id?: string
-          matricula?: string
-          observacoes?: string | null
-          tipo?: string
-          updated_at?: string
+          uploaded_by?: string | null
         }
         Relationships: []
       }
