@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -258,7 +259,7 @@ const CadastroChavePix = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row justify-between items-start mb-6">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Cadastro Chave PIX</h1>
+            <h1 className="text-2xl font-bold mb-2">Cadastro Chave PIX / Juros</h1>
             <p className="text-gray-500">Cadastre e gerencie as chaves PIX disponíveis para recebimento.</p>
           </div>
         </div>

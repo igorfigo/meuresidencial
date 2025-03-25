@@ -246,8 +246,8 @@ const FinanceiroRecebimentoPix = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row justify-between items-start mb-6">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Recebimento PIX</h1>
-            <p className="text-gray-500">Configure as informações da chave PIX para recebimento de pagamentos.</p>
+            <h1 className="text-2xl font-bold mb-2">Recebimento PIX / Juros</h1>
+            <p className="text-gray-500">Configure as informações da chave PIX e juros para recebimento de pagamentos.</p>
           </div>
         </div>
         
@@ -257,7 +257,7 @@ const FinanceiroRecebimentoPix = () => {
               <div>
                 <CardTitle className="text-lg font-medium flex items-center">
                   <QrCode className="mr-2 h-5 w-5 text-blue-500" />
-                  Dados da Chave PIX
+                  Dados da Chave PIX e Juros
                 </CardTitle>
                 <CardDescription>
                   Configure a chave PIX para recebimento de pagamentos do condomínio

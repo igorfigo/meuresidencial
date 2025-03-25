@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -85,8 +84,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Visão Geral', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
     { name: 'Cadastro Gestor', icon: <Building className="h-5 w-5" />, path: '/cadastro-gestor' },
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
-    { name: 'Chave PIX', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
-    { name: 'Gerar Faturas', icon: <ReceiptText className="h-5 w-5" />, path: '/gerar-faturas' },
+    { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
     { 
       name: 'Business Management', 

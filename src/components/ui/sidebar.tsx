@@ -1,4 +1,3 @@
-
 import {
   Home,
   LayoutDashboard,
@@ -68,7 +67,7 @@ export function Sidebar() {
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <UserPlus className="h-5 w-5" /> },
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
-    { path: '/gerar-faturas', label: 'Gerar Faturas', icon: <ReceiptText className="h-5 w-5" /> },
+    { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
     { 
       path: '/business-management', 
