@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -35,6 +34,7 @@ interface PixKeyFormData {
   id?: string;
   tipochave: string;
   chavepix: string;
+  jurosaodia: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -43,6 +43,7 @@ interface PixKey {
   id: string;
   tipochave: string;
   chavepix: string;
+  jurosaodia: string;
   created_at: string;
   updated_at?: string;
 }
@@ -59,6 +60,7 @@ const CadastroChavePix = () => {
     defaultValues: {
       tipochave: 'CPF',
       chavepix: '',
+      jurosaodia: '0.033',
     }
   });
   
@@ -109,6 +111,7 @@ const CadastroChavePix = () => {
           .update({
             tipochave: data.tipochave,
             chavepix: data.chavepix,
+            jurosaodia: data.jurosaodia,
             updated_at: new Date().toISOString()
           })
           .eq('id', selectedPixKey.id);
@@ -125,7 +128,8 @@ const CadastroChavePix = () => {
           .from('pix_keys')
           .insert({
             tipochave: data.tipochave,
-            chavepix: data.chavepix
+            chavepix: data.chavepix,
+            jurosaodia: data.jurosaodia,
           });
         
         if (error) throw error;
@@ -138,6 +142,7 @@ const CadastroChavePix = () => {
       form.reset({
         tipochave: 'CPF',
         chavepix: '',
+        jurosaodia: '0.033',
       });
     } catch (error) {
       console.error('Error saving PIX key:', error);
@@ -199,6 +204,7 @@ const CadastroChavePix = () => {
     form.reset({
       tipochave: pixKey.tipochave,
       chavepix: pixKey.chavepix,
+      jurosaodia: pixKey.jurosaodia,
     });
   };
   
@@ -208,6 +214,7 @@ const CadastroChavePix = () => {
     form.reset({
       tipochave: 'CPF',
       chavepix: '',
+      jurosaodia: '0.033',
     });
   };
   
@@ -383,6 +390,23 @@ const CadastroChavePix = () => {
                         </FormItem>
                       )}
                     />
+                    
+                    <FormField
+                      control={form.control}
+                      name="jurosaodia"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Juros ao Dia (%)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="0.033"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-gray-500">Exemplo: 0.033 para uma taxa de 0,033% ao dia</p>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                   
                   <div className="flex justify-end gap-2 pt-4">
@@ -397,49 +421,52 @@ const CadastroChavePix = () => {
               </Form>
             ) : pixKeys.length > 0 ? (
               <div className="space-y-6">
-                {pixKeys.map((pixKey) => (
-                  <div key={pixKey.id} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Tipo da Chave</h3>
-                      <p className="text-base font-medium">{pixKey.tipochave}</p>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Chave PIX</h3>
-                      <p className="text-base font-medium">{pixKey.chavepix}</p>
-                    </div>
-                    
-                    <div className="col-span-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(pixKey)} className="mr-2">
-                        <Pencil className="mr-1 h-3 w-3" />
-                        Editar
-                      </Button>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="bg-red-50 border-red-200 text-red-600 hover:bg-red-100">
-                            <Trash2 className="mr-1 h-3 w-3" />
-                            Excluir
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Excluir Chave PIX</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza que deseja excluir esta chave PIX? Esta ação não pode ser desfeita.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(pixKey.id)} className="bg-red-600 hover:bg-red-700">
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Tipo da Chave</h3>
+                    <p className="text-base font-medium">{pixKey.tipochave}</p>
                   </div>
-                ))}
+                  
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Chave PIX</h3>
+                    <p className="text-base font-medium">{pixKey.chavepix}</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Juros ao Dia</h3>
+                    <p className="text-base font-medium">{pixKey.jurosaodia || '0.033'}%</p>
+                  </div>
+                    
+                  <div className="col-span-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(pixKey)} className="mr-2">
+                      <Pencil className="mr-1 h-3 w-3" />
+                      Editar
+                    </Button>
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="bg-red-50 border-red-200 text-red-600 hover:bg-red-100">
+                          <Trash2 className="mr-1 h-3 w-3" />
+                          Excluir
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir Chave PIX</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir esta chave PIX? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(pixKey.id)} className="bg-red-600 hover:bg-red-700">
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
                 
                 <div className="bg-blue-50 p-4 rounded-md border border-blue-100 mt-6">
                   <p className="text-sm text-blue-700">

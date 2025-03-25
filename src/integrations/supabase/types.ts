@@ -751,18 +751,21 @@ export type Database = {
           chavepix: string
           created_at: string
           id: string
+          jurosaodia: string | null
           tipochave: string
         }
         Insert: {
           chavepix: string
           created_at?: string
           id?: string
+          jurosaodia?: string | null
           tipochave: string
         }
         Update: {
           chavepix?: string
           created_at?: string
           id?: string
+          jurosaodia?: string | null
           tipochave?: string
         }
         Relationships: []
