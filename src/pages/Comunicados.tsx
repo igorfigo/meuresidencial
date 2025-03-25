@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,7 @@ const Comunicados: React.FC = () => {
   const [formErrors, setFormErrors] = useState<{title?: string; content?: string; date?: string}>({});
   const [isSaving, setIsSaving] = useState(false);
   
-  const { createAnnouncement, updateAnnouncement, fetchAnnouncements } = useAnnouncements();
+  const { createAnnouncement, updateAnnouncement } = useAnnouncements();
   const { user } = useApp();
   
   const handleNewAnnouncement = () => {
@@ -146,16 +147,6 @@ const Comunicados: React.FC = () => {
     setDate(e.target.value);
   };
 
-  // Check if the user is a resident
-  const isResident = user?.isResident;
-
-  // Force a refresh of announcements when the component mounts
-  useEffect(() => {
-    fetchAnnouncements();
-    console.log("Resident status:", isResident);
-    console.log("User matricula or selectedCondominium:", user?.matricula || user?.selectedCondominium);
-  }, []);
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -163,12 +154,10 @@ const Comunicados: React.FC = () => {
           <div>
             <h1 className="text-3xl font-bold">Comunicados</h1>
             <p className="text-muted-foreground">
-              {isResident 
-                ? "Veja os comunicados do seu condomínio." 
-                : "Gerencie e envie comunicados aos moradores do seu condomínio."}
+              Gerencie e envie comunicados aos moradores do seu condomínio.
             </p>
           </div>
-          {!showForm && !isResident && (
+          {!showForm && (
             <Button onClick={handleNewAnnouncement} className="bg-brand-600 hover:bg-brand-700">
               <PlusCircle className="mr-2 h-4 w-4" />
               Novo Comunicado
@@ -177,7 +166,7 @@ const Comunicados: React.FC = () => {
         </div>
         
         <div className="border-t pt-6">
-          {showForm && !isResident ? (
+          {showForm ? (
             <Card className="border-t-4 border-t-brand-600 shadow-md">
               <AnnouncementForm
                 isNewAnnouncement={!selectedAnnouncement?.id}
@@ -200,19 +189,17 @@ const Comunicados: React.FC = () => {
             </Card>
           ) : (
             <AnnouncementsList 
-              onEdit={isResident ? undefined : handleEditAnnouncement}
+              onEdit={handleEditAnnouncement}
             />
           )}
         </div>
       </div>
       
-      {!isResident && (
-        <AnnouncementConfirmDialog
-          open={showConfirmDialog}
-          onOpenChange={setShowConfirmDialog}
-          onConfirm={saveAnnouncement}
-        />
-      )}
+      <AnnouncementConfirmDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        onConfirm={saveAnnouncement}
+      />
     </DashboardLayout>
   );
 };

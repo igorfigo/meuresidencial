@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
 import { Eye, Trash2, Mail, MessageCircleMore } from 'lucide-react';
@@ -35,7 +36,7 @@ import {
 } from "@/components/ui/pagination";
 
 interface AnnouncementsListProps {
-  onEdit?: (announcement: Announcement) => void;
+  onEdit: (announcement: Announcement) => void;
 }
 
 const ITEMS_PER_PAGE = 6;
@@ -79,10 +80,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
     }
   };
 
-  useEffect(() => {
-    console.log("Announcements loaded:", announcements.length);
-  }, [announcements]);
-
+  // Calculate pagination
   const totalPages = Math.ceil(announcements.length / ITEMS_PER_PAGE);
   const paginatedAnnouncements = announcements.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -175,15 +173,13 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      {onEdit && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => announcement.id && handleDeleteClick(announcement.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => announcement.id && handleDeleteClick(announcement.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -191,6 +187,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
             </TableBody>
           </Table>
           
+          {/* Add pagination */}
           {totalPages > 1 && (
             <div className="py-4 border-t">
               <Pagination>

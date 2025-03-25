@@ -30,7 +30,7 @@ export function useAnnouncements() {
   const { toast } = useToast();
   const { user } = useApp();
 
-  const selectedCondominium = user?.selectedCondominium || user?.matricula || '';
+  const selectedCondominium = user?.selectedCondominium || '';
 
   const fetchAnnouncements = async () => {
     if (!selectedCondominium) return;
