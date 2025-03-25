@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -55,7 +54,7 @@ export const CommonAreaReservationsList: React.FC<CommonAreaReservationsListProp
   isProcessing = false
 }) => {
   const { user } = useApp();
-  const isManager = user?.role === 'manager';
+  const isManager = user?.isAdmin === false && user?.isResident === false;
   
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -121,8 +120,6 @@ export const CommonAreaReservationsList: React.FC<CommonAreaReservationsListProp
             <TableCell>{getStatusBadge(reservation.status)}</TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-2">
-                {/* Cancel button - visible to residents (only for their pending reservations), 
-                    and to managers for any reservation */}
                 {(isResidentView && reservation.status === 'pending') && (
                   <Button
                     size="sm"
@@ -135,7 +132,6 @@ export const CommonAreaReservationsList: React.FC<CommonAreaReservationsListProp
                   </Button>
                 )}
                 
-                {/* Manager-only actions */}
                 {isManager && !isResidentView && (
                   <>
                     {reservation.status === 'pending' && onApprove && (

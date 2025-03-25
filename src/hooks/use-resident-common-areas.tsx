@@ -78,32 +78,55 @@ export const useResidentCommonAreas = () => {
   
   // Fetch resident's reservations
   const fetchMyReservations = async () => {
-    if (!user?.id) return;
+    // Changed to check user.residentId instead of user.id
+    if (!user?.residentId) {
+      // If residentId is not yet set, try to find it using user_id
+      if (user) {
+        try {
+          const { data: residentData, error: residentError } = await supabase
+            .from('residents')
+            .select('id')
+            .eq('user_id', user.email) // Using email as a fallback, since it's unique
+            .single();
+          
+          if (residentError) throw residentError;
+          
+          if (residentData) {
+            const { data, error } = await supabase
+              .from('common_area_reservations')
+              .select(`
+                *,
+                common_areas (name, opening_time, closing_time),
+                residents:resident_id (nome_completo, unidade)
+              `)
+              .eq('resident_id', residentData.id)
+              .order('reservation_date', { ascending: false });
+            
+            if (error) throw error;
+            
+            setMyReservations(data || []);
+          }
+        } catch (error: any) {
+          console.error('Error fetching resident ID:', error.message);
+        }
+      }
+      return;
+    }
     
     try {
-      const { data: residentData, error: residentError } = await supabase
-        .from('residents')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      const { data, error } = await supabase
+        .from('common_area_reservations')
+        .select(`
+          *,
+          common_areas (name, opening_time, closing_time),
+          residents:resident_id (nome_completo, unidade)
+        `)
+        .eq('resident_id', user.residentId)
+        .order('reservation_date', { ascending: false });
       
-      if (residentError) throw residentError;
+      if (error) throw error;
       
-      if (residentData) {
-        const { data, error } = await supabase
-          .from('common_area_reservations')
-          .select(`
-            *,
-            common_areas (name, opening_time, closing_time),
-            residents:resident_id (nome_completo, unidade)
-          `)
-          .eq('resident_id', residentData.id)
-          .order('reservation_date', { ascending: false });
-        
-        if (error) throw error;
-        
-        setMyReservations(data || []);
-      }
+      setMyReservations(data || []);
     } catch (error: any) {
       console.error('Error fetching my reservations:', error.message);
       toast.error('Erro ao carregar suas reservas');
@@ -112,7 +135,8 @@ export const useResidentCommonAreas = () => {
   
   // Create reservation
   const createReservation = async ({ areaId, date, startTime, endTime, notes }: any) => {
-    if (!user?.id) {
+    // Check if user exists and has either residentId or email
+    if (!user || (!user.residentId && !user.email)) {
       toast.error('Você precisa estar logado para fazer uma reserva');
       return;
     }
@@ -121,17 +145,24 @@ export const useResidentCommonAreas = () => {
     
     try {
       // Get resident ID
-      const { data: residentData, error: residentError } = await supabase
-        .from('residents')
-        .select('id, unidade')
-        .eq('user_id', user.id)
-        .single();
+      let residentId = user.residentId;
       
-      if (residentError) throw residentError;
-      
-      if (!residentData) {
-        toast.error('Perfil de morador não encontrado');
-        return;
+      // If no residentId is available, try to find it using user_id or email
+      if (!residentId) {
+        const { data: residentData, error: residentError } = await supabase
+          .from('residents')
+          .select('id, unidade')
+          .eq('email', user.email)
+          .single();
+        
+        if (residentError) throw residentError;
+        
+        if (!residentData) {
+          toast.error('Perfil de morador não encontrado');
+          return;
+        }
+        
+        residentId = residentData.id;
       }
       
       // Check for scheduling conflicts
@@ -155,7 +186,7 @@ export const useResidentCommonAreas = () => {
         .from('common_area_reservations')
         .insert({
           common_area_id: areaId,
-          resident_id: residentData.id,
+          resident_id: residentId,
           reservation_date: date,
           start_time: startTime,
           end_time: endTime,
@@ -205,7 +236,7 @@ export const useResidentCommonAreas = () => {
       fetchCommonAreas();
       fetchMyReservations();
     }
-  }, [matricula, user?.id]);
+  }, [matricula, user]);
   
   return {
     commonAreas,
