@@ -9,6 +9,41 @@ import { toast } from 'sonner';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 
+// Type definitions
+export interface DocumentAttachment {
+  id: string;
+  document_id: string;
+  file_name: string;
+  file_type: string;
+  file_path: string;
+  created_at: string;
+}
+
+export interface Document {
+  id: string;
+  tipo: string;
+  data_cadastro: string;
+  observacoes?: string;
+  matricula: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type DocumentFormValues = z.infer<typeof formSchema>;
+
+// Form schema definition
+const formSchema = z.object({
+  id: z.string().optional(),
+  tipo: z.string().min(2, {
+    message: "Tipo é obrigatório e deve ter pelo menos 2 caracteres",
+  }),
+  data_cadastro: z.string().min(1, {
+    message: "Data é obrigatória",
+  }),
+  observacoes: z.string().optional(),
+  matricula: z.string().optional(),
+});
+
 export const useDocuments = (
   documentType: 'documents' | 'business_documents' = 'documents',
   initialData?: any
@@ -19,25 +54,12 @@ export const useDocuments = (
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [attachments, setAttachments] = useState<File[]>([]);
-  const [existingAttachments, setExistingAttachments] = useState<any[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<DocumentAttachment[]>([]);
 
   // Get the appropriate attachments table name based on document type
   const getAttachmentsTable = () => {
     return documentType === 'business_documents' ? 'business_document_attachments' : 'document_attachments';
   };
-
-  // Form definition with zod schema
-  const formSchema = z.object({
-    id: z.string().optional(),
-    tipo: z.string().min(2, {
-      message: "Tipo é obrigatório e deve ter pelo menos 2 caracteres",
-    }),
-    data_cadastro: z.string().min(1, {
-      message: "Data é obrigatória",
-    }),
-    observacoes: z.string().optional(),
-    matricula: z.string().optional(),
-  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,8 +70,6 @@ export const useDocuments = (
       matricula: user?.selectedCondominium || "",
     },
   });
-
-  const queryClient = supabase.realtime.postgrestClient();
 
   // Query to get documents
   const { data: documents, refetch: refetchDocuments } = useQuery({
