@@ -26,6 +26,7 @@ import MinhaAssinatura from '@/pages/MinhaAssinatura';
 import FaleConosco from '@/pages/FaleConosco';
 import GerenciarAvisos from '@/pages/GerenciarAvisos';
 import MinhasCobrancas from '@/pages/MinhasCobrancas';
+import NotFound from '@/pages/NotFound';
 
 // We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
@@ -74,6 +75,9 @@ function App() {
               
               {/* Resident Routes */}
               <Route path="/minhas-cobrancas" element={<AuthRequired><MinhasCobrancas /></AuthRequired>} />
+              
+              {/* 404 route - this must be the last route */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
           </div>
