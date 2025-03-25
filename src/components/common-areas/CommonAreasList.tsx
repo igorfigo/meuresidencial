@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Eye, 
@@ -215,7 +214,7 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
                       variant="ghost"
                       className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
                       onClick={() => handleViewReservations(area)}
-                      title="Ver reservas"
+                      title="Ver detalhes"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -272,101 +271,60 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
           <DialogHeader>
             <DialogTitle>{selectedArea?.name}</DialogTitle>
             <DialogDescription>
-              Informações e reservas para esta área comum
+              Informações da área comum
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            <Card className="border-t-4 border-t-brand-600">
-              <CardHeader>
-                <CardTitle className="text-lg">Detalhes da Área</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {selectedArea?.description && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500">Descrição:</h4>
-                    <p className="text-sm">{selectedArea.description}</p>
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {selectedArea?.capacity ? `${selectedArea.capacity} pessoas` : 'Capacidade não definida'}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {formatHours(selectedArea?.opening_time, selectedArea?.closing_time)}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {formatWeekdays(selectedArea?.weekdays)}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1.5">
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {selectedArea?.valor ? formatCurrency(selectedArea.valor) : 'Grátis'}
-                    </span>
-                  </div>
+          <Card className="border-t-4 border-t-brand-600">
+            <CardHeader>
+              <CardTitle className="text-lg">Detalhes da Área</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {selectedArea?.description && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">Descrição:</h4>
+                  <p className="text-sm">{selectedArea.description}</p>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-1.5">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {selectedArea?.capacity ? `${selectedArea.capacity} pessoas` : 'Capacidade não definida'}
+                  </span>
                 </div>
                 
-                {selectedArea?.rules && (
-                  <div className="pt-2">
-                    <h4 className="text-sm font-medium text-gray-500">Regras:</h4>
-                    <p className="text-sm whitespace-pre-line">{selectedArea.rules}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card className="border-t-4 border-t-brand-600">
-              <CardHeader>
-                <CardTitle className="text-lg">Reservas</CardTitle>
-                <CardDescription>
-                  Lista de reservas para esta área
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="py-6 text-center text-muted-foreground">
-                    Carregando reservas...
-                  </div>
-                ) : reservations.length === 0 ? (
-                  <div className="py-6 text-center text-muted-foreground">
-                    Nenhuma reserva encontrada
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {reservations.map(reservation => (
-                      <div key={reservation.id} className="border rounded-md p-3">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="font-medium">{reservation.residents.nome_completo}</span>
-                          <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(reservation.status)}`}>
-                            {getStatusText(reservation.status)}
-                          </span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <p>Unidade: {reservation.residents.unidade}</p>
-                          <p>Data: {formatDate(reservation.reservation_date)}</p>
-                          <p>Horário: {reservation.start_time} às {reservation.end_time}</p>
-                          {reservation.notes && <p>Observações: {reservation.notes}</p>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {formatHours(selectedArea?.opening_time, selectedArea?.closing_time)}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {formatWeekdays(selectedArea?.weekdays)}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-1.5">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {selectedArea?.valor ? formatCurrency(selectedArea.valor) : 'Grátis'}
+                  </span>
+                </div>
+              </div>
+              
+              {selectedArea?.rules && (
+                <div className="pt-2">
+                  <h4 className="text-sm font-medium text-gray-500">Regras:</h4>
+                  <p className="text-sm whitespace-pre-line">{selectedArea.rules}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </DialogContent>
       </Dialog>
 
