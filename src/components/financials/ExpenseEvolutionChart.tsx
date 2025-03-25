@@ -151,7 +151,7 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
   return (
     <Card className="overflow-hidden border-blue-300 shadow-md">
       <CardContent className="p-4">
-        <div className="flex flex-wrap items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="h-5 w-5 text-blue-500" />
           <h3 className="font-semibold text-gray-800">Evolução de Despesas</h3>
           
@@ -189,8 +189,6 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="month" 
-                  tick={{ fontSize: 12 }}
-                  tickLine={{ transform: 'translate(0, 6)' }}
                 />
                 <YAxis 
                   tickFormatter={formatTooltipValue} 
@@ -210,13 +208,11 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
                     return null;
                   }}
                 />
-                <Legend formatter={(value) => `${categoryLabels[selectedCategory] || selectedCategory}`} />
+                <Legend />
                 <Bar 
                   dataKey="value" 
                   fill="#f97150" 
                   name={categoryLabels[selectedCategory] || selectedCategory} 
-                  barSize={30}
-                  radius={[4, 4, 0, 0]}
                 />
               </BarChart>
             </ChartContainer>
