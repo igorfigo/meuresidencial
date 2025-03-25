@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -103,6 +104,15 @@ export function Sidebar() {
     { path: '/contato', label: 'Fale Conosco', icon: <Mail className="h-5 w-5" /> },
   ];
   
+  const residentMenuItems: MenuItem[] = [
+    { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
+    { path: '/comunicados', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
+    { path: '/documentos', label: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" /> },
+    { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
+    { path: '/servicos', label: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" /> },
+    { path: '/minhas-cobrancas', label: 'Minhas Cobranças', icon: <Receipt className="h-5 w-5" /> },
+  ];
+  
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -113,8 +123,16 @@ export function Sidebar() {
   const renderMenuItems = () => {
     console.log("User in sidebar:", user);
     console.log("Is user admin?", user?.isAdmin);
+    console.log("Is user resident?", user?.isResident);
     
-    const menuItems = user?.isAdmin ? adminMenuItems : managerMenuItems;
+    let menuItems = [];
+    if (user?.isAdmin) {
+      menuItems = adminMenuItems;
+    } else if (user?.isResident) {
+      menuItems = residentMenuItems;
+    } else {
+      menuItems = managerMenuItems;
+    }
 
     return menuItems.map((item) => {
       if (item.submenu) {
@@ -188,29 +206,33 @@ export function Sidebar() {
                       {user.isAdmin ? 'Administrador' : user.nomeCondominio}
                     </p>
                   </div>
-                  <Settings 
-                    className="h-4 w-4 text-gray-400 opacity-70 group-hover:opacity-100 transition-opacity" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate('/perfil');
-                    }}
-                  />
+                  {!user.isResident && (
+                    <Settings 
+                      className="h-4 w-4 text-gray-400 opacity-70 group-hover:opacity-100 transition-opacity" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate('/perfil');
+                      }}
+                    />
+                  )}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/perfil')}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Perfil
-                </DropdownMenuItem>
+                {!user.isResident && (
+                  <DropdownMenuItem onClick={() => navigate('/perfil')}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Perfil
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleLogout}>
                   Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {!user.isAdmin && user.condominiums && user.condominiums.length > 1 && (
+            {!user.isAdmin && !user.isResident && user.condominiums && user.condominiums.length > 1 && (
               <SwitchCondominium
                 condominiums={user.condominiums}
                 selectedCondominium={user.selectedCondominium || ''}

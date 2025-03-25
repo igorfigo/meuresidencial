@@ -8,6 +8,7 @@ import { PasswordChangeSection } from '@/components/minha-assinatura/PasswordCha
 import { toast } from 'sonner';
 import { ProfileCondominiumInfo } from '@/components/profile/ProfileCondominiumInfo';
 import { ProfileRepresentativeInfo } from '@/components/profile/ProfileRepresentativeInfo';
+import { AlertCircle } from 'lucide-react';
 
 const UserProfile = () => {
   const { user, isAuthenticated } = useApp();
@@ -42,12 +43,36 @@ const UserProfile = () => {
     }
   }, [user]);
 
-  if (!isAuthenticated || !user || user.isAdmin) {
+  // Show restricted access message for residents
+  if (isAuthenticated && user?.isResident) {
     return (
       <DashboardLayout>
         <div className="container mx-auto py-6">
           <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
-          <p>Esta página está disponível apenas para usuários de condomínios.</p>
+          <Card className="p-6 border-l-4 border-l-amber-500">
+            <div className="flex items-start gap-4">
+              <AlertCircle className="h-6 w-6 text-amber-500 flex-shrink-0 mt-1" />
+              <div>
+                <h3 className="font-medium text-lg mb-2">Acesso Restrito</h3>
+                <p className="text-gray-600">
+                  Esta página não está disponível para o perfil de Morador. 
+                  Caso precise atualizar suas informações de perfil, 
+                  por favor entre em contato com o administrador do seu condomínio.
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto py-6">
+          <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
+          <p>Esta página está disponível apenas para usuários autenticados.</p>
         </div>
       </DashboardLayout>
     );
