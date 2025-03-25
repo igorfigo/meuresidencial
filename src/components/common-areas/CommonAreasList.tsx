@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Eye, 
@@ -65,10 +66,11 @@ interface Reservation {
 
 interface CommonAreasListProps {
   commonAreas: CommonArea[];
-  onEdit: (area: CommonArea) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (area: CommonArea) => void;
+  onDelete?: (id: string) => void;
   isDeleting: boolean;
   fetchReservations: (id: string) => Promise<any[]>;
+  viewOnly?: boolean;
 }
 
 export const CommonAreasList: React.FC<CommonAreasListProps> = ({
@@ -76,7 +78,8 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
   onEdit,
   onDelete,
   isDeleting,
-  fetchReservations
+  fetchReservations,
+  viewOnly = false
 }) => {
   const [selectedArea, setSelectedArea] = useState<CommonArea | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -169,13 +172,13 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
             <TableHead>Capacidade</TableHead>
             <TableHead className="hidden md:table-cell text-center">Disponibilidade</TableHead>
             <TableHead className="hidden md:table-cell text-center">Horário</TableHead>
-            <TableHead className="text-center">Ações</TableHead>
+            {!viewOnly && <TableHead className="text-center">Ações</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
           {commonAreas.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={viewOnly ? 4 : 5} className="text-center py-8 text-muted-foreground">
                 Nenhuma área comum cadastrada
               </TableCell>
             </TableRow>
@@ -190,38 +193,44 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
                 <TableCell className="hidden md:table-cell text-center">
                   {formatHours(area.opening_time, area.closing_time)}
                 </TableCell>
-                <TableCell className="text-center">
-                  <div className="flex justify-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
-                      onClick={() => handleViewReservations(area)}
-                      title="Ver reservas"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                      onClick={() => onEdit(area)}
-                      title="Editar"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
-                      onClick={() => onDelete(area.id)}
-                      disabled={isDeleting}
-                      title="Excluir"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+                {!viewOnly && (
+                  <TableCell className="text-center">
+                    <div className="flex justify-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
+                        onClick={() => handleViewReservations(area)}
+                        title="Ver reservas"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {onEdit && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => onEdit(area)}
+                          title="Editar"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {onDelete && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
+                          onClick={() => onDelete(area.id)}
+                          disabled={isDeleting}
+                          title="Excluir"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                )}
               </TableRow>
             ))
           )}

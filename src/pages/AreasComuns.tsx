@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useCommonAreas } from '@/hooks/use-common-areas';
@@ -16,8 +17,10 @@ import {
   AlertDialogHeader, 
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
+import { useApp } from '@/contexts/AppContext';
 
 const AreasComuns = () => {
+  const { user } = useApp();
   const { 
     form, 
     commonAreas, 
@@ -34,6 +37,9 @@ const AreasComuns = () => {
   
   const [showForm, setShowForm] = useState(false);
   const [areaToDelete, setAreaToDelete] = useState<string | null>(null);
+
+  // Only managers (non-residents and non-admin users) can add/edit areas
+  const isManager = user && !user.isAdmin && !user.isResident;
 
   const handleNewArea = () => {
     resetForm();
@@ -73,10 +79,13 @@ const AreasComuns = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Áreas Comuns</h1>
             <p className="text-muted-foreground">
-              Gerencie as áreas comuns do seu condomínio
+              {isManager 
+                ? "Gerencie as áreas comuns do seu condomínio"
+                : "Veja as áreas comuns disponíveis no seu condomínio"
+              }
             </p>
           </div>
-          {!showForm && (
+          {isManager && !showForm && (
             <Button onClick={handleNewArea} className="bg-brand-600 hover:bg-brand-700">
               <Plus className="mr-2 h-4 w-4" />
               Nova Área Comum
@@ -85,7 +94,7 @@ const AreasComuns = () => {
         </div>
 
         <div className="border-t pt-6">
-          {showForm ? (
+          {isManager && showForm ? (
             <Card className="border-t-4 border-t-brand-600 shadow-md">
               <CommonAreaForm
                 form={form}
@@ -105,10 +114,11 @@ const AreasComuns = () => {
                 <Card className="border-t-4 border-t-brand-600 shadow-md overflow-hidden">
                   <CommonAreasList
                     commonAreas={commonAreas || []}
-                    onEdit={handleEditArea}
-                    onDelete={handleDeleteClick}
+                    onEdit={isManager ? handleEditArea : undefined}
+                    onDelete={isManager ? handleDeleteClick : undefined}
                     isDeleting={isDeleting}
                     fetchReservations={fetchReservations}
+                    viewOnly={!isManager}
                   />
                 </Card>
               )}
