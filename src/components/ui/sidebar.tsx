@@ -1,4 +1,3 @@
-
 import {
   Home,
   LayoutDashboard,
@@ -25,7 +24,6 @@ import {
   Bug,
   Mail,
   QrCode,
-  FolderIcon,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -78,7 +76,6 @@ export function Sidebar() {
       submenu: [
         { path: '/business-management/despesas', label: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" /> },
         { path: '/business-management/contratos', label: 'Contratos', icon: <FileText className="h-5 w-5" /> },
-        { path: '/business-management/documentos', label: 'Documentos', icon: <FolderIcon className="h-5 w-5" /> },
       ]
     },
   ];
