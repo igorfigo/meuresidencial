@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -24,17 +25,12 @@ import Dedetizacoes from '@/pages/Dedetizacoes';
 import MinhaAssinatura from '@/pages/MinhaAssinatura';
 import FaleConosco from '@/pages/FaleConosco';
 import GerenciarAvisos from '@/pages/GerenciarAvisos';
-import BusinessManagement from '@/pages/BusinessManagement';
-import BusinessDespesas from '@/pages/BusinessDespesas';
-import BusinessContratos from '@/pages/BusinessContratos';
-import BusinessDocumentos from '@/pages/BusinessDocumentos';
-import Servicos from '@/pages/Servicos';
 
+// We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 const BusinessManagement = () => <div>Business Management (Em Desenvolvimento)</div>;
 const BusinessDespesas = () => <div>Business Despesas (Em Desenvolvimento)</div>;
 const BusinessContratos = () => <div>Business Contratos (Em Desenvolvimento)</div>;
-const BusinessDocumentos = () => <div>Business Documentos (Em Desenvolvimento)</div>;
 const Servicos = () => <div>Serviços (Em Desenvolvimento)</div>;
 
 function App() {
@@ -49,11 +45,13 @@ function App() {
               <Route path="/dashboard" element={<AuthRequired><Dashboard /></AuthRequired>} />
               <Route path="/perfil" element={<AuthRequired><UserProfile /></AuthRequired>} />
               
+              {/* Financeiro Routes */}
               <Route path="/financeiro/dashboard" element={<AuthRequired><FinanceiroDashboard /></AuthRequired>} />
               <Route path="/financeiro/receitas-despesas" element={<AuthRequired><FinanceiroReceitasDespesas /></AuthRequired>} />
               <Route path="/financeiro/recebimento-pix" element={<AuthRequired><FinanceiroRecebimentoPix /></AuthRequired>} />
               <Route path="/financeiro/prestacao-contas" element={<AuthRequired><FinanceiroPrestacaoContas /></AuthRequired>} />
               
+              {/* Admin Routes */}
               <Route path="/cadastro-gestor" element={<AuthRequired><CadastroGestor /></AuthRequired>} />
               <Route path="/cadastro-planos" element={<AuthRequired><CadastroPlanos /></AuthRequired>} />
               <Route path="/cadastro-chave-pix" element={<AuthRequired><CadastroChavePix /></AuthRequired>} />
@@ -62,8 +60,8 @@ function App() {
               <Route path="/business-management" element={<AuthRequired><BusinessManagement /></AuthRequired>} />
               <Route path="/business-management/despesas" element={<AuthRequired><BusinessDespesas /></AuthRequired>} />
               <Route path="/business-management/contratos" element={<AuthRequired><BusinessContratos /></AuthRequired>} />
-              <Route path="/business-management/documentos" element={<AuthRequired><BusinessDocumentos /></AuthRequired>} />
               
+              {/* Manager Routes */}
               <Route path="/moradores" element={<AuthRequired><Moradores /></AuthRequired>} />
               <Route path="/comunicados" element={<AuthRequired><Comunicados /></AuthRequired>} />
               <Route path="/documentos" element={<AuthRequired><Documentos /></AuthRequired>} />
