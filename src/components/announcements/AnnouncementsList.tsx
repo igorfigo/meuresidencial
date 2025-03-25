@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
 import { Eye, Trash2, Mail, MessageCircleMore } from 'lucide-react';
@@ -80,7 +79,10 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
     }
   };
 
-  // Calculate pagination
+  useEffect(() => {
+    console.log("Announcements loaded:", announcements.length);
+  }, [announcements]);
+
   const totalPages = Math.ceil(announcements.length / ITEMS_PER_PAGE);
   const paginatedAnnouncements = announcements.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -189,7 +191,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit }) => {
             </TableBody>
           </Table>
           
-          {/* Add pagination */}
           {totalPages > 1 && (
             <div className="py-4 border-t">
               <Pagination>

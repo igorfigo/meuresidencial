@@ -168,6 +168,8 @@ export const getReservationsByCommonAreaId = async (commonAreaId: string) => {
 // Announcement functions with type assertions to avoid TypeScript errors
 export const getAnnouncements = async (matricula: string) => {
   try {
+    console.log("Fetching announcements for matricula:", matricula);
+    
     // Use type assertion to bypass TypeScript checking
     const { data, error } = await (supabase
       .from('announcements' as any)
@@ -180,6 +182,7 @@ export const getAnnouncements = async (matricula: string) => {
       throw error;
     }
     
+    console.log("Announcements fetched:", data?.length || 0);
     return data;
   } catch (error) {
     console.error('Error in getAnnouncements:', error);

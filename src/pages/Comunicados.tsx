@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ const Comunicados: React.FC = () => {
   const [formErrors, setFormErrors] = useState<{title?: string; content?: string; date?: string}>({});
   const [isSaving, setIsSaving] = useState(false);
   
-  const { createAnnouncement, updateAnnouncement } = useAnnouncements();
+  const { createAnnouncement, updateAnnouncement, fetchAnnouncements } = useAnnouncements();
   const { user } = useApp();
   
   const handleNewAnnouncement = () => {
@@ -149,6 +148,13 @@ const Comunicados: React.FC = () => {
 
   // Check if the user is a resident
   const isResident = user?.isResident;
+
+  // Force a refresh of announcements when the component mounts
+  useEffect(() => {
+    fetchAnnouncements();
+    console.log("Resident status:", isResident);
+    console.log("User matricula or selectedCondominium:", user?.matricula || user?.selectedCondominium);
+  }, []);
 
   return (
     <DashboardLayout>
