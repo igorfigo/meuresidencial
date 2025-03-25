@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building, Eye, EyeOff, Lock, Mail, Users, Wallet, Calendar, Bell } from 'lucide-react';
+import { Building, Eye, EyeOff, Lock, Mail, Users, Wallet, Calendar, Bell, AlertCircle } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
@@ -15,6 +17,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useApp();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('manager');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,15 +47,44 @@ const Login = () => {
             <p className="text-gray-500">Faça login para acessar sua conta</p>
           </div>
           
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="manager">Síndico/Admin</TabsTrigger>
+              <TabsTrigger value="resident">Morador</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="manager">
+              <Alert className="mb-4 bg-blue-50 border-blue-200">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <AlertTitle>Acesso de Síndico ou Administrador</AlertTitle>
+                <AlertDescription>
+                  Use seu email ou matrícula do condomínio e senha.
+                </AlertDescription>
+              </Alert>
+            </TabsContent>
+            
+            <TabsContent value="resident">
+              <Alert className="mb-4 bg-green-50 border-green-200">
+                <AlertCircle className="h-4 w-4 text-green-600" />
+                <AlertTitle>Acesso de Morador</AlertTitle>
+                <AlertDescription>
+                  Use seu email cadastrado e seu CPF como senha.
+                </AlertDescription>
+              </Alert>
+            </TabsContent>
+          </Tabs>
+          
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="identifier">Email ou Matrícula</Label>
+              <Label htmlFor="identifier">
+                {activeTab === 'manager' ? 'Email ou Matrícula' : 'Email'}
+              </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="identifier"
                   type="text"
-                  placeholder="seu@email.com ou matrícula"
+                  placeholder={activeTab === 'manager' ? "seu@email.com ou matrícula" : "seu@email.com"}
                   className="pl-9"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
@@ -63,17 +95,21 @@ const Login = () => {
             
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Senha</Label>
-                <a href="#" className="text-xs text-brand-600 hover:underline">
-                  Esqueceu a senha?
-                </a>
+                <Label htmlFor="password">
+                  {activeTab === 'manager' ? 'Senha' : 'CPF (Senha)'}
+                </Label>
+                {activeTab === 'manager' && (
+                  <a href="#" className="text-xs text-brand-600 hover:underline">
+                    Esqueceu a senha?
+                  </a>
+                )}
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Sua senha"
+                  placeholder={activeTab === 'manager' ? "Sua senha" : "Seu CPF (apenas números)"}
                   className="pl-9"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

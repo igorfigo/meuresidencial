@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ import {
   Megaphone,
   ReceiptText,
   QrCode,
+  CreditCard as PaymentIcon,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -119,11 +121,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" />, path: '/minha-assinatura' },
     { name: 'Fale Conosco', icon: <Mail className="h-5 w-5" />, path: '/contato' },
   ];
+  
+  const residentMenuItems: MenuItem[] = [
+    { name: 'Visão Geral', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
+    { name: 'Comunicados', icon: <MessageSquare className="h-5 w-5" />, path: '/comunicados' },
+    { name: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
+    { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
+    { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
+    { name: 'Minhas Cobranças', icon: <PaymentIcon className="h-5 w-5" />, path: '/minhas-cobrancas' },
+  ];
 
-  const menuItems = user?.isAdmin ? adminMenuItems : managerMenuItems;
+  let menuItems: MenuItem[] = [];
+  if (user?.isAdmin) {
+    menuItems = adminMenuItems;
+  } else if (user?.isResident) {
+    menuItems = residentMenuItems;
+  } else {
+    menuItems = managerMenuItems;
+  }
 
   const renderCondominiumSelector = () => {
-    if (!user || user.isAdmin || !user.condominiums || user.condominiums.length <= 1) {
+    if (!user || user.isAdmin || user.isResident || !user.condominiums || user.condominiums.length <= 1) {
       return null;
     }
 
@@ -248,6 +266,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <Building2 className="h-5 w-5 mr-2 text-brand-400" />
           <span className="text-sm font-medium text-white truncate">
             {user.nomeCondominio || 'Condomínio'}
+            {user.isResident && user.unit && ` - Unidade ${user.unit}`}
           </span>
         </div>
       </div>
@@ -297,7 +316,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </div>
         )}
 
-        {!user?.isAdmin && (
+        {!user?.isAdmin && !user?.isResident && (
           <div className="px-3 py-2">
             {renderCondominiumSelector()}
           </div>
@@ -378,7 +397,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </div>
         )}
         
-        {sidebarOpen && !user?.isAdmin && (
+        {sidebarOpen && !user?.isAdmin && !user?.isResident && (
           <div className="bg-sidebar px-3 py-2">
             {renderCondominiumSelector()}
           </div>

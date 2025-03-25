@@ -111,71 +111,6 @@ export type Database = {
         }
         Relationships: []
       }
-      business_document_attachments: {
-        Row: {
-          created_at: string
-          document_id: string
-          file_name: string
-          file_path: string
-          file_type: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          document_id: string
-          file_name: string
-          file_path: string
-          file_type: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          document_id?: string
-          file_name?: string
-          file_path?: string
-          file_type?: string
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_document_attachments_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "business_documents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      business_documents: {
-        Row: {
-          created_at: string
-          data_cadastro: string
-          id: string
-          matricula: string
-          observacoes: string | null
-          tipo: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          data_cadastro: string
-          id?: string
-          matricula: string
-          observacoes?: string | null
-          tipo: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          data_cadastro?: string
-          id?: string
-          matricula?: string
-          observacoes?: string | null
-          tipo?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       common_area_reservations: {
         Row: {
           common_area_id: string
@@ -868,6 +803,51 @@ export type Database = {
         }
         Relationships: []
       }
+      resident_charges: {
+        Row: {
+          amount: string
+          created_at: string
+          due_date: string
+          id: string
+          matricula: string
+          month: string
+          payment_date: string | null
+          resident_id: string
+          status: string
+          unit: string
+          updated_at: string
+          year: string
+        }
+        Insert: {
+          amount: string
+          created_at?: string
+          due_date: string
+          id?: string
+          matricula: string
+          month: string
+          payment_date?: string | null
+          resident_id: string
+          status?: string
+          unit: string
+          updated_at?: string
+          year: string
+        }
+        Update: {
+          amount?: string
+          created_at?: string
+          due_date?: string
+          id?: string
+          matricula?: string
+          month?: string
+          payment_date?: string | null
+          resident_id?: string
+          status?: string
+          unit?: string
+          updated_at?: string
+          year?: string
+        }
+        Relationships: []
+      }
       residents: {
         Row: {
           cpf: string
@@ -879,6 +859,7 @@ export type Database = {
           telefone: string | null
           unidade: string
           updated_at: string
+          user_id: string | null
           valor_condominio: string | null
         }
         Insert: {
@@ -891,6 +872,7 @@ export type Database = {
           telefone?: string | null
           unidade: string
           updated_at?: string
+          user_id?: string | null
           valor_condominio?: string | null
         }
         Update: {
@@ -903,6 +885,7 @@ export type Database = {
           telefone?: string | null
           unidade?: string
           updated_at?: string
+          user_id?: string | null
           valor_condominio?: string | null
         }
         Relationships: [
@@ -915,12 +898,42 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          matricula: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          matricula?: string | null
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          matricula?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

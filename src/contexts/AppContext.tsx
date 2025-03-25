@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -11,10 +12,15 @@ interface User {
   nome: string;
   email: string;
   isAdmin: boolean;
+  isResident?: boolean;
   matricula?: string;
   nomeCondominio?: string;
   condominiums?: Condominium[];
   selectedCondominium?: string; // Storing the selected condominium matricula
+  
+  // Resident specific fields
+  residentId?: string;
+  unit?: string;
   
   // Address related fields from condominium
   rua?: string;
@@ -50,6 +56,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsedUser = JSON.parse(storedUser);
         console.log("Stored user from localStorage:", parsedUser);
         console.log("Is stored user admin?", parsedUser.isAdmin);
+        console.log("Is stored user resident?", parsedUser.isResident);
         setUser(parsedUser);
       } catch (e) {
         console.error("Error parsing stored user:", e);
@@ -67,7 +74,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const adminUser = {
           nome: 'IGOR COSTA ALVES',
           email: 'meuresidencialcom@gmail.com',
-          isAdmin: true
+          isAdmin: true,
+          isResident: false
         };
         
         console.log("Admin user created:", adminUser);
@@ -77,7 +85,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
-      // Check if it's a login with email
+      // Check if it's a manager login with email
       const { data: emailData, error: emailError } = await supabase
         .from('condominiums')
         .select('*')
@@ -89,7 +97,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error("Erro ao verificar credenciais por email:", emailError);
       }
       
-      // Check if it's a login with matricula
+      // Check if it's a manager login with matricula
       const { data: matriculaData, error: matriculaError } = await supabase
         .from('condominiums')
         .select('*')
@@ -140,6 +148,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           nome: firstCondo.nomelegal || firstCondo.matricula,
           email: firstCondo.emaillegal || '',
           isAdmin: false,
+          isResident: false,
           matricula: firstCondo.matricula,
           nomeCondominio: firstCondo.nomecondominio || 'Condomínio',
           condominiums: condosFormatted,
@@ -157,6 +166,78 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setUser(managerUser);
         localStorage.setItem('condoUser', JSON.stringify(managerUser));
         toast.success("Login realizado com sucesso!");
+        return true;
+      }
+      
+      // Check for resident login (email is the registered email, password is their CPF)
+      const { data: residents, error: residentError } = await supabase
+        .from('residents')
+        .select('*')
+        .eq('email', emailOrMatricula.toLowerCase())
+        .eq('cpf', password);
+      
+      if (residentError) {
+        console.error("Erro ao verificar credenciais de morador:", residentError);
+      }
+      
+      if (residents && residents.length > 0) {
+        const resident = residents[0];
+        
+        // Get condominium info for the resident
+        const { data: condoData, error: condoError } = await supabase
+          .from('condominiums')
+          .select('*')
+          .eq('matricula', resident.matricula)
+          .eq('ativo', true)
+          .single();
+        
+        if (condoError) {
+          console.error("Erro ao obter dados do condomínio do morador:", condoError);
+          toast.error("Não foi possível obter os dados do condomínio associado a este morador.");
+          return false;
+        }
+        
+        if (!condoData) {
+          toast.error("Condomínio não encontrado ou inativo.");
+          return false;
+        }
+        
+        const residentUser = {
+          nome: resident.nome_completo,
+          email: resident.email || '',
+          isAdmin: false,
+          isResident: true,
+          residentId: resident.id,
+          matricula: resident.matricula,
+          unit: resident.unidade,
+          nomeCondominio: condoData.nomecondominio || 'Condomínio',
+          // Add address details from condominium
+          rua: condoData.rua,
+          numero: condoData.numero,
+          complemento: condoData.complemento,
+          bairro: condoData.bairro,
+          cidade: condoData.cidade,
+          estado: condoData.estado,
+          cep: condoData.cep,
+        };
+        
+        setUser(residentUser);
+        localStorage.setItem('condoUser', JSON.stringify(residentUser));
+        toast.success("Login de morador realizado com sucesso!");
+        
+        // Create Supabase auth user if they don't exist yet
+        // This is for future use with RLS policies
+        try {
+          // Check if there's already a user_id for this resident
+          if (!resident.user_id) {
+            // Will handle linking auth users in a separate function when needed
+            console.log("Resident login successful - future auth integration will be implemented");
+          }
+        } catch (authError) {
+          console.error("Error in resident auth setup:", authError);
+          // Still allow login even if auth setup fails - this is just for future RLS
+        }
+        
         return true;
       }
       
