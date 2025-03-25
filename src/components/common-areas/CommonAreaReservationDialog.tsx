@@ -97,6 +97,8 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         status: 'pending',
       };
       
+      console.log('Creating reservation with data:', reservationData);
+      
       // Check for existing reservations
       const { data: existingReservations, error: checkError } = await supabase
         .from('common_area_reservations')
@@ -130,6 +132,7 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
       toast.success('Reserva criada com sucesso!');
       form.reset();
       onSuccess();
+      onOpenChange(false);
       
     } catch (error: any) {
       console.error('Error during reservation submission:', error);
