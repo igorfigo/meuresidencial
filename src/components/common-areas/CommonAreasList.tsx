@@ -6,7 +6,8 @@ import {
   Trash, 
   Calendar, 
   Users, 
-  Clock 
+  Clock,
+  CalendarPlus 
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -33,6 +34,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { CommonAreaReservationDialog } from './CommonAreaReservationDialog';
 
 interface CommonArea {
   id: string;
@@ -71,6 +73,8 @@ interface CommonAreasListProps {
   isDeleting: boolean;
   fetchReservations: (id: string) => Promise<any[]>;
   viewOnly?: boolean;
+  onCreateReservation?: (commonAreaId: string) => void;
+  showReservationButton?: boolean;
 }
 
 export const CommonAreasList: React.FC<CommonAreasListProps> = ({
@@ -79,12 +83,15 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
   onDelete,
   isDeleting,
   fetchReservations,
-  viewOnly = false
+  viewOnly = false,
+  onCreateReservation,
+  showReservationButton = false
 }) => {
   const [selectedArea, setSelectedArea] = useState<CommonArea | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isReservationOpen, setIsReservationOpen] = useState(false);
   
   const handleViewReservations = async (area: CommonArea) => {
     setSelectedArea(area);
@@ -99,6 +106,11 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReservationClick = (area: CommonArea) => {
+    setSelectedArea(area);
+    setIsReservationOpen(true);
   };
 
   const formatWeekdays = (weekdays?: string[]) => {
@@ -172,13 +184,13 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
             <TableHead>Capacidade</TableHead>
             <TableHead className="hidden md:table-cell text-center">Disponibilidade</TableHead>
             <TableHead className="hidden md:table-cell text-center">Horário</TableHead>
-            {!viewOnly && <TableHead className="text-center">Ações</TableHead>}
+            <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {commonAreas.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={viewOnly ? 4 : 5} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                 Nenhuma área comum cadastrada
               </TableCell>
             </TableRow>
@@ -193,44 +205,59 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
                 <TableCell className="hidden md:table-cell text-center">
                   {formatHours(area.opening_time, area.closing_time)}
                 </TableCell>
-                {!viewOnly && (
-                  <TableCell className="text-center">
-                    <div className="flex justify-center gap-2">
+                <TableCell className="text-center">
+                  <div className="flex justify-center gap-2">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
+                      onClick={() => handleViewReservations(area)}
+                      title="Ver reservas"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    
+                    {showReservationButton && (
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
-                        onClick={() => handleViewReservations(area)}
-                        title="Ver reservas"
+                        className="h-8 w-8 text-green-500 hover:bg-green-50 hover:text-green-600"
+                        onClick={() => handleReservationClick(area)}
+                        title="Reservar"
                       >
-                        <Eye className="h-4 w-4" />
+                        <CalendarPlus className="h-4 w-4" />
                       </Button>
-                      {onEdit && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                          onClick={() => onEdit(area)}
-                          title="Editar"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {onDelete && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
-                          onClick={() => onDelete(area.id)}
-                          disabled={isDeleting}
-                          title="Excluir"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                )}
+                    )}
+                    
+                    {!viewOnly && (
+                      <>
+                        {onEdit && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                            onClick={() => onEdit(area)}
+                            title="Editar"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {onDelete && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
+                            onClick={() => onDelete(area.id)}
+                            disabled={isDeleting}
+                            title="Excluir"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </TableCell>
               </TableRow>
             ))
           )}
@@ -332,6 +359,22 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Reservation Dialog */}
+      {selectedArea && (
+        <CommonAreaReservationDialog
+          open={isReservationOpen}
+          onOpenChange={setIsReservationOpen}
+          commonArea={selectedArea}
+          onSuccess={() => {
+            setIsReservationOpen(false);
+            // Refresh reservations if the details dialog is open
+            if (isDetailsOpen && selectedArea) {
+              handleViewReservations(selectedArea);
+            }
+          }}
+        />
+      )}
     </>
   );
 };

@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useCommonAreas } from '@/hooks/use-common-areas';
 import { CommonAreaForm } from '@/components/common-areas/CommonAreaForm';
 import { CommonAreasList } from '@/components/common-areas/CommonAreasList';
+import { ReservationsCalendar } from '@/components/common-areas/ReservationsCalendar';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -40,6 +41,7 @@ const AreasComuns = () => {
 
   // Only managers (non-residents and non-admin users) can add/edit areas
   const isManager = user && !user.isAdmin && !user.isResident;
+  const isResident = user && user.isResident;
 
   const handleNewArea = () => {
     resetForm();
@@ -81,7 +83,7 @@ const AreasComuns = () => {
             <p className="text-muted-foreground">
               {isManager 
                 ? "Gerencie as áreas comuns do seu condomínio"
-                : "Veja as áreas comuns disponíveis no seu condomínio"
+                : "Veja e reserve as áreas comuns disponíveis no seu condomínio"
               }
             </p>
           </div>
@@ -105,7 +107,7 @@ const AreasComuns = () => {
               />
             </Card>
           ) : (
-            <div>
+            <div className="space-y-6">
               {isLoading ? (
                 <div className="py-10 text-center text-muted-foreground">
                   Carregando áreas comuns...
@@ -119,8 +121,14 @@ const AreasComuns = () => {
                     isDeleting={isDeleting}
                     fetchReservations={fetchReservations}
                     viewOnly={!isManager}
+                    showReservationButton={isResident}
                   />
                 </Card>
+              )}
+              
+              {/* Show calendar view of all reservations */}
+              {commonAreas && commonAreas.length > 0 && (
+                <ReservationsCalendar />
               )}
             </div>
           )}
