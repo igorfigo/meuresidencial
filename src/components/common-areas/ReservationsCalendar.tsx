@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { format, startOfDay, addDays, isSameDay } from 'date-fns';
+import { format, startOfDay, addDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, User, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import {
@@ -13,6 +13,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface Reservation {
   id: string;
@@ -35,7 +43,6 @@ export const ReservationsCalendar: React.FC = () => {
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [startDate, setStartDate] = useState<Date>(startOfDay(new Date()));
   
   const fetchReservations = async () => {
     if (!matricula) {
@@ -94,10 +101,6 @@ export const ReservationsCalendar: React.FC = () => {
     fetchReservations();
   }, [matricula]);
   
-  const navigateDays = (days: number) => {
-    setStartDate(prevDate => startOfDay(addDays(prevDate, days)));
-  };
-  
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved':
@@ -123,18 +126,6 @@ export const ReservationsCalendar: React.FC = () => {
         return 'Pendente';
     }
   };
-  
-  // Generate an array of 7 days starting from startDate
-  const dateRange = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
-  
-  // Group reservations by date
-  const reservationsByDate = dateRange.map(date => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return {
-      date,
-      reservations: reservations.filter(r => r.reservation_date === dateStr)
-    };
-  });
 
   return (
     <Card className="border-t-4 border-t-brand-600">
@@ -146,29 +137,15 @@ export const ReservationsCalendar: React.FC = () => {
               Visualize todas as reservas das áreas comuns
             </CardDescription>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setStartDate(startOfDay(new Date()))}
-            >
-              Hoje
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigateDays(-7)}
-            >
-              Anterior
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigateDays(7)}
-            >
-              Próximo
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchReservations}
+            className="self-end"
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            Atualizar
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -176,41 +153,55 @@ export const ReservationsCalendar: React.FC = () => {
           <div className="py-10 text-center text-muted-foreground">
             Carregando agenda de reservas...
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
-            {reservationsByDate.map(({ date, reservations }) => (
-              <div key={date.toString()} className="border rounded-md">
-                <div className="bg-muted p-2 text-center font-medium rounded-t-md">
-                  {format(date, "EEE, dd/MM", { locale: ptBR })}
-                </div>
-                <div className="p-2 min-h-[150px] max-h-[250px] overflow-y-auto">
-                  {reservations.length === 0 ? (
-                    <div className="text-center text-sm text-muted-foreground py-4">
-                      Sem reservas
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {reservations.map((reservation) => (
-                        <div 
-                          key={reservation.id} 
-                          className={`p-2 rounded-md border text-xs ${getStatusColor(reservation.status)}`}
-                        >
-                          <div className="font-medium">{reservation.common_area.name}</div>
-                          <div className="flex items-center mt-1 gap-1">
-                            <Clock className="h-3 w-3" />
-                            {reservation.start_time} - {reservation.end_time}
-                          </div>
-                          <div className="mt-1 font-medium text-[10px]">
-                            {reservation.residents.nome_completo} ({reservation.residents.unidade})
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+        ) : reservations.length === 0 ? (
+          <div className="py-10 text-center text-muted-foreground">
+            Não há reservas agendadas
           </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Área</TableHead>
+                <TableHead>Horário</TableHead>
+                <TableHead>Morador</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {reservations.map((reservation) => (
+                <TableRow key={reservation.id}>
+                  <TableCell className="font-medium">
+                    {format(parseISO(reservation.reservation_date), "dd/MM/yyyy", { locale: ptBR })}
+                  </TableCell>
+                  <TableCell>{reservation.common_area.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {reservation.start_time} - {reservation.end_time}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        {reservation.residents.nome_completo}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Home className="h-3 w-3" />
+                        {reservation.residents.unidade}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(reservation.status)}`}>
+                      {getStatusText(reservation.status)}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>
