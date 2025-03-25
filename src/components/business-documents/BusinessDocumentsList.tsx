@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -16,16 +16,55 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useApp } from '@/contexts/AppContext';
+
+interface Document {
+  id: string;
+  title: string;
+  created_at: string;
+  file_type: string;
+  observations?: string;
+  file_path?: string;
+  file_name?: string;
+}
 
 export const BusinessDocumentsList = () => {
-  const [documents, setDocuments] = useState([]);
+  const { user } = useApp();
+  const matricula = user?.selectedCondominium || '';
+
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [newDocument, setNewDocument] = useState({
     title: '',
     type: '',
     observations: '',
-    file: null
+    file: null as File | null
   });
+  
+  // Fetch documents on component mount
+  useEffect(() => {
+    if (matricula) {
+      fetchDocuments();
+    }
+  }, [matricula]);
+
+  const fetchDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('business_documents')
+        .select('*')
+        .eq('matricula', matricula)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setDocuments(data || []);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      toast.error('Não foi possível carregar os documentos');
+    }
+  };
   
   const handleOpenAddDialog = () => {
     setIsAddDialogOpen(true);
@@ -36,29 +75,139 @@ export const BusinessDocumentsList = () => {
     setNewDocument({ title: '', type: '', observations: '', file: null });
   };
   
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewDocument(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleSelectChange = (value) => {
+  const handleSelectChange = (value: string) => {
     setNewDocument(prev => ({ ...prev, type: value }));
   };
   
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setNewDocument(prev => ({ ...prev, file: e.target.files[0] }));
+      setNewDocument(prev => ({ ...prev, file: e.target.files![0] }));
     }
   };
   
-  const handleAddDocument = () => {
-    // This would typically involve uploading the file and saving document metadata
-    // For now, we'll mock it with a toast notification
-    toast.success('Documento adicionado com sucesso!');
-    handleCloseAddDialog();
+  const handleAddDocument = async () => {
+    if (!matricula) {
+      toast.error('Matrícula não encontrada');
+      return;
+    }
     
-    // In a real implementation, you would upload the file to storage
-    // and save the document metadata to the database, then update the documents state
+    if (!newDocument.title || !newDocument.type || !newDocument.file) {
+      toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // 1. Upload the file to Supabase Storage
+      const fileExt = newDocument.file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${matricula}/${fileName}`;
+      
+      // Check if business_files bucket exists, create if not
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.find(b => b.name === 'business_files');
+      
+      if (!bucketExists) {
+        // This would typically be done via SQL migration, but for simplicity we'll create it here
+        await supabase.storage.createBucket('business_files', {
+          public: false
+        });
+      }
+      
+      // Upload file
+      const { error: uploadError } = await supabase.storage
+        .from('business_files')
+        .upload(filePath, newDocument.file);
+      
+      if (uploadError) throw uploadError;
+      
+      // 2. Save document metadata to the database
+      const { data, error } = await supabase
+        .from('business_documents')
+        .insert([
+          {
+            matricula,
+            title: newDocument.title,
+            file_type: newDocument.type,
+            observations: newDocument.observations,
+            file_path: filePath,
+            file_name: newDocument.file.name
+          }
+        ])
+        .select();
+      
+      if (error) throw error;
+      
+      // 3. Update the local state with the new document
+      if (data && data.length > 0) {
+        setDocuments(prev => [data[0], ...prev]);
+      }
+      
+      toast.success('Documento adicionado com sucesso!');
+      handleCloseAddDialog();
+    } catch (error) {
+      console.error('Error adding document:', error);
+      toast.error('Erro ao adicionar documento');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDownloadDocument = async (document: Document) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('business_files')
+        .download(document.file_path!);
+      
+      if (error) throw error;
+      
+      // Create download link
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = document.file_name || 'documento';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast.error('Erro ao baixar documento');
+    }
+  };
+
+  const handleDeleteDocument = async (id: string, filePath: string) => {
+    if (!confirm('Tem certeza que deseja excluir este documento?')) return;
+    
+    try {
+      // Delete document from database
+      const { error: dbError } = await supabase
+        .from('business_documents')
+        .delete()
+        .eq('id', id);
+      
+      if (dbError) throw dbError;
+      
+      // Delete file from storage
+      const { error: storageError } = await supabase.storage
+        .from('business_files')
+        .remove([filePath]);
+      
+      if (storageError) throw storageError;
+      
+      // Update local state
+      setDocuments(prev => prev.filter(doc => doc.id !== id));
+      
+      toast.success('Documento excluído com sucesso!');
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast.error('Erro ao excluir documento');
+    }
   };
 
   return (
@@ -94,18 +243,28 @@ export const BusinessDocumentsList = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {documents.map((doc, index) => (
-              <TableRow key={index}>
+            {documents.map((doc) => (
+              <TableRow key={doc.id}>
                 <TableCell>{doc.title}</TableCell>
                 <TableCell>{new Date(doc.created_at).toLocaleDateString('pt-BR')}</TableCell>
                 <TableCell>{doc.file_type}</TableCell>
                 <TableCell>{doc.observations}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" title="Download">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      title="Download"
+                      onClick={() => handleDownloadDocument(doc)}
+                    >
                       <Download className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" title="Excluir">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      title="Excluir"
+                      onClick={() => handleDeleteDocument(doc.id, doc.file_path!)}
+                    >
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>
@@ -169,14 +328,14 @@ export const BusinessDocumentsList = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseAddDialog}>
+            <Button variant="outline" onClick={handleCloseAddDialog} disabled={isLoading}>
               Cancelar
             </Button>
             <Button 
               onClick={handleAddDocument} 
-              disabled={!newDocument.title || !newDocument.type || !newDocument.file}
+              disabled={isLoading || !newDocument.title || !newDocument.type || !newDocument.file}
             >
-              Salvar
+              {isLoading ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>
         </DialogContent>
