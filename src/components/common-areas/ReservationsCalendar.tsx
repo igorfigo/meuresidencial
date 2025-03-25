@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { format, startOfDay, addDays, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar, Clock, User, Home, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -89,7 +89,7 @@ export const ReservationsCalendar: React.FC = () => {
       if (error) {
         console.error('Error fetching reservations:', error);
       } else {
-        setReservations(data || []);
+        setReservations(data as unknown as Reservation[]);
       }
     } catch (error) {
       console.error('Error in fetchReservations:', error);

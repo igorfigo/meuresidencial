@@ -45,6 +45,7 @@ interface CommonAreaReservationDialogProps {
     name: string;
     opening_time?: string;
     closing_time?: string;
+    valor?: string;
   };
   onSuccess: () => void;
 }
@@ -97,7 +98,7 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         status: 'pending',
       };
       
-      // Check for existing reservations
+      // Check for existing reservations using any method
       const { data: existingReservations, error: checkError } = await supabase
         .from('common_area_reservations')
         .select('*')
@@ -144,6 +145,19 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
     onOpenChange(false);
   };
 
+  const formatCurrency = (value: string | undefined) => {
+    if (!value) return 'Grátis';
+    
+    // Convert to number, then format
+    const numValue = parseFloat(value);
+    if (numValue <= 0) return 'Grátis';
+    
+    return numValue.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -151,6 +165,11 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
           <DialogTitle>Reservar Área Comum</DialogTitle>
           <DialogDescription>
             Preencha os dados para reservar {commonArea.name}
+            {commonArea.valor && parseFloat(commonArea.valor) > 0 && (
+              <span className="ml-1 font-medium text-brand-600">
+                ({formatCurrency(commonArea.valor)})
+              </span>
+            )}
           </DialogDescription>
         </DialogHeader>
         
