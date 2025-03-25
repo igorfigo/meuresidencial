@@ -104,7 +104,7 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
 
         if (error) throw error;
 
-        // Process data for chart - ensure all months are represented
+        // Process data for chart
         const monthlyData = months.map(monthStr => {
           const monthlyExpenses = data.filter(expense => expense.reference_month === monthStr);
           
@@ -112,14 +112,12 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
             sum + BRLToNumber(expense.amount), 0
           );
           
-          // Create a better month/year format for display
-          const monthDate = new Date(monthStr + '-01'); // Add day to make it a valid date
-          const monthName = format(monthDate, 'MMM', { locale: ptBR });
-          const year = format(monthDate, 'yy');
+          const [year, monthNum] = monthStr.split('-');
+          const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+          const monthName = monthNames[parseInt(monthNum) - 1];
           
           return {
-            month: `${monthName}/${year}`,
-            fullMonth: format(monthDate, 'MMMM/yyyy', { locale: ptBR }),
+            month: `${monthName}/${year.substring(2)}`,
             value: totalExpense
           };
         });
@@ -142,18 +140,16 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
   return (
     <Card className="overflow-hidden border-blue-300 shadow-md">
       <CardContent className="p-4">
-        <div className="flex flex-col mb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="h-5 w-5 text-blue-500" />
-            <h3 className="font-semibold text-gray-800">Evolução de Despesas</h3>
-          </div>
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <TrendingUp className="h-5 w-5 text-blue-500" />
+          <h3 className="font-semibold text-gray-800">Evolução de Despesas</h3>
           
-          <div className="flex justify-center w-full">
+          <div className="ml-auto">
             <Select 
               value={selectedCategory} 
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="w-[220px] h-9">
+              <SelectTrigger className="w-[180px] h-8 text-xs">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent>
@@ -180,19 +176,16 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
             >
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="month" 
-                  tick={{ fontSize: 12 }}
-                />
+                <XAxis dataKey="month" />
                 <YAxis tickFormatter={formatTooltipValue} />
                 <Tooltip 
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
-                          <p className="text-sm font-medium">{payload[0].payload.fullMonth}</p>
+                          <p className="text-sm font-medium">{payload[0].payload.month}</p>
                           <p className="text-sm" style={{ color: '#f97150' }}>
-                            Valor: {formatToBRL(payload[0].value as number)}
+                            Valor: R$ {formatToBRL(payload[0].value as number)}
                           </p>
                         </div>
                       );
@@ -200,16 +193,8 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
                     return null;
                   }}
                 />
-                <Legend 
-                  formatter={(value) => {
-                    return categoryLabels[selectedCategory] || selectedCategory;
-                  }}
-                />
-                <Bar 
-                  dataKey="value" 
-                  fill="#f97150"
-                  name={categoryLabels[selectedCategory] || selectedCategory}
-                />
+                <Legend />
+                <Bar dataKey="value" fill="#f97150" name={categoryLabels[selectedCategory] || selectedCategory} />
               </BarChart>
             </ChartContainer>
           ) : (
