@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Document, DocumentAttachment } from '@/hooks/use-documents';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   Pagination,
@@ -77,23 +77,8 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
 
   const formatDate = (dateString: string) => {
     try {
-      // Handle different date formats
-      if (dateString.includes('T')) {
-        // For ISO formatted dates with time component
-        const date = parseISO(dateString);
-        return format(date, 'dd/MM/yyyy', { locale: ptBR });
-      } 
-      // For yyyy-MM-dd format
-      else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const [year, month, day] = dateString.split('-').map(Number);
-        // Note: month is 0-indexed in JavaScript Date
-        const date = new Date(year, month - 1, day);
-        return format(date, 'dd/MM/yyyy', { locale: ptBR });
-      }
-      // For other formats, rely on JavaScript's Date parsing
       return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
     } catch (error) {
-      console.error('Error formatting date:', error, dateString);
       return dateString;
     }
   };

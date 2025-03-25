@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { useToast } from './use-toast';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -117,34 +116,10 @@ export function useDocuments() {
     setAttachments([]);
     
     if (document?.id) {
-      // When editing an existing document, ensure the date is formatted correctly
-      let dataCadastro = format(new Date(), 'yyyy-MM-dd');
-      
-      if (document.data_cadastro) {
-        // Handle different date formats from the database
-        try {
-          if (typeof document.data_cadastro === 'string') {
-            if (document.data_cadastro.includes('T')) {
-              // If it's ISO format with time
-              dataCadastro = format(parseISO(document.data_cadastro), 'yyyy-MM-dd');
-            } else {
-              // If it's date-only format
-              dataCadastro = document.data_cadastro.substring(0, 10);
-            }
-          } else {
-            // For other date formats
-            dataCadastro = format(new Date(document.data_cadastro), 'yyyy-MM-dd');
-          }
-        } catch (error) {
-          console.error('Error formatting date:', error, document.data_cadastro);
-          dataCadastro = format(new Date(), 'yyyy-MM-dd');
-        }
-      }
-      
       form.reset({
         id: document.id,
         tipo: document.tipo,
-        data_cadastro: dataCadastro,
+        data_cadastro: document.data_cadastro || format(new Date(), 'yyyy-MM-dd'),
         observacoes: document.observacoes,
       });
       
@@ -197,7 +172,7 @@ export function useDocuments() {
           .from('documents')
           .update({
             tipo: data.tipo,
-            data_cadastro: data.data_cadastro, // Use the date string directly
+            data_cadastro: data.data_cadastro,
             observacoes: data.observacoes,
             updated_at: new Date().toISOString(),
           })
@@ -211,7 +186,7 @@ export function useDocuments() {
           .insert({
             matricula,
             tipo: data.tipo,
-            data_cadastro: data.data_cadastro, // Use the date string directly
+            data_cadastro: data.data_cadastro,
             observacoes: data.observacoes,
           })
           .select();
