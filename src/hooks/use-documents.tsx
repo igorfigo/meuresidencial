@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { useToast } from './use-toast';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -82,7 +83,14 @@ export function useDocuments() {
       if (error) throw error;
       
       console.log("Documents fetched:", data?.length || 0);
-      setDocuments(data || []);
+      // Process the data to ensure dates are properly formatted
+      const processedData = data?.map(doc => ({
+        ...doc,
+        // Ensure data_cadastro is preserved as a full ISO string
+        data_cadastro: doc.data_cadastro
+      })) || [];
+      
+      setDocuments(processedData);
     } catch (error) {
       console.error('Error fetching documents:', error);
       toast({
@@ -119,7 +127,9 @@ export function useDocuments() {
       form.reset({
         id: document.id,
         tipo: document.tipo,
-        data_cadastro: document.data_cadastro || format(new Date(), 'yyyy-MM-dd'),
+        data_cadastro: document.data_cadastro 
+          ? format(parseISO(document.data_cadastro), 'yyyy-MM-dd')
+          : format(new Date(), 'yyyy-MM-dd'),
         observacoes: document.observacoes,
       });
       
@@ -172,7 +182,7 @@ export function useDocuments() {
           .from('documents')
           .update({
             tipo: data.tipo,
-            data_cadastro: data.data_cadastro,
+            data_cadastro: data.data_cadastro, // Use the date as is - will be stored as ISO
             observacoes: data.observacoes,
             updated_at: new Date().toISOString(),
           })
@@ -186,7 +196,7 @@ export function useDocuments() {
           .insert({
             matricula,
             tipo: data.tipo,
-            data_cadastro: data.data_cadastro,
+            data_cadastro: data.data_cadastro, // Use the date as is - will be stored as ISO
             observacoes: data.observacoes,
           })
           .select();

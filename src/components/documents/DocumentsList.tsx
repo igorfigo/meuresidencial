@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Document, DocumentAttachment } from '@/hooks/use-documents';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   Pagination,
@@ -77,8 +77,13 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
 
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
+      // Parse the ISO string to a Date object, forcing UTC interpretation
+      const date = parseISO(dateString);
+      
+      // Format the date without adjusting for timezone
+      return format(date, 'dd/MM/yyyy', { locale: ptBR });
     } catch (error) {
+      console.error('Error formatting date:', dateString, error);
       return dateString;
     }
   };
