@@ -185,13 +185,20 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
                 value: { color: '#f97150', label: 'Valor' }
               }}
             >
-              <BarChart data={chartData}>
+              <BarChart data={chartData} barCategoryGap={5}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="month" 
+                  tick={{ fontSize: 12 }}
+                  axisLine={true}
+                  tickLine={true}
                 />
                 <YAxis 
                   tickFormatter={formatTooltipValue} 
+                  tick={{ fontSize: 11 }}
+                  domain={[0, 'auto']}
+                  axisLine={true}
+                  tickLine={true}
                 />
                 <Tooltip 
                   content={({ active, payload }) => {
@@ -208,11 +215,13 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
                     return null;
                   }}
                 />
-                <Legend />
+                <Legend formatter={(value) => `${categoryLabels[selectedCategory] || selectedCategory}`} />
                 <Bar 
                   dataKey="value" 
                   fill="#f97150" 
-                  name={categoryLabels[selectedCategory] || selectedCategory} 
+                  name={categoryLabels[selectedCategory] || selectedCategory}
+                  barSize={30}
+                  radius={[4, 4, 0, 0]}
                 />
               </BarChart>
             </ChartContainer>
