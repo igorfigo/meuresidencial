@@ -1,356 +1,402 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { useToast } from './use-toast';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 
-export interface DocumentAttachment {
-  id: string;
-  document_id: string;
-  file_path: string;
-  file_type: string;
-  file_name: string;
-  created_at: string;
-}
-
-export interface Document {
-  id?: string;
-  matricula: string;
-  tipo: string;
-  data_cadastro: string;
-  observacoes?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-// Form validation schema
-const documentSchema = z.object({
-  id: z.string().optional(),
-  tipo: z.string().min(1, "Tipo do documento é obrigatório"),
-  data_cadastro: z.string().min(1, "Data é obrigatória"),
-  observacoes: z.string().min(1, "Observações são obrigatórias"),
-});
-
-export type DocumentFormValues = z.infer<typeof documentSchema>;
-
-export function useDocuments() {
-  const { toast } = useToast();
+export const useDocuments = (
+  documentType: 'documents' | 'business_documents' = 'documents',
+  initialData?: any
+) => {
   const { user } = useApp();
-  const matricula = user?.selectedCondominium || '';
-  
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
   const [attachments, setAttachments] = useState<File[]>([]);
-  const [existingAttachments, setExistingAttachments] = useState<DocumentAttachment[]>([]);
-  
-  const form = useForm<DocumentFormValues>({
-    resolver: zodResolver(documentSchema),
-    defaultValues: {
-      tipo: '',
-      data_cadastro: format(new Date(), 'yyyy-MM-dd'),
-      observacoes: '',
-    }
-  });
-  
-  // Fetch documents
-  const fetchDocuments = async () => {
-    if (!matricula) return;
-    
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('matricula', matricula)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setDocuments(data || []);
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-      toast({
-        title: 'Erro ao carregar documentos',
-        description: 'Não foi possível carregar os documentos.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const [existingAttachments, setExistingAttachments] = useState<any[]>([]);
+
+  // Get the appropriate attachments table name based on document type
+  const getAttachmentsTable = () => {
+    return documentType === 'business_documents' ? 'business_document_attachments' : 'document_attachments';
   };
-  
+
+  // Form definition with zod schema
+  const formSchema = z.object({
+    id: z.string().optional(),
+    tipo: z.string().min(2, {
+      message: "Tipo é obrigatório e deve ter pelo menos 2 caracteres",
+    }),
+    data_cadastro: z.string().min(1, {
+      message: "Data é obrigatória",
+    }),
+    observacoes: z.string().optional(),
+    matricula: z.string().optional(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: initialData || {
+      tipo: "",
+      data_cadastro: format(new Date(), 'yyyy-MM-dd'),
+      observacoes: "",
+      matricula: user?.selectedCondominium || "",
+    },
+  });
+
+  const queryClient = supabase.realtime.postgrestClient();
+
+  // Query to get documents
+  const { data: documents, refetch: refetchDocuments } = useQuery({
+    queryKey: [documentType, user?.selectedCondominium],
+    queryFn: async () => {
+      try {
+        const matricula = user?.selectedCondominium;
+        if (!matricula) return [];
+
+        const { data, error } = await supabase
+          .from(documentType)
+          .select("*")
+          .eq("matricula", matricula)
+          .order("data_cadastro", { ascending: false });
+
+        if (error) {
+          console.error(`Error fetching ${documentType}:`, error);
+          toast.error(`Erro ao carregar documentos: ${error.message}`);
+          return [];
+        }
+
+        return data;
+      } catch (error) {
+        console.error(`Error in ${documentType} query:`, error);
+        toast.error("Erro ao carregar documentos");
+        return [];
+      }
+    },
+    enabled: !!user?.selectedCondominium,
+  });
+
   // Fetch document attachments
   const fetchAttachments = async (documentId: string) => {
     try {
       const { data, error } = await supabase
-        .from('document_attachments')
-        .select('*')
-        .eq('document_id', documentId);
-      
-      if (error) throw error;
-      return data || [];
+        .from(getAttachmentsTable())
+        .select("*")
+        .eq("document_id", documentId);
+
+      if (error) {
+        console.error("Error fetching attachments:", error);
+        toast.error(`Erro ao carregar anexos: ${error.message}`);
+        return [];
+      }
+
+      return data;
     } catch (error) {
-      console.error('Error fetching attachments:', error);
+      console.error("Error in fetchAttachments:", error);
+      toast.error("Erro ao carregar anexos");
       return [];
     }
   };
-  
+
   // Reset form
-  const resetForm = (document?: Document) => {
-    setAttachments([]);
-    
-    if (document?.id) {
+  const resetForm = (initialValues?: any) => {
+    if (initialValues) {
       form.reset({
-        id: document.id,
-        tipo: document.tipo,
-        data_cadastro: document.data_cadastro || format(new Date(), 'yyyy-MM-dd'),
-        observacoes: document.observacoes,
+        id: initialValues.id,
+        tipo: initialValues.tipo,
+        data_cadastro: initialValues.data_cadastro,
+        observacoes: initialValues.observacoes || "",
+        matricula: initialValues.matricula,
       });
-      
-      // Fetch existing attachments for edit mode
-      fetchExistingAttachments(document.id);
+
+      // Fetch existing attachments if editing
+      if (initialValues.id) {
+        fetchAttachments(initialValues.id).then(attachments => {
+          setExistingAttachments(attachments || []);
+        });
+      }
     } else {
       form.reset({
-        tipo: '',
+        tipo: "",
         data_cadastro: format(new Date(), 'yyyy-MM-dd'),
-        observacoes: '',
+        observacoes: "",
+        matricula: user?.selectedCondominium || "",
       });
+      setAttachments([]);
       setExistingAttachments([]);
     }
   };
-  
-  // Fetch existing attachments for a document
-  const fetchExistingAttachments = async (documentId: string) => {
-    try {
-      const attachments = await fetchAttachments(documentId);
-      setExistingAttachments(attachments);
-    } catch (error) {
-      console.error('Error fetching existing attachments:', error);
+
+  // Handle file change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setAttachments(prev => [...prev, ...newFiles]);
     }
   };
-  
-  // Submit form
-  const onSubmit = async (data: DocumentFormValues) => {
-    if (!matricula) return;
-    
-    // Check if there are either new attachments or existing attachments (for edit)
-    if (attachments.length === 0 && existingAttachments.length === 0) {
-      toast({
-        title: "Erro ao salvar documento",
-        description: "É necessário anexar pelo menos um arquivo.",
-        variant: "destructive",
-      });
+
+  // Remove file
+  const removeFile = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove existing attachment
+  const removeExistingAttachment = async (id: string) => {
+    try {
+      // First get the attachment to get the file path
+      const { data, error: fetchError } = await supabase
+        .from(getAttachmentsTable())
+        .select("file_path")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching attachment:", fetchError);
+        toast.error(`Erro ao remover anexo: ${fetchError.message}`);
+        return;
+      }
+
+      // Delete the file from storage
+      if (data && data.file_path) {
+        const { error: storageError } = await supabase.storage
+          .from(documentType)
+          .remove([data.file_path.split('/').pop()!]);
+
+        if (storageError) {
+          console.error("Error removing file from storage:", storageError);
+          // Continue anyway to delete the record
+        }
+      }
+
+      // Delete the attachment record
+      const { error } = await supabase
+        .from(getAttachmentsTable())
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error deleting attachment:", error);
+        toast.error(`Erro ao remover anexo: ${error.message}`);
+        return;
+      }
+
+      // Update the UI
+      setExistingAttachments(prev => prev.filter(attachment => attachment.id !== id));
+      toast.success("Anexo removido com sucesso");
+    } catch (error) {
+      console.error("Error in removeExistingAttachment:", error);
+      toast.error("Erro ao remover anexo");
+    }
+  };
+
+  // Get file URL
+  const getFileUrl = async (path: string) => {
+    try {
+      const fileName = path.split('/').pop();
+      if (!fileName) return null;
+
+      const { data, error } = await supabase.storage
+        .from(documentType)
+        .createSignedUrl(fileName, 60);
+
+      if (error) {
+        console.error("Error getting file URL:", error);
+        return null;
+      }
+
+      return data.signedUrl;
+    } catch (error) {
+      console.error("Error in getFileUrl:", error);
+      return null;
+    }
+  };
+
+  // Upload files
+  const uploadFiles = async (documentId: string) => {
+    if (attachments.length === 0) return [];
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    const uploadedAttachments = [];
+    for (let i = 0; i < attachments.length; i++) {
+      const file = attachments[i];
+      const fileName = `${documentId}_${Date.now()}_${file.name}`;
+
+      try {
+        // Upload file to storage
+        const { data, error } = await supabase.storage
+          .from(documentType)
+          .upload(fileName, file);
+
+        if (error) {
+          console.error("Error uploading file:", error);
+          toast.error(`Erro ao fazer upload do arquivo ${file.name}`);
+          continue;
+        }
+
+        // Create attachment record
+        const { data: attachmentData, error: attachmentError } = await supabase
+          .from(getAttachmentsTable())
+          .insert({
+            document_id: documentId,
+            file_name: file.name,
+            file_type: file.type,
+            file_path: data?.path || fileName,
+          })
+          .select("*")
+          .single();
+
+        if (attachmentError) {
+          console.error("Error creating attachment record:", attachmentError);
+          toast.error(`Erro ao registrar anexo ${file.name}`);
+          continue;
+        }
+
+        uploadedAttachments.push(attachmentData);
+        // Update progress
+        setUploadProgress(Math.round((i + 1) / attachments.length * 100));
+      } catch (error) {
+        console.error("Error in file upload:", error);
+        toast.error(`Erro ao processar arquivo ${file.name}`);
+      }
+    }
+
+    setIsUploading(false);
+    setAttachments([]);
+    return uploadedAttachments;
+  };
+
+  // Submit document
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user?.selectedCondominium) {
+      toast.error("Selecione um condomínio");
       return;
     }
-    
-    setIsSubmitting(true);
-    setUploadProgress(0);
-    
+
     try {
-      // Save or update document
-      let documentId = data.id;
+      setIsSubmitting(true);
+      const isEditing = !!values.id;
       
-      if (documentId) {
+      // Ensure matricula is set
+      values.matricula = user.selectedCondominium;
+
+      let documentId;
+      if (isEditing) {
         // Update existing document
-        const { error } = await supabase
-          .from('documents')
+        const { data, error } = await supabase
+          .from(documentType)
           .update({
-            tipo: data.tipo,
-            data_cadastro: data.data_cadastro,
-            observacoes: data.observacoes,
+            tipo: values.tipo,
+            data_cadastro: values.data_cadastro,
+            observacoes: values.observacoes,
             updated_at: new Date().toISOString(),
           })
-          .eq('id', documentId);
-        
-        if (error) throw error;
+          .eq("id", values.id)
+          .select("*")
+          .single();
+
+        if (error) {
+          console.error("Error updating document:", error);
+          toast.error(`Erro ao atualizar documento: ${error.message}`);
+          return;
+        }
+
+        documentId = data.id;
+        toast.success("Documento atualizado com sucesso");
       } else {
         // Create new document
-        const { data: newDocument, error } = await supabase
-          .from('documents')
+        const { data, error } = await supabase
+          .from(documentType)
           .insert({
-            matricula,
-            tipo: data.tipo,
-            data_cadastro: data.data_cadastro,
-            observacoes: data.observacoes,
+            tipo: values.tipo,
+            data_cadastro: values.data_cadastro,
+            observacoes: values.observacoes,
+            matricula: values.matricula,
           })
-          .select();
-        
-        if (error) throw error;
-        documentId = newDocument[0].id;
-      }
-      
-      // Handle file uploads if there are any
-      if (attachments.length > 0) {
-        setIsUploading(true);
-        
-        for (let i = 0; i < attachments.length; i++) {
-          const file = attachments[i];
-          const filePath = `${matricula}/${documentId}/${file.name}`;
-          
-          // Upload file to storage
-          const { error: uploadError } = await supabase.storage
-            .from('document_files')
-            .upload(filePath, file);
-          
-          if (uploadError) throw uploadError;
-          
-          // Save attachment record in database
-          const { error: attachmentError } = await supabase
-            .from('document_attachments')
-            .insert({
-              document_id: documentId,
-              file_path: filePath,
-              file_type: file.type,
-              file_name: file.name,
-            });
-          
-          if (attachmentError) throw attachmentError;
-          
-          // Update progress
-          setUploadProgress(Math.round(((i + 1) / attachments.length) * 100));
+          .select("*")
+          .single();
+
+        if (error) {
+          console.error("Error creating document:", error);
+          toast.error(`Erro ao criar documento: ${error.message}`);
+          return;
         }
-        
-        setIsUploading(false);
+
+        documentId = data.id;
+        toast.success("Documento criado com sucesso");
       }
-      
-      toast({
-        title: documentId === data.id ? 'Documento atualizado' : 'Documento cadastrado',
-        description: 'As informações foram salvas com sucesso.',
-      });
-      
-      // Refresh documents list
-      fetchDocuments();
-      resetForm();
+
+      // Upload attachments
+      if (documentId && attachments.length > 0) {
+        await uploadFiles(documentId);
+      }
+
+      // Refetch documents
+      refetchDocuments();
     } catch (error) {
-      console.error('Error saving document:', error);
-      toast({
-        title: 'Erro ao salvar documento',
-        description: 'Não foi possível salvar as informações.',
-        variant: 'destructive',
-      });
+      console.error("Error in onSubmit:", error);
+      toast.error("Erro ao salvar documento");
     } finally {
       setIsSubmitting(false);
-      setIsUploading(false);
     }
   };
-  
+
   // Delete document
   const deleteDocument = async (id: string) => {
-    setIsDeleting(true);
-    
     try {
-      // Delete document (attachments and files will be deleted via cascade)
+      setIsDeleting(true);
+
+      // First get all attachments to delete files from storage
+      const { data: attachmentsData, error: attachmentsError } = await supabase
+        .from(getAttachmentsTable())
+        .select("file_path")
+        .eq("document_id", id);
+
+      if (!attachmentsError && attachmentsData && attachmentsData.length > 0) {
+        // Delete files from storage
+        const filesToDelete = attachmentsData.map(att => 
+          att.file_path.split('/').pop()!
+        );
+
+        if (filesToDelete.length > 0) {
+          await supabase.storage
+            .from(documentType)
+            .remove(filesToDelete);
+        }
+      }
+
+      // Delete document (attachments will be deleted by cascade)
       const { error } = await supabase
-        .from('documents')
+        .from(documentType)
         .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      toast({
-        title: 'Documento excluído',
-        description: 'O documento foi excluído com sucesso.',
-      });
-      
-      // Refresh documents list
-      fetchDocuments();
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error deleting document:", error);
+        toast.error(`Erro ao excluir documento: ${error.message}`);
+        return;
+      }
+
+      toast.success("Documento excluído com sucesso");
+      refetchDocuments();
     } catch (error) {
-      console.error('Error deleting document:', error);
-      toast({
-        title: 'Erro ao excluir documento',
-        description: 'Não foi possível excluir o documento.',
-        variant: 'destructive',
-      });
+      console.error("Error in deleteDocument:", error);
+      toast.error("Erro ao excluir documento");
     } finally {
       setIsDeleting(false);
     }
   };
-  
-  // Handle file change
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      const fileList = event.target.files;
-      const filesArray = Array.from(fileList);
-      setAttachments(prev => [...prev, ...filesArray]);
-    }
-  };
-  
-  // Remove file from attachments
-  const removeFile = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
-  };
-  
-  // Remove existing attachment
-  const removeExistingAttachment = async (id: string) => {
-    try {
-      // Find attachment to get file path
-      const attachment = existingAttachments.find(a => a.id === id);
-      if (!attachment) return;
-      
-      // Delete file from storage
-      const { error: storageError } = await supabase.storage
-        .from('document_files')
-        .remove([attachment.file_path]);
-      
-      if (storageError) throw storageError;
-      
-      // Delete attachment record
-      const { error } = await supabase
-        .from('document_attachments')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      // Update existing attachments list
-      setExistingAttachments(prev => prev.filter(a => a.id !== id));
-      
-      toast({
-        title: 'Anexo removido',
-        description: 'O anexo foi removido com sucesso.',
-      });
-    } catch (error) {
-      console.error('Error removing attachment:', error);
-      toast({
-        title: 'Erro ao remover anexo',
-        description: 'Não foi possível remover o anexo.',
-        variant: 'destructive',
-      });
-    }
-  };
-  
-  // Get file URL
-  const getFileUrl = async (path: string) => {
-    try {
-      const { data } = await supabase.storage
-        .from('document_files')
-        .createSignedUrl(path, 60); // 60 seconds expiry
-      
-      return data?.signedUrl || '';
-    } catch (error) {
-      console.error('Error getting file URL:', error);
-      return '';
-    }
-  };
-  
-  // Fetch documents on mount
-  useEffect(() => {
-    if (matricula) {
-      fetchDocuments();
-    }
-  }, [matricula]);
-  
+
   return {
     form,
     documents,
-    isLoading,
+    isLoading: !documents,
     resetForm,
     onSubmit,
     deleteDocument,
@@ -364,7 +410,7 @@ export function useDocuments() {
     getFileUrl,
     uploadProgress,
     isUploading,
-    fetchDocuments,
-    fetchAttachments
+    fetchDocuments: refetchDocuments,
+    fetchAttachments,
   };
-}
+};
