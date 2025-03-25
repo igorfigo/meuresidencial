@@ -268,15 +268,15 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
       </Table>
 
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{selectedArea?.name}</DialogTitle>
             <DialogDescription>
-              Informações e reservas para esta área comum
+              Informações para esta área comum
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div className="mt-4">
             <Card className="border-t-4 border-t-brand-600">
               <CardHeader>
                 <CardTitle className="text-lg">Detalhes da Área</CardTitle>
@@ -323,45 +323,6 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
                   <div className="pt-2">
                     <h4 className="text-sm font-medium text-gray-500">Regras:</h4>
                     <p className="text-sm whitespace-pre-line">{selectedArea.rules}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card className="border-t-4 border-t-brand-600">
-              <CardHeader>
-                <CardTitle className="text-lg">Reservas</CardTitle>
-                <CardDescription>
-                  Lista de reservas para esta área
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="py-6 text-center text-muted-foreground">
-                    Carregando reservas...
-                  </div>
-                ) : reservations.length === 0 ? (
-                  <div className="py-6 text-center text-muted-foreground">
-                    Nenhuma reserva encontrada
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {reservations.map(reservation => (
-                      <div key={reservation.id} className="border rounded-md p-3">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="font-medium">{reservation.residents.nome_completo}</span>
-                          <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(reservation.status)}`}>
-                            {getStatusText(reservation.status)}
-                          </span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <p>Unidade: {reservation.residents.unidade}</p>
-                          <p>Data: {formatDate(reservation.reservation_date)}</p>
-                          <p>Horário: {reservation.start_time} às {reservation.end_time}</p>
-                          {reservation.notes && <p>Observações: {reservation.notes}</p>}
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 )}
               </CardContent>
