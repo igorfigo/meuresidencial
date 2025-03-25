@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { useDocuments } from '@/hooks/use-documents';
-import { DocumentForm } from '@/components/documents/DocumentForm';
-import { DocumentsList } from '@/components/documents/DocumentsList';
+import { useBusinessDocuments } from '@/hooks/use-business-documents';
+import { DocumentForm } from '@/components/business-documents/DocumentForm';
+import { DocumentsList } from '@/components/business-documents/DocumentsList';
 import { Card } from '@/components/ui/card';
 import { 
   AlertDialog, 
@@ -40,7 +40,7 @@ const BusinessDocumentos = () => {
     isUploading,
     fetchDocuments,
     fetchAttachments
-  } = useDocuments();
+  } = useBusinessDocuments();
   
   const [showForm, setShowForm] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
