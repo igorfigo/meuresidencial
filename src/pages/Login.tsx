@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -48,18 +49,12 @@ const Login = () => {
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="manager">Síndico/Admin</TabsTrigger>
+              <TabsTrigger value="manager">Síndico</TabsTrigger>
               <TabsTrigger value="resident">Morador</TabsTrigger>
             </TabsList>
             
             <TabsContent value="manager">
-              <Alert className="mb-4 bg-blue-50 border-blue-200">
-                <AlertCircle className="h-4 w-4 text-blue-600" />
-                <AlertTitle>Acesso de Síndico ou Administrador</AlertTitle>
-                <AlertDescription>
-                  Use seu email ou matrícula do condomínio e senha.
-                </AlertDescription>
-              </Alert>
+              {/* Information box removed as requested */}
             </TabsContent>
             
             <TabsContent value="resident">
@@ -82,6 +77,7 @@ const Login = () => {
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   required
+                  tabIndex={1}
                 />
               </div>
             </div>
@@ -109,11 +105,13 @@ const Login = () => {
                   required
                   maxLength={activeTab === 'resident' ? 11 : undefined}
                   numberOnly={activeTab === 'resident'}
+                  tabIndex={2}
                 />
                 <button
                   type="button"
                   className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={3}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -128,6 +126,7 @@ const Login = () => {
               type="submit"
               className="w-full bg-brand-600 hover:bg-brand-700 text-white"
               disabled={loading}
+              tabIndex={4}
             >
               {loading ? 'Carregando...' : 'Entrar'}
             </Button>
