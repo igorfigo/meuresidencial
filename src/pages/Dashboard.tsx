@@ -1,7 +1,7 @@
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Users, FileText, MapPin, Wallet, Home, Bug, BellRing, FileCheck, Receipt, PiggyBank, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { Users, FileText, MapPin, Wallet, Home, Bug, BellRing, FileCheck, Receipt, PiggyBank, ArrowDownCircle, ArrowUpCircle, Clock, New } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { formatToBRL, BRLToNumber } from '@/utils/currency';
 import { useFinances } from '@/hooks/use-finances';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
   Tooltip as UITooltip, 
@@ -21,6 +21,7 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 
 interface LocationStats {
   states: [string, number][];
@@ -336,6 +337,17 @@ const Dashboard = () => {
     }
   }
 
+  const isRecentNews = (createdAt: string): boolean => {
+    try {
+      const postDate = parseISO(createdAt);
+      const today = new Date();
+      return differenceInDays(today, postDate) <= 7;
+    } catch (error) {
+      console.error('Error calculating if news is recent:', error);
+      return false;
+    }
+  };
+
   const handleStateClick = (state: string) => {
     setSelectedState(state);
     setIsStateDetailOpen(true);
@@ -462,7 +474,15 @@ const Dashboard = () => {
             onClick={() => setNewsDialogOpen(true)}
           >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-sm font-medium">{latestNews.title}</CardTitle>
+                {isRecentNews(latestNews.created_at) && (
+                  <Badge variant="default" className="bg-blue-500 hover:bg-blue-500 flex items-center gap-0.5 px-1.5 py-0.5 h-5">
+                    <Clock className="h-3 w-3 mr-0.5" />
+                    <span>NEW</span>
+                  </Badge>
+                )}
+              </div>
               <BellRing className="h-4 w-4 text-brand-600" />
             </CardHeader>
             <CardContent>
