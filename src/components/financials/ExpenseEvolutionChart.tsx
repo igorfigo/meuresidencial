@@ -95,6 +95,8 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
           months.push(format(month, 'yyyy-MM', { locale: ptBR }));
         }
 
+        console.log('Fetching expenses for months:', months, 'category:', selectedCategory);
+
         const { data, error } = await supabase
           .from('financial_expenses')
           .select('amount, reference_month')
@@ -104,17 +106,25 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
 
         if (error) throw error;
 
+        console.log('Expense data received:', data);
+
         // Process data for chart
         const monthlyData = months.map(monthStr => {
           const monthlyExpenses = data.filter(expense => expense.reference_month === monthStr);
           
-          const totalExpense = monthlyExpenses.reduce((sum, expense) => 
-            sum + BRLToNumber(expense.amount), 0
-          );
+          console.log(`Month ${monthStr} has ${monthlyExpenses.length} expenses`);
+          
+          const totalExpense = monthlyExpenses.reduce((sum, expense) => {
+            const amount = BRLToNumber(expense.amount);
+            console.log(`Amount for ${monthStr}: ${expense.amount} -> ${amount}`);
+            return sum + amount;
+          }, 0);
           
           const [year, monthNum] = monthStr.split('-');
           const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
           const monthName = monthNames[parseInt(monthNum) - 1];
+          
+          console.log(`Month ${monthStr} total: ${totalExpense}`);
           
           return {
             month: `${monthName}/${year.substring(2)}`,
@@ -122,6 +132,7 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
           };
         });
 
+        console.log('Processed chart data:', monthlyData);
         setChartData(monthlyData);
       } catch (error) {
         console.error('Error fetching expense data:', error);
@@ -144,7 +155,7 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
           <TrendingUp className="h-5 w-5 text-blue-500" />
           <h3 className="font-semibold text-gray-800">Evolução de Despesas</h3>
           
-          <div className="ml-auto">
+          <div className="flex-grow flex justify-center">
             <Select 
               value={selectedCategory} 
               onValueChange={setSelectedCategory}
@@ -176,8 +187,14 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
             >
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis tickFormatter={formatTooltipValue} />
+                <XAxis 
+                  dataKey="month" 
+                  tick={{ fontSize: 12 }}
+                  tickLine={{ transform: 'translate(0, 6)' }}
+                />
+                <YAxis 
+                  tickFormatter={formatTooltipValue} 
+                />
                 <Tooltip 
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
@@ -185,7 +202,7 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
                         <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
                           <p className="text-sm font-medium">{payload[0].payload.month}</p>
                           <p className="text-sm" style={{ color: '#f97150' }}>
-                            Valor: R$ {formatToBRL(payload[0].value as number)}
+                            {categoryLabels[selectedCategory] || selectedCategory}: {formatToBRL(payload[0].value as number)}
                           </p>
                         </div>
                       );
@@ -193,8 +210,14 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
                     return null;
                   }}
                 />
-                <Legend />
-                <Bar dataKey="value" fill="#f97150" name={categoryLabels[selectedCategory] || selectedCategory} />
+                <Legend formatter={(value) => `${categoryLabels[selectedCategory] || selectedCategory}`} />
+                <Bar 
+                  dataKey="value" 
+                  fill="#f97150" 
+                  name={categoryLabels[selectedCategory] || selectedCategory} 
+                  barSize={30}
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ChartContainer>
           ) : (
