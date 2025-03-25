@@ -5,7 +5,6 @@ import { Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InfoCondominio } from './form-sections/InfoCondominio';
 import { InfoRepresentante } from './form-sections/InfoRepresentante';
-import { InfoFinanceira } from './form-sections/InfoFinanceira';
 import { PlanoContrato } from './form-sections/PlanoContrato';
 import { Seguranca } from './form-sections/Seguranca';
 import type { FormFields } from '@/hooks/use-condominium-form';
@@ -34,7 +33,6 @@ export const CondominiumForm = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <InfoCondominio handleInputChange={handleInputChange} />
         <InfoRepresentante handleInputChange={handleInputChange} />
-        <InfoFinanceira handleInputChange={handleInputChange} />
         <PlanoContrato handleInputChange={handleInputChange} />
         <Seguranca 
           handleInputChange={handleInputChange}

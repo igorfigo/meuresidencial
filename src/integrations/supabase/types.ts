@@ -320,16 +320,13 @@ export type Database = {
       }
       condominiums: {
         Row: {
-          agencia: string | null
           ativo: boolean | null
           bairro: string | null
-          banco: string | null
           cep: string | null
           cidade: string | null
           cnpj: string | null
           complemento: string | null
           confirmarsenha: string | null
-          conta: string | null
           created_at: string | null
           desconto: string | null
           emaillegal: string | null
@@ -341,7 +338,6 @@ export type Database = {
           nomecondominio: string | null
           nomelegal: string | null
           numero: string | null
-          pix: string | null
           planocontratado: string | null
           rua: string | null
           senha: string | null
@@ -354,16 +350,13 @@ export type Database = {
           welcome_email_sent: boolean | null
         }
         Insert: {
-          agencia?: string | null
           ativo?: boolean | null
           bairro?: string | null
-          banco?: string | null
           cep?: string | null
           cidade?: string | null
           cnpj?: string | null
           complemento?: string | null
           confirmarsenha?: string | null
-          conta?: string | null
           created_at?: string | null
           desconto?: string | null
           emaillegal?: string | null
@@ -375,7 +368,6 @@ export type Database = {
           nomecondominio?: string | null
           nomelegal?: string | null
           numero?: string | null
-          pix?: string | null
           planocontratado?: string | null
           rua?: string | null
           senha?: string | null
@@ -388,16 +380,13 @@ export type Database = {
           welcome_email_sent?: boolean | null
         }
         Update: {
-          agencia?: string | null
           ativo?: boolean | null
           bairro?: string | null
-          banco?: string | null
           cep?: string | null
           cidade?: string | null
           cnpj?: string | null
           complemento?: string | null
           confirmarsenha?: string | null
-          conta?: string | null
           created_at?: string | null
           desconto?: string | null
           emaillegal?: string | null
@@ -409,7 +398,6 @@ export type Database = {
           nomecondominio?: string | null
           nomelegal?: string | null
           numero?: string | null
-          pix?: string | null
           planocontratado?: string | null
           rua?: string | null
           senha?: string | null

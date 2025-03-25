@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -21,10 +20,6 @@ export type FormFields = {
   emailLegal: string;
   telefoneLegal: string;
   enderecoLegal: string;
-  banco: string;
-  agencia: string;
-  conta: string;
-  pix: string;
   planoContratado: string;
   valorPlano: string;
   formaPagamento: string;
@@ -76,10 +71,6 @@ export const useCondominiumForm = () => {
       emailLegal: '',
       telefoneLegal: '',
       enderecoLegal: '',
-      banco: '',
-      agencia: '',
-      conta: '',
-      pix: '',
       planoContratado: 'STANDARD',
       valorPlano: '',
       formaPagamento: 'pix',
@@ -175,10 +166,6 @@ export const useCondominiumForm = () => {
           emailLegal: data.emaillegal || '',
           telefoneLegal: data.telefonelegal || '',
           enderecoLegal: data.enderecolegal || '',
-          banco: data.banco || '',
-          agencia: data.agencia || '',
-          conta: data.conta || '',
-          pix: data.pix || '',
           planoContratado: data.planocontratado || 'STANDARD',
           valorPlano: data.valorplano ? `R$ ${formatToBRL(Number(data.valorplano))}` : 'R$ 0,00',
           formaPagamento: data.formapagamento || 'pix',
@@ -243,10 +230,6 @@ export const useCondominiumForm = () => {
       emaillegal: data.emailLegal,
       telefonelegal: data.telefoneLegal,
       enderecolegal: data.enderecoLegal,
-      banco: data.banco,
-      agencia: data.agencia,
-      conta: data.conta,
-      pix: data.pix,
       planocontratado: data.planoContratado,
       valorplano: BRLToNumber(data.valorPlano).toString(),
       formapagamento: data.formaPagamento,
