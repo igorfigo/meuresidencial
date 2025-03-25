@@ -7,7 +7,8 @@ import {
   Calendar, 
   Users, 
   Clock,
-  CalendarPlus 
+  CalendarPlus,
+  DollarSign 
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -35,6 +36,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { CommonAreaReservationDialog } from './CommonAreaReservationDialog';
+import { formatCurrency } from '@/utils/currency';
 
 interface CommonArea {
   id: string;
@@ -45,6 +47,7 @@ interface CommonArea {
   opening_time?: string;
   closing_time?: string;
   weekdays?: string[];
+  valor?: string;
   created_at: string;
   updated_at: string;
 }
@@ -181,7 +184,7 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead>Capacidade</TableHead>
+            <TableHead className="text-center">Capacidade</TableHead>
             <TableHead className="hidden md:table-cell text-center">Disponibilidade</TableHead>
             <TableHead className="hidden md:table-cell text-center">Horário</TableHead>
             <TableHead className="text-center">Ações</TableHead>
@@ -198,7 +201,7 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
             commonAreas.map((area) => (
               <TableRow key={area.id}>
                 <TableCell className="font-medium">{area.name}</TableCell>
-                <TableCell>{area.capacity || 'Não definido'}</TableCell>
+                <TableCell className="text-center">{area.capacity || 'Não definido'}</TableCell>
                 <TableCell className="hidden md:table-cell text-center">
                   {formatWeekdays(area.weekdays)}
                 </TableCell>
@@ -305,6 +308,13 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">
                       {formatWeekdays(selectedArea?.weekdays)}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1.5">
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">
+                      {selectedArea?.valor ? formatCurrency(selectedArea.valor) : 'Grátis'}
                     </span>
                   </div>
                 </div>
