@@ -20,7 +20,7 @@ const reservationSchema = z.object({
 export type ReservationFormValues = z.infer<typeof reservationSchema>;
 
 export const useResidentCommonAreas = () => {
-  const { user, resident } = useApp();
+  const { user, resident, isResident } = useApp();
   const matricula = user?.selectedCondominium || '';
   const queryClient = useQueryClient();
   

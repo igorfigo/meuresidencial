@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +31,14 @@ interface User {
   cep?: string;
 }
 
+interface Resident {
+  id: string;
+  matricula: string;
+  nome_completo: string;
+  email: string;
+  unidade: string;
+}
+
 interface AppContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
@@ -39,6 +46,9 @@ interface AppContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   switchCondominium: (matricula: string) => void;
+  isAdmin: boolean;
+  isResident: boolean;
+  resident: Resident | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -46,6 +56,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [resident, setResident] = useState<Resident | null>(null);
 
   useEffect(() => {
     // Check if user is already logged in from localStorage
@@ -58,6 +69,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.log("Is stored user admin?", parsedUser.isAdmin);
         console.log("Is stored user resident?", parsedUser.isResident);
         setUser(parsedUser);
+        
+        // If user is a resident, fetch and set resident data
+        if (parsedUser.isResident && parsedUser.residentId) {
+          fetchResidentData(parsedUser.residentId);
+        }
       } catch (e) {
         console.error("Error parsing stored user:", e);
         localStorage.removeItem('condoUser');
@@ -65,6 +81,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     setIsLoading(false);
   }, []);
+  
+  const fetchResidentData = async (residentId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('residents')
+        .select('*')
+        .eq('id', residentId)
+        .single();
+        
+      if (error) {
+        console.error("Error fetching resident data:", error);
+        return;
+      }
+      
+      if (data) {
+        setResident(data as Resident);
+      }
+    } catch (error) {
+      console.error("Error in fetchResidentData:", error);
+    }
+  };
 
   const login = async (emailOrMatricula: string, password: string): Promise<boolean> => {
     setIsLoading(true);
@@ -293,12 +330,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => {
     setUser(null);
+    setResident(null);
     localStorage.removeItem('condoUser');
     toast.info("Logout realizado com sucesso");
   };
 
+  const isAdmin = user?.isAdmin === true;
+  const isResident = user?.isResident === true;
+
   return (
-    <AppContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading, switchCondominium }}>
+    <AppContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      isAuthenticated: !!user, 
+      isLoading, 
+      switchCondominium,
+      isAdmin,
+      isResident,
+      resident
+    }}>
       {children}
     </AppContext.Provider>
   );
@@ -311,3 +362,4 @@ export const useApp = () => {
   }
   return context;
 };
+
