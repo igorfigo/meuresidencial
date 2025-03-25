@@ -24,6 +24,11 @@ import Dedetizacoes from '@/pages/Dedetizacoes';
 import MinhaAssinatura from '@/pages/MinhaAssinatura';
 import FaleConosco from '@/pages/FaleConosco';
 import GerenciarAvisos from '@/pages/GerenciarAvisos';
+import BusinessManagement from '@/pages/BusinessManagement';
+import BusinessDespesas from '@/pages/BusinessDespesas';
+import BusinessContratos from '@/pages/BusinessContratos';
+import BusinessDocumentos from '@/pages/BusinessDocumentos';
+import Servicos from '@/pages/Servicos';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 const BusinessManagement = () => <div>Business Management (Em Desenvolvimento)</div>;
