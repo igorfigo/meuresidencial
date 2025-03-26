@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, Clock, User, Home, DollarSign } from 'lucide-react';
+import { Calendar, User, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import {
@@ -26,8 +26,6 @@ interface Reservation {
   id: string;
   common_area_id: string;
   reservation_date: string;
-  start_time: string;
-  end_time: string;
   status: string;
   common_area: {
     name: string;
@@ -79,7 +77,7 @@ export const ReservationsCalendar: React.FC = () => {
         .from('common_area_reservations')
         .select(`
           *,
-          common_area:common_area_id (name, valor),
+          common_area:common_area_id (name),
           residents:resident_id (nome_completo, unidade)
         `)
         .in('common_area_id', areaIds)
@@ -101,43 +99,6 @@ export const ReservationsCalendar: React.FC = () => {
   useEffect(() => {
     fetchReservations();
   }, [matricula]);
-  
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'cancelled':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-      default:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    }
-  };
-  
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'Aprovado';
-      case 'rejected':
-        return 'Rejeitado';
-      case 'cancelled':
-        return 'Cancelado';
-      default:
-        return 'Pendente';
-    }
-  };
-
-  const formatCurrency = (value: string | undefined) => {
-    if (!value) return 'R$ 0,00';
-    
-    // Convert to number, then format
-    const numValue = parseFloat(value);
-    return numValue.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  };
 
   return (
     <Card className="border-t-4 border-t-brand-600">
@@ -175,10 +136,7 @@ export const ReservationsCalendar: React.FC = () => {
               <TableRow>
                 <TableHead>Data</TableHead>
                 <TableHead>Área</TableHead>
-                <TableHead>Horário</TableHead>
                 <TableHead>Morador</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -188,12 +146,6 @@ export const ReservationsCalendar: React.FC = () => {
                     {format(parseISO(reservation.reservation_date), "dd/MM/yyyy", { locale: ptBR })}
                   </TableCell>
                   <TableCell>{reservation.common_area.name}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {reservation.start_time} - {reservation.end_time}
-                    </div>
-                  </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1">
@@ -205,17 +157,6 @@ export const ReservationsCalendar: React.FC = () => {
                         {reservation.residents.unidade}
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="h-3 w-3" />
-                      {formatCurrency(reservation.common_area.valor)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(reservation.status)}`}>
-                      {getStatusText(reservation.status)}
-                    </span>
                   </TableCell>
                 </TableRow>
               ))}
