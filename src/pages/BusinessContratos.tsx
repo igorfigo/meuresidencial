@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FileText, Plus, Search, Download, Trash2 } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -16,9 +15,9 @@ import { useBusinessContracts } from '@/hooks/use-business-contracts';
 import { toast } from 'sonner';
 
 const ContractStatusBadge = ({ status }: { status: string }) => {
-  const statusMap: Record<string, { label: string, variant: "default" | "destructive" | "outline" | "secondary" | "success" | "warning" }> = {
-    active: { label: "Ativo", variant: "success" },
-    pending: { label: "Pendente", variant: "warning" },
+  const statusMap: Record<string, { label: string, variant: "default" | "destructive" | "outline" | "secondary" }> = {
+    active: { label: "Ativo", variant: "default" },
+    pending: { label: "Pendente", variant: "secondary" },
     expired: { label: "Expirado", variant: "destructive" },
     draft: { label: "Rascunho", variant: "outline" },
   };
@@ -43,14 +42,11 @@ const BusinessContratos = () => {
   } = useBusinessContracts();
 
   const filteredContracts = contracts?.filter(contract => {
-    // Filter by search query
     const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          contract.counterparty.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Filter by tab
     const matchesTab = activeTab === 'todos' || contract.status === activeTab;
     
-    // Filter by type
     const matchesType = !selectedType || contract.type === selectedType;
     
     return matchesSearch && matchesTab && matchesType;
