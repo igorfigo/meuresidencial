@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
@@ -7,6 +6,7 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { SupabaseRPCTypes } from '@/integrations/supabase/rpc-types';
 
 // Document attachment type
 export interface BusinessDocumentAttachment {
@@ -194,10 +194,15 @@ export function useBusinessDocuments() {
             
             // Try to create the bucket (may need admin privileges)
             try {
-              await supabase.rpc('create_storage_bucket', {
-                bucket_name: 'business_files',
-                bucket_public: true
-              });
+              const { error } = await supabase.rpc<SupabaseRPCTypes['create_storage_bucket']['returns']>(
+                'create_storage_bucket',
+                {
+                  bucket_name: 'business_files',
+                  bucket_public: true
+                }
+              );
+              
+              if (error) throw error;
               console.log('Bucket created successfully');
             } catch (error) {
               console.error('Failed to create bucket. Using fallback method.', error);
