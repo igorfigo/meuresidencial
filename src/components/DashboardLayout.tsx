@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -102,8 +101,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
-    { separator: true, path: '', name: 'Business Administration', icon: <></> },
-    { name: 'Contratos', icon: <Briefcase className="h-5 w-5" />, path: '/contratos' },
+    { separator: true, path: '', name: '', icon: <></> },
+    { name: 'Contratos', icon: <Briefcase className="h-5 w-5" />, path: '/contratos', sectionTitle: 'Business Administration' },
   ];
 
   const managerMenuItems: MenuItem[] = [
@@ -207,15 +206,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       location.pathname === subItem.path
     );
 
-    // Return a separator with section title if this is a separator item
     if (item.separator) {
       return (
         <div key={`separator-${item.name}`} className="mt-5 mb-2 px-3">
-          {item.name && (
-            <div className="mb-2 text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">
-              {item.name}
-            </div>
-          )}
           <Separator className="bg-sidebar-foreground/20" />
         </div>
       );
@@ -223,6 +216,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
     return (
       <div key={item.path} className="w-full">
+        {item.sectionTitle && (
+          <div className="mb-2 ml-2 mt-1 px-3 text-xs font-semibold text-brand-600 uppercase tracking-wider">
+            {item.sectionTitle}
+          </div>
+        )}
+        
         {hasSubmenu ? (
           <>
             <button
@@ -474,7 +473,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           {sidebarOpen ? (
             <div className="flex items-center space-x-3">
               <NavLink to="/perfil" className="flex-grow flex items-center space-x-3 hover:opacity-80 transition-opacity">
-                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
+                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white mb-2">
                   {user?.nome?.charAt(0) || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
