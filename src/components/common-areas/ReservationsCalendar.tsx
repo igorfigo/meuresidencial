@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { User, Home, Trash2 } from 'lucide-react';
+import { Home, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -39,6 +39,7 @@ interface Reservation {
   common_area_id: string;
   reservation_date: string;
   status: string;
+  resident_id: string;
   common_area: {
     name: string;
     valor?: string;
@@ -57,8 +58,9 @@ export const ReservationsCalendar: React.FC = () => {
   const [reservationToDelete, setReservationToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Only managers (non-residents and non-admin users) can remove reservations
+  // Different user roles
   const isManager = user && !user.isAdmin && !user.isResident;
+  const isResident = user && user.isResident;
   
   const fetchReservations = async () => {
     if (!matricula) {
@@ -120,6 +122,18 @@ export const ReservationsCalendar: React.FC = () => {
     setReservationToDelete(id);
   };
 
+  // Check if user can delete a specific reservation
+  const canDeleteReservation = (reservation: Reservation) => {
+    if (isManager) {
+      // Managers can delete any reservation
+      return true;
+    } else if (isResident && user?.id) {
+      // Residents can only delete their own reservations
+      return reservation.resident_id === user.id;
+    }
+    return false;
+  };
+
   const confirmDelete = async () => {
     if (!reservationToDelete) return;
     
@@ -175,8 +189,8 @@ export const ReservationsCalendar: React.FC = () => {
               <TableRow>
                 <TableHead>Data</TableHead>
                 <TableHead>Área</TableHead>
-                <TableHead>Morador</TableHead>
-                {isManager && <TableHead className="w-[100px]">Ações</TableHead>}
+                <TableHead>Unidade</TableHead>
+                <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -187,19 +201,13 @@ export const ReservationsCalendar: React.FC = () => {
                   </TableCell>
                   <TableCell>{reservation.common_area.name}</TableCell>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {reservation.residents.nome_completo}
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Home className="h-3 w-3" />
-                        {reservation.residents.unidade}
-                      </div>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Home className="h-3 w-3" />
+                      {reservation.residents.unidade}
                     </div>
                   </TableCell>
-                  {isManager && (
-                    <TableCell>
+                  <TableCell>
+                    {canDeleteReservation(reservation) && (
                       <Button
                         variant="ghost"
                         size="icon"
@@ -209,8 +217,8 @@ export const ReservationsCalendar: React.FC = () => {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    </TableCell>
-                  )}
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
