@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileText, Plus, Search, Download, Trash2 } from 'lucide-react';
+import { FileText, Plus, Search, Download, Trash2, Eye, Pencil } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { useBusinessContracts } from '@/hooks/use-business-contracts';
@@ -32,7 +31,9 @@ const BusinessContratos = () => {
   const [openNewContractDialog, setOpenNewContractDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
-  const [viewMode] = useState<'list'>('list');
+  const [openViewDialog, setOpenViewDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<any>(null);
   
   const { 
     contracts, 
@@ -101,6 +102,17 @@ const BusinessContratos = () => {
     }
   };
 
+  const handleViewContract = (contract: any) => {
+    setSelectedContract(contract);
+    setOpenViewDialog(true);
+  };
+
+  const handleEditContract = (contract: any) => {
+    setSelectedContract(contract);
+    setOpenEditDialog(true);
+    toast.info("Edição de contrato (em desenvolvimento)");
+  };
+
   const contractTypes = [
     { id: 'service', label: 'Serviço' },
     { id: 'product', label: 'Produto' },
@@ -137,48 +149,39 @@ const BusinessContratos = () => {
               <TableCell><ContractStatusBadge status={contract.status} /></TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleViewContract(contract)}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleEditContract(contract)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => handleDownloadContract(contract.id)}>
                     <Download className="h-4 w-4" />
                   </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <FileText className="h-4 w-4" />
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="text-red-600">
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => toast.info("Visualizar contrato (em desenvolvimento)")}>
-                        Visualizar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => toast.info("Editar contrato (em desenvolvimento)")}>
-                        Editar
-                      </DropdownMenuItem>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
-                            Excluir
-                          </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction 
-                              className="bg-red-600 hover:bg-red-700"
-                              onClick={() => handleDeleteContract(contract.id)}
-                            >
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction 
+                          className="bg-red-600 hover:bg-red-700"
+                          onClick={() => handleDeleteContract(contract.id)}
+                        >
+                          Excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </TableCell>
             </TableRow>
@@ -327,6 +330,62 @@ const BusinessContratos = () => {
           </div>
         )}
       </div>
+
+      {/* Dialog de Visualização de Contrato */}
+      <Dialog open={openViewDialog} onOpenChange={setOpenViewDialog}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Contrato</DialogTitle>
+          </DialogHeader>
+          {selectedContract && (
+            <div className="grid gap-4 py-4">
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Título</h3>
+                <p className="text-base">{selectedContract.title}</p>
+              </div>
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Contraparte</h3>
+                <p className="text-base">{selectedContract.counterparty}</p>
+              </div>
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Tipo</h3>
+                <p className="text-base">{contractTypes.find(t => t.id === selectedContract.type)?.label || selectedContract.type}</p>
+              </div>
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Valor</h3>
+                <p className="text-base">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedContract.value)}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Data Início</h3>
+                  <p className="text-base">{new Date(selectedContract.start_date).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Data Fim</h3>
+                  <p className="text-base">{new Date(selectedContract.end_date).toLocaleDateString('pt-BR')}</p>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Status</h3>
+                <div className="mt-1">
+                  <ContractStatusBadge status={selectedContract.status} />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenViewDialog(false)}>
+              Fechar
+            </Button>
+            <Button onClick={() => {
+              setOpenViewDialog(false);
+              handleEditContract(selectedContract);
+            }}>
+              Editar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
