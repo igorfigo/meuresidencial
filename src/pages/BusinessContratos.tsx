@@ -14,6 +14,8 @@ import { useBusinessContracts, ContractAttachment } from '@/hooks/use-business-c
 import { toast } from 'sonner';
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ContractStatusBadge = ({ status }: { status: string }) => {
   const statusMap: Record<string, { label: string, variant: "default" | "destructive" | "outline" | "secondary" }> = {
@@ -652,200 +654,263 @@ const BusinessContratos = () => {
       </Dialog>
 
       <Dialog open={openEditContractDialog} onOpenChange={setOpenEditContractDialog}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="sm:max-w-[725px] max-h-[90vh] overflow-y-auto">
           <Form {...editForm}>
             <form onSubmit={editForm.handleSubmit(handleSubmitEditContract)}>
               <DialogHeader>
                 <DialogTitle>Editar Contrato</DialogTitle>
                 <DialogDescription>
-                  Altere os dados do contrato abaixo. Você também pode adicionar novos anexos.
+                  Altere os dados do contrato abaixo
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <FormField
-                  control={editForm.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Label htmlFor="edit-title">Título</Label>
-                      <FormControl>
-                        <Input id="edit-title" required placeholder="Título do contrato" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              
+              <Tabs defaultValue="basic-info" className="w-full mt-4">
+                <TabsList className="grid grid-cols-2 mb-4">
+                  <TabsTrigger value="basic-info">Informações Básicas</TabsTrigger>
+                  <TabsTrigger value="attachments">Anexos</TabsTrigger>
+                </TabsList>
                 
-                <FormField
-                  control={editForm.control}
-                  name="counterparty"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Label htmlFor="edit-counterparty">Contraparte</Label>
-                      <FormControl>
-                        <Input id="edit-counterparty" required placeholder="Empresa ou pessoa" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={editForm.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Label htmlFor="edit-type">Tipo</Label>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tipo de contrato" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {contractTypes.map(type => (
-                            <SelectItem key={type.id} value={type.id}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={editForm.control}
-                    name="start_date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label htmlFor="edit-start-date">Data Início</Label>
-                        <FormControl>
-                          <Input id="edit-start-date" type="date" required {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <TabsContent value="basic-info" className="space-y-4 pt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={editForm.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="edit-title">Título</Label>
+                          <FormControl>
+                            <Input id="edit-title" required placeholder="Título do contrato" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={editForm.control}
+                      name="counterparty"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="edit-counterparty">Contraparte</Label>
+                          <FormControl>
+                            <Input id="edit-counterparty" required placeholder="Empresa ou pessoa" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={editForm.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="edit-type">Tipo</Label>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o tipo de contrato" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {contractTypes.map(type => (
+                                <SelectItem key={type.id} value={type.id}>
+                                  {type.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={editForm.control}
+                      name="value"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="edit-value">Valor (R$)</Label>
+                          <FormControl>
+                            <Input 
+                              id="edit-value" 
+                              type="number" 
+                              step="0.01" 
+                              required 
+                              placeholder="0,00" 
+                              {...field}
+                              value={field.value}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={editForm.control}
+                      name="start_date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="edit-start-date">Data Início</Label>
+                          <FormControl>
+                            <Input id="edit-start-date" type="date" required {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={editForm.control}
+                      name="end_date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="edit-end-date">Data Fim</Label>
+                          <FormControl>
+                            <Input id="edit-end-date" type="date" required {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   
                   <FormField
                     control={editForm.control}
-                    name="end_date"
+                    name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <Label htmlFor="edit-end-date">Data Fim</Label>
-                        <FormControl>
-                          <Input id="edit-end-date" type="date" required {...field} />
-                        </FormControl>
+                        <Label htmlFor="edit-status">Status</Label>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {contractStatusOptions.map(status => (
+                              <SelectItem key={status.id} value={status.id}>
+                                {status.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
+                </TabsContent>
                 
-                <FormField
-                  control={editForm.control}
-                  name="value"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Label htmlFor="edit-value">Valor (R$)</Label>
-                      <FormControl>
-                        <Input 
-                          id="edit-value" 
-                          type="number" 
-                          step="0.01" 
-                          required 
-                          placeholder="0,00" 
-                          {...field}
-                          value={field.value}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={editForm.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Label htmlFor="edit-status">Status</Label>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {contractStatusOptions.map(status => (
-                            <SelectItem key={status.id} value={status.id}>
-                              {status.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid gap-2">
-                  <Label>Anexos adicionais</Label>
-                  <div className="border rounded-md p-4">
-                    {editContractFiles.length > 0 ? (
-                      <div className="space-y-2">
-                        {editContractFiles.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between border p-2 rounded">
-                            <div className="flex items-center space-x-2 overflow-hidden">
+                <TabsContent value="attachments" className="space-y-4 pt-2">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <Label>Anexos Existentes</Label>
+                    </div>
+                    
+                    {isLoadingAttachments ? (
+                      <div className="p-8 flex justify-center">
+                        <p>Carregando anexos...</p>
+                      </div>
+                    ) : attachments.length > 0 ? (
+                      <div className="space-y-2 max-h-[300px] overflow-y-auto border rounded-md p-4">
+                        {attachments.map((attachment) => (
+                          <div key={attachment.id} className="border rounded-md p-3 flex justify-between items-center">
+                            <div className="flex items-center gap-2 flex-1 overflow-hidden">
                               <Paperclip className="h-4 w-4 shrink-0" />
-                              <span className="truncate">{file.name}</span>
+                              <span className="truncate">{attachment.file_name}</span>
                             </div>
-                            <Button 
-                              type="button"
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => handleRemoveEditContractFile(index)}
-                              className="text-red-600"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => downloadAttachment(attachment)}
+                              >
+                                <Download className="h-4 w-4 mr-1" />
+                                Baixar
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-red-600" 
+                                onClick={() => handleDeleteAttachment(attachment)}
+                              >
+                                <Trash className="h-4 w-4 mr-1" />
+                                Excluir
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>
                     ) : (
                       <div className="text-center py-6 border border-dashed rounded-md">
-                        <p className="text-muted-foreground">Adicione novos anexos (opcional)</p>
+                        <p className="text-muted-foreground">Nenhum anexo encontrado</p>
                       </div>
                     )}
                     
-                    <div className="mt-4">
-                      <Label htmlFor="editContractFileUpload" className="cursor-pointer">
-                        <div className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm w-full justify-center">
-                          <Paperclip className="h-4 w-4" />
-                          <span>Adicionar Anexo</span>
+                    <div className="mt-6">
+                      <div className="grid gap-2">
+                        <Label>Adicionar Novos Anexos</Label>
+                        <div className="border rounded-md p-4">
+                          {editContractFiles.length > 0 ? (
+                            <div className="space-y-2">
+                              {editContractFiles.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between border p-2 rounded">
+                                  <div className="flex items-center space-x-2 overflow-hidden">
+                                    <Paperclip className="h-4 w-4 shrink-0" />
+                                    <span className="truncate">{file.name}</span>
+                                  </div>
+                                  <Button 
+                                    type="button"
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleRemoveEditContractFile(index)}
+                                    className="text-red-600"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-6 border border-dashed rounded-md">
+                              <p className="text-muted-foreground">Adicione novos anexos (opcional)</p>
+                            </div>
+                          )}
+                          
+                          <div className="mt-4">
+                            <Label htmlFor="editContractFileUpload" className="cursor-pointer">
+                              <div className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm w-full justify-center">
+                                <Paperclip className="h-4 w-4" />
+                                <span>Adicionar Anexo</span>
+                              </div>
+                              <Input 
+                                id="editContractFileUpload" 
+                                type="file" 
+                                className="hidden" 
+                                onChange={handleAddEditContractFile}
+                              />
+                            </Label>
+                          </div>
                         </div>
-                        <Input 
-                          id="editContractFileUpload" 
-                          type="file" 
-                          className="hidden" 
-                          onChange={handleAddEditContractFile}
-                        />
-                      </Label>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              <DialogFooter>
+                </TabsContent>
+              </Tabs>
+              
+              <DialogFooter className="mt-6 pt-4 border-t">
                 <Button type="button" variant="outline" onClick={() => {
                   setOpenEditContractDialog(false);
                   setEditContractFiles([]);
