@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Home, Trash2 } from 'lucide-react';
@@ -37,7 +38,6 @@ interface Reservation {
   id: string;
   common_area_id: string;
   reservation_date: string;
-  status: string;
   resident_id: string;
   common_area: {
     name: string;

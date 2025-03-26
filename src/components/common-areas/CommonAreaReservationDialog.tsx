@@ -1,243 +1,126 @@
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
+import { DayPicker } from 'react-day-picker';
 import { ptBR } from 'date-fns/locale';
-import { Calendar as CalendarIcon, CheckCircle, XCircle } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
-import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from "@/components/ui/use-toast"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
+import { Calendar } from "@/components/ui/calendar"
+import { CalendarIcon } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 interface CommonAreaReservationDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  commonArea: {
-    id: string;
-    name: string;
-    opening_time?: string;
-    closing_time?: string;
-    valor?: string;
-  };
-  onSuccess?: () => void;
+  setOpen: (open: boolean) => void;
+  commonAreaId: string | undefined;
+  onReservationComplete: () => void;
 }
-
-const formSchema = z.object({
-  reservation_date: z.date({
-    required_error: "A data da reserva é obrigatória",
-  }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
 
 export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogProps> = ({
   open,
-  onOpenChange,
-  commonArea,
-  onSuccess,
+  setOpen,
+  commonAreaId,
+  onReservationComplete,
 }) => {
   const { user } = useApp();
+  const { toast } = useToast()
+  const residentId = user?.residentId;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const queryClient = useQueryClient();
-  
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-  });
+  const [date, setDate] = React.useState<Date | undefined>(new Date())
 
-  const onSubmit = async (data: FormValues) => {
-    if (!user?.residentId) {
-      toast.error("Você precisa estar logado como morador para fazer uma reserva");
+  // When submitting a reservation form
+  const onSubmit = async (data: any) => {
+    if (!residentId || !commonAreaId) {
+      toast({
+        title: "Dados incompletos para reserva",
+      })
       return;
     }
 
     setIsSubmitting(true);
-    
     try {
-      const reservationData = {
-        common_area_id: commonArea.id,
-        resident_id: user.residentId,
-        reservation_date: format(data.reservation_date, 'yyyy-MM-dd'),
-        start_time: commonArea.opening_time || "08:00",
-        end_time: commonArea.closing_time || "18:00",
-        status: 'pending',
-      };
-      
-      // Check for existing reservations using any method
-      const { data: existingReservations, error: checkError } = await supabase
-        .from('common_area_reservations')
-        .select('*')
-        .eq('common_area_id', commonArea.id)
-        .eq('reservation_date', reservationData.reservation_date);
-      
-      if (checkError) {
-        console.error('Error checking existing reservations:', checkError);
-        toast.error('Erro ao verificar disponibilidade');
-        return;
-      }
-      
-      if (existingReservations && existingReservations.length > 0) {
-        toast.error('Esta área já está reservada nesta data. Por favor, escolha outra data.');
-        return;
-      }
-      
-      // Create the reservation
+      // Format the date for database storage (YYYY-MM-DD)
+      const formattedDate = format(data.date, 'yyyy-MM-dd');
+
+      // Insert reservation into database
       const { error } = await supabase
         .from('common_area_reservations')
-        .insert(reservationData);
-      
-      if (error) {
-        console.error('Error creating reservation:', error);
-        toast.error(`Erro ao criar reserva: ${error.message}`);
-        return;
-      }
-      
+        .insert({
+          common_area_id: commonAreaId,
+          resident_id: residentId,
+          reservation_date: formattedDate,
+        });
+
+      if (error) throw error;
+
       toast.success('Reserva criada com sucesso!');
-      form.reset();
-      
-      // Invalidate the reservations query to trigger a refetch
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
-      
-      if (onSuccess) {
-        onSuccess();
-      }
-      onOpenChange(false);
-      
+      onReservationComplete();
+      setOpen(false);
     } catch (error: any) {
-      console.error('Error during reservation submission:', error);
-      toast.error(`Erro ao processar reserva: ${error.message}`);
+      console.error('Error creating reservation:', error);
+      toast.error(`Erro ao criar reserva: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleCancel = () => {
-    form.reset();
-    onOpenChange(false);
-  };
-
-  const formatCurrency = (value: string | undefined) => {
-    if (!value) return 'Grátis';
-    
-    // Convert to number, then format
-    const numValue = parseFloat(value);
-    if (numValue <= 0) return 'Grátis';
-    
-    return numValue.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  };
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Reservar Área Comum</DialogTitle>
-          <DialogDescription>
-            Preencha os dados para reservar {commonArea.name}
-            {commonArea.valor && parseFloat(commonArea.valor) > 0 && (
-              <span className="ml-1 font-medium text-brand-600">
-                ({formatCurrency(commonArea.valor)})
-              </span>
-            )}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="reservation_date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Data da Reserva</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                          ) : (
-                            <span>Selecione uma data</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormDescription>
-                    Escolha a data para sua reserva
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <DialogFooter className="gap-2">
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Agendar Reserva</AlertDialogTitle>
+          <AlertDialogDescription>
+            Selecione a data desejada para a reserva.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="grid gap-4">
+          <Popover>
+            <PopoverTrigger asChild>
               <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isSubmitting}
+                variant={"outline"}
+                className={
+                  "w-[240px] justify-start text-left font-normal" +
+                  (date ? " text-brand-800" : " text-muted-foreground")
+                }
               >
-                <XCircle className="mr-2 h-4 w-4" />
-                Cancelar
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, "PPP", { locale: ptBR }) : <span>Escolher Data</span>}
               </Button>
-              <Button 
-                type="submit"
-                className="bg-brand-600 hover:bg-brand-700" 
-                disabled={isSubmitting}
-              >
-                <CheckCircle className="mr-2 h-4 w-4" />
-                {isSubmitting ? 'Reservando...' : 'Confirmar Reserva'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center" side="bottom">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                disabled={(date) =>
+                  date < new Date()
+                }
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => onSubmit({ date: date })}
+            disabled={isSubmitting || !date}
+          >
+            {isSubmitting ? 'Agendando...' : 'Agendar'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };

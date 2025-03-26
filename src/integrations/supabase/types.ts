@@ -115,37 +115,25 @@ export type Database = {
         Row: {
           common_area_id: string
           created_at: string
-          end_time: string
           id: string
-          notes: string | null
           reservation_date: string
           resident_id: string
-          start_time: string
-          status: string
           updated_at: string
         }
         Insert: {
           common_area_id: string
           created_at?: string
-          end_time: string
           id?: string
-          notes?: string | null
           reservation_date: string
           resident_id: string
-          start_time: string
-          status?: string
           updated_at?: string
         }
         Update: {
           common_area_id?: string
           created_at?: string
-          end_time?: string
           id?: string
-          notes?: string | null
           reservation_date?: string
           resident_id?: string
-          start_time?: string
-          status?: string
           updated_at?: string
         }
         Relationships: [
