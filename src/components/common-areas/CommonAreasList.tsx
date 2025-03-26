@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Eye, 
@@ -351,9 +352,9 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
       {selectedArea && (
         <CommonAreaReservationDialog
           open={isReservationOpen}
-          onOpenChange={setIsReservationOpen}
-          commonArea={selectedArea}
-          onSuccess={() => {
+          setOpen={setIsReservationOpen}
+          commonAreaId={selectedArea.id}
+          onReservationComplete={() => {
             setIsReservationOpen(false);
             // Refresh reservations if the details dialog is open
             if (isDetailsOpen && selectedArea) {

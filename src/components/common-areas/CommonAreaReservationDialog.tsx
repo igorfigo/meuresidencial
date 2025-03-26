@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { DayPicker } from 'react-day-picker';
 import { ptBR } from 'date-fns/locale';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +26,7 @@ interface CommonAreaReservationDialogProps {
   setOpen: (open: boolean) => void;
   commonAreaId: string | undefined;
   onReservationComplete: () => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogProps> = ({
@@ -32,9 +34,10 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
   setOpen,
   commonAreaId,
   onReservationComplete,
+  onOpenChange,
 }) => {
   const { user } = useApp();
-  const { toast } = useToast()
+  const { toast } = useToast();
   const residentId = user?.residentId;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [date, setDate] = React.useState<Date | undefined>(new Date())
@@ -44,7 +47,7 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
     if (!residentId || !commonAreaId) {
       toast({
         title: "Dados incompletos para reserva",
-      })
+      });
       return;
     }
 
@@ -64,19 +67,32 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
 
       if (error) throw error;
 
-      toast.success('Reserva criada com sucesso!');
+      toast({
+        title: 'Reserva criada com sucesso!',
+        variant: 'default',
+      });
       onReservationComplete();
       setOpen(false);
     } catch (error: any) {
       console.error('Error creating reservation:', error);
-      toast.error(`Erro ao criar reserva: ${error.message}`);
+      toast({
+        title: `Erro ao criar reserva: ${error.message}`,
+        variant: 'destructive',
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (onOpenChange) {
+      onOpenChange(newOpen);
+    }
+  };
+
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Agendar Reserva</AlertDialogTitle>
