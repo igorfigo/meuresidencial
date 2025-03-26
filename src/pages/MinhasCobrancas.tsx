@@ -177,21 +177,26 @@ const MinhasCobrancas = () => {
     enabled: !!matricula && !!unit
   });
 
-  // Filter charges for this year's upcoming months (current month included) for the pending tab
-  const upcomingCharges = charges?.filter(charge => {
+  // Filter charges for current and future months of the current year for the pending tab
+  const pendingCharges = charges?.filter(charge => {
     const chargeDate = new Date(charge.reference_month);
     const chargeYear = chargeDate.getFullYear();
     const chargeMonth = chargeDate.getMonth();
     
-    // For pending tab, show only upcoming months of current year (including current month)
-    return chargeYear === currentYear && chargeMonth >= currentMonth && charge.status === 'pending';
+    // If it's already paid, don't show it in pending tab
+    if (charge.status === 'paid') {
+      return false;
+    }
+    
+    // For pending tab, show all charges from current month onwards for the current year
+    return chargeYear === currentYear && chargeMonth >= currentMonth;
   }) || [];
 
-  // Filter charges for paid tab
+  // Filter charges for paid tab - show ALL paid charges
   const paidCharges = charges?.filter(charge => charge.status === 'paid') || [];
   
   // Get the charges to display based on active tab
-  const displayCharges = activeTab === 'pending' ? upcomingCharges : paidCharges;
+  const displayCharges = activeTab === 'pending' ? pendingCharges : paidCharges;
 
   const handleOpenQrCode = (charge: Charge) => {
     setSelectedCharge(charge);
