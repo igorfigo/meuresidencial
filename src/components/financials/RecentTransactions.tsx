@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye, Filter } from 'lucide-react';
 import { BRLToNumber } from '@/utils/currency';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -13,6 +14,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 export interface Transaction {
   id?: string;
@@ -42,7 +51,8 @@ export const RecentTransactions = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
-  const itemsPerPage = 6; // Changed from 10 to 6
+  const [transactionTypeFilter, setTransactionTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const itemsPerPage = 6;
   
   if (JSON.stringify(transactions) !== JSON.stringify(initialTransactions)) {
     setTransactions(initialTransactions);
@@ -179,10 +189,16 @@ export const RecentTransactions = ({
     );
   };
   
-  const totalPages = Math.ceil(transactions.length / itemsPerPage);
+  // Filter transactions based on the selected type
+  const filteredTransactions = initialTransactions.filter(transaction => {
+    if (transactionTypeFilter === 'all') return true;
+    return transaction.type === transactionTypeFilter;
+  });
+  
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTransactions = transactions.slice(indexOfFirstItem, indexOfLastItem);
+  const currentTransactions = filteredTransactions.slice(indexOfFirstItem, indexOfLastItem);
   
   if (currentPage > totalPages && totalPages > 0) {
     setCurrentPage(totalPages);
@@ -194,8 +210,42 @@ export const RecentTransactions = ({
   
   return (
     <Card className="border-t-4 border-t-brand-600">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle>Transações Recentes</CardTitle>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Select
+            value={transactionTypeFilter}
+            onValueChange={(value) => {
+              setTransactionTypeFilter(value as 'all' | 'income' | 'expense');
+              setCurrentPage(1); // Reset to first page when filter changes
+            }}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Filtrar por" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              <SelectItem value="income">
+                <div className="flex items-center gap-2">
+                  <ArrowUpCircle className="h-4 w-4 text-green-500" />
+                  <span>Receitas</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="expense">
+                <div className="flex items-center gap-2">
+                  <ArrowDownCircle className="h-4 w-4 text-red-500" />
+                  <span>Despesas</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          {transactionTypeFilter !== 'all' && (
+            <Badge variant={transactionTypeFilter === 'income' ? 'default' : 'destructive'} className="ml-2">
+              {transactionTypeFilter === 'income' ? 'Receitas' : 'Despesas'}
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
