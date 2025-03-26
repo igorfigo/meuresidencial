@@ -100,14 +100,17 @@ export const useBusinessDocuments = () => {
     try {
       console.log('Creating document:', document);
       
-      // Include the user's ID explicitly when creating the document
+      // For residents, we don't have auth.uid() available, so we'll need to use null
+      // For admin users, there's no id either, we need to work with what's available
+      // created_by can be null in the database schema
       const { data, error } = await supabase
         .from('business_documents')
         .insert({
           title: document.title,
           description: document.description,
           category: document.category,
-          created_by: user?.id || null
+          // Don't rely on user.id which doesn't exist in our User type
+          created_by: null 
         })
         .select()
         .single();
