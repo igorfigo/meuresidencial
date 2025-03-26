@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -40,15 +41,12 @@ import {
 } from './dropdown-menu';
 import { Skeleton } from './skeleton';
 import { SwitchCondominium } from './switch-condominium';
-import { supabase } from '@/integrations/supabase/client';
-import { Badge } from './badge';
 
 interface MenuItem {
   path: string;
   label: string;
   icon: React.ReactNode;
   submenu?: MenuItem[];
-  notificationCount?: number;
 }
 
 export function Sidebar() {
@@ -57,80 +55,10 @@ export function Sidebar() {
   const location = useLocation();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [newAnnouncementsCount, setNewAnnouncementsCount] = useState(0);
-  const [newDocumentsCount, setNewDocumentsCount] = useState(0);
 
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
-
-  useEffect(() => {
-    if (user?.isResident) {
-      checkForNewContent();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user?.isResident) {
-      if (location.pathname === '/comunicados' && newAnnouncementsCount > 0) {
-        localStorage.setItem('lastAnnouncementsCheckTime', new Date().toISOString());
-        setNewAnnouncementsCount(0);
-      }
-      
-      if (location.pathname === '/documentos' && newDocumentsCount > 0) {
-        localStorage.setItem('lastDocumentsCheckTime', new Date().toISOString());
-        setNewDocumentsCount(0);
-      }
-    }
-  }, [location.pathname, newAnnouncementsCount, newDocumentsCount, user?.isResident]);
-
-  const checkForNewContent = async () => {
-    if (!user?.matricula) return;
-
-    try {
-      console.log('Checking for new content');
-      const lastLoginTime = localStorage.getItem('lastLoginTime') || new Date().toISOString();
-      
-      const lastAnnouncementsCheck = localStorage.getItem('lastAnnouncementsCheckTime') || lastLoginTime;
-      const lastDocumentsCheck = localStorage.getItem('lastDocumentsCheckTime') || lastLoginTime;
-      
-      console.log('Last login time:', lastLoginTime);
-      console.log('Last announcements check:', lastAnnouncementsCheck);
-      console.log('Last documents check:', lastDocumentsCheck);
-      
-      const { data: announcements, error: announcementsError } = await supabase
-        .from('announcements')
-        .select('id')
-        .eq('matricula', user.matricula)
-        .gte('created_at', lastAnnouncementsCheck);
-        
-      if (announcementsError) {
-        console.error('Error fetching new announcements:', announcementsError);
-      } else {
-        console.log('New announcements found:', announcements?.length || 0);
-        setNewAnnouncementsCount(announcements?.length || 0);
-      }
-      
-      const { data: documents, error: documentsError } = await supabase
-        .from('documents')
-        .select('id')
-        .eq('matricula', user.matricula)
-        .gte('created_at', lastDocumentsCheck);
-        
-      if (documentsError) {
-        console.error('Error fetching new documents:', documentsError);
-      } else {
-        console.log('New documents found:', documents?.length || 0);
-        setNewDocumentsCount(documents?.length || 0);
-      }
-      
-      if (!localStorage.getItem('lastLoginTime')) {
-        localStorage.setItem('lastLoginTime', new Date().toISOString());
-      }
-    } catch (error) {
-      console.error('Error checking for new content:', error);
-    }
-  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -178,18 +106,8 @@ export function Sidebar() {
   
   const residentMenuItems: MenuItem[] = [
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
-    { 
-      path: '/comunicados', 
-      label: 'Comunicados', 
-      icon: <MessageSquare className="h-5 w-5" />,
-      notificationCount: newAnnouncementsCount
-    },
-    { 
-      path: '/documentos', 
-      label: 'Documentos Úteis', 
-      icon: <FileIcon className="h-5 w-5" />,
-      notificationCount: newDocumentsCount
-    },
+    { path: '/comunicados', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
+    { path: '/documentos', label: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" /> },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/servicos', label: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" /> },
     { path: '/minhas-cobrancas', label: 'Minhas Cobranças', icon: <Receipt className="h-5 w-5" /> },
@@ -206,8 +124,6 @@ export function Sidebar() {
     console.log("User in sidebar:", user);
     console.log("Is user admin?", user?.isAdmin);
     console.log("Is user resident?", user?.isResident);
-    console.log("New announcements count:", newAnnouncementsCount);
-    console.log("New documents count:", newDocumentsCount);
     
     let menuItems = [];
     if (user?.isAdmin) {
@@ -256,11 +172,6 @@ export function Sidebar() {
           >
             {item.icon}
             <span className="ml-3">{item.label}</span>
-            {item.notificationCount ? (
-              <Badge variant="notification" className="ml-2">
-                {item.notificationCount}
-              </Badge>
-            ) : null}
           </a>
         </li>
       );

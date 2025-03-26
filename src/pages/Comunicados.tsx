@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
@@ -10,7 +11,7 @@ import AnnouncementConfirmDialog from '@/components/announcements/AnnouncementCo
 import { format } from 'date-fns';
 import { ANNOUNCEMENT_TEMPLATES } from '@/components/announcements/AnnouncementTemplates';
 import { Card } from '@/components/ui/card';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const Comunicados: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -29,13 +30,6 @@ const Comunicados: React.FC = () => {
   
   // Check if the user is a resident
   const isResident = user?.isResident === true;
-  
-  useEffect(() => {
-    // If the user is a resident, update the last check time for announcements
-    if (isResident) {
-      localStorage.setItem('lastAnnouncementsCheckTime', new Date().toISOString());
-    }
-  }, [isResident]);
   
   const handleNewAnnouncement = () => {
     setSelectedAnnouncement({

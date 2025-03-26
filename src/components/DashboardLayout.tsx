@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,8 +39,6 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { supabase } from '@/integrations/supabase/client';
-import { Badge } from '@/components/ui/badge';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -50,7 +49,6 @@ interface MenuItem {
   icon: React.ReactNode;
   path: string;
   submenu?: MenuItem[];
-  notificationCount?: number;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -60,8 +58,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
-  const [newAnnouncementsCount, setNewAnnouncementsCount] = useState(0);
-  const [newDocumentsCount, setNewDocumentsCount] = useState(0);
 
   const isFinanceiroPath = location.pathname.includes('/financeiro');
 
@@ -70,74 +66,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       setExpandedSubmenu('Financeiro');
     }
   }, [location.pathname, isFinanceiroPath, user?.isAdmin]);
-
-  useEffect(() => {
-    if (user?.isResident) {
-      checkForNewContent();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user?.isResident) {
-      if (location.pathname === '/comunicados' && newAnnouncementsCount > 0) {
-        localStorage.setItem('lastAnnouncementsCheckTime', new Date().toISOString());
-        setNewAnnouncementsCount(0);
-      }
-      
-      if (location.pathname === '/documentos' && newDocumentsCount > 0) {
-        localStorage.setItem('lastDocumentsCheckTime', new Date().toISOString());
-        setNewDocumentsCount(0);
-      }
-    }
-  }, [location.pathname, newAnnouncementsCount, newDocumentsCount, user?.isResident]);
-
-  const checkForNewContent = async () => {
-    if (!user?.matricula) return;
-
-    try {
-      console.log('Checking for new content in DashboardLayout');
-      const lastLoginTime = localStorage.getItem('lastLoginTime') || new Date().toISOString();
-      
-      const lastAnnouncementsCheck = localStorage.getItem('lastAnnouncementsCheckTime') || lastLoginTime;
-      const lastDocumentsCheck = localStorage.getItem('lastDocumentsCheckTime') || lastLoginTime;
-      
-      console.log('Last login time:', lastLoginTime);
-      console.log('Last announcements check:', lastAnnouncementsCheck);
-      console.log('Last documents check:', lastDocumentsCheck);
-      
-      const { data: announcements, error: announcementsError } = await supabase
-        .from('announcements')
-        .select('id')
-        .eq('matricula', user.matricula)
-        .gte('created_at', lastAnnouncementsCheck);
-        
-      if (announcementsError) {
-        console.error('Error fetching new announcements:', announcementsError);
-      } else {
-        console.log('New announcements found:', announcements?.length || 0);
-        setNewAnnouncementsCount(announcements?.length || 0);
-      }
-      
-      const { data: documents, error: documentsError } = await supabase
-        .from('documents')
-        .select('id')
-        .eq('matricula', user.matricula)
-        .gte('created_at', lastDocumentsCheck);
-        
-      if (documentsError) {
-        console.error('Error fetching new documents:', documentsError);
-      } else {
-        console.log('New documents found:', documents?.length || 0);
-        setNewDocumentsCount(documents?.length || 0);
-      }
-      
-      if (!localStorage.getItem('lastLoginTime')) {
-        localStorage.setItem('lastLoginTime', new Date().toISOString());
-      }
-    } catch (error) {
-      console.error('Error checking for new content:', error);
-    }
-  };
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
@@ -196,18 +124,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   const residentMenuItems: MenuItem[] = [
     { name: 'Visão Geral', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
-    { 
-      name: 'Comunicados', 
-      icon: <MessageSquare className="h-5 w-5" />, 
-      path: '/comunicados',
-      notificationCount: newAnnouncementsCount
-    },
-    { 
-      name: 'Documentos Úteis', 
-      icon: <FileIcon className="h-5 w-5" />, 
-      path: '/documentos',
-      notificationCount: newDocumentsCount
-    },
+    { name: 'Comunicados', icon: <MessageSquare className="h-5 w-5" />, path: '/comunicados' },
+    { name: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
     { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
     { name: 'Minhas Cobranças', icon: <PaymentIcon className="h-5 w-5" />, path: '/minhas-cobrancas' },
@@ -333,11 +251,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             {item.icon}
             <span className={cn("ml-3", !sidebarOpen && "lg:hidden")}>{item.name}</span>
-            {item.notificationCount ? (
-              <Badge variant="notification" className="ml-2">
-                {item.notificationCount}
-              </Badge>
-            ) : null}
           </NavLink>
         )}
       </div>
