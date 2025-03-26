@@ -160,14 +160,12 @@ export const useBusinessDocuments = () => {
       
       console.log('Attachment record created successfully');
       await fetchDocuments();
-      toast({
-        title: 'Arquivo enviado',
+      toast('Arquivo enviado', {
         description: 'O arquivo foi enviado com sucesso',
       });
     } catch (err) {
       console.error('Error uploading document file:', err);
-      toast({
-        title: 'Erro ao enviar arquivo',
+      toast('Erro ao enviar arquivo', {
         description: 'Não foi possível enviar o arquivo',
         variant: 'destructive',
       });
@@ -217,14 +215,12 @@ export const useBusinessDocuments = () => {
       link.click();
       link.remove();
       
-      toast({
-        title: 'Download concluído',
+      toast('Download concluído', {
         description: 'O arquivo foi baixado com sucesso',
       });
     } catch (err) {
       console.error('Error downloading document:', err);
-      toast({
-        title: 'Erro ao baixar arquivo',
+      toast('Erro ao baixar arquivo', {
         description: 'Não foi possível baixar o arquivo',
         variant: 'destructive',
       });
@@ -276,14 +272,12 @@ export const useBusinessDocuments = () => {
       console.log('Document deleted successfully');
       await fetchDocuments();
       
-      toast({
-        title: 'Documento excluído',
+      toast('Documento excluído', {
         description: 'O documento foi excluído com sucesso',
       });
     } catch (err) {
       console.error('Error deleting document:', err);
-      toast({
-        title: 'Erro ao excluir documento',
+      toast('Erro ao excluir documento', {
         description: 'Não foi possível excluir o documento',
         variant: 'destructive',
       });

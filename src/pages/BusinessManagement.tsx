@@ -4,7 +4,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { FileText, Receipt, FileContract } from 'lucide-react';
+import { FileText, Receipt, FileCog } from 'lucide-react';
 
 const BusinessManagement = () => {
   return (
@@ -35,7 +35,7 @@ const BusinessManagement = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <FileContract className="mr-2 h-5 w-5" /> Contratos
+                <FileText className="mr-2 h-5 w-5" /> Contratos
               </CardTitle>
               <CardDescription>Gerenciar contratos</CardDescription>
             </CardHeader>
@@ -54,7 +54,7 @@ const BusinessManagement = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <FileText className="mr-2 h-5 w-5" /> Documentos
+                <FileCog className="mr-2 h-5 w-5" /> Documentos
               </CardTitle>
               <CardDescription>Gerenciar documentos administrativos</CardDescription>
             </CardHeader>

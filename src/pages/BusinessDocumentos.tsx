@@ -66,14 +66,12 @@ const BusinessDocumentos = () => {
       setSelectedFile(null);
       setIsDialogOpen(false);
       
-      toast({
-        title: 'Documento salvo',
+      toast('Documento salvo', {
         description: 'O documento foi salvo com sucesso',
       });
     } catch (error) {
       console.error('Error saving document:', error);
-      toast({
-        title: 'Erro ao salvar documento',
+      toast('Erro ao salvar documento', {
         description: 'Não foi possível salvar o documento',
         variant: 'destructive',
       });
