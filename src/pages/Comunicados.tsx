@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
@@ -11,7 +10,8 @@ import AnnouncementConfirmDialog from '@/components/announcements/AnnouncementCo
 import { format } from 'date-fns';
 import { ANNOUNCEMENT_TEMPLATES } from '@/components/announcements/AnnouncementTemplates';
 import { Card } from '@/components/ui/card';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNotifications } from '@/hooks/use-notifications';
 
 const Comunicados: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -27,9 +27,17 @@ const Comunicados: React.FC = () => {
   
   const { createAnnouncement, updateAnnouncement } = useAnnouncements();
   const { user } = useApp();
+  const { markAsViewed } = useNotifications();
   
   // Check if the user is a resident
   const isResident = user?.isResident === true;
+  
+  // Mark announcements as viewed when the page loads for residents
+  useEffect(() => {
+    if (isResident) {
+      markAsViewed('announcements');
+    }
+  }, [isResident, markAsViewed]);
   
   const handleNewAnnouncement = () => {
     setSelectedAnnouncement({

@@ -1,4 +1,3 @@
-
 import {
   Home,
   LayoutDashboard,
@@ -41,6 +40,8 @@ import {
 } from './dropdown-menu';
 import { Skeleton } from './skeleton';
 import { SwitchCondominium } from './switch-condominium';
+import { Badge } from './badge';
+import { useNotifications } from '@/hooks/use-notifications';
 
 interface MenuItem {
   path: string;
@@ -53,12 +54,21 @@ export function Sidebar() {
   const { user, logout, isAuthenticated, switchCondominium } = useApp();
   const isMobile = useIsMobile();
   const location = useLocation();
+  const navigate = useNavigate();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { unreadAnnouncements, unreadDocuments, markAsViewed } = useNotifications();
 
   useEffect(() => {
     setIsMenuOpen(false);
-  }, [location.pathname]);
+    
+    // Mark items as viewed when navigating to their respective pages
+    if (location.pathname === '/comunicados') {
+      markAsViewed('announcements');
+    } else if (location.pathname === '/documentos') {
+      markAsViewed('documents');
+    }
+  }, [location.pathname, markAsViewed]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -106,14 +116,22 @@ export function Sidebar() {
   
   const residentMenuItems: MenuItem[] = [
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
-    { path: '/comunicados', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
-    { path: '/documentos', label: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" /> },
+    { 
+      path: '/comunicados', 
+      label: 'Comunicados', 
+      icon: <MessageSquare className="h-5 w-5" />,
+      badge: unreadAnnouncements > 0 ? unreadAnnouncements : undefined
+    },
+    { 
+      path: '/documentos', 
+      label: 'Documentos Úteis', 
+      icon: <FileIcon className="h-5 w-5" />,
+      badge: unreadDocuments > 0 ? unreadDocuments : undefined
+    },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/servicos', label: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" /> },
     { path: '/minhas-cobrancas', label: 'Minhas Cobranças', icon: <Receipt className="h-5 w-5" /> },
   ];
-  
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
@@ -172,6 +190,14 @@ export function Sidebar() {
           >
             {item.icon}
             <span className="ml-3">{item.label}</span>
+            {item.badge && (
+              <Badge 
+                variant="destructive" 
+                className="ml-auto mr-1 px-1.5 py-0.5 min-w-5 text-center"
+              >
+                {item.badge}
+              </Badge>
+            )}
           </a>
         </li>
       );

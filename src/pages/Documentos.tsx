@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -8,6 +7,7 @@ import { DocumentForm } from '@/components/documents/DocumentForm';
 import { DocumentsList } from '@/components/documents/DocumentsList';
 import { Card } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
+import { useNotifications } from '@/hooks/use-notifications';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -47,9 +47,16 @@ const Documentos = () => {
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { user } = useApp();
+  const { markAsViewed } = useNotifications();
   
   // Check if the user is a resident
   const isResident = user?.isResident === true;
+
+  useEffect(() => {
+    if (isResident) {
+      markAsViewed('documents');
+    }
+  }, [isResident, markAsViewed]);
 
   const totalPages = documents ? Math.ceil(documents.length / ITEMS_PER_PAGE) : 1;
   const paginatedDocuments = documents ? documents.slice(

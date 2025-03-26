@@ -39,6 +39,8 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { useNotifications } from '@/hooks/use-notifications';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -49,6 +51,7 @@ interface MenuItem {
   icon: React.ReactNode;
   path: string;
   submenu?: MenuItem[];
+  badge?: number;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -58,6 +61,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
+  const { unreadAnnouncements, unreadDocuments, markAsViewed } = useNotifications();
 
   const isFinanceiroPath = location.pathname.includes('/financeiro');
 
@@ -65,7 +69,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     if (isFinanceiroPath && !user?.isAdmin) {
       setExpandedSubmenu('Financeiro');
     }
-  }, [location.pathname, isFinanceiroPath, user?.isAdmin]);
+    
+    // Mark items as viewed when navigating to their respective pages
+    if (location.pathname === '/comunicados') {
+      markAsViewed('announcements');
+    } else if (location.pathname === '/documentos') {
+      markAsViewed('documents');
+    }
+  }, [location.pathname, isFinanceiroPath, user?.isAdmin, markAsViewed]);
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
@@ -124,8 +135,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   const residentMenuItems: MenuItem[] = [
     { name: 'Visão Geral', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
-    { name: 'Comunicados', icon: <MessageSquare className="h-5 w-5" />, path: '/comunicados' },
-    { name: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
+    { 
+      name: 'Comunicados', 
+      icon: <MessageSquare className="h-5 w-5" />, 
+      path: '/comunicados',
+      badge: unreadAnnouncements > 0 ? unreadAnnouncements : undefined
+    },
+    { 
+      name: 'Documentos Úteis', 
+      icon: <FileIcon className="h-5 w-5" />, 
+      path: '/documentos',
+      badge: unreadDocuments > 0 ? unreadDocuments : undefined
+    },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
     { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
     { name: 'Minhas Cobranças', icon: <PaymentIcon className="h-5 w-5" />, path: '/minhas-cobrancas' },
@@ -231,6 +252,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   >
                     {subItem.icon}
                     <span className="ml-3">{subItem.name}</span>
+                    {subItem.badge && (
+                      <Badge 
+                        variant="destructive" 
+                        className="ml-auto px-1.5 py-0.5 min-w-5 text-center bg-red-500"
+                      >
+                        {subItem.badge}
+                      </Badge>
+                    )}
                   </NavLink>
                 ))}
               </div>
@@ -251,6 +280,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             {item.icon}
             <span className={cn("ml-3", !sidebarOpen && "lg:hidden")}>{item.name}</span>
+            {item.badge && (sidebarOpen || mobileMenuOpen) && (
+              <Badge 
+                variant="destructive" 
+                className="ml-auto px-1.5 py-0.5 min-w-5 text-center bg-red-500"
+              >
+                {item.badge}
+              </Badge>
+            )}
           </NavLink>
         )}
       </div>
