@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/use-notifications';
+import { Separator } from './ui/separator';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -52,6 +53,7 @@ interface MenuItem {
   path: string;
   submenu?: MenuItem[];
   badge?: number;
+  isSeparator?: boolean;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -98,6 +100,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
+    { isSeparator: true, name: '', icon: null, path: '' },
     { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
   ];
 
@@ -195,6 +198,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   const renderMenuItem = (item: MenuItem) => {
+    if (item.isSeparator) {
+      return <Separator key={`separator-${item.path}`} className="my-2 bg-sidebar-border/60" />;
+    }
+    
     const hasSubmenu = item.submenu && item.submenu.length > 0;
     const isSubmenuExpanded = expandedSubmenu === item.name;
     

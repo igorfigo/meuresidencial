@@ -42,6 +42,7 @@ import { Skeleton } from './skeleton';
 import { SwitchCondominium } from './switch-condominium';
 import { Badge } from './badge';
 import { useNotifications } from '@/hooks/use-notifications';
+import { Separator } from './separator';
 
 interface MenuItem {
   path: string;
@@ -49,6 +50,7 @@ interface MenuItem {
   icon: React.ReactNode;
   submenu?: MenuItem[];
   badge?: number;
+  isSeparator?: boolean;
 }
 
 export function Sidebar() {
@@ -80,6 +82,7 @@ export function Sidebar() {
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
+    { isSeparator: true, path: '', label: '', icon: null },
     { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
   ];
   
@@ -144,7 +147,11 @@ export function Sidebar() {
       menuItems = managerMenuItems;
     }
 
-    return menuItems.map((item) => {
+    return menuItems.map((item, index) => {
+      if (item.isSeparator) {
+        return <Separator key={`separator-${index}`} className="my-2 bg-gray-300 dark:bg-gray-600" />;
+      }
+      
       if (item.submenu) {
         return (
           <li key={item.label} className="mb-1">
