@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { FileText, Plus, Search, Download, Trash2, Eye, Pencil } from 'lucide-react';
+import { FileText, Plus, Search, Trash2, Eye, Pencil } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +38,6 @@ const BusinessContratos = () => {
     contracts, 
     isLoading, 
     createContract, 
-    downloadContract,
     deleteContract
   } = useBusinessContracts();
 
@@ -89,16 +87,6 @@ const BusinessContratos = () => {
     } catch (error) {
       console.error("Erro ao excluir contrato:", error);
       toast.error("Erro ao excluir contrato");
-    }
-  };
-
-  const handleDownloadContract = async (contractId: string) => {
-    try {
-      await downloadContract(contractId);
-      toast.success("Download iniciado");
-    } catch (error) {
-      console.error("Erro ao baixar contrato:", error);
-      toast.error("Erro ao baixar contrato");
     }
   };
 
@@ -154,9 +142,6 @@ const BusinessContratos = () => {
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleEditContract(contract)}>
                     <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDownloadContract(contract.id)}>
-                    <Download className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

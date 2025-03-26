@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -59,17 +60,6 @@ export function useBusinessContracts() {
     }
   });
 
-  // Download contract (mock function for now, would be replaced with actual download)
-  const downloadContractMutation = useMutation({
-    mutationFn: async (contractId: string) => {
-      // In a real implementation, this would call a Supabase function or get a storage URL
-      // For now, keep the simulation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log(`Downloading contract ${contractId}`);
-      return true;
-    }
-  });
-
   // Delete contract mutation
   const deleteContractMutation = useMutation({
     mutationFn: async (contractId: string) => {
@@ -95,10 +85,6 @@ export function useBusinessContracts() {
     return createContractMutation.mutateAsync(newContract);
   };
 
-  const downloadContract = async (contractId: string) => {
-    return downloadContractMutation.mutateAsync(contractId);
-  };
-
   const deleteContract = async (contractId: string) => {
     return deleteContractMutation.mutateAsync(contractId);
   };
@@ -107,7 +93,6 @@ export function useBusinessContracts() {
     contracts,
     isLoading,
     createContract,
-    downloadContract,
     deleteContract
   };
 }
