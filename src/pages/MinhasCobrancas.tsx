@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -76,7 +75,6 @@ function extractMonthYearFromReferenceMonth(referenceMonth: string | undefined):
     return { month: '01', year: new Date().getFullYear().toString() };
   }
   
-  // Handle formats like '2025-03' or just the date string
   const parts = referenceMonth.split('-');
   if (parts.length >= 2) {
     return { 
@@ -85,7 +83,6 @@ function extractMonthYearFromReferenceMonth(referenceMonth: string | undefined):
     };
   }
   
-  // Fallback to current date
   const currentDate = new Date();
   return {
     month: (currentDate.getMonth() + 1).toString().padStart(2, '0'),
@@ -165,7 +162,6 @@ const MinhasCobrancas = () => {
         }
         
         return (data || []).map(income => {
-          // Extract month and year from the reference_month field
           const { month, year } = extractMonthYearFromReferenceMonth(income.reference_month);
           
           return {
@@ -332,10 +328,7 @@ const MinhasCobrancas = () => {
                         </TableCell>
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>
-                          {charge.status === 'paid' 
-                            ? formatCurrency(BRLToNumber(charge.amount))
-                            : formatCurrency(BRLToNumber(charge.amount))
-                          }
+                          {formatCurrency(BRLToNumber(charge.amount))}
                         </TableCell>
                         {activeTab === 'pending' && (
                           <TableCell>{formatDate(charge.due_date)}</TableCell>
