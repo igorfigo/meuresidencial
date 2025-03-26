@@ -120,14 +120,6 @@ const MinhasCobrancas = () => {
     if (activeTab === 'all') return true;
     return charge.status === activeTab;
   }) || [];
-  
-  const pendingCharges = charges?.filter(charge => charge.status === 'pending') || [];
-  const paidCharges = charges?.filter(charge => charge.status === 'paid') || [];
-  const overdueCharges = charges?.filter(charge => charge.status === 'overdue') || [];
-  
-  const totalPending = pendingCharges.reduce((sum, charge) => sum + parseFloat(charge.amount), 0);
-  const totalPaid = paidCharges.reduce((sum, charge) => sum + parseFloat(charge.amount), 0);
-  const totalOverdue = overdueCharges.reduce((sum, charge) => sum + parseFloat(charge.amount), 0);
 
   return (
     <DashboardLayout>
@@ -137,53 +129,6 @@ const MinhasCobrancas = () => {
           <p className="text-muted-foreground">
             Acompanhe suas cobranças de condomínio
           </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium">Pendentes</CardTitle>
-              <CardDescription>Cobranças a vencer</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
-                {formatCurrency(totalPending)}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {pendingCharges.length} cobrança(s)
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium">Pagas</CardTitle>
-              <CardDescription>Cobranças já pagas</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {formatCurrency(totalPaid)}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {paidCharges.length} cobrança(s)
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium">Atrasadas</CardTitle>
-              <CardDescription>Cobranças em atraso</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(totalOverdue)}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {overdueCharges.length} cobrança(s)
-              </p>
-            </CardContent>
-          </Card>
         </div>
         
         <Card>
