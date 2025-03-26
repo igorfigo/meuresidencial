@@ -8,7 +8,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency, BRLToNumber } from '@/utils/currency';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
@@ -200,11 +200,14 @@ const MinhasCobrancas = () => {
     
     const generatedCharges: Charge[] = [];
     
-    // First, clean the valor_condominio to only have numbers for calculations
-    // Remove currency symbols (R$) and any non-numeric characters except decimal points
-    let cleanedAmount = residentDetails.valor_condominio.replace(/[^\d.,]/g, '');
-    // Replace commas with dots for numerical operations
-    cleanedAmount = cleanedAmount.replace(',', '.');
+    // First, ensure we have a clean and usable amount value
+    const formattedAmount = residentDetails.valor_condominio;
+    
+    // Convert to number for potential calculations (if needed)
+    const numericAmount = BRLToNumber(formattedAmount);
+    
+    // This is a safety check - if conversion fails or returns 0, use a default string format
+    const amountToUse = numericAmount > 0 ? formattedAmount : "0,00";
     
     for (let month = 1; month <= 12; month++) {
       const monthStr = month.toString().padStart(2, '0');
@@ -223,7 +226,7 @@ const MinhasCobrancas = () => {
           unit,
           month: monthStr,
           year: currentYear,
-          amount: residentDetails.valor_condominio,
+          amount: amountToUse,
           status,
           due_date: dueDate,
           payment_date: null
@@ -308,7 +311,12 @@ const MinhasCobrancas = () => {
                           }
                         </TableCell>
                         <TableCell>{charge.unit}</TableCell>
-                        <TableCell>{formatCurrency(parseFloat(charge.amount))}</TableCell>
+                        <TableCell>
+                          {charge.status === 'paid' 
+                            ? formatCurrency(parseFloat(charge.amount))
+                            : formatCurrency(BRLToNumber(charge.amount))
+                          }
+                        </TableCell>
                         {activeTab === 'pending' && (
                           <TableCell>{formatDate(charge.due_date)}</TableCell>
                         )}
