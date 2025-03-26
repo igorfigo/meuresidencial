@@ -111,68 +111,6 @@ export type Database = {
         }
         Relationships: []
       }
-      business_document_attachments: {
-        Row: {
-          created_at: string | null
-          document_id: string | null
-          file_name: string
-          file_path: string
-          file_type: string
-          id: string
-        }
-        Insert: {
-          created_at?: string | null
-          document_id?: string | null
-          file_name: string
-          file_path: string
-          file_type: string
-          id?: string
-        }
-        Update: {
-          created_at?: string | null
-          document_id?: string | null
-          file_name?: string
-          file_path?: string
-          file_type?: string
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_document_attachments_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "business_documents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      business_documents: {
-        Row: {
-          created_at: string
-          data_cadastro: string
-          id: string
-          observacoes: string | null
-          tipo: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          data_cadastro?: string
-          id?: string
-          observacoes?: string | null
-          tipo: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          data_cadastro?: string
-          id?: string
-          observacoes?: string | null
-          tipo?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       common_area_reservations: {
         Row: {
           common_area_id: string
