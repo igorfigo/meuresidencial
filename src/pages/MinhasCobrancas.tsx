@@ -34,6 +34,14 @@ interface Charge {
   payment_date: string | null;
 }
 
+interface PixReceiptSettings {
+  tipochave: string;
+  chavepix: string;
+  diavencimento: string;
+  jurosaodia: string;
+  matricula: string;
+}
+
 const statusColors = {
   pending: {
     background: 'bg-yellow-100',
@@ -74,6 +82,15 @@ function formatDate(dateString: string | null) {
   return format(date, 'dd/MM/yyyy', { locale: ptBR });
 }
 
+// Function to get the formatted due date based on the PIX settings and month/year
+function getDueDate(month: string, year: string, dueDayOfMonth: string) {
+  const dueDay = parseInt(dueDayOfMonth);
+  // Month is 1-indexed in our data, but 0-indexed in Date
+  const monthIndex = parseInt(month) - 1;
+  const dueDate = new Date(parseInt(year), monthIndex, dueDay);
+  return formatDate(dueDate.toISOString());
+}
+
 const MinhasCobrancas = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<string>('pending');
@@ -81,6 +98,33 @@ const MinhasCobrancas = () => {
   const residentId = user?.residentId;
   const matricula = user?.matricula;
   const unit = user?.unit;
+  
+  // Fetch PIX receipt settings to get the due day
+  const { data: pixSettings } = useQuery({
+    queryKey: ['pix-settings', matricula],
+    queryFn: async () => {
+      if (!matricula) return null;
+      
+      try {
+        const { data, error } = await supabase
+          .from('pix_receipt_settings')
+          .select('*')
+          .eq('matricula', matricula)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching PIX settings:', error);
+          return null;
+        }
+        
+        return data as PixReceiptSettings;
+      } catch (err) {
+        console.error('Error in PIX settings function:', err);
+        return null;
+      }
+    },
+    enabled: !!matricula
+  });
   
   // Using direct query method to avoid RLS policy issues
   const { data: charges, isLoading, error } = useQuery({
@@ -173,6 +217,9 @@ const MinhasCobrancas = () => {
     return false;
   }) || [];
 
+  // Get the configured due day from PIX settings, or default to 10
+  const dueDayOfMonth = pixSettings?.diavencimento || '10';
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -243,7 +290,12 @@ const MinhasCobrancas = () => {
                         </TableCell>
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>{formatCurrency(parseFloat(charge.amount))}</TableCell>
-                        <TableCell>{formatDate(charge.due_date)}</TableCell>
+                        <TableCell>
+                          {charge.status === 'paid' 
+                            ? formatDate(charge.due_date) // For paid charges, use the stored due_date
+                            : getDueDate(charge.month, charge.year, dueDayOfMonth) // For pending charges, calculate based on PIX settings
+                          }
+                        </TableCell>
                         <TableCell>{formatDate(charge.payment_date)}</TableCell>
                         <TableCell>
                           <Badge 
