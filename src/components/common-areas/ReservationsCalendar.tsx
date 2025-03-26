@@ -127,9 +127,9 @@ export const ReservationsCalendar: React.FC = () => {
     if (isManager) {
       // Managers can delete any reservation
       return true;
-    } else if (isResident && user?.id) {
+    } else if (isResident && user?.userId) {
       // Residents can only delete their own reservations
-      return reservation.resident_id === user.id;
+      return reservation.resident_id === user.userId;
     }
     return false;
   };
@@ -189,7 +189,7 @@ export const ReservationsCalendar: React.FC = () => {
               <TableRow>
                 <TableHead>Data</TableHead>
                 <TableHead>Área</TableHead>
-                <TableHead>Unidade</TableHead>
+                {!isResident && <TableHead>Unidade</TableHead>}
                 <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -200,12 +200,14 @@ export const ReservationsCalendar: React.FC = () => {
                     {format(parseISO(reservation.reservation_date), "dd/MM/yyyy", { locale: ptBR })}
                   </TableCell>
                   <TableCell>{reservation.common_area.name}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Home className="h-3 w-3" />
-                      {reservation.residents.unidade}
-                    </div>
-                  </TableCell>
+                  {!isResident && (
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Home className="h-3 w-3" />
+                        {reservation.residents.unidade}
+                      </div>
+                    </TableCell>
+                  )}
                   <TableCell>
                     {canDeleteReservation(reservation) && (
                       <Button
