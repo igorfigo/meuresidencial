@@ -2,13 +2,14 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar as CalendarIcon, CheckCircle, XCircle } from 'lucide-react';
+import { CalendarIcon, CheckCircle, XCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -41,11 +42,7 @@ interface CommonAreaReservationDialogProps {
   commonArea: {
     id: string;
     name: string;
-    opening_time?: string;
-    closing_time?: string;
-    valor?: string;
   };
-  onSuccess: () => void;
 }
 
 const formSchema = z.object({
@@ -60,10 +57,10 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
   open,
   onOpenChange,
   commonArea,
-  onSuccess,
 }) => {
   const { user } = useApp();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -82,12 +79,9 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         common_area_id: commonArea.id,
         resident_id: user.residentId,
         reservation_date: format(data.reservation_date, 'yyyy-MM-dd'),
-        start_time: commonArea.opening_time || "08:00",
-        end_time: commonArea.closing_time || "18:00",
-        status: 'pending',
       };
       
-      // Check for existing reservations using any method
+      // Check for existing reservations
       const { data: existingReservations, error: checkError } = await supabase
         .from('common_area_reservations')
         .select('*')
@@ -116,9 +110,12 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         return;
       }
       
+      // Invalidate and refetch reservations
+      await queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      
       toast.success('Reserva criada com sucesso!');
       form.reset();
-      onSuccess();
+      onOpenChange(false);
       
     } catch (error: any) {
       console.error('Error during reservation submission:', error);
@@ -133,19 +130,6 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
     onOpenChange(false);
   };
 
-  const formatCurrency = (value: string | undefined) => {
-    if (!value) return 'Grátis';
-    
-    // Convert to number, then format
-    const numValue = parseFloat(value);
-    if (numValue <= 0) return 'Grátis';
-    
-    return numValue.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -153,11 +137,6 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
           <DialogTitle>Reservar Área Comum</DialogTitle>
           <DialogDescription>
             Preencha os dados para reservar {commonArea.name}
-            {commonArea.valor && parseFloat(commonArea.valor) > 0 && (
-              <span className="ml-1 font-medium text-brand-600">
-                ({formatCurrency(commonArea.valor)})
-              </span>
-            )}
           </DialogDescription>
         </DialogHeader>
         
