@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Home, Trash2 } from 'lucide-react';
+import { Home, Trash2, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface Reservation {
   id: string;
@@ -133,6 +134,11 @@ export const ReservationsCalendar: React.FC = () => {
     return false;
   };
 
+  // Check if the reservation belongs to the logged-in resident
+  const isUserReservation = (reservation: Reservation) => {
+    return isResident && user?.residentId === reservation.resident_id;
+  };
+
   const confirmDelete = async () => {
     if (!reservationToDelete) return;
     
@@ -189,6 +195,7 @@ export const ReservationsCalendar: React.FC = () => {
                 <TableHead>Data</TableHead>
                 <TableHead>Área</TableHead>
                 {!isResident && <TableHead>Unidade</TableHead>}
+                <TableHead>Reserva</TableHead>
                 <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -207,6 +214,16 @@ export const ReservationsCalendar: React.FC = () => {
                       </div>
                     </TableCell>
                   )}
+                  <TableCell>
+                    {isResident && (
+                      <Badge 
+                        variant={isUserReservation(reservation) ? "default" : "outline"}
+                        className={isUserReservation(reservation) ? "bg-brand-600" : ""}
+                      >
+                        {isUserReservation(reservation) ? "Minha Reserva" : "Outro Morador"}
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell>
                     {canDeleteReservation(reservation) && (
                       <Button
