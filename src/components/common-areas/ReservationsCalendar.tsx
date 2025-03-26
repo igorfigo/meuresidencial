@@ -1,11 +1,10 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { User, Home } from 'lucide-react';
+import { Calendar, User, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
-import { useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
@@ -13,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -26,8 +26,10 @@ interface Reservation {
   id: string;
   common_area_id: string;
   reservation_date: string;
+  status: string;
   common_area: {
     name: string;
+    valor?: string;
   };
   residents: {
     nome_completo: string;
@@ -38,12 +40,17 @@ interface Reservation {
 export const ReservationsCalendar: React.FC = () => {
   const { user } = useApp();
   const matricula = user?.selectedCondominium || user?.matricula || '';
-
-  const { data: reservations, isLoading } = useQuery({
-    queryKey: ['reservations', matricula],
-    queryFn: async () => {
-      if (!matricula) return [];
-
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const fetchReservations = async () => {
+    if (!matricula) {
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    try {
       // First get all common areas for this condominium
       const { data: commonAreas, error: areaError } = await supabase
         .from('common_areas')
@@ -52,17 +59,19 @@ export const ReservationsCalendar: React.FC = () => {
       
       if (areaError) {
         console.error('Error fetching common areas:', areaError);
-        return [];
+        setLoading(false);
+        return;
       }
       
       if (!commonAreas || commonAreas.length === 0) {
-        return [];
+        setLoading(false);
+        return;
       }
       
       const areaIds = commonAreas.map(area => area.id);
       
       // Then get all reservations for these areas
-      const currentDate = new Date().toISOString().split('T')[0];
+      const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
       
       const { data, error } = await supabase
         .from('common_area_reservations')
@@ -77,30 +86,47 @@ export const ReservationsCalendar: React.FC = () => {
       
       if (error) {
         console.error('Error fetching reservations:', error);
-        return [];
+      } else {
+        setReservations(data as unknown as Reservation[]);
       }
-      
-      return data as Reservation[];
-    },
-    enabled: !!matricula,
-  });
+    } catch (error) {
+      console.error('Error in fetchReservations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchReservations();
+  }, [matricula]);
 
   return (
     <Card className="border-t-4 border-t-brand-600">
       <CardHeader>
-        <div>
-          <CardTitle>Agenda de Reservas</CardTitle>
-          <CardDescription>
-            Visualize todas as reservas das áreas comuns
-          </CardDescription>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <CardTitle>Agenda de Reservas</CardTitle>
+            <CardDescription>
+              Visualize todas as reservas das áreas comuns
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchReservations}
+            className="self-end"
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            Atualizar
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {loading ? (
           <div className="py-10 text-center text-muted-foreground">
             Carregando agenda de reservas...
           </div>
-        ) : !reservations || reservations.length === 0 ? (
+        ) : reservations.length === 0 ? (
           <div className="py-10 text-center text-muted-foreground">
             Não há reservas agendadas
           </div>
