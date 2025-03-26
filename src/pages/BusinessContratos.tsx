@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileText, Plus, Search, Download, Trash2 } from 'lucide-react';
+import { FileText, Plus, Search, Download, Trash2, Grid, ListIcon } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { useBusinessContracts } from '@/hooks/use-business-contracts';
 import { toast } from 'sonner';
 
@@ -33,6 +34,7 @@ const BusinessContratos = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('todos');
   const [selectedType, setSelectedType] = useState('all');
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
   
   const { 
     contracts, 
@@ -112,6 +114,170 @@ const BusinessContratos = () => {
     { id: 'employment', label: 'Trabalho' },
     { id: 'other', label: 'Outro' }
   ];
+
+  const renderCardView = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {filteredContracts.map((contract) => (
+        <Card key={contract.id} className="overflow-hidden">
+          <CardHeader className="pb-4">
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <CardTitle className="line-clamp-1 text-lg">{contract.title}</CardTitle>
+                <CardDescription>{contract.counterparty}</CardDescription>
+              </div>
+              <ContractStatusBadge status={contract.status} />
+            </div>
+          </CardHeader>
+          <CardContent className="pb-2">
+            <div className="text-sm text-muted-foreground space-y-2">
+              <div className="flex justify-between">
+                <span>Tipo:</span>
+                <span className="font-medium text-foreground">
+                  {contractTypes.find(t => t.id === contract.type)?.label || contract.type}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Valor:</span>
+                <span className="font-medium text-foreground">
+                  {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(contract.value)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Vigência:</span>
+                <span className="font-medium text-foreground">
+                  {new Date(contract.start_date).toLocaleDateString('pt-BR')} - {new Date(contract.end_date).toLocaleDateString('pt-BR')}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="pt-2 flex justify-between border-t">
+            <Button variant="outline" size="sm" onClick={() => handleDownloadContract(contract.id)}>
+              <Download className="h-4 w-4 mr-1" />
+              Download
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <FileText className="h-4 w-4 mr-1" />
+                  Ações
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => toast.info("Visualizar contrato (em desenvolvimento)")}>
+                  Visualizar
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toast.info("Editar contrato (em desenvolvimento)")}>
+                  Editar
+                </DropdownMenuItem>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
+                      Excluir
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction 
+                        className="bg-red-600 hover:bg-red-700"
+                        onClick={() => handleDeleteContract(contract.id)}
+                      >
+                        Excluir
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderListView = () => (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Título</TableHead>
+            <TableHead>Contraparte</TableHead>
+            <TableHead>Tipo</TableHead>
+            <TableHead>Valor</TableHead>
+            <TableHead>Início</TableHead>
+            <TableHead>Término</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredContracts.map((contract) => (
+            <TableRow key={contract.id}>
+              <TableCell className="font-medium">{contract.title}</TableCell>
+              <TableCell>{contract.counterparty}</TableCell>
+              <TableCell>{contractTypes.find(t => t.id === contract.type)?.label || contract.type}</TableCell>
+              <TableCell>{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(contract.value)}</TableCell>
+              <TableCell>{new Date(contract.start_date).toLocaleDateString('pt-BR')}</TableCell>
+              <TableCell>{new Date(contract.end_date).toLocaleDateString('pt-BR')}</TableCell>
+              <TableCell><ContractStatusBadge status={contract.status} /></TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleDownloadContract(contract.id)}>
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => toast.info("Visualizar contrato (em desenvolvimento)")}>
+                        Visualizar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => toast.info("Editar contrato (em desenvolvimento)")}>
+                        Editar
+                      </DropdownMenuItem>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
+                            Excluir
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction 
+                              className="bg-red-600 hover:bg-red-700"
+                              onClick={() => handleDeleteContract(contract.id)}
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 
   return (
     <DashboardLayout>
@@ -216,6 +382,25 @@ const BusinessContratos = () => {
               ))}
             </SelectContent>
           </Select>
+
+          <div className="flex items-center border rounded-md overflow-hidden">
+            <Button 
+              variant={viewMode === 'cards' ? 'default' : 'ghost'} 
+              size="sm" 
+              className="rounded-none h-10"
+              onClick={() => setViewMode('cards')}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant={viewMode === 'list' ? 'default' : 'ghost'} 
+              size="sm" 
+              className="rounded-none h-10"
+              onClick={() => setViewMode('list')}
+            >
+              <ListIcon className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="todos" className="mb-8" value={activeTab} onValueChange={setActiveTab}>
@@ -242,89 +427,7 @@ const BusinessContratos = () => {
             ))}
           </div>
         ) : filteredContracts?.length ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredContracts.map((contract) => (
-              <Card key={contract.id} className="overflow-hidden">
-                <CardHeader className="pb-4">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-1">
-                      <CardTitle className="line-clamp-1 text-lg">{contract.title}</CardTitle>
-                      <CardDescription>{contract.counterparty}</CardDescription>
-                    </div>
-                    <ContractStatusBadge status={contract.status} />
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="text-sm text-muted-foreground space-y-2">
-                    <div className="flex justify-between">
-                      <span>Tipo:</span>
-                      <span className="font-medium text-foreground">
-                        {contractTypes.find(t => t.id === contract.type)?.label || contract.type}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Valor:</span>
-                      <span className="font-medium text-foreground">
-                        {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(contract.value)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Vigência:</span>
-                      <span className="font-medium text-foreground">
-                        {new Date(contract.start_date).toLocaleDateString('pt-BR')} - {new Date(contract.end_date).toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-2 flex justify-between border-t">
-                  <Button variant="outline" size="sm" onClick={() => handleDownloadContract(contract.id)}>
-                    <Download className="h-4 w-4 mr-1" />
-                    Download
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <FileText className="h-4 w-4 mr-1" />
-                        Ações
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => toast.info("Visualizar contrato (em desenvolvimento)")}>
-                        Visualizar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => toast.info("Editar contrato (em desenvolvimento)")}>
-                        Editar
-                      </DropdownMenuItem>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
-                            Excluir
-                          </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction 
-                              className="bg-red-600 hover:bg-red-700"
-                              onClick={() => handleDeleteContract(contract.id)}
-                            >
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+          viewMode === 'cards' ? renderCardView() : renderListView()
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="rounded-full bg-muted p-3 mb-4">
