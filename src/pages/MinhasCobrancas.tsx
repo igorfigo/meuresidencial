@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -117,6 +116,32 @@ const MinhasCobrancas = () => {
   const residentId = user?.residentId;
   const matricula = user?.matricula;
   const unit = user?.unit;
+  
+  const { data: residentCreationDate } = useQuery({
+    queryKey: ['resident-creation-date', residentId],
+    queryFn: async () => {
+      if (!residentId) return null;
+
+      try {
+        const { data, error } = await supabase
+          .from('residents')
+          .select('created_at')
+          .eq('id', residentId)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching resident creation date:', error);
+          return null;
+        }
+        
+        return data?.created_at ? new Date(data.created_at) : null;
+      } catch (err) {
+        console.error('Error in resident creation date fetch:', err);
+        return null;
+      }
+    },
+    enabled: !!residentId
+  });
   
   const { data: pixSettings } = useQuery({
     queryKey: ['pix-settings', matricula],
@@ -262,20 +287,30 @@ const MinhasCobrancas = () => {
   const charges = [...(paidCharges || []), ...generateCurrentYearCharges()];
   
   const filteredCharges = charges?.filter(charge => {
-    if (activeTab === 'pending') return charge.status === 'pending' || charge.status === 'overdue';
     if (activeTab === 'paid') return charge.status === 'paid';
+    
+    if (activeTab === 'pending') {
+      if (residentCreationDate && charge.due_date) {
+        const chargeDate = new Date(charge.due_date);
+        
+        if (chargeDate < residentCreationDate) {
+          return false;
+        }
+      }
+      
+      return charge.status === 'pending' || charge.status === 'overdue';
+    }
+    
     return false;
   }) || [];
 
-  // Sort paid charges by reference month (year and month) in ascending order
   const sortedCharges = [...filteredCharges].sort((a, b) => {
     if (activeTab === 'paid') {
       const aDate = a.reference_month ? a.reference_month : `${a.year}-${a.month}`;
       const bDate = b.reference_month ? b.reference_month : `${b.year}-${b.month}`;
-      // Compare in ascending order (oldest first)
       return aDate.localeCompare(bDate);
     }
-    return 0; // No sorting for pending tab
+    return 0;
   });
 
   return (
