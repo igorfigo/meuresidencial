@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -46,9 +45,10 @@ export function useBusinessContracts() {
     
     if (endDate < today) {
       return 'expired';
+    } else {
+      // If the end date is in the future (greater than today), set status to active
+      return 'active';
     }
-    
-    return contract.status || 'active';
   };
   
   // Fetch contracts from Supabase
