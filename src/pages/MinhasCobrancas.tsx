@@ -98,7 +98,7 @@ function generateMonthlyCharges(existingCharges: Charge[]): Charge[] {
         month: month,
         year: currentYear,
         amount: existingCharges.length > 0 ? existingCharges[0].amount : '0',
-        status: 'pending',
+        status: 'pending' as const, // Use 'as const' to ensure it's a literal type
         due_date: `${currentYear}-${month}-10`, // Assuming due date is the 10th of each month
         payment_date: null
       };
@@ -137,15 +137,20 @@ const MinhasCobrancas = () => {
       return (data || []).map((charge) => {
         const dueDate = new Date(charge.due_date);
         
-        let status = charge.status;
-        if (status === 'pending' && dueDate < today) {
+        // Ensure status is one of the valid union types
+        let status: 'pending' | 'paid' | 'overdue';
+        if (charge.status === 'paid') {
+          status = 'paid';
+        } else if (charge.status === 'pending' && dueDate < today) {
           status = 'overdue';
+        } else {
+          status = 'pending';
         }
         
         return {
           ...charge,
           status
-        };
+        } as Charge; // Type assertion to Charge
       });
     },
     enabled: !!residentId && !!matricula
