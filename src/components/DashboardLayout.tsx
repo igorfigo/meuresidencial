@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -30,6 +29,7 @@ import {
   ReceiptText,
   QrCode,
   CreditCard as PaymentIcon,
+  Truck,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -99,15 +99,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
-    { 
-      name: 'Business Management', 
-      icon: <Briefcase className="h-5 w-5" />, 
-      path: '/business-management',
-      submenu: [
-        { name: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" />, path: '/business-management/despesas' },
-        { name: 'Contratos', icon: <FileText className="h-5 w-5" />, path: '/business-management/contratos' },
-      ] 
-    },
   ];
 
   const managerMenuItems: MenuItem[] = [
@@ -128,7 +119,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
     { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
-    { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
+    { name: 'Serviços Gerais', icon: <Truck className="h-5 w-5" />, path: '/servicos' },
     { name: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" />, path: '/minha-assinatura' },
     { name: 'Fale Conosco', icon: <Mail className="h-5 w-5" />, path: '/contato' },
   ];
@@ -148,7 +139,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       badge: unreadDocuments > 0 ? unreadDocuments : undefined
     },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
-    { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
+    { name: 'Serviços Gerais', icon: <Truck className="h-5 w-5" />, path: '/servicos' },
     { name: 'Minhas Cobranças', icon: <PaymentIcon className="h-5 w-5" />, path: '/minhas-cobrancas' },
   ];
 

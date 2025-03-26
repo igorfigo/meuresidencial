@@ -12,7 +12,6 @@ import {
   Bell,
   Truck,
   Megaphone,
-  Briefcase,
   Receipt,
   ReceiptText,
   PiggyBank,
@@ -81,15 +80,6 @@ export function Sidebar() {
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
-    { 
-      path: '/business-management', 
-      label: 'Business Management', 
-      icon: <Briefcase className="h-5 w-5" />,
-      submenu: [
-        { path: '/business-management/despesas', label: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" /> },
-        { path: '/business-management/contratos', label: 'Contratos', icon: <FileText className="h-5 w-5" /> },
-      ]
-    },
   ];
   
   const managerMenuItems: MenuItem[] = [
@@ -110,7 +100,7 @@ export function Sidebar() {
     },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/dedetizacoes', label: 'Dedetizações', icon: <Bug className="h-5 w-5" /> },
-    { path: '/servicos', label: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" /> },
+    { path: '/servicos', label: 'Serviços Gerais', icon: <Truck className="h-5 w-5" /> },
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/contato', label: 'Fale Conosco', icon: <Mail className="h-5 w-5" /> },
   ];
@@ -130,7 +120,7 @@ export function Sidebar() {
       badge: unreadDocuments > 0 ? unreadDocuments : undefined
     },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
-    { path: '/servicos', label: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" /> },
+    { path: '/servicos', label: 'Serviços Gerais', icon: <Truck className="h-5 w-5" /> },
     { path: '/minhas-cobrancas', label: 'Minhas Cobranças', icon: <Receipt className="h-5 w-5" /> },
   ];
 
