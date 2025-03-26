@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -75,7 +74,7 @@ function formatDate(dateString: string | null) {
 
 const MinhasCobrancas = () => {
   const { user } = useApp();
-  const [activeTab, setActiveTab] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>('pending');
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
@@ -97,7 +96,6 @@ const MinhasCobrancas = () => {
         throw new Error('Erro ao buscar cobranças');
       }
       
-      // Process charges to determine if any are overdue
       const today = new Date();
       return (data || []).map((charge) => {
         const dueDate = new Date(charge.due_date);
@@ -117,8 +115,9 @@ const MinhasCobrancas = () => {
   });
   
   const filteredCharges = charges?.filter(charge => {
-    if (activeTab === 'all') return true;
-    return charge.status === activeTab;
+    if (activeTab === 'pending') return charge.status === 'pending';
+    if (activeTab === 'paid') return charge.status === 'paid';
+    return false;
   }) || [];
 
   return (
@@ -139,10 +138,8 @@ const MinhasCobrancas = () => {
             </CardDescription>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
               <TabsList>
-                <TabsTrigger value="all">Todas</TabsTrigger>
                 <TabsTrigger value="pending">Pendentes</TabsTrigger>
                 <TabsTrigger value="paid">Pagas</TabsTrigger>
-                <TabsTrigger value="overdue">Atrasadas</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
@@ -165,7 +162,7 @@ const MinhasCobrancas = () => {
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertTitle>Nenhuma cobrança encontrada</AlertTitle>
                 <AlertDescription>
-                  Não existem cobranças {activeTab !== 'all' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para este condomínio.
+                  Não existem cobranças {activeTab !== 'pending' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para este condomínio.
                 </AlertDescription>
               </Alert>
             ) : (
