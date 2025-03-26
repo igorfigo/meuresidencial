@@ -16,6 +16,16 @@ export interface BusinessContract {
   status: 'active' | 'pending' | 'expired' | 'draft';
 }
 
+// Contract attachment type definition
+export interface ContractAttachment {
+  id: string;
+  contract_id: string;
+  file_name: string;
+  file_path: string;
+  file_type: string;
+  created_at: string;
+}
+
 export function useBusinessContracts() {
   const queryClient = useQueryClient();
   
@@ -81,6 +91,114 @@ export function useBusinessContracts() {
     }
   });
 
+  // Get contract attachments
+  const getContractAttachments = async (contractId: string) => {
+    const { data, error } = await supabase
+      .from('contract_attachments')
+      .select('*')
+      .eq('contract_id', contractId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching attachments:', error);
+      toast.error('Erro ao carregar anexos');
+      throw error;
+    }
+    
+    return data as ContractAttachment[];
+  };
+
+  // Upload file attachment
+  const uploadAttachment = async (contractId: string, file: File) => {
+    try {
+      // 1. Upload the file to storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${contractId}/${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('contract-attachments')
+        .upload(filePath, file);
+      
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        toast.error('Erro ao fazer upload do arquivo');
+        throw uploadError;
+      }
+      
+      // 2. Create a record in the contract_attachments table
+      const { error: attachmentError } = await supabase
+        .from('contract_attachments')
+        .insert([{
+          contract_id: contractId,
+          file_name: file.name,
+          file_path: filePath,
+          file_type: file.type
+        }]);
+      
+      if (attachmentError) {
+        console.error('Error saving attachment record:', attachmentError);
+        toast.error('Erro ao salvar registro do anexo');
+        throw attachmentError;
+      }
+      
+      // 3. Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['contract-attachments', contractId] });
+      
+      toast.success('Anexo adicionado com sucesso');
+      return true;
+    } catch (error) {
+      console.error('Error in uploadAttachment:', error);
+      throw error;
+    }
+  };
+
+  // Delete attachment
+  const deleteAttachment = async (attachment: ContractAttachment) => {
+    try {
+      // 1. Delete the file from storage
+      const { error: storageError } = await supabase.storage
+        .from('contract-attachments')
+        .remove([attachment.file_path]);
+      
+      if (storageError) {
+        console.error('Error deleting file from storage:', storageError);
+        toast.error('Erro ao excluir arquivo');
+        throw storageError;
+      }
+      
+      // 2. Delete the record from the contract_attachments table
+      const { error: recordError } = await supabase
+        .from('contract_attachments')
+        .delete()
+        .eq('id', attachment.id);
+      
+      if (recordError) {
+        console.error('Error deleting attachment record:', recordError);
+        toast.error('Erro ao excluir registro do anexo');
+        throw recordError;
+      }
+      
+      // 3. Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['contract-attachments', attachment.contract_id] });
+      
+      toast.success('Anexo excluído com sucesso');
+      return true;
+    } catch (error) {
+      console.error('Error in deleteAttachment:', error);
+      throw error;
+    }
+  };
+
+  // Get public URL for a file
+  const getFileUrl = (filePath: string) => {
+    const { data } = supabase.storage
+      .from('contract-attachments')
+      .getPublicUrl(filePath);
+    
+    return data.publicUrl;
+  };
+
   const createContract = async (newContract: Omit<BusinessContract, 'id'>) => {
     return createContractMutation.mutateAsync(newContract);
   };
@@ -93,6 +211,10 @@ export function useBusinessContracts() {
     contracts,
     isLoading,
     createContract,
-    deleteContract
+    deleteContract,
+    getContractAttachments,
+    uploadAttachment,
+    deleteAttachment,
+    getFileUrl
   };
 }

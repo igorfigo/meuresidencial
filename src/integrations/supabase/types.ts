@@ -376,6 +376,41 @@ export type Database = {
         }
         Relationships: []
       }
+      contract_attachments: {
+        Row: {
+          contract_id: string
+          created_at: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_attachments_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "business_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_attachments: {
         Row: {
           created_at: string

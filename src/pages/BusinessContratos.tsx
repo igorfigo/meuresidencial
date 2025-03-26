@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FileText, Plus, Search, Trash2, Eye, Pencil } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,8 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
-import { useBusinessContracts } from '@/hooks/use-business-contracts';
+import { useBusinessContracts, ContractAttachment } from '@/hooks/use-business-contracts';
 import { toast } from 'sonner';
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 const ContractStatusBadge = ({ status }: { status: string }) => {
   const statusMap: Record<string, { label: string, variant: "default" | "destructive" | "outline" | "secondary" }> = {
@@ -33,12 +35,18 @@ const BusinessContratos = () => {
   const [openViewDialog, setOpenViewDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedContract, setSelectedContract] = useState<any>(null);
+  const [attachments, setAttachments] = useState<ContractAttachment[]>([]);
+  const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
   
   const { 
     contracts, 
     isLoading, 
     createContract, 
-    deleteContract
+    deleteContract,
+    getContractAttachments,
+    uploadAttachment,
+    deleteAttachment,
+    getFileUrl
   } = useBusinessContracts();
 
   const filteredContracts = contracts?.filter(contract => {
@@ -90,15 +98,57 @@ const BusinessContratos = () => {
     }
   };
 
-  const handleViewContract = (contract: any) => {
+  const handleViewContract = async (contract: any) => {
     setSelectedContract(contract);
     setOpenViewDialog(true);
+    
+    setIsLoadingAttachments(true);
+    try {
+      const attachmentsData = await getContractAttachments(contract.id);
+      setAttachments(attachmentsData);
+    } catch (error) {
+      console.error("Erro ao carregar anexos:", error);
+    } finally {
+      setIsLoadingAttachments(false);
+    }
   };
 
   const handleEditContract = (contract: any) => {
     setSelectedContract(contract);
     setOpenEditDialog(true);
     toast.info("Edição de contrato (em desenvolvimento)");
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, contractId: string) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    try {
+      await uploadAttachment(contractId, file);
+      const updatedAttachments = await getContractAttachments(contractId);
+      setAttachments(updatedAttachments);
+    } catch (error) {
+      console.error("Erro ao fazer upload do anexo:", error);
+      toast.error("Erro ao fazer upload do anexo");
+    } finally {
+      event.target.value = '';
+    }
+  };
+
+  const handleDeleteAttachment = async (attachment: ContractAttachment) => {
+    try {
+      await deleteAttachment(attachment);
+      setAttachments(attachments.filter(a => a.id !== attachment.id));
+    } catch (error) {
+      console.error("Erro ao excluir anexo:", error);
+      toast.error("Erro ao excluir anexo");
+    }
+  };
+
+  const downloadAttachment = (attachment: ContractAttachment) => {
+    const url = getFileUrl(attachment.file_path);
+    window.open(url, '_blank');
   };
 
   const contractTypes = [
@@ -318,29 +368,29 @@ const BusinessContratos = () => {
 
       {/* Dialog de Visualização de Contrato */}
       <Dialog open={openViewDialog} onOpenChange={setOpenViewDialog}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="sm:max-w-[725px]">
           <DialogHeader>
             <DialogTitle>Detalhes do Contrato</DialogTitle>
           </DialogHeader>
           {selectedContract && (
-            <div className="grid gap-4 py-4">
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground">Título</h3>
-                <p className="text-base">{selectedContract.title}</p>
-              </div>
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground">Contraparte</h3>
-                <p className="text-base">{selectedContract.counterparty}</p>
-              </div>
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground">Tipo</h3>
-                <p className="text-base">{contractTypes.find(t => t.id === selectedContract.type)?.label || selectedContract.type}</p>
-              </div>
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground">Valor</h3>
-                <p className="text-base">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedContract.value)}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-6 py-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Título</h3>
+                  <p className="text-base">{selectedContract.title}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Contraparte</h3>
+                  <p className="text-base">{selectedContract.counterparty}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Tipo</h3>
+                  <p className="text-base">{contractTypes.find(t => t.id === selectedContract.type)?.label || selectedContract.type}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Valor</h3>
+                  <p className="text-base">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedContract.value)}</p>
+                </div>
                 <div>
                   <h3 className="font-medium text-sm text-muted-foreground">Data Início</h3>
                   <p className="text-base">{new Date(selectedContract.start_date).toLocaleDateString('pt-BR')}</p>
@@ -349,12 +399,72 @@ const BusinessContratos = () => {
                   <h3 className="font-medium text-sm text-muted-foreground">Data Fim</h3>
                   <p className="text-base">{new Date(selectedContract.end_date).toLocaleDateString('pt-BR')}</p>
                 </div>
-              </div>
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground">Status</h3>
-                <div className="mt-1">
-                  <ContractStatusBadge status={selectedContract.status} />
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Status</h3>
+                  <div className="mt-1">
+                    <ContractStatusBadge status={selectedContract.status} />
+                  </div>
                 </div>
+              </div>
+              
+              {/* Attachment Section */}
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold">Anexos</h3>
+                  <div>
+                    <Label htmlFor="fileUpload" className="cursor-pointer">
+                      <div className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm">
+                        <Paperclip className="h-4 w-4" />
+                        <span>Adicionar Anexo</span>
+                      </div>
+                      <Input 
+                        id="fileUpload" 
+                        type="file" 
+                        className="hidden" 
+                        onChange={(e) => handleFileUpload(e, selectedContract.id)}
+                      />
+                    </Label>
+                  </div>
+                </div>
+
+                {isLoadingAttachments ? (
+                  <div className="p-8 flex justify-center">
+                    <p>Carregando anexos...</p>
+                  </div>
+                ) : attachments.length > 0 ? (
+                  <div className="space-y-2">
+                    {attachments.map((attachment) => (
+                      <div key={attachment.id} className="border rounded-md p-3 flex justify-between items-center">
+                        <div className="flex items-center gap-2 flex-1 overflow-hidden">
+                          <Paperclip className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{attachment.file_name}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => downloadAttachment(attachment)}
+                          >
+                            Baixar
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600" 
+                            onClick={() => handleDeleteAttachment(attachment)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 border border-dashed rounded-md">
+                    <p className="text-muted-foreground">Nenhum anexo encontrado</p>
+                    <p className="text-sm text-muted-foreground mt-1">Clique em "Adicionar Anexo" para fazer upload de um arquivo</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
