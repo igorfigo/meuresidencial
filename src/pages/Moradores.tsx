@@ -108,7 +108,9 @@ const Moradores = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir este morador? Esta ação não pode ser desfeita.
+              Atenção: Ao excluir este morador, ele não terá mais acesso a todo o histórico de sua conta. Somente o síndico terá acesso a estas informações.
+              <br /><br />
+              Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

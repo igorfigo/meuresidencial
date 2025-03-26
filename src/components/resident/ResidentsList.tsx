@@ -53,7 +53,7 @@ export const ResidentsList = ({
                 <TableCell className="font-medium">{resident.nome_completo}</TableCell>
                 <TableCell className="text-center">{resident.cpf}</TableCell>
                 <TableCell className="text-center">{resident.unidade}</TableCell>
-                <TableCell>{resident.telefone || '-'}</TableCell>
+                <TableCell className="text-center">{resident.telefone || '-'}</TableCell>
                 <TableCell className="text-center">{resident.email || '-'}</TableCell>
                 <TableCell className="text-center">{resident.valor_condominio || '-'}</TableCell>
                 <TableCell className="text-right">
