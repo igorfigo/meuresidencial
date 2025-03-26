@@ -2,8 +2,7 @@
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { File, FolderArchive, Plus } from 'lucide-react';
+import { File, FolderArchive } from 'lucide-react';
 import AdminOnly from '@/components/AdminOnly';
 import { BusinessDocumentRepository } from '@/components/business/BusinessDocumentRepository';
 

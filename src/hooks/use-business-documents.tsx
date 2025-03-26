@@ -7,7 +7,16 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { DocumentAttachment } from './use-documents';
+
+// Document attachment type
+export interface BusinessDocumentAttachment {
+  id: string;
+  document_id: string;
+  file_path: string;
+  file_type: string;
+  file_name: string;
+  created_at: string;
+}
 
 // Form validation schema
 const documentSchema = z.object({
@@ -23,9 +32,6 @@ export function useBusinessDocuments() {
   const { toast } = useToast();
   const { user } = useApp();
   
-  // For business documents, we use 'admin' as the identifier
-  const businessId = 'admin';
-  
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +40,7 @@ export function useBusinessDocuments() {
   const [uploadProgress, setUploadProgress] = useState(0);
   
   const [attachments, setAttachments] = useState<File[]>([]);
-  const [existingAttachments, setExistingAttachments] = useState<DocumentAttachment[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<BusinessDocumentAttachment[]>([]);
   
   const form = useForm<BusinessDocumentFormValues>({
     resolver: zodResolver(documentSchema),
@@ -47,7 +53,7 @@ export function useBusinessDocuments() {
   
   // Fetch documents
   const fetchDocuments = async () => {
-    if (!businessId || !user?.isAdmin) return;
+    if (!user?.isAdmin) return;
     
     setIsLoading(true);
     
@@ -73,7 +79,7 @@ export function useBusinessDocuments() {
   };
   
   // Fetch document attachments
-  const fetchAttachments = async (documentId: string) => {
+  const fetchAttachments = async (documentId: string): Promise<BusinessDocumentAttachment[]> => {
     try {
       const { data, error } = await supabase
         .from('business_document_attachments')

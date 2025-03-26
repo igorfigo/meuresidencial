@@ -19,9 +19,8 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { DocumentAttachment } from '@/hooks/use-documents';
+import { BusinessDocumentAttachment } from '@/hooks/use-business-documents';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 
 interface BusinessDocumentsListProps {
   documents: any[];
@@ -29,7 +28,7 @@ interface BusinessDocumentsListProps {
   onDelete: (id: string) => void;
   isDeleting: boolean;
   getFileUrl: (path: string) => Promise<string>;
-  fetchAttachments: (documentId: string) => Promise<DocumentAttachment[]>;
+  fetchAttachments: (documentId: string) => Promise<BusinessDocumentAttachment[]>;
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -47,7 +46,7 @@ export const BusinessDocumentsList: React.FC<BusinessDocumentsListProps> = ({
   onPageChange,
 }) => {
   const [expandedDocument, setExpandedDocument] = useState<string | null>(null);
-  const [attachments, setAttachments] = useState<{ [key: string]: DocumentAttachment[] }>({});
+  const [attachments, setAttachments] = useState<{ [key: string]: BusinessDocumentAttachment[] }>({});
   const [loadingAttachments, setLoadingAttachments] = useState<{ [key: string]: boolean }>({});
 
   const toggleDocument = async (documentId: string) => {
@@ -69,7 +68,7 @@ export const BusinessDocumentsList: React.FC<BusinessDocumentsListProps> = ({
     }
   };
 
-  const handleDownload = async (attachment: DocumentAttachment) => {
+  const handleDownload = async (attachment: BusinessDocumentAttachment) => {
     try {
       const url = await getFileUrl(attachment.file_path);
       if (url) {

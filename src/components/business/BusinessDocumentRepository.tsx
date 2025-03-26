@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
-import { useBusinessDocuments } from '@/hooks/use-business-documents';
+import { useBusinessDocuments, BusinessDocumentAttachment } from '@/hooks/use-business-documents';
 import { BusinessDocumentForm } from './BusinessDocumentForm';
 import { BusinessDocumentsList } from './BusinessDocumentsList';
 import { 

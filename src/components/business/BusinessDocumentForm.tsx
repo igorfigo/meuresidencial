@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -20,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Paperclip, X, File } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { DocumentAttachment } from '@/hooks/use-documents';
+import { BusinessDocumentAttachment } from '@/hooks/use-business-documents';
 import { UseFormReturn } from 'react-hook-form';
 
 interface BusinessDocumentFormProps {
@@ -30,7 +29,7 @@ interface BusinessDocumentFormProps {
   isEditing: boolean;
   onCancel: () => void;
   attachments: File[];
-  existingAttachments: DocumentAttachment[];
+  existingAttachments: BusinessDocumentAttachment[];
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   removeFile: (index: number) => void;
   removeExistingAttachment: (id: string) => void;
