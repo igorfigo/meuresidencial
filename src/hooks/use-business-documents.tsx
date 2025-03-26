@@ -167,7 +167,6 @@ export const useBusinessDocuments = () => {
       console.error('Error uploading document file:', err);
       toast('Erro ao enviar arquivo', {
         description: 'Não foi possível enviar o arquivo',
-        variant: 'destructive',
       });
       throw err;
     }
@@ -222,7 +221,6 @@ export const useBusinessDocuments = () => {
       console.error('Error downloading document:', err);
       toast('Erro ao baixar arquivo', {
         description: 'Não foi possível baixar o arquivo',
-        variant: 'destructive',
       });
       throw err;
     }
@@ -279,7 +277,6 @@ export const useBusinessDocuments = () => {
       console.error('Error deleting document:', err);
       toast('Erro ao excluir documento', {
         description: 'Não foi possível excluir o documento',
-        variant: 'destructive',
       });
       throw err;
     }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -73,7 +72,6 @@ const BusinessDocumentos = () => {
       console.error('Error saving document:', error);
       toast('Erro ao salvar documento', {
         description: 'Não foi possível salvar o documento',
-        variant: 'destructive',
       });
     }
   };
