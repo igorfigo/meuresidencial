@@ -11,8 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Plus, FileText, Download, Trash2, FileArchive, ExternalLink } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Plus, FileText, Download, Trash2, FileArchive } from 'lucide-react';
+import { toast } from 'sonner';
 import { useBusinessDocuments } from '@/hooks/use-business-documents';
 import { format } from 'date-fns';
 
@@ -27,7 +27,6 @@ type DocumentFormValues = z.infer<typeof documentSchema>;
 
 const BusinessDocumentos = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { toast } = useToast();
   const { 
     documents, 
     isLoading, 
@@ -90,17 +89,8 @@ const BusinessDocumentos = () => {
   const handleDeleteDocument = async (id: string) => {
     try {
       await deleteDocument(id);
-      toast({
-        title: 'Documento excluído',
-        description: 'O documento foi excluído com sucesso',
-      });
     } catch (error) {
       console.error('Error deleting document:', error);
-      toast({
-        title: 'Erro ao excluir documento',
-        description: 'Não foi possível excluir o documento',
-        variant: 'destructive',
-      });
     }
   };
   
@@ -109,11 +99,6 @@ const BusinessDocumentos = () => {
       await downloadDocument(id, fileName);
     } catch (error) {
       console.error('Error downloading document:', error);
-      toast({
-        title: 'Erro ao fazer download',
-        description: 'Não foi possível baixar o documento',
-        variant: 'destructive',
-      });
     }
   };
   

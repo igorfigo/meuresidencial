@@ -12,6 +12,7 @@ interface BusinessDocument {
   created_by: string;
   has_file: boolean;
   file_name?: string;
+  updated_at: string;
 }
 
 interface CreateDocumentParams {
@@ -28,6 +29,7 @@ export const useBusinessDocuments = () => {
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching business documents...');
       
       // Fetch documents from Supabase
       const { data: documentsData, error: documentsError } = await supabase
@@ -35,7 +37,12 @@ export const useBusinessDocuments = () => {
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (documentsError) throw documentsError;
+      if (documentsError) {
+        console.error('Error fetching business documents:', documentsError);
+        throw documentsError;
+      }
+      
+      console.log('Documents data:', documentsData);
       
       // Fetch file information for each document
       const documentsWithFiles = await Promise.all(
@@ -46,11 +53,15 @@ export const useBusinessDocuments = () => {
             .eq('document_id', doc.id)
             .maybeSingle();
           
+          if (fileError) {
+            console.warn('Error fetching attachment for document:', doc.id, fileError);
+          }
+          
           return {
             ...doc,
             has_file: !!fileData,
             file_name: fileData?.file_name
-          };
+          } as BusinessDocument;
         })
       );
       
@@ -72,6 +83,7 @@ export const useBusinessDocuments = () => {
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'business_documents' }, 
         () => {
+          console.log('Business documents changed, refreshing...');
           fetchDocuments();
         }
       )
@@ -84,6 +96,8 @@ export const useBusinessDocuments = () => {
   
   const createDocument = async (document: CreateDocumentParams): Promise<string | null> => {
     try {
+      console.log('Creating document:', document);
+      
       const { data, error } = await supabase
         .from('business_documents')
         .insert({
@@ -91,11 +105,15 @@ export const useBusinessDocuments = () => {
           description: document.description,
           category: document.category,
         })
-        .select('id')
+        .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating document:', error);
+        throw error;
+      }
       
+      console.log('Created document:', data);
       await fetchDocuments();
       return data.id;
     } catch (err) {
@@ -106,6 +124,8 @@ export const useBusinessDocuments = () => {
   
   const uploadDocumentFile = async (documentId: string, file: File) => {
     try {
+      console.log('Uploading file for document:', documentId, file);
+      
       // Step 1: Upload file to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${documentId}-${Date.now()}.${fileExt}`;
@@ -115,7 +135,12 @@ export const useBusinessDocuments = () => {
         .from('business_documents')
         .upload(filePath, file);
         
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Error uploading file to storage:', uploadError);
+        throw uploadError;
+      }
+      
+      console.log('File uploaded successfully to storage');
       
       // Step 2: Create attachment record in database
       const { error: attachmentError } = await supabase
@@ -128,17 +153,32 @@ export const useBusinessDocuments = () => {
           file_size: file.size,
         });
         
-      if (attachmentError) throw attachmentError;
+      if (attachmentError) {
+        console.error('Error creating attachment record:', attachmentError);
+        throw attachmentError;
+      }
       
+      console.log('Attachment record created successfully');
       await fetchDocuments();
+      toast({
+        title: 'Arquivo enviado',
+        description: 'O arquivo foi enviado com sucesso',
+      });
     } catch (err) {
       console.error('Error uploading document file:', err);
+      toast({
+        title: 'Erro ao enviar arquivo',
+        description: 'Não foi possível enviar o arquivo',
+        variant: 'destructive',
+      });
       throw err;
     }
   };
   
   const downloadDocument = async (documentId: string, fileName: string) => {
     try {
+      console.log('Downloading document:', documentId, fileName);
+      
       // Get file path from attachment record
       const { data: attachment, error: attachmentError } = await supabase
         .from('business_document_attachments')
@@ -146,15 +186,27 @@ export const useBusinessDocuments = () => {
         .eq('document_id', documentId)
         .maybeSingle();
         
-      if (attachmentError) throw attachmentError;
-      if (!attachment) throw new Error('Attachment not found');
+      if (attachmentError) {
+        console.error('Error fetching attachment:', attachmentError);
+        throw attachmentError;
+      }
+      
+      if (!attachment) {
+        console.error('Attachment not found for document:', documentId);
+        throw new Error('Attachment not found');
+      }
+      
+      console.log('Found attachment:', attachment);
       
       // Download file from storage
       const { data, error } = await supabase.storage
         .from('business_documents')
         .download(attachment.file_path);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error downloading file from storage:', error);
+        throw error;
+      }
       
       // Create download link
       const url = URL.createObjectURL(data);
@@ -164,14 +216,26 @@ export const useBusinessDocuments = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      
+      toast({
+        title: 'Download concluído',
+        description: 'O arquivo foi baixado com sucesso',
+      });
     } catch (err) {
       console.error('Error downloading document:', err);
+      toast({
+        title: 'Erro ao baixar arquivo',
+        description: 'Não foi possível baixar o arquivo',
+        variant: 'destructive',
+      });
       throw err;
     }
   };
   
   const deleteDocument = async (documentId: string) => {
     try {
+      console.log('Deleting document:', documentId);
+      
       // First, get attachment info
       const { data: attachment, error: attachmentError } = await supabase
         .from('business_document_attachments')
@@ -179,23 +243,24 @@ export const useBusinessDocuments = () => {
         .eq('document_id', documentId)
         .maybeSingle();
       
-      // Delete attachment record if exists
+      // Delete attachment record and file if exists
       if (attachment) {
+        console.log('Found attachment, deleting file from storage:', attachment);
+        
         // Delete the file from storage
         const { error: storageError } = await supabase.storage
           .from('business_documents')
           .remove([attachment.file_path]);
           
-        if (storageError) throw storageError;
+        if (storageError) {
+          console.error('Error deleting file from storage:', storageError);
+          throw storageError;
+        }
         
-        // Delete attachment record
-        const { error: deleteAttachmentError } = await supabase
-          .from('business_document_attachments')
-          .delete()
-          .eq('document_id', documentId);
-          
-        if (deleteAttachmentError) throw deleteAttachmentError;
+        console.log('File deleted from storage successfully');
       }
+      
+      // The attachment record will be automatically deleted due to ON DELETE CASCADE
       
       // Finally, delete the document
       const { error: deleteDocError } = await supabase
@@ -203,11 +268,25 @@ export const useBusinessDocuments = () => {
         .delete()
         .eq('id', documentId);
         
-      if (deleteDocError) throw deleteDocError;
+      if (deleteDocError) {
+        console.error('Error deleting document:', deleteDocError);
+        throw deleteDocError;
+      }
       
+      console.log('Document deleted successfully');
       await fetchDocuments();
+      
+      toast({
+        title: 'Documento excluído',
+        description: 'O documento foi excluído com sucesso',
+      });
     } catch (err) {
       console.error('Error deleting document:', err);
+      toast({
+        title: 'Erro ao excluir documento',
+        description: 'Não foi possível excluir o documento',
+        variant: 'destructive',
+      });
       throw err;
     }
   };
