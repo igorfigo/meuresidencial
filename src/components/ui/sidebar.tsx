@@ -23,6 +23,7 @@ import {
   Bug,
   Mail,
   QrCode,
+  Briefcase,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -62,7 +63,6 @@ export function Sidebar() {
   useEffect(() => {
     setIsMenuOpen(false);
     
-    // Mark items as viewed when navigating to their respective pages
     if (location.pathname === '/comunicados') {
       markAsViewed('announcements');
     } else if (location.pathname === '/documentos') {
@@ -80,6 +80,7 @@ export function Sidebar() {
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
+    { path: '/contratos', label: 'Contratos', icon: <Briefcase className="h-5 w-5" /> },
   ];
   
   const managerMenuItems: MenuItem[] = [

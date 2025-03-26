@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import { AppProvider } from '@/contexts/AppContext';
 import { queryClient } from '@/lib/react-query';
 import AuthRequired from '@/components/AuthRequired';
+import AdminOnly from '@/components/AdminOnly';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Dashboard from '@/pages/Dashboard';
@@ -26,6 +27,7 @@ import MinhaAssinatura from '@/pages/MinhaAssinatura';
 import FaleConosco from '@/pages/FaleConosco';
 import GerenciarAvisos from '@/pages/GerenciarAvisos';
 import MinhasCobrancas from '@/pages/MinhasCobrancas';
+import BusinessContratos from '@/pages/BusinessContratos';
 
 // We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
@@ -50,11 +52,12 @@ function App() {
               <Route path="/financeiro/prestacao-contas" element={<AuthRequired><FinanceiroPrestacaoContas /></AuthRequired>} />
               
               {/* Admin Routes */}
-              <Route path="/cadastro-gestor" element={<AuthRequired><CadastroGestor /></AuthRequired>} />
-              <Route path="/cadastro-planos" element={<AuthRequired><CadastroPlanos /></AuthRequired>} />
-              <Route path="/cadastro-chave-pix" element={<AuthRequired><CadastroChavePix /></AuthRequired>} />
+              <Route path="/cadastro-gestor" element={<AdminOnly><CadastroGestor /></AdminOnly>} />
+              <Route path="/cadastro-planos" element={<AdminOnly><CadastroPlanos /></AdminOnly>} />
+              <Route path="/cadastro-chave-pix" element={<AdminOnly><CadastroChavePix /></AdminOnly>} />
               <Route path="/gerar-faturas" element={<AuthRequired><GerarFaturas /></AuthRequired>} />
               <Route path="/gerenciar-avisos" element={<AuthRequired><GerenciarAvisos /></AuthRequired>} />
+              <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
               
               {/* Manager Routes */}
               <Route path="/moradores" element={<AuthRequired><Moradores /></AuthRequired>} />

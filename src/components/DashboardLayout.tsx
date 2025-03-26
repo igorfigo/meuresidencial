@@ -70,7 +70,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       setExpandedSubmenu('Financeiro');
     }
     
-    // Mark items as viewed when navigating to their respective pages
     if (location.pathname === '/comunicados') {
       markAsViewed('announcements');
     } else if (location.pathname === '/documentos') {
@@ -99,6 +98,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
+    { name: 'Contratos', icon: <Briefcase className="h-5 w-5" />, path: '/contratos' },
   ];
 
   const managerMenuItems: MenuItem[] = [
