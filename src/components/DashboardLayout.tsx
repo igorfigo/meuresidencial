@@ -41,7 +41,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/use-notifications';
-import { Separator } from '@/components/ui/separator';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -53,8 +52,6 @@ interface MenuItem {
   path: string;
   submenu?: MenuItem[];
   badge?: number;
-  separator?: boolean;
-  sectionTitle?: string;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -101,8 +98,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
-    { separator: true, path: '', name: '', icon: <></> },
-    { name: 'Contratos', icon: <Briefcase className="h-5 w-5" />, path: '/contratos', sectionTitle: 'Business Administration' },
+    { name: 'Contratos', icon: <Briefcase className="h-5 w-5" />, path: '/contratos' },
   ];
 
   const managerMenuItems: MenuItem[] = [
@@ -206,22 +202,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       location.pathname === subItem.path
     );
 
-    if (item.separator) {
-      return (
-        <div key={`separator-${item.name}`} className="mt-5 mb-2 px-3">
-          <Separator className="bg-sidebar-foreground/20" />
-        </div>
-      );
-    }
-
     return (
       <div key={item.path} className="w-full">
-        {item.sectionTitle && (
-          <div className="mb-2 ml-2 mt-1 px-3 text-xs font-semibold text-brand-600 uppercase tracking-wider">
-            {item.sectionTitle}
-          </div>
-        )}
-        
         {hasSubmenu ? (
           <>
             <button
@@ -473,7 +455,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           {sidebarOpen ? (
             <div className="flex items-center space-x-3">
               <NavLink to="/perfil" className="flex-grow flex items-center space-x-3 hover:opacity-80 transition-opacity">
-                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white mb-2">
+                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
                   {user?.nome?.charAt(0) || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">

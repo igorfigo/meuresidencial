@@ -42,7 +42,6 @@ import { Skeleton } from './skeleton';
 import { SwitchCondominium } from './switch-condominium';
 import { Badge } from './badge';
 import { useNotifications } from '@/hooks/use-notifications';
-import { Separator } from './separator';
 
 interface MenuItem {
   path: string;
@@ -50,8 +49,6 @@ interface MenuItem {
   icon: React.ReactNode;
   submenu?: MenuItem[];
   badge?: number;
-  separator?: boolean;
-  sectionTitle?: string;
 }
 
 export function Sidebar() {
@@ -83,8 +80,7 @@ export function Sidebar() {
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
-    { separator: true, path: '', label: '', icon: <></> },
-    { path: '/contratos', label: 'Contratos', icon: <Briefcase className="h-5 w-5" />, sectionTitle: 'Business Administration' },
+    { path: '/contratos', label: 'Contratos', icon: <Briefcase className="h-5 w-5" /> },
   ];
   
   const managerMenuItems: MenuItem[] = [
@@ -148,15 +144,7 @@ export function Sidebar() {
       menuItems = managerMenuItems;
     }
 
-    return menuItems.map((item, index) => {
-      if (item.separator) {
-        return (
-          <li key={`separator-${index}`} className="mt-4 mb-2">
-            <Separator className="my-1" />
-          </li>
-        );
-      }
-      
+    return menuItems.map((item) => {
       if (item.submenu) {
         return (
           <li key={item.label} className="mb-1">
@@ -188,11 +176,6 @@ export function Sidebar() {
       
       return (
         <li key={item.label}>
-          {item.sectionTitle && (
-            <div className="mb-2 ml-2 mt-1 text-xs font-semibold text-brand-600 uppercase tracking-wider">
-              {item.sectionTitle}
-            </div>
-          )}
           <a
             href={item.path}
             className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
