@@ -31,6 +31,12 @@ interface Charge {
   status: 'pending' | 'paid' | 'overdue';
   due_date: string;
   payment_date: string | null;
+  category: string;
+}
+
+interface PixSettings {
+  diavencimento: string;
+  jurosaodia: string;
 }
 
 const statusColors = {
@@ -73,47 +79,101 @@ function formatDate(dateString: string | null) {
   return format(date, 'dd/MM/yyyy', { locale: ptBR });
 }
 
+// Função para gerar a data de vencimento com base no mês de referência e no dia de vencimento
+function getDueDate(referenceMonth: string, dueDay: string): string {
+  // O formato do reference_month é YYYY-MM
+  const [year, month] = referenceMonth.split('-');
+  
+  // Criar data com o dia de vencimento
+  const dueDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(dueDay));
+  
+  return dueDate.toISOString();
+}
+
 const MinhasCobrancas = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<string>('all');
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
+  const unit = user?.unit;
   
-  const { data: charges, isLoading, error } = useQuery({
-    queryKey: ['resident-charges', residentId, matricula],
+  // Buscar as configurações de recebimento PIX para o condomínio
+  const { data: pixSettings, isLoading: isLoadingPixSettings } = useQuery({
+    queryKey: ['pix-settings', matricula],
     queryFn: async () => {
-      if (!residentId || !matricula) return [];
-
+      if (!matricula) return null;
+      
       const { data, error } = await supabase
-        .from('resident_charges')
+        .from('pix_receipt_settings')
         .select('*')
-        .eq('resident_id', residentId)
         .eq('matricula', matricula)
-        .order('due_date', { ascending: false });
+        .single();
+        
+      if (error) {
+        console.error('Error fetching PIX settings:', error);
+        return { diavencimento: '10', jurosaodia: '0.033' } as PixSettings; // Valores padrão
+      }
+      
+      return data as PixSettings;
+    },
+    enabled: !!matricula
+  });
+  
+  // Buscar as receitas do tipo "Taxa de Condomínio" para a unidade do morador
+  const { data: charges, isLoading, error } = useQuery({
+    queryKey: ['resident-charges', matricula, unit],
+    queryFn: async () => {
+      if (!matricula || !unit) return [];
+      
+      const { data, error } = await supabase
+        .from('financial_incomes')
+        .select('*')
+        .eq('matricula', matricula)
+        .eq('unit', unit)
+        .eq('category', 'Taxa de Condomínio')
+        .order('reference_month', { ascending: false });
         
       if (error) {
         console.error('Error fetching charges:', error);
         throw new Error('Erro ao buscar cobranças');
       }
       
-      // Process charges to determine if any are overdue
+      // Processar as receitas para criar as cobranças
       const today = new Date();
-      return (data || []).map((charge) => {
-        const dueDate = new Date(charge.due_date);
+      const dueDay = pixSettings?.diavencimento || '10';
+      
+      return (data || []).map((income) => {
+        // Obter a data de vencimento
+        const dueDate = getDueDate(income.reference_month, dueDay);
+        const dueDateObj = new Date(dueDate);
         
-        let status = charge.status;
-        if (status === 'pending' && dueDate < today) {
+        // Determinar o status da cobrança
+        let status: 'pending' | 'paid' | 'overdue' = 'pending';
+        
+        if (income.payment_date) {
+          status = 'paid';
+        } else if (dueDateObj < today) {
           status = 'overdue';
         }
         
+        // Extrair mês e ano do reference_month (formato: YYYY-MM)
+        const [year, month] = income.reference_month.split('-');
+        
         return {
-          ...charge,
-          status
-        };
+          id: income.id,
+          unit: income.unit || '',
+          month,
+          year,
+          amount: income.amount,
+          status,
+          due_date: dueDate,
+          payment_date: income.payment_date,
+          category: income.category
+        } as Charge;
       });
     },
-    enabled: !!residentId && !!matricula
+    enabled: !!matricula && !!unit && !!pixSettings?.diavencimento
   });
   
   const filteredCharges = charges?.filter(charge => {
@@ -202,7 +262,7 @@ const MinhasCobrancas = () => {
             </Tabs>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isLoading || isLoadingPixSettings ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
                 <span className="ml-2 text-lg text-muted-foreground">Carregando cobranças...</span>
@@ -220,7 +280,7 @@ const MinhasCobrancas = () => {
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertTitle>Nenhuma cobrança encontrada</AlertTitle>
                 <AlertDescription>
-                  Não existem cobranças {activeTab !== 'all' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para este condomínio.
+                  Não existem cobranças {activeTab !== 'all' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para esta unidade.
                 </AlertDescription>
               </Alert>
             ) : (
