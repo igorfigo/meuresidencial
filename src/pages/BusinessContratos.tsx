@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X } from 'lucide-react';
+import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X, MoreHorizontal, Download, FileEdit, Trash } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,7 @@ import { useBusinessContracts, ContractAttachment } from '@/hooks/use-business-c
 import { toast } from 'sonner';
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const ContractStatusBadge = ({ status }: { status: string }) => {
   const statusMap: Record<string, { label: string, variant: "default" | "destructive" | "outline" | "secondary" }> = {
@@ -74,7 +75,6 @@ const BusinessContratos = () => {
 
   useEffect(() => {
     if (selectedContract && openEditContractDialog) {
-      // Set form values when a contract is selected for editing
       editForm.reset({
         title: selectedContract.title,
         counterparty: selectedContract.counterparty,
@@ -129,7 +129,6 @@ const BusinessContratos = () => {
     if (!selectedContract?.id) return;
     
     try {
-      // Update contract data
       await updateContract(selectedContract.id, {
         title: data.title,
         counterparty: data.counterparty,
@@ -140,7 +139,6 @@ const BusinessContratos = () => {
         status: data.status
       });
       
-      // Upload any new files
       if (editContractFiles.length > 0) {
         for (const file of editContractFiles) {
           await uploadAttachment(selectedContract.id, file);
@@ -151,7 +149,6 @@ const BusinessContratos = () => {
       setOpenEditContractDialog(false);
       setEditContractFiles([]);
       
-      // Refresh attachments if view dialog is still open
       if (openViewDialog) {
         const updatedAttachments = await getContractAttachments(selectedContract.id);
         setAttachments(updatedAttachments);
@@ -295,38 +292,48 @@ const BusinessContratos = () => {
               <TableCell>{new Date(contract.end_date).toLocaleDateString('pt-BR')}</TableCell>
               <TableCell><ContractStatusBadge status={contract.status} /></TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleViewContract(contract)}>
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleEditContract(contract)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="text-red-600">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction 
-                          className="bg-red-600 hover:bg-red-700"
-                          onClick={() => handleDeleteContract(contract.id)}
-                        >
-                          Excluir
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleViewContract(contract)}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      <span>Visualizar</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleEditContract(contract)}>
+                      <FileEdit className="mr-2 h-4 w-4" />
+                      <span>Editar</span>
+                    </DropdownMenuItem>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>
+                          <Trash className="mr-2 h-4 w-4" />
+                          <span>Excluir</span>
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction 
+                            className="bg-red-600 hover:bg-red-700"
+                            onClick={() => handleDeleteContract(contract.id)}
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
@@ -638,7 +645,6 @@ const BusinessContratos = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Contract Dialog */}
       <Dialog open={openEditContractDialog} onOpenChange={setOpenEditContractDialog}>
         <DialogContent className="sm:max-w-[525px]">
           <Form {...editForm}>
