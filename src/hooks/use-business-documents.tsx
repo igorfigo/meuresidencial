@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useApp } from '@/contexts/AppContext';
 
 interface BusinessDocument {
   id: string;
@@ -25,6 +26,7 @@ export const useBusinessDocuments = () => {
   const [documents, setDocuments] = useState<BusinessDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const { user } = useApp();
 
   const fetchDocuments = async () => {
     try {
@@ -98,18 +100,23 @@ export const useBusinessDocuments = () => {
     try {
       console.log('Creating document:', document);
       
+      // Include the user's ID explicitly when creating the document
       const { data, error } = await supabase
         .from('business_documents')
         .insert({
           title: document.title,
           description: document.description,
           category: document.category,
+          created_by: user?.id || null
         })
         .select()
         .single();
       
       if (error) {
         console.error('Error creating document:', error);
+        toast('Erro ao criar documento', {
+          description: `${error.message}`,
+        });
         throw error;
       }
       
@@ -137,6 +144,9 @@ export const useBusinessDocuments = () => {
         
       if (uploadError) {
         console.error('Error uploading file to storage:', uploadError);
+        toast('Erro ao enviar arquivo', {
+          description: 'Não foi possível enviar o arquivo',
+        });
         throw uploadError;
       }
       
@@ -155,6 +165,9 @@ export const useBusinessDocuments = () => {
         
       if (attachmentError) {
         console.error('Error creating attachment record:', attachmentError);
+        toast('Erro ao salvar anexo', {
+          description: `${attachmentError.message}`,
+        });
         throw attachmentError;
       }
       
@@ -165,9 +178,6 @@ export const useBusinessDocuments = () => {
       });
     } catch (err) {
       console.error('Error uploading document file:', err);
-      toast('Erro ao enviar arquivo', {
-        description: 'Não foi possível enviar o arquivo',
-      });
       throw err;
     }
   };
@@ -185,11 +195,17 @@ export const useBusinessDocuments = () => {
         
       if (attachmentError) {
         console.error('Error fetching attachment:', attachmentError);
+        toast('Erro ao baixar arquivo', {
+          description: 'Não foi possível encontrar o anexo',
+        });
         throw attachmentError;
       }
       
       if (!attachment) {
         console.error('Attachment not found for document:', documentId);
+        toast('Erro ao baixar arquivo', {
+          description: 'Anexo não encontrado',
+        });
         throw new Error('Attachment not found');
       }
       
@@ -202,6 +218,9 @@ export const useBusinessDocuments = () => {
         
       if (error) {
         console.error('Error downloading file from storage:', error);
+        toast('Erro ao baixar arquivo', {
+          description: 'Não foi possível baixar o arquivo',
+        });
         throw error;
       }
       
@@ -219,9 +238,6 @@ export const useBusinessDocuments = () => {
       });
     } catch (err) {
       console.error('Error downloading document:', err);
-      toast('Erro ao baixar arquivo', {
-        description: 'Não foi possível baixar o arquivo',
-      });
       throw err;
     }
   };
@@ -248,6 +264,9 @@ export const useBusinessDocuments = () => {
           
         if (storageError) {
           console.error('Error deleting file from storage:', storageError);
+          toast('Erro ao excluir arquivo', {
+            description: 'Não foi possível excluir o arquivo',
+          });
           throw storageError;
         }
         
@@ -264,6 +283,9 @@ export const useBusinessDocuments = () => {
         
       if (deleteDocError) {
         console.error('Error deleting document:', deleteDocError);
+        toast('Erro ao excluir documento', {
+          description: 'Não foi possível excluir o documento',
+        });
         throw deleteDocError;
       }
       
@@ -275,9 +297,6 @@ export const useBusinessDocuments = () => {
       });
     } catch (err) {
       console.error('Error deleting document:', err);
-      toast('Erro ao excluir documento', {
-        description: 'Não foi possível excluir o documento',
-      });
       throw err;
     }
   };

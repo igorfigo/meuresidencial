@@ -1,16 +1,17 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Plus, FileText, Download, Trash2, FileArchive } from 'lucide-react';
+import { Plus, FileText, Download, Trash2, FileArchive, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useBusinessDocuments } from '@/hooks/use-business-documents';
 import { format } from 'date-fns';
@@ -26,6 +27,7 @@ type DocumentFormValues = z.infer<typeof documentSchema>;
 
 const BusinessDocumentos = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { 
     documents, 
     isLoading, 
@@ -48,6 +50,18 @@ const BusinessDocumentos = () => {
 
   const onSubmit = async (data: DocumentFormValues) => {
     try {
+      setIsSubmitting(true);
+      console.log('Form submitted with data:', data);
+      
+      // Validate file selection
+      if (!selectedFile) {
+        toast('Arquivo obrigatório', {
+          description: 'Por favor, selecione um arquivo para upload',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      
       // Create document in database
       const documentId = await createDocument({
         title: data.title,
@@ -55,10 +69,16 @@ const BusinessDocumentos = () => {
         category: data.category,
       });
       
-      // Upload file if selected
-      if (selectedFile && documentId) {
-        await uploadDocumentFile(documentId, selectedFile);
+      if (!documentId) {
+        toast('Erro ao salvar documento', {
+          description: 'Não foi possível criar o documento',
+        });
+        setIsSubmitting(false);
+        return;
       }
+      
+      // Upload file if document was created
+      await uploadDocumentFile(documentId, selectedFile);
       
       // Reset form and close dialog
       form.reset();
@@ -73,6 +93,8 @@ const BusinessDocumentos = () => {
       toast('Erro ao salvar documento', {
         description: 'Não foi possível salvar o documento',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -122,6 +144,9 @@ const BusinessDocumentos = () => {
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>Adicionar Novo Documento</DialogTitle>
+                <DialogDescription>
+                  Preencha os dados abaixo para adicionar um novo documento administrativo.
+                </DialogDescription>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -174,21 +199,36 @@ const BusinessDocumentos = () => {
                     )}
                   />
                   <FormItem>
-                    <FormLabel>Arquivo</FormLabel>
+                    <FormLabel>Arquivo <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input
                         type="file"
                         onChange={handleFileChange}
                         className="cursor-pointer"
+                        required
                       />
                     </FormControl>
+                    {selectedFile && (
+                      <p className="text-sm text-green-600">
+                        Arquivo selecionado: {selectedFile.name}
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                   <DialogFooter>
                     <DialogClose asChild>
-                      <Button variant="outline">Cancelar</Button>
+                      <Button variant="outline" type="button" disabled={isSubmitting}>Cancelar</Button>
                     </DialogClose>
-                    <Button type="submit">Salvar Documento</Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : (
+                        <>Salvar Documento</>
+                      )}
+                    </Button>
                   </DialogFooter>
                 </form>
               </Form>
