@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/use-notifications';
+import { Separator } from '@/components/ui/separator';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -52,6 +54,8 @@ interface MenuItem {
   path: string;
   submenu?: MenuItem[];
   badge?: number;
+  separator?: boolean;
+  sectionTitle?: string;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -98,6 +102,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
+    { separator: true, path: '', name: 'Business Administration', icon: <></> },
     { name: 'Contratos', icon: <Briefcase className="h-5 w-5" />, path: '/contratos' },
   ];
 
@@ -201,6 +206,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     const isSubmenuActive = hasSubmenu && item.submenu?.some(subItem => 
       location.pathname === subItem.path
     );
+
+    // Return a separator with section title if this is a separator item
+    if (item.separator) {
+      return (
+        <div key={`separator-${item.name}`} className="mt-5 mb-2 px-3">
+          {item.name && (
+            <div className="mb-2 text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">
+              {item.name}
+            </div>
+          )}
+          <Separator className="bg-sidebar-foreground/20" />
+        </div>
+      );
+    }
 
     return (
       <div key={item.path} className="w-full">
