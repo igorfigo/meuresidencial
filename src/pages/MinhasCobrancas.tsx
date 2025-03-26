@@ -159,7 +159,7 @@ const MinhasCobrancas = () => {
           dueDate.setMonth(dueDate.getMonth() + 1);
         }
         
-        // Determine status
+        // Determine status - only payments with a payment_date are considered paid
         let status: 'pending' | 'paid' | 'overdue' = 'pending';
         if (income.payment_date) {
           status = 'paid';
@@ -177,22 +177,22 @@ const MinhasCobrancas = () => {
     enabled: !!matricula && !!unit
   });
 
-  // Filter charges for this year's upcoming months (current month included) for the pending tab
-  // Changed to include all charges for current year's upcoming months regardless of status
-  const upcomingCharges = charges?.filter(charge => {
+  // For the pending tab, show all charges from the current month and future months of the current year,
+  // regardless of their actual status (except paid ones which go to the paid tab)
+  const pendingCharges = charges?.filter(charge => {
     const chargeDate = new Date(charge.reference_month);
     const chargeYear = chargeDate.getFullYear();
     const chargeMonth = chargeDate.getMonth();
     
-    // For pending tab, show all charges for upcoming months of current year (including current month)
-    return chargeYear === currentYear && chargeMonth >= currentMonth;
+    // Show all charges for current and upcoming months of current year, unless they are paid
+    return chargeYear === currentYear && chargeMonth >= currentMonth && charge.status !== 'paid';
   }) || [];
 
-  // Filter charges for paid tab
+  // Filter charges for paid tab - only charges with payment_date
   const paidCharges = charges?.filter(charge => charge.status === 'paid') || [];
   
   // Get the charges to display based on active tab
-  const displayCharges = activeTab === 'pending' ? upcomingCharges : paidCharges;
+  const displayCharges = activeTab === 'pending' ? pendingCharges : paidCharges;
 
   const handleOpenQrCode = (charge: Charge) => {
     setSelectedCharge(charge);
