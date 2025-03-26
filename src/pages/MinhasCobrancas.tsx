@@ -21,16 +21,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { QrCodeDisplay } from '@/components/payments/QrCodeDisplay';
 
 interface Charge {
   id: string;
   unit: string;
-  month: string;
-  year: string;
+  reference_month: string;
   amount: string;
   status: 'pending' | 'paid' | 'overdue';
   due_date: string;
   payment_date: string | null;
+  category: string;
+  observations?: string;
+}
+
+interface PixSettings {
+  tipochave: string;
+  chavepix: string;
+  diavencimento: string;
+  jurosaodia: string;
 }
 
 const statusColors = {
@@ -57,63 +67,109 @@ const statusColors = {
   }
 };
 
-function formatMonthYear(month: string, year: string) {
-  const monthNames = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
-  
-  const monthIndex = parseInt(month) - 1;
-  return `${monthNames[monthIndex]} de ${year}`;
+function formatMonthYear(dateString: string) {
+  try {
+    const date = new Date(dateString);
+    return format(date, 'MMMM yyyy', { locale: ptBR });
+  } catch (error) {
+    return dateString;
+  }
 }
 
 function formatDate(dateString: string | null) {
   if (!dateString) return "-";
-  const date = new Date(dateString);
-  return format(date, 'dd/MM/yyyy', { locale: ptBR });
+  try {
+    const date = new Date(dateString);
+    return format(date, 'dd/MM/yyyy', { locale: ptBR });
+  } catch (error) {
+    return dateString || "-";
+  }
 }
 
 const MinhasCobrancas = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
+  const [qrCodeOpen, setQrCodeOpen] = useState(false);
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
+  const unit = user?.unit;
   
-  const { data: charges, isLoading, error } = useQuery({
-    queryKey: ['resident-charges', residentId, matricula],
+  // Fetch PIX settings
+  const { data: pixSettings } = useQuery({
+    queryKey: ['pix-settings', matricula],
     queryFn: async () => {
-      if (!residentId || !matricula) return [];
+      if (!matricula) return null;
 
       const { data, error } = await supabase
-        .from('resident_charges')
+        .from('pix_receipt_settings')
         .select('*')
-        .eq('resident_id', residentId)
         .eq('matricula', matricula)
-        .order('due_date', { ascending: false });
+        .single();
+        
+      if (error) {
+        console.error('Error fetching PIX settings:', error);
+        return null;
+      }
+      
+      return data as PixSettings;
+    },
+    enabled: !!matricula
+  });
+  
+  // Fetch financial incomes for the resident's unit
+  const { data: charges, isLoading, error } = useQuery({
+    queryKey: ['resident-incomes', matricula, unit],
+    queryFn: async () => {
+      if (!matricula || !unit) return [];
+
+      const { data, error } = await supabase
+        .from('financial_incomes')
+        .select('*')
+        .eq('matricula', matricula)
+        .eq('unit', unit)
+        .order('reference_month', { ascending: false });
         
       if (error) {
         console.error('Error fetching charges:', error);
         throw new Error('Erro ao buscar cobranças');
       }
       
-      // Process charges to determine if any are overdue
+      // Process charges to determine if any are overdue and create due_date based on PIX settings
       const today = new Date();
-      return (data || []).map((charge) => {
-        const dueDate = new Date(charge.due_date);
+      return (data || []).map((income) => {
+        const referenceMonth = new Date(income.reference_month);
         
-        let status = charge.status;
-        if (status === 'pending' && dueDate < today) {
+        // Calculate due date based on PIX settings day of month
+        const dueDay = pixSettings?.diavencimento || '10';
+        const dueDate = new Date(
+          referenceMonth.getFullYear(),
+          referenceMonth.getMonth(),
+          parseInt(dueDay)
+        );
+        
+        // If the due date is in the past, move to next month
+        if (dueDate < referenceMonth) {
+          dueDate.setMonth(dueDate.getMonth() + 1);
+        }
+        
+        // Determine status
+        let status: 'pending' | 'paid' | 'overdue' = 'pending';
+        if (income.payment_date) {
+          status = 'paid';
+        } else if (dueDate < today) {
           status = 'overdue';
         }
         
         return {
-          ...charge,
-          status
-        };
+          ...income,
+          status,
+          due_date: dueDate.toISOString().split('T')[0]
+        } as Charge;
       });
     },
-    enabled: !!residentId && !!matricula
+    enabled: !!matricula && !!unit
   });
   
   const filteredCharges = charges?.filter(charge => {
@@ -128,6 +184,16 @@ const MinhasCobrancas = () => {
   const totalPending = pendingCharges.reduce((sum, charge) => sum + parseFloat(charge.amount), 0);
   const totalPaid = paidCharges.reduce((sum, charge) => sum + parseFloat(charge.amount), 0);
   const totalOverdue = overdueCharges.reduce((sum, charge) => sum + parseFloat(charge.amount), 0);
+
+  const handleOpenQrCode = (charge: Charge) => {
+    setSelectedCharge(charge);
+    setQrCodeOpen(true);
+  };
+
+  const handleCloseQrCode = () => {
+    setQrCodeOpen(false);
+    setSelectedCharge(null);
+  };
 
   return (
     <DashboardLayout>
@@ -220,7 +286,7 @@ const MinhasCobrancas = () => {
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertTitle>Nenhuma cobrança encontrada</AlertTitle>
                 <AlertDescription>
-                  Não existem cobranças {activeTab !== 'all' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para este condomínio.
+                  Não existem cobranças {activeTab !== 'all' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para esta unidade.
                 </AlertDescription>
               </Alert>
             ) : (
@@ -241,7 +307,7 @@ const MinhasCobrancas = () => {
                     {filteredCharges.map((charge) => (
                       <TableRow key={charge.id}>
                         <TableCell className="font-medium">
-                          {formatMonthYear(charge.month, charge.year)}
+                          {formatMonthYear(charge.reference_month)}
                         </TableCell>
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>{formatCurrency(parseFloat(charge.amount))}</TableCell>
@@ -262,9 +328,10 @@ const MinhasCobrancas = () => {
                               variant="ghost"
                               size="sm"
                               className="text-brand-600 hover:text-brand-800 hover:bg-brand-50"
+                              onClick={() => handleOpenQrCode(charge)}
                             >
                               <FileDown className="h-4 w-4 mr-1" />
-                              Boleto
+                              Gerar Boleto/PIX
                             </Button>
                           )}
                         </TableCell>
@@ -277,6 +344,26 @@ const MinhasCobrancas = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* QR Code Dialog */}
+      <Dialog open={qrCodeOpen} onOpenChange={handleCloseQrCode}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pagamento via PIX</DialogTitle>
+            <DialogDescription>
+              Escaneie o QR Code abaixo para realizar o pagamento
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedCharge && pixSettings && (
+            <QrCodeDisplay 
+              charge={selectedCharge}
+              pixSettings={pixSettings}
+              condominiumName={user?.nomeCondominio || 'Condomínio'}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
