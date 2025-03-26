@@ -5,7 +5,6 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -32,9 +31,9 @@ const ContractStatusBadge = ({ status }: { status: string }) => {
 const BusinessContratos = () => {
   const [openNewContractDialog, setOpenNewContractDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('todos');
   const [selectedType, setSelectedType] = useState('all');
-  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+  // Removendo o estado activeTab e definindo viewMode como 'list' por padrão
+  const [viewMode] = useState<'list'>('list');
   
   const { 
     contracts, 
@@ -48,11 +47,11 @@ const BusinessContratos = () => {
     const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          contract.counterparty.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesTab = activeTab === 'todos' || contract.status === activeTab;
+    // Removendo o filtro por status (activeTab)
     
     const matchesType = selectedType === 'all' || contract.type === selectedType;
     
-    return matchesSearch && matchesTab && matchesType;
+    return matchesSearch && matchesType;
   });
 
   const handleSubmitNewContract = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -115,91 +114,7 @@ const BusinessContratos = () => {
     { id: 'other', label: 'Outro' }
   ];
 
-  const renderCardView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {filteredContracts.map((contract) => (
-        <Card key={contract.id} className="overflow-hidden">
-          <CardHeader className="pb-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <CardTitle className="line-clamp-1 text-lg">{contract.title}</CardTitle>
-                <CardDescription>{contract.counterparty}</CardDescription>
-              </div>
-              <ContractStatusBadge status={contract.status} />
-            </div>
-          </CardHeader>
-          <CardContent className="pb-2">
-            <div className="text-sm text-muted-foreground space-y-2">
-              <div className="flex justify-between">
-                <span>Tipo:</span>
-                <span className="font-medium text-foreground">
-                  {contractTypes.find(t => t.id === contract.type)?.label || contract.type}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Valor:</span>
-                <span className="font-medium text-foreground">
-                  {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(contract.value)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Vigência:</span>
-                <span className="font-medium text-foreground">
-                  {new Date(contract.start_date).toLocaleDateString('pt-BR')} - {new Date(contract.end_date).toLocaleDateString('pt-BR')}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="pt-2 flex justify-between border-t">
-            <Button variant="outline" size="sm" onClick={() => handleDownloadContract(contract.id)}>
-              <Download className="h-4 w-4 mr-1" />
-              Download
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <FileText className="h-4 w-4 mr-1" />
-                  Ações
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => toast.info("Visualizar contrato (em desenvolvimento)")}>
-                  Visualizar
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info("Editar contrato (em desenvolvimento)")}>
-                  Editar
-                </DropdownMenuItem>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600">
-                      Excluir
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction 
-                        className="bg-red-600 hover:bg-red-700"
-                        onClick={() => handleDeleteContract(contract.id)}
-                      >
-                        Excluir
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CardFooter>
-        </Card>
-      ))}
-    </div>
-  );
+  // Removendo a função renderCardView, já que agora só exibimos a lista
 
   const renderListView = () => (
     <div className="overflow-x-auto">
@@ -382,36 +297,9 @@ const BusinessContratos = () => {
               ))}
             </SelectContent>
           </Select>
-
-          <div className="flex items-center border rounded-md overflow-hidden">
-            <Button 
-              variant={viewMode === 'cards' ? 'default' : 'ghost'} 
-              size="sm" 
-              className="rounded-none h-10"
-              onClick={() => setViewMode('cards')}
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant={viewMode === 'list' ? 'default' : 'ghost'} 
-              size="sm" 
-              className="rounded-none h-10"
-              onClick={() => setViewMode('list')}
-            >
-              <ListIcon className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
 
-        <Tabs defaultValue="todos" className="mb-8" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="todos">Todos</TabsTrigger>
-            <TabsTrigger value="active">Ativos</TabsTrigger>
-            <TabsTrigger value="pending">Pendentes</TabsTrigger>
-            <TabsTrigger value="expired">Expirados</TabsTrigger>
-            <TabsTrigger value="draft">Rascunhos</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Removendo as abas (Tabs) de status dos contratos */}
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -427,7 +315,7 @@ const BusinessContratos = () => {
             ))}
           </div>
         ) : filteredContracts?.length ? (
-          viewMode === 'cards' ? renderCardView() : renderListView()
+          renderListView()
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="rounded-full bg-muted p-3 mb-4">
@@ -435,7 +323,7 @@ const BusinessContratos = () => {
             </div>
             <h3 className="text-lg font-semibold">Nenhum contrato encontrado</h3>
             <p className="text-muted-foreground mt-2 mb-4 max-w-md">
-              {searchQuery || selectedType || activeTab !== 'todos' 
+              {searchQuery || selectedType
                 ? "Tente ajustar os filtros da sua busca ou" 
                 : "Você ainda não possui contratos cadastrados. Vamos"}
               {" criar seu primeiro contrato agora?"}
