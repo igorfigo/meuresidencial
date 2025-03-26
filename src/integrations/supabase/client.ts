@@ -168,7 +168,6 @@ export const getReservationsByCommonAreaId = async (commonAreaId: string) => {
 // Announcement functions with type assertions to avoid TypeScript errors
 export const getAnnouncements = async (matricula: string) => {
   try {
-    // Use type assertion to bypass TypeScript checking
     const { data, error } = await (supabase
       .from('announcements' as any)
       .select('*')
@@ -189,7 +188,6 @@ export const getAnnouncements = async (matricula: string) => {
 
 export const getAnnouncementById = async (id: string) => {
   try {
-    // Use type assertion to bypass TypeScript checking
     const { data, error } = await (supabase
       .from('announcements' as any)
       .select('*')
@@ -213,8 +211,6 @@ export const saveAnnouncement = async (announcementData: any) => {
     const { id } = announcementData;
     
     if (id) {
-      // Update existing announcement
-      // Use type assertion to bypass TypeScript checking
       const { data, error } = await (supabase
         .from('announcements' as any)
         .update({
@@ -233,8 +229,6 @@ export const saveAnnouncement = async (announcementData: any) => {
       
       return data;
     } else {
-      // Create new announcement
-      // Use type assertion to bypass TypeScript checking
       const { data, error } = await (supabase
         .from('announcements' as any)
         .insert({
@@ -260,7 +254,6 @@ export const saveAnnouncement = async (announcementData: any) => {
 
 export const deleteAnnouncement = async (id: string) => {
   try {
-    // Use type assertion to bypass TypeScript checking
     const { error } = await (supabase
       .from('announcements' as any)
       .delete()
@@ -301,7 +294,6 @@ export const getFinancialIncomes = async (matricula: string) => {
 
 export const saveFinancialIncome = async (income: Omit<FinancialIncome, 'created_at'>): Promise<FinancialIncome[]> => {
   try {
-    // Don't adjust dates, pass them directly to Supabase
     const { data, error } = income.id
       ? await supabase
           .from('financial_incomes')
@@ -342,7 +334,6 @@ export const saveFinancialIncome = async (income: Omit<FinancialIncome, 'created
 
 export const saveFinancialExpense = async (expense: Omit<FinancialExpense, 'created_at'>): Promise<FinancialExpense[]> => {
   try {
-    // Don't adjust dates, pass them directly to Supabase
     const { data, error } = expense.id
       ? await supabase
           .from('financial_expenses')
@@ -385,7 +376,6 @@ export const saveFinancialExpense = async (expense: Omit<FinancialExpense, 'crea
 
 export const deleteFinancialIncome = async (id: string) => {
   try {
-    // Execute the deletion immediately without additional checks
     const { error } = await supabase
       .from('financial_incomes')
       .delete()
@@ -405,7 +395,6 @@ export const deleteFinancialIncome = async (id: string) => {
 
 export const deleteFinancialExpense = async (id: string) => {
   try {
-    // Execute the deletion immediately without additional checks
     const { error } = await supabase
       .from('financial_expenses')
       .delete()
@@ -433,7 +422,6 @@ export const getFinancialBalance = async (matricula: string) => {
     
     if (error) {
       if (error.code === 'PGRST116') {
-        // Not found, return default balance
         return { balance: '0', matricula };
       }
       console.error('Error fetching financial balance:', error);
@@ -449,7 +437,6 @@ export const getFinancialBalance = async (matricula: string) => {
 
 export const updateFinancialBalance = async (matricula: string, balance: string, isManual: boolean = false) => {
   try {
-    // Use a direct update with UPSERT for faster processing
     const { data, error } = await supabase
       .from('financial_balance')
       .upsert({
@@ -541,7 +528,6 @@ export const savePixKey = async (data: any) => {
   try {
     const { matricula } = data;
     
-    // Check if record exists
     const { data: existingRecord } = await supabase
       .from('pix_receipt_settings')
       .select('*')
@@ -549,7 +535,6 @@ export const savePixKey = async (data: any) => {
       .single();
     
     if (existingRecord) {
-      // Update existing record
       const { error } = await supabase
         .from('pix_receipt_settings')
         .update({
@@ -568,7 +553,6 @@ export const savePixKey = async (data: any) => {
       
       return { success: true };
     } else {
-      // Create new record
       const { error } = await supabase
         .from('pix_receipt_settings')
         .insert({

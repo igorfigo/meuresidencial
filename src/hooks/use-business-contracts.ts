@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -146,10 +147,10 @@ export function useBusinessContracts() {
     }
   });
 
-  // Get contract attachments
+  // Get contract attachments - Updated to use the new table name
   const getContractAttachments = async (contractId: string) => {
     const { data, error } = await supabase
-      .from('contract_attachments')
+      .from('business_contracts_attachments')
       .select('*')
       .eq('contract_id', contractId)
       .order('created_at', { ascending: false });
@@ -163,7 +164,7 @@ export function useBusinessContracts() {
     return data as ContractAttachment[];
   };
 
-  // Upload file attachment
+  // Upload file attachment - Updated to use the new table name
   const uploadAttachment = async (contractId: string, file: File) => {
     try {
       // 1. Upload the file to storage
@@ -181,9 +182,9 @@ export function useBusinessContracts() {
         throw uploadError;
       }
       
-      // 2. Create a record in the contract_attachments table
+      // 2. Create a record in the business_contracts_attachments table
       const { error: attachmentError } = await supabase
-        .from('contract_attachments')
+        .from('business_contracts_attachments')
         .insert([{
           contract_id: contractId,
           file_name: file.name,
@@ -208,7 +209,7 @@ export function useBusinessContracts() {
     }
   };
 
-  // Delete attachment
+  // Delete attachment - Updated to use the new table name
   const deleteAttachment = async (attachment: ContractAttachment) => {
     try {
       // 1. Delete the file from storage
@@ -222,9 +223,9 @@ export function useBusinessContracts() {
         throw storageError;
       }
       
-      // 2. Delete the record from the contract_attachments table
+      // 2. Delete the record from the business_contracts_attachments table
       const { error: recordError } = await supabase
-        .from('contract_attachments')
+        .from('business_contracts_attachments')
         .delete()
         .eq('id', attachment.id);
       
