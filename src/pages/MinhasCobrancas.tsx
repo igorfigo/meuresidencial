@@ -121,12 +121,11 @@ const MinhasCobrancas = () => {
     queryFn: async () => {
       if (!residentId || !matricula) return [];
 
-      const { data, error } = await supabase
+      // Use a simpler query approach to avoid RLS recursion issues
+      const { data: chargesData, error } = await supabase
         .from('resident_charges')
         .select('*')
-        .eq('resident_id', residentId)
-        .eq('matricula', matricula)
-        .order('due_date', { ascending: false });
+        .eq('matricula', matricula);
         
       if (error) {
         console.error('Error fetching charges:', error);
@@ -134,24 +133,29 @@ const MinhasCobrancas = () => {
       }
       
       const today = new Date();
-      return (data || []).map((charge) => {
-        const dueDate = new Date(charge.due_date);
-        
-        // Ensure status is one of the valid union types
-        let status: 'pending' | 'paid' | 'overdue';
-        if (charge.status === 'paid') {
-          status = 'paid';
-        } else if (charge.status === 'pending' && dueDate < today) {
-          status = 'overdue';
-        } else {
-          status = 'pending';
-        }
-        
-        return {
-          ...charge,
-          status
-        } as Charge; // Type assertion to Charge
-      });
+      return (chargesData || [])
+        .filter(charge => 
+          // For resident data, only return charges for the current resident
+          charge.resident_id === residentId
+        )
+        .map((charge) => {
+          const dueDate = new Date(charge.due_date);
+          
+          // Ensure status is one of the valid union types
+          let status: 'pending' | 'paid' | 'overdue';
+          if (charge.status === 'paid') {
+            status = 'paid';
+          } else if (charge.status === 'pending' && dueDate < today) {
+            status = 'overdue';
+          } else {
+            status = 'pending';
+          }
+          
+          return {
+            ...charge,
+            status
+          } as Charge; // Type assertion to Charge
+        });
     },
     enabled: !!residentId && !!matricula
   });
