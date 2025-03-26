@@ -39,15 +39,18 @@ export function useBusinessDocuments() {
   const { data: documents, isLoading } = useQuery({
     queryKey: ['businessDocuments'],
     queryFn: async () => {
+      console.log("Fetching business documents");
       const { data, error } = await supabase
         .from('business_documents')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching documents:', error);
         throw error;
       }
 
+      console.log("Fetched documents:", data);
       return data as BusinessDocument[];
     },
   });
@@ -61,6 +64,7 @@ export function useBusinessDocuments() {
       values: BusinessDocumentFormValues; 
       attachments: File[] 
     }) => {
+      console.log("Creating document with values:", values);
       // Insert document
       const { data, error } = await supabase
         .from('business_documents')
@@ -77,6 +81,8 @@ export function useBusinessDocuments() {
         throw error;
       }
 
+      console.log("Document created:", data);
+
       // Upload attachments if any
       if (attachments.length > 0) {
         setIsUploading(true);
@@ -85,9 +91,10 @@ export function useBusinessDocuments() {
         for (let i = 0; i < attachments.length; i++) {
           const file = attachments[i];
           const filePath = `business_documents/${data.id}/${file.name}`;
+          console.log(`Uploading file ${i+1}/${attachments.length}: ${filePath}`);
 
           // Upload file to storage
-          const { error: uploadError } = await supabase.storage
+          const { error: uploadError, data: uploadData } = await supabase.storage
             .from('business_document_files')
             .upload(filePath, file);
 
@@ -96,8 +103,10 @@ export function useBusinessDocuments() {
             throw uploadError;
           }
 
+          console.log("File uploaded:", uploadData);
+
           // Create attachment record
-          const { error: attachmentError } = await supabase
+          const { error: attachmentError, data: attachmentData } = await supabase
             .from('business_document_attachments')
             .insert({
               document_id: data.id,
@@ -110,6 +119,8 @@ export function useBusinessDocuments() {
             console.error('Error creating attachment record:', attachmentError);
             throw attachmentError;
           }
+
+          console.log("Attachment record created:", attachmentData);
 
           // Update progress
           setUploadProgress(Math.round(((i + 1) / attachments.length) * 100));
@@ -148,6 +159,7 @@ export function useBusinessDocuments() {
       values: BusinessDocumentFormValues; 
       attachments: File[] 
     }) => {
+      console.log("Updating document:", { id, values });
       // Update document
       const { data, error } = await supabase
         .from('business_documents')
@@ -166,6 +178,8 @@ export function useBusinessDocuments() {
         throw error;
       }
 
+      console.log("Document updated:", data);
+
       // Upload attachments if any
       if (attachments.length > 0) {
         setIsUploading(true);
@@ -174,9 +188,10 @@ export function useBusinessDocuments() {
         for (let i = 0; i < attachments.length; i++) {
           const file = attachments[i];
           const filePath = `business_documents/${id}/${file.name}`;
+          console.log(`Uploading file ${i+1}/${attachments.length}: ${filePath}`);
 
           // Upload file
-          const { error: uploadError } = await supabase.storage
+          const { error: uploadError, data: uploadData } = await supabase.storage
             .from('business_document_files')
             .upload(filePath, file);
 
@@ -185,8 +200,10 @@ export function useBusinessDocuments() {
             throw uploadError;
           }
 
+          console.log("File uploaded:", uploadData);
+
           // Create attachment record
-          const { error: attachmentError } = await supabase
+          const { error: attachmentError, data: attachmentData } = await supabase
             .from('business_document_attachments')
             .insert({
               document_id: id,
@@ -199,6 +216,8 @@ export function useBusinessDocuments() {
             console.error('Error creating attachment record:', attachmentError);
             throw attachmentError;
           }
+
+          console.log("Attachment record created:", attachmentData);
 
           // Update progress
           setUploadProgress(Math.round(((i + 1) / attachments.length) * 100));
@@ -229,6 +248,7 @@ export function useBusinessDocuments() {
   // Delete document mutation
   const deleteDocument = useMutation({
     mutationFn: async (id: string) => {
+      console.log("Deleting document:", id);
       // Delete document (attachments will be deleted via cascade)
       const { error } = await supabase
         .from('business_documents')
@@ -240,6 +260,7 @@ export function useBusinessDocuments() {
         throw error;
       }
 
+      console.log("Document deleted successfully");
       // TODO: Delete files from storage
       // This would require fetching attachments first and then deleting files one by one
       return id;
@@ -263,6 +284,7 @@ export function useBusinessDocuments() {
 
   // Fetch document attachments
   const fetchDocumentAttachments = async (documentId: string) => {
+    console.log("Fetching attachments for document:", documentId);
     const { data, error } = await supabase
       .from('business_document_attachments')
       .select('*')
@@ -273,12 +295,14 @@ export function useBusinessDocuments() {
       throw error;
     }
 
+    console.log("Fetched attachments:", data);
     return data as BusinessDocumentAttachment[];
   };
 
   // Delete attachment mutation
   const deleteAttachment = useMutation({
     mutationFn: async (attachment: BusinessDocumentAttachment) => {
+      console.log("Deleting attachment:", attachment);
       // Delete file from storage
       const { error: storageError } = await supabase.storage
         .from('business_document_files')
@@ -288,6 +312,8 @@ export function useBusinessDocuments() {
         console.error('Error deleting file from storage:', storageError);
         throw storageError;
       }
+
+      console.log("File deleted from storage");
 
       // Delete attachment record
       const { error } = await supabase
@@ -300,6 +326,7 @@ export function useBusinessDocuments() {
         throw error;
       }
 
+      console.log("Attachment record deleted");
       return attachment;
     },
     onError: (error) => {
@@ -321,11 +348,17 @@ export function useBusinessDocuments() {
   // Get file URL
   const getFileUrl = async (path: string) => {
     try {
+      console.log("Getting signed URL for path:", path);
       const { data, error } = await supabase.storage
         .from('business_document_files')
         .createSignedUrl(path, 60); // 60 seconds expiry
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        throw error;
+      }
+
+      console.log("Got signed URL:", data.signedUrl);
       return data.signedUrl;
     } catch (error) {
       console.error('Error getting file URL:', error);

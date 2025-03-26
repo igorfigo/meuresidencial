@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { BusinessDocumentsList } from '@/components/business-documents/BusinessDocumentsList';
@@ -115,16 +116,29 @@ const BusinessDocumentos = () => {
         return;
       }
       
+      console.log("Submitting document:", { data, attachments, isEditing, selectedDocument });
+      
       if (isEditing && selectedDocument) {
         await updateDocument.mutateAsync({
           id: selectedDocument.id,
           values: data,
           attachments,
         });
+        
+        toast({
+          title: "Documento atualizado",
+          description: "O documento foi atualizado com sucesso.",
+        });
       } else {
+        console.log("Creating new document with:", { values: data, attachments });
         await createDocument.mutateAsync({
           values: data,
           attachments,
+        });
+        
+        toast({
+          title: "Documento salvo",
+          description: "O documento foi salvo com sucesso.",
         });
       }
       
@@ -134,6 +148,11 @@ const BusinessDocumentos = () => {
       setAttachments([]);
     } catch (error) {
       console.error('Error submitting form:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar o documento. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
