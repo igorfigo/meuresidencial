@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -77,9 +76,8 @@ function formatDate(dateString: string | null) {
 }
 
 function getDueDateFromPixSettings(month: string, year: string, dayOfMonth: string): string {
-  // Create a date with the specified month, year and day
-  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(dayOfMonth));
-  return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+  const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(dayOfMonth)));
+  return date.toISOString().split('T')[0];
 }
 
 const MinhasCobrancas = () => {
@@ -90,7 +88,6 @@ const MinhasCobrancas = () => {
   const matricula = user?.matricula;
   const unit = user?.unit;
   
-  // Fetch PIX settings for due date
   const { data: pixSettings } = useQuery({
     queryKey: ['pix-settings', matricula],
     queryFn: async () => {
@@ -105,26 +102,24 @@ const MinhasCobrancas = () => {
           
         if (error) {
           console.error('Error fetching PIX settings:', error);
-          return { diavencimento: '10' }; // Default to day 10 if error
+          return { diavencimento: '10' };
         }
         
         return data;
       } catch (err) {
         console.error('Error in PIX settings fetch:', err);
-        return { diavencimento: '10' }; // Default to day 10 if error
+        return { diavencimento: '10' };
       }
     },
     enabled: !!matricula
   });
   
-  // Using direct query method to avoid RLS policy issues
   const { data: paidCharges, isLoading: isLoadingPaid } = useQuery({
     queryKey: ['resident-paid-charges', residentId, matricula, unit],
     queryFn: async () => {
       if (!residentId || !matricula || !unit) return [];
 
       try {
-        // Query the direct financial_incomes table for paid charges
         const { data, error } = await supabase
           .from('financial_incomes')
           .select('*')
@@ -137,7 +132,6 @@ const MinhasCobrancas = () => {
           return [];
         }
         
-        // Transform paid charges to match the Charge interface
         return (data || []).map(income => {
           const date = income.payment_date ? new Date(income.payment_date) : new Date();
           const month = (date.getMonth() + 1).toString();
@@ -162,7 +156,6 @@ const MinhasCobrancas = () => {
     enabled: !!residentId && !!matricula && !!unit
   });
 
-  // Get resident details to get condominium fee
   const { data: residentDetails } = useQuery({
     queryKey: ['resident-details', residentId],
     queryFn: async () => {
@@ -189,7 +182,6 @@ const MinhasCobrancas = () => {
     enabled: !!residentId
   });
 
-  // Generate charges for all months of the current year
   const generateCurrentYearCharges = (): Charge[] => {
     if (!unit || !residentDetails?.valor_condominio) return [];
     
@@ -199,18 +191,15 @@ const MinhasCobrancas = () => {
     
     const generatedCharges: Charge[] = [];
     
-    // Generate charges for all 12 months
     for (let month = 1; month <= 12; month++) {
       const monthStr = month.toString().padStart(2, '0');
       const dueDate = getDueDateFromPixSettings(monthStr, currentYear, dueDay);
       
-      // Check if this month's charge is in the paid charges
       const isPaid = paidCharges?.some(
         charge => charge.month === monthStr && charge.year === currentYear
       );
       
       if (!isPaid) {
-        // If not paid, add it as pending or overdue
         const dueDateObj = new Date(dueDate);
         const status = dueDateObj < today ? 'overdue' : 'pending';
         
@@ -232,7 +221,6 @@ const MinhasCobrancas = () => {
   
   const isLoading = isLoadingPaid;
   
-  // Combine paid charges with generated pending charges
   const charges = [...(paidCharges || []), ...generateCurrentYearCharges()];
   
   const filteredCharges = charges?.filter(charge => {
@@ -300,7 +288,7 @@ const MinhasCobrancas = () => {
                       <TableRow key={charge.id}>
                         <TableCell className="font-medium">
                           {charge.status === 'paid' 
-                            ? charge.due_date // For paid charges, use reference_month
+                            ? charge.due_date
                             : formatMonthYear(charge.month, charge.year)
                           }
                         </TableCell>
