@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { FileText, Plus, Search, Download, Trash2, Grid, ListIcon } from 'lucide-react';
+import { FileText, Plus, Search, Download, Trash2 } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -32,7 +32,6 @@ const BusinessContratos = () => {
   const [openNewContractDialog, setOpenNewContractDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
-  // Removendo o estado activeTab e definindo viewMode como 'list' por padrão
   const [viewMode] = useState<'list'>('list');
   
   const { 
@@ -46,9 +45,6 @@ const BusinessContratos = () => {
   const filteredContracts = contracts?.filter(contract => {
     const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          contract.counterparty.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    // Removendo o filtro por status (activeTab)
-    
     const matchesType = selectedType === 'all' || contract.type === selectedType;
     
     return matchesSearch && matchesType;
@@ -114,8 +110,6 @@ const BusinessContratos = () => {
     { id: 'other', label: 'Outro' }
   ];
 
-  // Removendo a função renderCardView, já que agora só exibimos a lista
-
   const renderListView = () => (
     <div className="overflow-x-auto">
       <Table>
@@ -132,7 +126,7 @@ const BusinessContratos = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredContracts.map((contract) => (
+          {filteredContracts?.map((contract) => (
             <TableRow key={contract.id}>
               <TableCell className="font-medium">{contract.title}</TableCell>
               <TableCell>{contract.counterparty}</TableCell>
@@ -299,18 +293,16 @@ const BusinessContratos = () => {
           </Select>
         </div>
 
-        {/* Removendo as abas (Tabs) de status dos contratos */}
-
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
-                <CardHeader className="h-32 bg-gray-100 dark:bg-gray-800"></CardHeader>
-                <CardContent className="pt-4 space-y-2">
+                <div className="h-32 bg-gray-100 dark:bg-gray-800"></div>
+                <div className="pt-4 p-6 space-y-2">
                   <div className="h-5 bg-gray-100 dark:bg-gray-800 rounded w-2/3"></div>
                   <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-full"></div>
-                </CardContent>
-                <CardFooter className="h-12 bg-gray-50 dark:bg-gray-900"></CardFooter>
+                </div>
+                <div className="h-12 bg-gray-50 dark:bg-gray-900"></div>
               </Card>
             ))}
           </div>
@@ -323,7 +315,7 @@ const BusinessContratos = () => {
             </div>
             <h3 className="text-lg font-semibold">Nenhum contrato encontrado</h3>
             <p className="text-muted-foreground mt-2 mb-4 max-w-md">
-              {searchQuery || selectedType
+              {searchQuery || selectedType !== 'all'
                 ? "Tente ajustar os filtros da sua busca ou" 
                 : "Você ainda não possui contratos cadastrados. Vamos"}
               {" criar seu primeiro contrato agora?"}

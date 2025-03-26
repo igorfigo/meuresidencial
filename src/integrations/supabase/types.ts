@@ -111,6 +111,45 @@ export type Database = {
         }
         Relationships: []
       }
+      business_contracts: {
+        Row: {
+          counterparty: string
+          created_at: string
+          end_date: string
+          id: string
+          start_date: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          counterparty: string
+          created_at?: string
+          end_date: string
+          id?: string
+          start_date: string
+          status: string
+          title: string
+          type: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          counterparty?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          start_date?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
+      }
       common_area_reservations: {
         Row: {
           common_area_id: string

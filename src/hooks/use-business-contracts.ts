@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { supabase } from "@/integrations/supabase/client";
 
 // Contract type definition
 export interface BusinessContract {
@@ -15,95 +15,55 @@ export interface BusinessContract {
   status: 'active' | 'pending' | 'expired' | 'draft';
 }
 
-// Mock data for the contracts (would be replaced with API calls)
-const mockContracts: BusinessContract[] = [
-  {
-    id: '1',
-    title: 'Contrato de Manutenção',
-    counterparty: 'Tech Solutions',
-    type: 'service',
-    start_date: '2023-01-01',
-    end_date: '2023-12-31',
-    value: 12000,
-    status: 'active'
-  },
-  {
-    id: '2',
-    title: 'Aluguel de Equipamentos',
-    counterparty: 'Equipment Rental Co.',
-    type: 'lease',
-    start_date: '2023-03-15',
-    end_date: '2024-03-14',
-    value: 8500,
-    status: 'active'
-  },
-  {
-    id: '3',
-    title: 'Consultoria Financeira',
-    counterparty: 'Finance Experts Inc.',
-    type: 'service',
-    start_date: '2023-06-01',
-    end_date: '2023-07-31',
-    value: 6000,
-    status: 'expired'
-  },
-  {
-    id: '4',
-    title: 'Parceria de Marketing',
-    counterparty: 'Marketing Partners',
-    type: 'partnership',
-    start_date: '2023-09-01',
-    end_date: '2024-08-31',
-    value: 15000,
-    status: 'active'
-  },
-  {
-    id: '5',
-    title: 'Serviço de Limpeza',
-    counterparty: 'CleanPro Services',
-    type: 'service',
-    start_date: '2023-07-01',
-    end_date: '2024-06-30',
-    value: 7200,
-    status: 'active'
-  }
-];
-
 export function useBusinessContracts() {
   const queryClient = useQueryClient();
   
-  // Fetch contracts
+  // Fetch contracts from Supabase
   const { data: contracts, isLoading } = useQuery({
     queryKey: ['business-contracts'],
     queryFn: async () => {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      return mockContracts;
+      const { data, error } = await supabase
+        .from('business_contracts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching contracts:', error);
+        toast.error('Erro ao carregar contratos');
+        throw error;
+      }
+      
+      return data as BusinessContract[];
     }
   });
 
   // Create contract mutation
   const createContractMutation = useMutation({
     mutationFn: async (newContract: Omit<BusinessContract, 'id'>) => {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const { data, error } = await supabase
+        .from('business_contracts')
+        .insert([newContract])
+        .select()
+        .single();
       
-      // Generate a mock ID (in a real app, this would come from the backend)
-      const id = Math.random().toString(36).substring(2, 11);
+      if (error) {
+        console.error('Error creating contract:', error);
+        toast.error('Erro ao criar contrato');
+        throw error;
+      }
       
-      return { id, ...newContract };
+      return data as BusinessContract;
     },
-    onSuccess: (newContract) => {
-      queryClient.setQueryData(['business-contracts'], (oldData: BusinessContract[] = []) => {
-        return [...oldData, newContract];
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-contracts'] });
     }
   });
 
-  // Download contract (mock function)
+  // Download contract (mock function for now, would be replaced with actual download)
   const downloadContractMutation = useMutation({
     mutationFn: async (contractId: string) => {
-      // Simulate API delay
+      // In a real implementation, this would call a Supabase function or get a storage URL
+      // For now, keep the simulation
       await new Promise(resolve => setTimeout(resolve, 1000));
       console.log(`Downloading contract ${contractId}`);
       return true;
@@ -113,14 +73,21 @@ export function useBusinessContracts() {
   // Delete contract mutation
   const deleteContractMutation = useMutation({
     mutationFn: async (contractId: string) => {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const { error } = await supabase
+        .from('business_contracts')
+        .delete()
+        .eq('id', contractId);
+      
+      if (error) {
+        console.error('Error deleting contract:', error);
+        toast.error('Erro ao excluir contrato');
+        throw error;
+      }
+      
       return contractId;
     },
-    onSuccess: (contractId) => {
-      queryClient.setQueryData(['business-contracts'], (oldData: BusinessContract[] = []) => {
-        return oldData.filter(contract => contract.id !== contractId);
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-contracts'] });
     }
   });
 
