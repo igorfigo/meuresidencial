@@ -203,13 +203,18 @@ const MinhasCobrancas = () => {
     const numericAmount = BRLToNumber(formattedAmount);
     const amountToUse = numericAmount > 0 ? formattedAmount : "0,00";
     
+    const paidChargesMap = new Map<string, boolean>();
+    paidCharges?.forEach(charge => {
+      const key = `${charge.year}-${charge.month.padStart(2, '0')}`;
+      paidChargesMap.set(key, true);
+    });
+    
     for (let month = 1; month <= 12; month++) {
       const monthStr = month.toString().padStart(2, '0');
       const dueDate = getDueDateFromPixSettings(monthStr, currentYear, dueDay);
       
-      const isPaid = paidCharges?.some(
-        charge => charge.month === monthStr && charge.year === currentYear
-      );
+      const chargeKey = `${currentYear}-${monthStr}`;
+      const isPaid = paidChargesMap.has(chargeKey);
       
       if (!isPaid) {
         const dueDateObj = new Date(dueDate);
