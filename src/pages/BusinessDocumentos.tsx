@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { Plus, FileText, Download, Trash2, FileArchive, Loader2 } from 'lucide-r
 import { toast } from 'sonner';
 import { useBusinessDocuments } from '@/hooks/use-business-documents';
 import { format } from 'date-fns';
+import AdminOnly from '@/components/AdminOnly';
 
 const documentSchema = z.object({
   title: z.string().min(3, { message: 'Título deve ter pelo menos 3 caracteres' }),
@@ -34,8 +35,14 @@ const BusinessDocumentos = () => {
     createDocument, 
     deleteDocument,
     uploadDocumentFile,
-    downloadDocument
+    downloadDocument,
+    refreshDocuments
   } = useBusinessDocuments();
+  
+  // Fetch documents on component mount and authentication change
+  useEffect(() => {
+    refreshDocuments();
+  }, [refreshDocuments]);
   
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
@@ -130,177 +137,179 @@ const BusinessDocumentos = () => {
   }, {} as Record<string, typeof documents>);
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Documentos Administrativos</h1>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Novo Documento
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Adicionar Novo Documento</DialogTitle>
-                <DialogDescription>
-                  Preencha os dados abaixo para adicionar um novo documento administrativo.
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Título</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Contrato de Serviço" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descrição</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Detalhes sobre o documento" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Categoria</FormLabel>
-                        <FormControl>
-                          <select
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            {...field}
-                          >
-                            <option value="contracts">Contratos</option>
-                            <option value="financial">Financeiro</option>
-                            <option value="legal">Documentos Legais</option>
-                            <option value="operational">Operacional</option>
-                            <option value="other">Outros</option>
-                          </select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormItem>
-                    <FormLabel>Arquivo <span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        onChange={handleFileChange}
-                        className="cursor-pointer"
-                        required
-                      />
-                    </FormControl>
-                    {selectedFile && (
-                      <p className="text-sm text-green-600">
-                        Arquivo selecionado: {selectedFile.name}
-                      </p>
-                    )}
-                    <FormMessage />
-                  </FormItem>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline" type="button" disabled={isSubmitting}>Cancelar</Button>
-                    </DialogClose>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Salvando...
-                        </>
-                      ) : (
-                        <>Salvar Documento</>
+    <AdminOnly>
+      <DashboardLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Documentos Administrativos</h1>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Novo Documento
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Adicionar Novo Documento</DialogTitle>
+                  <DialogDescription>
+                    Preencha os dados abaixo para adicionar um novo documento administrativo.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ex: Contrato de Serviço" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Detalhes sobre o documento" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Categoria</FormLabel>
+                          <FormControl>
+                            <select
+                              className="w-full p-2 border border-gray-300 rounded-md"
+                              {...field}
+                            >
+                              <option value="contracts">Contratos</option>
+                              <option value="financial">Financeiro</option>
+                              <option value="legal">Documentos Legais</option>
+                              <option value="operational">Operacional</option>
+                              <option value="other">Outros</option>
+                            </select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormItem>
+                      <FormLabel>Arquivo <span className="text-red-500">*</span></FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          onChange={handleFileChange}
+                          className="cursor-pointer"
+                          required
+                        />
+                      </FormControl>
+                      {selectedFile && (
+                        <p className="text-sm text-green-600">
+                          Arquivo selecionado: {selectedFile.name}
+                        </p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline" type="button" disabled={isSubmitting}>Cancelar</Button>
+                      </DialogClose>
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Salvando...
+                          </>
+                        ) : (
+                          <>Salvar Documento</>
+                        )}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Documentos Administrativos</CardTitle>
-            <CardDescription>
-              Gerencie todos os documentos administrativos da empresa.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="contracts">
-              <TabsList className="mb-4">
-                <TabsTrigger value="contracts">Contratos</TabsTrigger>
-                <TabsTrigger value="financial">Financeiro</TabsTrigger>
-                <TabsTrigger value="legal">Legal</TabsTrigger>
-                <TabsTrigger value="operational">Operacional</TabsTrigger>
-                <TabsTrigger value="other">Outros</TabsTrigger>
-              </TabsList>
-              
-              {isLoading ? (
-                <div className="flex justify-center p-4">
-                  <p>Carregando documentos...</p>
-                </div>
-              ) : (
-                <>
-                  <TabsContent value="contracts">
-                    <DocumentsList 
-                      documents={documentsByCategory?.contracts || []} 
-                      onDelete={handleDeleteDocument}
-                      onDownload={handleDownloadDocument}
-                    />
-                  </TabsContent>
-                  <TabsContent value="financial">
-                    <DocumentsList 
-                      documents={documentsByCategory?.financial || []} 
-                      onDelete={handleDeleteDocument}
-                      onDownload={handleDownloadDocument}
-                    />
-                  </TabsContent>
-                  <TabsContent value="legal">
-                    <DocumentsList 
-                      documents={documentsByCategory?.legal || []} 
-                      onDelete={handleDeleteDocument}
-                      onDownload={handleDownloadDocument}
-                    />
-                  </TabsContent>
-                  <TabsContent value="operational">
-                    <DocumentsList 
-                      documents={documentsByCategory?.operational || []} 
-                      onDelete={handleDeleteDocument}
-                      onDownload={handleDownloadDocument}
-                    />
-                  </TabsContent>
-                  <TabsContent value="other">
-                    <DocumentsList 
-                      documents={documentsByCategory?.other || []} 
-                      onDelete={handleDeleteDocument}
-                      onDownload={handleDownloadDocument}
-                    />
-                  </TabsContent>
-                </>
-              )}
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+          <Card>
+            <CardHeader>
+              <CardTitle>Documentos Administrativos</CardTitle>
+              <CardDescription>
+                Gerencie todos os documentos administrativos da empresa.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="contracts">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="contracts">Contratos</TabsTrigger>
+                  <TabsTrigger value="financial">Financeiro</TabsTrigger>
+                  <TabsTrigger value="legal">Legal</TabsTrigger>
+                  <TabsTrigger value="operational">Operacional</TabsTrigger>
+                  <TabsTrigger value="other">Outros</TabsTrigger>
+                </TabsList>
+                
+                {isLoading ? (
+                  <div className="flex justify-center p-4">
+                    <p>Carregando documentos...</p>
+                  </div>
+                ) : (
+                  <>
+                    <TabsContent value="contracts">
+                      <DocumentsList 
+                        documents={documentsByCategory?.contracts || []} 
+                        onDelete={handleDeleteDocument}
+                        onDownload={handleDownloadDocument}
+                      />
+                    </TabsContent>
+                    <TabsContent value="financial">
+                      <DocumentsList 
+                        documents={documentsByCategory?.financial || []} 
+                        onDelete={handleDeleteDocument}
+                        onDownload={handleDownloadDocument}
+                      />
+                    </TabsContent>
+                    <TabsContent value="legal">
+                      <DocumentsList 
+                        documents={documentsByCategory?.legal || []} 
+                        onDelete={handleDeleteDocument}
+                        onDownload={handleDownloadDocument}
+                      />
+                    </TabsContent>
+                    <TabsContent value="operational">
+                      <DocumentsList 
+                        documents={documentsByCategory?.operational || []} 
+                        onDelete={handleDeleteDocument}
+                        onDownload={handleDownloadDocument}
+                      />
+                    </TabsContent>
+                    <TabsContent value="other">
+                      <DocumentsList 
+                        documents={documentsByCategory?.other || []} 
+                        onDelete={handleDeleteDocument}
+                        onDownload={handleDownloadDocument}
+                      />
+                    </TabsContent>
+                  </>
+                )}
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    </AdminOnly>
   );
 };
 
