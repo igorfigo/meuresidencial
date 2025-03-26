@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -7,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency } from '@/utils/currency';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
 
 interface Charge {
   id: string;
@@ -31,17 +30,6 @@ interface Charge {
   status: 'pending' | 'paid' | 'overdue';
   due_date: string;
   payment_date: string | null;
-}
-
-interface FinancialIncome {
-  id: string;
-  matricula: string;
-  category: string;
-  amount: string;
-  reference_month: string;
-  payment_date?: string;
-  unit?: string;
-  observations?: string;
 }
 
 const statusColors = {
@@ -86,105 +74,51 @@ function formatDate(dateString: string | null) {
 
 const MinhasCobrancas = () => {
   const { user } = useApp();
+  const [activeTab, setActiveTab] = useState<string>('pending');
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
-  const unit = user?.unit;
-
-  // Get current year for filtering charges
-  const currentYear = new Date().getFullYear().toString();
   
-  const { data: charges, isLoading: isLoadingCharges, error: chargesError } = useQuery({
-    queryKey: ['resident-charges', residentId, matricula, currentYear],
+  const { data: charges, isLoading, error } = useQuery({
+    queryKey: ['resident-charges', residentId, matricula],
     queryFn: async () => {
       if (!residentId || !matricula) return [];
 
-      try {
-        const { data, error } = await supabase
-          .from('resident_charges')
-          .select('*')
-          .eq('matricula', matricula)
-          .eq('resident_id', residentId)
-          .eq('year', currentYear)
-          .order('month', { ascending: true });
-          
-        if (error) {
-          console.error('Error fetching charges:', error);
-          toast({
-            title: "Erro ao carregar cobranças",
-            description: "Ocorreu um erro ao buscar suas cobranças. Por favor, tente novamente.",
-            variant: "destructive"
-          });
-          throw new Error('Erro ao buscar cobranças');
+      const { data, error } = await supabase
+        .from('resident_charges')
+        .select('*')
+        .eq('resident_id', residentId)
+        .eq('matricula', matricula)
+        .order('due_date', { ascending: false });
+        
+      if (error) {
+        console.error('Error fetching charges:', error);
+        throw new Error('Erro ao buscar cobranças');
+      }
+      
+      const today = new Date();
+      return (data || []).map((charge) => {
+        const dueDate = new Date(charge.due_date);
+        
+        let status = charge.status;
+        if (status === 'pending' && dueDate < today) {
+          status = 'overdue';
         }
         
-        const today = new Date();
-        
-        // Map data to Charge type with correct status typing
-        const processedCharges = (data || []).map((charge) => {
-          const dueDate = new Date(charge.due_date);
-          
-          let chargeStatus: 'pending' | 'paid' | 'overdue' = 'pending';
-          
-          if (charge.status === 'paid') {
-            chargeStatus = 'paid';
-          } else if (charge.status === 'pending' && dueDate < today) {
-            chargeStatus = 'overdue';
-          } else {
-            chargeStatus = 'pending';
-          }
-          
-          return {
-            ...charge,
-            status: chargeStatus
-          } as Charge;
-        });
-        
-        return processedCharges;
-      } catch (error) {
-        console.error('Error in fetch function:', error);
-        return [];
-      }
+        return {
+          ...charge,
+          status
+        };
+      });
     },
     enabled: !!residentId && !!matricula
   });
-
-  // Fetch financial incomes for the resident's unit
-  const { data: financialIncomes, isLoading: isLoadingIncomes, error: incomesError } = useQuery({
-    queryKey: ['financial-incomes', matricula, unit, currentYear],
-    queryFn: async () => {
-      if (!matricula || !unit) return [];
-
-      try {
-        const { data, error } = await supabase
-          .from('financial_incomes')
-          .select('*')
-          .eq('matricula', matricula)
-          .eq('unit', unit)
-          .ilike('reference_month', `%/${currentYear}`)
-          .order('reference_month', { ascending: true });
-          
-        if (error) {
-          console.error('Error fetching financial incomes:', error);
-          toast({
-            title: "Erro ao carregar receitas",
-            description: "Ocorreu um erro ao buscar as receitas da sua unidade. Por favor, tente novamente.",
-            variant: "destructive"
-          });
-          throw new Error('Erro ao buscar receitas');
-        }
-        
-        return data || [];
-      } catch (error) {
-        console.error('Error in fetch function:', error);
-        return [];
-      }
-    },
-    enabled: !!matricula && !!unit
-  });
-
-  // Split charges into paid and pending/overdue
-  const pendingCharges = charges?.filter(charge => charge.status === 'pending' || charge.status === 'overdue') || [];
+  
+  const filteredCharges = charges?.filter(charge => {
+    if (activeTab === 'pending') return charge.status === 'pending';
+    if (activeTab === 'paid') return charge.status === 'paid';
+    return false;
+  }) || [];
 
   return (
     <DashboardLayout>
@@ -196,21 +130,26 @@ const MinhasCobrancas = () => {
           </p>
         </div>
         
-        {/* Pending Charges */}
         <Card>
           <CardHeader>
-            <CardTitle>Cobranças Pendentes</CardTitle>
+            <CardTitle>Histórico de Cobranças</CardTitle>
             <CardDescription>
-              Cobranças de condomínio pendentes para {currentYear}
+              Visualize e gerencie suas cobranças de condomínio
             </CardDescription>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+              <TabsList>
+                <TabsTrigger value="pending">Pendentes</TabsTrigger>
+                <TabsTrigger value="paid">Pagas</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </CardHeader>
           <CardContent>
-            {isLoadingCharges ? (
+            {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
                 <span className="ml-2 text-lg text-muted-foreground">Carregando cobranças...</span>
               </div>
-            ) : chargesError ? (
+            ) : error ? (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Erro</AlertTitle>
@@ -218,12 +157,12 @@ const MinhasCobrancas = () => {
                   Ocorreu um erro ao carregar as cobranças. Por favor, tente novamente mais tarde.
                 </AlertDescription>
               </Alert>
-            ) : pendingCharges.length === 0 ? (
+            ) : filteredCharges.length === 0 ? (
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
-                <AlertTitle>Nenhuma cobrança pendente</AlertTitle>
+                <AlertTitle>Nenhuma cobrança encontrada</AlertTitle>
                 <AlertDescription>
-                  Não existem cobranças pendentes para {currentYear}.
+                  Não existem cobranças {activeTab !== 'pending' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para este condomínio.
                 </AlertDescription>
               </Alert>
             ) : (
@@ -235,12 +174,13 @@ const MinhasCobrancas = () => {
                       <TableHead>Unidade</TableHead>
                       <TableHead>Valor</TableHead>
                       <TableHead>Vencimento</TableHead>
+                      <TableHead>Pagamento</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {pendingCharges.map((charge) => (
+                    {filteredCharges.map((charge) => (
                       <TableRow key={charge.id}>
                         <TableCell className="font-medium">
                           {formatMonthYear(charge.month, charge.year)}
@@ -248,6 +188,7 @@ const MinhasCobrancas = () => {
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>{formatCurrency(parseFloat(charge.amount))}</TableCell>
                         <TableCell>{formatDate(charge.due_date)}</TableCell>
+                        <TableCell>{formatDate(charge.payment_date)}</TableCell>
                         <TableCell>
                           <Badge 
                             className={`flex items-center ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
@@ -258,93 +199,19 @@ const MinhasCobrancas = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-brand-600 hover:text-brand-800 hover:bg-brand-50"
-                          >
-                            <FileDown className="h-4 w-4 mr-1" />
-                            Boleto
-                          </Button>
+                          {charge.status !== 'paid' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-brand-600 hover:text-brand-800 hover:bg-brand-50"
+                            >
+                              <FileDown className="h-4 w-4 mr-1" />
+                              Boleto
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        {/* Paid Charges (Financial Incomes for the resident's unit) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Cobranças Pagas</CardTitle>
-            <CardDescription>
-              Receitas do condomínio para a unidade {unit} em {currentYear}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoadingIncomes ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
-                <span className="ml-2 text-lg text-muted-foreground">Carregando receitas...</span>
-              </div>
-            ) : incomesError ? (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Erro</AlertTitle>
-                <AlertDescription>
-                  Ocorreu um erro ao carregar as receitas. Por favor, tente novamente mais tarde.
-                </AlertDescription>
-              </Alert>
-            ) : financialIncomes && financialIncomes.length === 0 ? (
-              <Alert className="bg-blue-50 border-blue-200">
-                <AlertCircle className="h-4 w-4 text-blue-600" />
-                <AlertTitle>Nenhuma receita registrada</AlertTitle>
-                <AlertDescription>
-                  Não existem receitas registradas para a unidade {unit} em {currentYear}.
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Competência</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Pagamento</TableHead>
-                      <TableHead>Observações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {financialIncomes?.map((income) => {
-                      // Extract month and year from reference_month (format: MM/YYYY)
-                      const [month, year] = income.reference_month.split('/');
-                      
-                      return (
-                        <TableRow key={income.id}>
-                          <TableCell className="font-medium">
-                            {month && year ? formatMonthYear(month, year) : income.reference_month}
-                          </TableCell>
-                          <TableCell>{income.unit || '-'}</TableCell>
-                          <TableCell>{income.category}</TableCell>
-                          <TableCell>{formatCurrency(parseFloat(income.amount))}</TableCell>
-                          <TableCell>{formatDate(income.payment_date || null)}</TableCell>
-                          <TableCell>
-                            {income.observations ? (
-                              <span className="line-clamp-2" title={income.observations}>
-                                {income.observations}
-                              </span>
-                            ) : (
-                              '-'
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
                   </TableBody>
                 </Table>
               </div>
