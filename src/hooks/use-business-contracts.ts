@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -58,7 +59,7 @@ export function useBusinessContracts() {
       const { data, error } = await supabase
         .from('business_contracts')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('end_date', { ascending: true }); // Changed to sort by end_date in ascending order
       
       if (error) {
         console.error('Error fetching contracts:', error);
