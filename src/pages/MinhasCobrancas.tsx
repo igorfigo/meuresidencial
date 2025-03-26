@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -200,13 +199,8 @@ const MinhasCobrancas = () => {
     
     const generatedCharges: Charge[] = [];
     
-    // First, ensure we have a clean and usable amount value
     const formattedAmount = residentDetails.valor_condominio;
-    
-    // Convert to number for potential calculations (if needed)
     const numericAmount = BRLToNumber(formattedAmount);
-    
-    // This is a safety check - if conversion fails or returns 0, use a default string format
     const amountToUse = numericAmount > 0 ? formattedAmount : "0,00";
     
     for (let month = 1; month <= 12; month++) {
@@ -305,10 +299,7 @@ const MinhasCobrancas = () => {
                     {filteredCharges.map((charge) => (
                       <TableRow key={charge.id}>
                         <TableCell className="font-medium">
-                          {charge.status === 'paid' 
-                            ? charge.due_date
-                            : formatMonthYear(charge.month, charge.year)
-                          }
+                          {formatMonthYear(charge.month, charge.year)}
                         </TableCell>
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>
