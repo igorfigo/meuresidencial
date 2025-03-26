@@ -1,11 +1,14 @@
+
 // Functions for formatting and parsing monetary values
 
 // Format a number to BRL format (Brazilian Real)
-export const formatToBRL = (value: number): string => {
-  return value.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+export const formatToBRL = (value: number | string): string => {
+  const numValue = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
+  
+  if (isNaN(numValue)) return '0,00';
+  
+  // Format with 2 decimal places and use comma as separator
+  return numValue.toFixed(2).replace('.', ',');
 };
 
 // Format a number to currency (with R$ prefix)
@@ -23,25 +26,34 @@ export const formatCurrency = (value: number | string): string => {
 
 // Convert from BRL format (with comma) to number
 export const BRLToNumber = (value: string): number => {
-  if (!value) return 0;
+  if (!value || value === '') return 0;
   
-  // Remove 'R$', spaces, and replace comma with dot
-  const cleaned = value.replace(/R\$\s?/g, '').replace(/\./g, '').replace(',', '.');
-  return parseFloat(cleaned) || 0;
+  // Remove R$ prefix and any non-numeric characters except for comma and period
+  const cleanValue = value.replace(/R\$\s*/g, '').replace(/[^\d,\.]/g, '');
+  
+  // Replace comma with dot for proper number parsing
+  const normalizedValue = cleanValue.replace(/\./g, '').replace(',', '.');
+  const parsedValue = parseFloat(normalizedValue);
+  
+  return isNaN(parsedValue) ? 0 : parsedValue;
 };
 
 // Format an input number into currency display format (adds thousand separators)
 export const formatCurrencyInput = (value: string): string => {
   if (!value) return '0,00';
   
-  // Convert to cents
-  const cents = parseInt(value) || 0;
+  // Convert the string to a number (cents)
+  const cents = parseInt(value.replace(/\D/g, ''), 10);
+  if (isNaN(cents)) return '0,00';
   
-  // Format to reais
-  const reais = (cents / 100).toFixed(2);
+  // Convert cents to a proper decimal number
+  const decimalValue = cents / 100;
   
-  // Format with commas and dots
-  return reais.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  // Format with thousand separators and two decimal places
+  return decimalValue.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 };
 
 // Format CNPJ: XX.XXX.XXX/XXXX-XX

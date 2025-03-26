@@ -21,26 +21,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { QrCodeDisplay } from '@/components/payments/QrCodeDisplay';
 
 interface Charge {
   id: string;
   unit: string;
-  reference_month: string;
+  month: string;
+  year: string;
   amount: string;
   status: 'pending' | 'paid' | 'overdue';
   due_date: string;
   payment_date: string | null;
-  category: string;
-  observations?: string;
-}
-
-interface PixSettings {
-  tipochave: string;
-  chavepix: string;
-  diavencimento: string;
-  jurosaodia: string;
 }
 
 const statusColors = {
@@ -67,142 +57,77 @@ const statusColors = {
   }
 };
 
-function formatMonthYear(dateString: string) {
-  try {
-    const date = new Date(dateString);
-    return format(date, 'MMMM yyyy', { locale: ptBR });
-  } catch (error) {
-    return dateString;
-  }
+function formatMonthYear(month: string, year: string) {
+  const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+  
+  const monthIndex = parseInt(month) - 1;
+  return `${monthNames[monthIndex]} de ${year}`;
 }
 
 function formatDate(dateString: string | null) {
   if (!dateString) return "-";
-  try {
-    const date = new Date(dateString);
-    return format(date, 'dd/MM/yyyy', { locale: ptBR });
-  } catch (error) {
-    return dateString || "-";
-  }
+  const date = new Date(dateString);
+  return format(date, 'dd/MM/yyyy', { locale: ptBR });
 }
 
 const MinhasCobrancas = () => {
   const { user } = useApp();
-  const [activeTab, setActiveTab] = useState<string>('pending');
-  const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
-  const [qrCodeOpen, setQrCodeOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('all');
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
-  const unit = user?.unit;
   
-  // Fetch PIX settings
-  const { data: pixSettings } = useQuery({
-    queryKey: ['pix-settings', matricula],
-    queryFn: async () => {
-      if (!matricula) return null;
-
-      const { data, error } = await supabase
-        .from('pix_receipt_settings')
-        .select('*')
-        .eq('matricula', matricula)
-        .single();
-        
-      if (error) {
-        console.error('Error fetching PIX settings:', error);
-        return null;
-      }
-      
-      return data as PixSettings;
-    },
-    enabled: !!matricula
-  });
-  
-  // Current year for filtering upcoming months
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth();
-  
-  // Fetch financial incomes for the resident's unit - only taxa_condominio category
   const { data: charges, isLoading, error } = useQuery({
-    queryKey: ['resident-incomes', matricula, unit],
+    queryKey: ['resident-charges', residentId, matricula],
     queryFn: async () => {
-      if (!matricula || !unit) return [];
+      if (!residentId || !matricula) return [];
 
       const { data, error } = await supabase
-        .from('financial_incomes')
+        .from('resident_charges')
         .select('*')
+        .eq('resident_id', residentId)
         .eq('matricula', matricula)
-        .eq('unit', unit)
-        .eq('category', 'taxa_condominio')
-        .order('reference_month', { ascending: false });
+        .order('due_date', { ascending: false });
         
       if (error) {
         console.error('Error fetching charges:', error);
         throw new Error('Erro ao buscar cobranças');
       }
       
-      // Process charges to determine if any are overdue and create due_date based on PIX settings
+      // Process charges to determine if any are overdue
       const today = new Date();
-      return (data || []).map((income) => {
-        const referenceMonth = new Date(income.reference_month);
+      return (data || []).map((charge) => {
+        const dueDate = new Date(charge.due_date);
         
-        // Calculate due date based on PIX settings day of month
-        const dueDay = pixSettings?.diavencimento || '10';
-        const dueDate = new Date(
-          referenceMonth.getFullYear(),
-          referenceMonth.getMonth(),
-          parseInt(dueDay)
-        );
-        
-        // If the due date is in the past, move to next month
-        if (dueDate < referenceMonth) {
-          dueDate.setMonth(dueDate.getMonth() + 1);
-        }
-        
-        // Determine status - only payments with a payment_date are considered paid
-        let status: 'pending' | 'paid' | 'overdue' = 'pending';
-        if (income.payment_date) {
-          status = 'paid';
-        } else if (dueDate < today) {
+        let status = charge.status;
+        if (status === 'pending' && dueDate < today) {
           status = 'overdue';
         }
         
         return {
-          ...income,
-          status,
-          due_date: dueDate.toISOString().split('T')[0]
-        } as Charge;
+          ...charge,
+          status
+        };
       });
     },
-    enabled: !!matricula && !!unit
+    enabled: !!residentId && !!matricula
   });
-
-  // For the pending tab, show all charges from the current month and future months of the current year,
-  // regardless of their actual status (except paid ones which go to the paid tab)
-  const pendingCharges = charges?.filter(charge => {
-    const chargeDate = new Date(charge.reference_month);
-    const chargeYear = chargeDate.getFullYear();
-    const chargeMonth = chargeDate.getMonth();
-    
-    // Show all charges for current and upcoming months of current year, unless they are paid
-    return chargeYear === currentYear && chargeMonth >= currentMonth && charge.status !== 'paid';
-  }) || [];
-
-  // Filter charges for paid tab - only charges with payment_date
-  const paidCharges = charges?.filter(charge => charge.status === 'paid') || [];
   
-  // Get the charges to display based on active tab
-  const displayCharges = activeTab === 'pending' ? pendingCharges : paidCharges;
-
-  const handleOpenQrCode = (charge: Charge) => {
-    setSelectedCharge(charge);
-    setQrCodeOpen(true);
-  };
-
-  const handleCloseQrCode = () => {
-    setQrCodeOpen(false);
-    setSelectedCharge(null);
-  };
+  const filteredCharges = charges?.filter(charge => {
+    if (activeTab === 'all') return true;
+    return charge.status === activeTab;
+  }) || [];
+  
+  const pendingCharges = charges?.filter(charge => charge.status === 'pending') || [];
+  const paidCharges = charges?.filter(charge => charge.status === 'paid') || [];
+  const overdueCharges = charges?.filter(charge => charge.status === 'overdue') || [];
+  
+  const totalPending = pendingCharges.reduce((sum, charge) => sum + parseFloat(charge.amount), 0);
+  const totalPaid = paidCharges.reduce((sum, charge) => sum + parseFloat(charge.amount), 0);
+  const totalOverdue = overdueCharges.reduce((sum, charge) => sum + parseFloat(charge.amount), 0);
 
   return (
     <DashboardLayout>
@@ -214,6 +139,53 @@ const MinhasCobrancas = () => {
           </p>
         </div>
         
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium">Pendentes</CardTitle>
+              <CardDescription>Cobranças a vencer</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">
+                {formatCurrency(totalPending)}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {pendingCharges.length} cobrança(s)
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium">Pagas</CardTitle>
+              <CardDescription>Cobranças já pagas</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {formatCurrency(totalPaid)}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {paidCharges.length} cobrança(s)
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium">Atrasadas</CardTitle>
+              <CardDescription>Cobranças em atraso</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {formatCurrency(totalOverdue)}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {overdueCharges.length} cobrança(s)
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        
         <Card>
           <CardHeader>
             <CardTitle>Histórico de Cobranças</CardTitle>
@@ -222,8 +194,10 @@ const MinhasCobrancas = () => {
             </CardDescription>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
               <TabsList>
+                <TabsTrigger value="all">Todas</TabsTrigger>
                 <TabsTrigger value="pending">Pendentes</TabsTrigger>
                 <TabsTrigger value="paid">Pagas</TabsTrigger>
+                <TabsTrigger value="overdue">Atrasadas</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
@@ -241,12 +215,12 @@ const MinhasCobrancas = () => {
                   Ocorreu um erro ao carregar as cobranças. Por favor, tente novamente mais tarde.
                 </AlertDescription>
               </Alert>
-            ) : displayCharges.length === 0 ? (
+            ) : filteredCharges.length === 0 ? (
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertTitle>Nenhuma cobrança encontrada</AlertTitle>
                 <AlertDescription>
-                  Não existem cobranças {activeTab === 'pending' ? 'pendentes' : 'pagas'} registradas para esta unidade.
+                  Não existem cobranças {activeTab !== 'all' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para este condomínio.
                 </AlertDescription>
               </Alert>
             ) : (
@@ -264,10 +238,10 @@ const MinhasCobrancas = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {displayCharges.map((charge) => (
+                    {filteredCharges.map((charge) => (
                       <TableRow key={charge.id}>
                         <TableCell className="font-medium">
-                          {formatMonthYear(charge.reference_month)}
+                          {formatMonthYear(charge.month, charge.year)}
                         </TableCell>
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>{formatCurrency(parseFloat(charge.amount))}</TableCell>
@@ -288,10 +262,9 @@ const MinhasCobrancas = () => {
                               variant="ghost"
                               size="sm"
                               className="text-brand-600 hover:text-brand-800 hover:bg-brand-50"
-                              onClick={() => handleOpenQrCode(charge)}
                             >
                               <FileDown className="h-4 w-4 mr-1" />
-                              Gerar Boleto/PIX
+                              Boleto
                             </Button>
                           )}
                         </TableCell>
@@ -304,26 +277,6 @@ const MinhasCobrancas = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* QR Code Dialog */}
-      <Dialog open={qrCodeOpen} onOpenChange={handleCloseQrCode}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Pagamento via PIX</DialogTitle>
-            <DialogDescription>
-              Escaneie o QR Code abaixo para realizar o pagamento
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedCharge && pixSettings && (
-            <QrCodeDisplay 
-              charge={selectedCharge}
-              pixSettings={pixSettings}
-              condominiumName={user?.nomeCondominio || 'Condomínio'}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </DashboardLayout>
   );
 };
