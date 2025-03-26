@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -204,14 +203,12 @@ const MinhasCobrancas = () => {
       const monthStr = month.toString().padStart(2, '0');
       const dueDate = getDueDateFromPixSettings(monthStr, currentYear, dueDay);
       
-      // Check if this month/year charge is already paid
       const isPaid = paidCharges?.some(
         charge => charge.month === monthStr && charge.year === currentYear
       );
       
-      // Only add to generated charges if not paid
       if (!isPaid) {
-        const dueDateObj = new Date(dueDate + "T12:00:00");
+        const dueDateObj = new Date(dueDate);
         const status = dueDateObj < today ? 'overdue' : 'pending';
         
         generatedCharges.push({
@@ -232,16 +229,13 @@ const MinhasCobrancas = () => {
   
   const isLoading = isLoadingPaid;
   
-  // We only need to combine paid charges with generated charges
-  // The filtering for the active tab will happen afterward
-  const allCharges = [...(paidCharges || []), ...generateCurrentYearCharges()];
+  const charges = [...(paidCharges || []), ...generateCurrentYearCharges()];
   
-  // Filter charges based on the active tab
-  const filteredCharges = allCharges.filter(charge => {
+  const filteredCharges = charges?.filter(charge => {
     if (activeTab === 'pending') return charge.status === 'pending' || charge.status === 'overdue';
     if (activeTab === 'paid') return charge.status === 'paid';
     return false;
-  });
+  }) || [];
 
   return (
     <DashboardLayout>
