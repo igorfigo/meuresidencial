@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { FileText, Plus, Search, Download, Trash2 } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -31,7 +32,7 @@ const BusinessContratos = () => {
   const [openNewContractDialog, setOpenNewContractDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('todos');
-  const [selectedType, setSelectedType] = useState('');
+  const [selectedType, setSelectedType] = useState('all');
   
   const { 
     contracts, 
@@ -47,7 +48,7 @@ const BusinessContratos = () => {
     
     const matchesTab = activeTab === 'todos' || contract.status === activeTab;
     
-    const matchesType = !selectedType || contract.type === selectedType;
+    const matchesType = selectedType === 'all' || contract.type === selectedType;
     
     return matchesSearch && matchesTab && matchesType;
   });
@@ -207,7 +208,7 @@ const BusinessContratos = () => {
               <SelectValue placeholder="Filtrar por tipo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os tipos</SelectItem>
+              <SelectItem value="all">Todos os tipos</SelectItem>
               {contractTypes.map(type => (
                 <SelectItem key={type.id} value={type.id}>
                   {type.label}
