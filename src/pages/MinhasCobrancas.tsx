@@ -71,7 +71,12 @@ function formatMonthYear(month: string, year: string) {
 
 function formatDate(dateString: string | null) {
   if (!dateString) return "-";
-  const date = new Date(dateString);
+  
+  const isoDate = dateString.includes('T') 
+    ? dateString 
+    : `${dateString}T12:00:00`;
+    
+  const date = new Date(isoDate);
   return format(date, 'dd/MM/yyyy', { locale: ptBR });
 }
 
@@ -326,4 +331,3 @@ const MinhasCobrancas = () => {
 };
 
 export default MinhasCobrancas;
-
