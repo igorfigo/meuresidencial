@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -50,6 +50,13 @@ const Documentos = () => {
   
   // Check if the user is a resident
   const isResident = user?.isResident === true;
+
+  useEffect(() => {
+    // If the user is a resident, update the last check time for documents
+    if (isResident) {
+      localStorage.setItem('lastDocumentsCheckTime', new Date().toISOString());
+    }
+  }, [isResident]);
 
   const totalPages = documents ? Math.ceil(documents.length / ITEMS_PER_PAGE) : 1;
   const paginatedDocuments = documents ? documents.slice(

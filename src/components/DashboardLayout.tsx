@@ -39,6 +39,8 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -49,6 +51,7 @@ interface MenuItem {
   icon: React.ReactNode;
   path: string;
   submenu?: MenuItem[];
+  notificationCount?: number;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -58,6 +61,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
+  const [newAnnouncementsCount, setNewAnnouncementsCount] = useState(0);
+  const [newDocumentsCount, setNewDocumentsCount] = useState(0);
 
   const isFinanceiroPath = location.pathname.includes('/financeiro');
 
@@ -66,6 +71,53 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       setExpandedSubmenu('Financeiro');
     }
   }, [location.pathname, isFinanceiroPath, user?.isAdmin]);
+
+  useEffect(() => {
+    // Only check for new content if the user is a resident
+    if (user?.isResident) {
+      checkForNewContent();
+    }
+  }, [user]);
+
+  const checkForNewContent = async () => {
+    if (!user?.matricula) return;
+
+    try {
+      // Get the last login time from localStorage or set it to now if it doesn't exist
+      const lastLoginTime = localStorage.getItem('lastLoginTime') || new Date().toISOString();
+      
+      // Check for new announcements
+      const { data: announcements, error: announcementsError } = await supabase
+        .from('announcements')
+        .select('id')
+        .eq('matricula', user.matricula)
+        .gte('created_at', lastLoginTime);
+        
+      if (announcementsError) {
+        console.error('Error fetching new announcements:', announcementsError);
+      } else {
+        setNewAnnouncementsCount(announcements?.length || 0);
+      }
+      
+      // Check for new documents
+      const { data: documents, error: documentsError } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('matricula', user.matricula)
+        .gte('created_at', lastLoginTime);
+        
+      if (documentsError) {
+        console.error('Error fetching new documents:', documentsError);
+      } else {
+        setNewDocumentsCount(documents?.length || 0);
+      }
+      
+      // Update the last login time to now
+      localStorage.setItem('lastLoginTime', new Date().toISOString());
+    } catch (error) {
+      console.error('Error checking for new content:', error);
+    }
+  };
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
@@ -124,8 +176,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   const residentMenuItems: MenuItem[] = [
     { name: 'Visão Geral', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
-    { name: 'Comunicados', icon: <MessageSquare className="h-5 w-5" />, path: '/comunicados' },
-    { name: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
+    { 
+      name: 'Comunicados', 
+      icon: <MessageSquare className="h-5 w-5" />, 
+      path: '/comunicados',
+      notificationCount: newAnnouncementsCount
+    },
+    { 
+      name: 'Documentos Úteis', 
+      icon: <FileIcon className="h-5 w-5" />, 
+      path: '/documentos',
+      notificationCount: newDocumentsCount
+    },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
     { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
     { name: 'Minhas Cobranças', icon: <PaymentIcon className="h-5 w-5" />, path: '/minhas-cobrancas' },
@@ -251,6 +313,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             {item.icon}
             <span className={cn("ml-3", !sidebarOpen && "lg:hidden")}>{item.name}</span>
+            {item.notificationCount ? (
+              <Badge variant="destructive" className="ml-2 px-1 py-0 min-w-5 h-5 flex items-center justify-center">
+                {item.notificationCount}
+              </Badge>
+            ) : null}
           </NavLink>
         )}
       </div>

@@ -41,12 +41,15 @@ import {
 } from './dropdown-menu';
 import { Skeleton } from './skeleton';
 import { SwitchCondominium } from './switch-condominium';
+import { supabase } from '@/integrations/supabase/client';
+import { Badge } from './badge';
 
 interface MenuItem {
   path: string;
   label: string;
   icon: React.ReactNode;
   submenu?: MenuItem[];
+  notificationCount?: number;
 }
 
 export function Sidebar() {
@@ -55,10 +58,59 @@ export function Sidebar() {
   const location = useLocation();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [newAnnouncementsCount, setNewAnnouncementsCount] = useState(0);
+  const [newDocumentsCount, setNewDocumentsCount] = useState(0);
 
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    // Only check for new content if the user is a resident
+    if (user?.isResident) {
+      checkForNewContent();
+    }
+  }, [user]);
+
+  const checkForNewContent = async () => {
+    if (!user?.matricula) return;
+
+    try {
+      // Get the last login time from localStorage or set it to now if it doesn't exist
+      const lastLoginTime = localStorage.getItem('lastLoginTime') || new Date().toISOString();
+      
+      // Check for new announcements
+      const { data: announcements, error: announcementsError } = await supabase
+        .from('announcements')
+        .select('id')
+        .eq('matricula', user.matricula)
+        .gte('created_at', lastLoginTime);
+        
+      if (announcementsError) {
+        console.error('Error fetching new announcements:', announcementsError);
+      } else {
+        setNewAnnouncementsCount(announcements?.length || 0);
+      }
+      
+      // Check for new documents
+      const { data: documents, error: documentsError } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('matricula', user.matricula)
+        .gte('created_at', lastLoginTime);
+        
+      if (documentsError) {
+        console.error('Error fetching new documents:', documentsError);
+      } else {
+        setNewDocumentsCount(documents?.length || 0);
+      }
+      
+      // Update the last login time to now
+      localStorage.setItem('lastLoginTime', new Date().toISOString());
+    } catch (error) {
+      console.error('Error checking for new content:', error);
+    }
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -106,8 +158,18 @@ export function Sidebar() {
   
   const residentMenuItems: MenuItem[] = [
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
-    { path: '/comunicados', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
-    { path: '/documentos', label: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" /> },
+    { 
+      path: '/comunicados', 
+      label: 'Comunicados', 
+      icon: <MessageSquare className="h-5 w-5" />,
+      notificationCount: newAnnouncementsCount
+    },
+    { 
+      path: '/documentos', 
+      label: 'Documentos Úteis', 
+      icon: <FileIcon className="h-5 w-5" />,
+      notificationCount: newDocumentsCount
+    },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/servicos', label: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" /> },
     { path: '/minhas-cobrancas', label: 'Minhas Cobranças', icon: <Receipt className="h-5 w-5" /> },
@@ -172,6 +234,11 @@ export function Sidebar() {
           >
             {item.icon}
             <span className="ml-3">{item.label}</span>
+            {item.notificationCount ? (
+              <Badge variant="destructive" className="ml-2 px-1 py-0 min-w-5 h-5 flex items-center justify-center">
+                {item.notificationCount}
+              </Badge>
+            ) : null}
           </a>
         </li>
       );

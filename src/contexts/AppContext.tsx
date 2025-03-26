@@ -225,6 +225,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('condoUser', JSON.stringify(residentUser));
         toast.success("Login de morador realizado com sucesso!");
         
+        // Update the last login time to now
+        localStorage.setItem('lastLoginTime', new Date().toISOString());
+        
         // Create Supabase auth user if they don't exist yet
         // This is for future use with RLS policies
         try {
@@ -294,6 +297,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('condoUser');
+    localStorage.removeItem('lastLoginTime');
     toast.info("Logout realizado com sucesso");
   };
 
