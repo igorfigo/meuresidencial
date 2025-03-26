@@ -48,6 +48,7 @@ interface MenuItem {
   label: string;
   icon: React.ReactNode;
   submenu?: MenuItem[];
+  badge?: number;
 }
 
 export function Sidebar() {
