@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -95,6 +96,7 @@ const MinhasCobrancas = () => {
   const matricula = user?.matricula;
   const unit = user?.unit;
   
+  // Fetch PIX settings
   const { data: pixSettings } = useQuery({
     queryKey: ['pix-settings', matricula],
     queryFn: async () => {
@@ -116,9 +118,11 @@ const MinhasCobrancas = () => {
     enabled: !!matricula
   });
   
+  // Current year for filtering upcoming months
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
   
+  // Fetch financial incomes for the resident's unit - only taxa_condominio category
   const { data: charges, isLoading, error } = useQuery({
     queryKey: ['resident-incomes', matricula, unit],
     queryFn: async () => {
@@ -137,10 +141,12 @@ const MinhasCobrancas = () => {
         throw new Error('Erro ao buscar cobranças');
       }
       
+      // Process charges to determine if any are overdue and create due_date based on PIX settings
       const today = new Date();
       return (data || []).map((income) => {
         const referenceMonth = new Date(income.reference_month);
         
+        // Calculate due date based on PIX settings day of month
         const dueDay = pixSettings?.diavencimento || '10';
         const dueDate = new Date(
           referenceMonth.getFullYear(),
@@ -148,10 +154,12 @@ const MinhasCobrancas = () => {
           parseInt(dueDay)
         );
         
+        // If the due date is in the past, move to next month
         if (dueDate < referenceMonth) {
           dueDate.setMonth(dueDate.getMonth() + 1);
         }
         
+        // Determine status - only payments with a payment_date are considered paid
         let status: 'pending' | 'paid' | 'overdue' = 'pending';
         if (income.payment_date) {
           status = 'paid';
@@ -169,9 +177,21 @@ const MinhasCobrancas = () => {
     enabled: !!matricula && !!unit
   });
 
-  const pendingCharges = charges?.filter(charge => charge.status !== 'paid') || [];
+  // For the pending tab, show all charges from the current month and future months of the current year,
+  // regardless of their actual status (except paid ones which go to the paid tab)
+  const pendingCharges = charges?.filter(charge => {
+    const chargeDate = new Date(charge.reference_month);
+    const chargeYear = chargeDate.getFullYear();
+    const chargeMonth = chargeDate.getMonth();
+    
+    // Show all charges for current and upcoming months of current year, unless they are paid
+    return chargeYear === currentYear && chargeMonth >= currentMonth && charge.status !== 'paid';
+  }) || [];
+
+  // Filter charges for paid tab - only charges with payment_date
   const paidCharges = charges?.filter(charge => charge.status === 'paid') || [];
   
+  // Get the charges to display based on active tab
   const displayCharges = activeTab === 'pending' ? pendingCharges : paidCharges;
 
   const handleOpenQrCode = (charge: Charge) => {
@@ -285,6 +305,7 @@ const MinhasCobrancas = () => {
         </Card>
       </div>
 
+      {/* QR Code Dialog */}
       <Dialog open={qrCodeOpen} onOpenChange={handleCloseQrCode}>
         <DialogContent className="max-w-md">
           <DialogHeader>
