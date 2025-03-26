@@ -80,7 +80,7 @@ export function Sidebar() {
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
-    { path: '/contratos', label: 'Contratos', icon: <Briefcase className="h-5 w-5" /> },
+    { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
   ];
   
   const managerMenuItems: MenuItem[] = [
