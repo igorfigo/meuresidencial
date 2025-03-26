@@ -41,8 +41,6 @@ interface CommonAreaReservationDialogProps {
   commonArea: {
     id: string;
     name: string;
-    opening_time?: string;
-    closing_time?: string;
     valor?: string;
   };
   onSuccess: () => void;
@@ -82,8 +80,6 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         common_area_id: commonArea.id,
         resident_id: user.residentId,
         reservation_date: format(data.reservation_date, 'yyyy-MM-dd'),
-        start_time: commonArea.opening_time || "08:00",
-        end_time: commonArea.closing_time || "18:00",
         status: 'pending',
       };
       
@@ -119,6 +115,7 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
       toast.success('Reserva criada com sucesso!');
       form.reset();
       onSuccess();
+      onOpenChange(false);
       
     } catch (error: any) {
       console.error('Error during reservation submission:', error);
