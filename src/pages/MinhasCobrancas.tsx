@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -29,6 +30,7 @@ interface Charge {
   status: 'pending' | 'paid' | 'overdue';
   due_date: string;
   payment_date: string | null;
+  reference_month?: string;
 }
 
 interface PixSettings {
@@ -67,6 +69,28 @@ function formatMonthYear(month: string, year: string) {
   
   const monthIndex = parseInt(month) - 1;
   return `${monthNames[monthIndex]} de ${year}`;
+}
+
+function extractMonthYearFromReferenceMonth(referenceMonth: string | undefined): { month: string, year: string } {
+  if (!referenceMonth) {
+    return { month: '01', year: new Date().getFullYear().toString() };
+  }
+  
+  // Handle formats like '2025-03' or just the date string
+  const parts = referenceMonth.split('-');
+  if (parts.length >= 2) {
+    return { 
+      year: parts[0], 
+      month: parts[1].padStart(2, '0')
+    };
+  }
+  
+  // Fallback to current date
+  const currentDate = new Date();
+  return {
+    month: (currentDate.getMonth() + 1).toString().padStart(2, '0'),
+    year: currentDate.getFullYear().toString()
+  };
 }
 
 function formatDate(dateString: string | null) {
@@ -141,9 +165,8 @@ const MinhasCobrancas = () => {
         }
         
         return (data || []).map(income => {
-          const date = income.payment_date ? new Date(income.payment_date) : new Date();
-          const month = (date.getMonth() + 1).toString();
-          const year = date.getFullYear().toString();
+          // Extract month and year from the reference_month field
+          const { month, year } = extractMonthYearFromReferenceMonth(income.reference_month);
           
           return {
             id: income.id,
@@ -153,7 +176,8 @@ const MinhasCobrancas = () => {
             amount: income.amount,
             status: 'paid' as const,
             due_date: income.reference_month || '',
-            payment_date: income.payment_date
+            payment_date: income.payment_date,
+            reference_month: income.reference_month
           };
         });
       } catch (err) {
@@ -309,7 +333,7 @@ const MinhasCobrancas = () => {
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>
                           {charge.status === 'paid' 
-                            ? formatCurrency(parseFloat(charge.amount))
+                            ? formatCurrency(BRLToNumber(charge.amount))
                             : formatCurrency(BRLToNumber(charge.amount))
                           }
                         </TableCell>
