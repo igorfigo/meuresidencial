@@ -76,7 +76,11 @@ function formatDate(dateString: string | null) {
 }
 
 function getDueDateFromPixSettings(month: string, year: string, dayOfMonth: string): string {
-  const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(dayOfMonth)));
+  const monthNum = parseInt(month);
+  const yearNum = parseInt(year);
+  const dayNum = parseInt(dayOfMonth);
+  
+  const date = new Date(Date.UTC(yearNum, monthNum - 1, dayNum));
   return date.toISOString().split('T')[0];
 }
 
