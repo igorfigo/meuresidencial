@@ -38,7 +38,6 @@ const AreasComuns = () => {
   
   const [showForm, setShowForm] = useState(false);
   const [areaToDelete, setAreaToDelete] = useState<string | null>(null);
-  const [calendarRefreshTrigger, setCalendarRefreshTrigger] = useState(0);
 
   // Only managers (non-residents and non-admin users) can add/edit areas
   const isManager = user && !user.isAdmin && !user.isResident;
@@ -73,11 +72,6 @@ const AreasComuns = () => {
       deleteCommonArea(areaToDelete);
       setAreaToDelete(null);
     }
-  };
-
-  const handleReservationSuccess = () => {
-    // Trigger calendar refresh by updating the trigger state
-    setCalendarRefreshTrigger(prev => prev + 1);
   };
 
   return (
@@ -128,14 +122,13 @@ const AreasComuns = () => {
                     fetchReservations={fetchReservations}
                     viewOnly={!isManager}
                     showReservationButton={isResident}
-                    onReservationSuccess={handleReservationSuccess}
                   />
                 </Card>
               )}
               
               {/* Show calendar view of all reservations */}
               {commonAreas && commonAreas.length > 0 && (
-                <ReservationsCalendar refreshTrigger={calendarRefreshTrigger} />
+                <ReservationsCalendar />
               )}
             </div>
           )}

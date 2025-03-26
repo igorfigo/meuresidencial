@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -36,9 +37,7 @@ interface Reservation {
   };
 }
 
-export const ReservationsCalendar: React.FC<{
-  refreshTrigger?: number;
-}> = ({ refreshTrigger = 0 }) => {
+export const ReservationsCalendar: React.FC = () => {
   const { user } = useApp();
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -99,7 +98,7 @@ export const ReservationsCalendar: React.FC<{
   
   useEffect(() => {
     fetchReservations();
-  }, [matricula, refreshTrigger]);
+  }, [matricula]);
 
   return (
     <Card className="border-t-4 border-t-brand-600">
@@ -111,6 +110,15 @@ export const ReservationsCalendar: React.FC<{
               Visualize todas as reservas das áreas comuns
             </CardDescription>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchReservations}
+            className="self-end"
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            Atualizar
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
