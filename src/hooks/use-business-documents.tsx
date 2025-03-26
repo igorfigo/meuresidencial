@@ -115,7 +115,8 @@ export function useBusinessDocuments() {
   };
 
   // Handle file change
-  const handleFileChange = (files: FileList | null) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
     if (!files) return;
     
     const newFiles = Array.from(files);
@@ -187,10 +188,9 @@ export function useBusinessDocuments() {
       
       if (!bucketExists) {
         console.log('Creating business-documents bucket...');
-        // Create the bucket using rpc
-        const { data, error } = await supabase.rpc('create_storage_bucket', {
-          bucket_name: 'business-documents',
-          bucket_public: true
+        // Create the bucket directly using storage API instead of RPC
+        const { data, error } = await supabase.storage.createBucket('business-documents', {
+          public: true
         });
         
         if (error) throw error;

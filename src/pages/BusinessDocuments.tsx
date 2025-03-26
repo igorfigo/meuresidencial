@@ -21,6 +21,15 @@ import {
 
 const ITEMS_PER_PAGE = 6;
 
+export type BusinessDocumentAttachment = {
+  id: string;
+  document_id: string;
+  file_name: string;
+  file_path: string;
+  file_type: string;
+  created_at: string;
+};
+
 const BusinessDocuments = () => {
   const { 
     form, 
