@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye, Filter } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Trash2, Eye } from 'lucide-react';
 import { BRLToNumber } from '@/utils/currency';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -189,7 +188,6 @@ export const RecentTransactions = ({
     );
   };
   
-  // Filter transactions based on the selected type
   const filteredTransactions = initialTransactions.filter(transaction => {
     if (transactionTypeFilter === 'all') return true;
     return transaction.type === transactionTypeFilter;
@@ -213,7 +211,6 @@ export const RecentTransactions = ({
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle>Transações Recentes</CardTitle>
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
           <Select
             value={transactionTypeFilter}
             onValueChange={(value) => {
