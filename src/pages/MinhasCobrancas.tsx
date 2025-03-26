@@ -33,6 +33,17 @@ interface Charge {
   payment_date: string | null;
 }
 
+interface FinancialIncome {
+  id: string;
+  matricula: string;
+  category: string;
+  amount: string;
+  reference_month: string;
+  payment_date?: string;
+  unit?: string;
+  observations?: string;
+}
+
 const statusColors = {
   pending: {
     background: 'bg-yellow-100',
@@ -78,11 +89,12 @@ const MinhasCobrancas = () => {
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
+  const unit = user?.unit;
 
   // Get current year for filtering charges
   const currentYear = new Date().getFullYear().toString();
   
-  const { data: charges, isLoading, error } = useQuery({
+  const { data: charges, isLoading: isLoadingCharges, error: chargesError } = useQuery({
     queryKey: ['resident-charges', residentId, matricula, currentYear],
     queryFn: async () => {
       if (!residentId || !matricula) return [];
@@ -137,8 +149,41 @@ const MinhasCobrancas = () => {
     enabled: !!residentId && !!matricula
   });
 
+  // Fetch financial incomes for the resident's unit
+  const { data: financialIncomes, isLoading: isLoadingIncomes, error: incomesError } = useQuery({
+    queryKey: ['financial-incomes', matricula, unit, currentYear],
+    queryFn: async () => {
+      if (!matricula || !unit) return [];
+
+      try {
+        const { data, error } = await supabase
+          .from('financial_incomes')
+          .select('*')
+          .eq('matricula', matricula)
+          .eq('unit', unit)
+          .ilike('reference_month', `%/${currentYear}`)
+          .order('reference_month', { ascending: true });
+          
+        if (error) {
+          console.error('Error fetching financial incomes:', error);
+          toast({
+            title: "Erro ao carregar receitas",
+            description: "Ocorreu um erro ao buscar as receitas da sua unidade. Por favor, tente novamente.",
+            variant: "destructive"
+          });
+          throw new Error('Erro ao buscar receitas');
+        }
+        
+        return data || [];
+      } catch (error) {
+        console.error('Error in fetch function:', error);
+        return [];
+      }
+    },
+    enabled: !!matricula && !!unit
+  });
+
   // Split charges into paid and pending/overdue
-  const paidCharges = charges?.filter(charge => charge.status === 'paid') || [];
   const pendingCharges = charges?.filter(charge => charge.status === 'pending' || charge.status === 'overdue') || [];
 
   return (
@@ -160,12 +205,12 @@ const MinhasCobrancas = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isLoadingCharges ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
                 <span className="ml-2 text-lg text-muted-foreground">Carregando cobranças...</span>
               </div>
-            ) : error ? (
+            ) : chargesError ? (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Erro</AlertTitle>
@@ -231,34 +276,34 @@ const MinhasCobrancas = () => {
           </CardContent>
         </Card>
         
-        {/* Paid Charges */}
+        {/* Paid Charges (Financial Incomes for the resident's unit) */}
         <Card>
           <CardHeader>
             <CardTitle>Cobranças Pagas</CardTitle>
             <CardDescription>
-              Cobranças de condomínio já pagas em {currentYear}
+              Receitas do condomínio para a unidade {unit} em {currentYear}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isLoadingIncomes ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
-                <span className="ml-2 text-lg text-muted-foreground">Carregando cobranças...</span>
+                <span className="ml-2 text-lg text-muted-foreground">Carregando receitas...</span>
               </div>
-            ) : error ? (
+            ) : incomesError ? (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Erro</AlertTitle>
                 <AlertDescription>
-                  Ocorreu um erro ao carregar as cobranças. Por favor, tente novamente mais tarde.
+                  Ocorreu um erro ao carregar as receitas. Por favor, tente novamente mais tarde.
                 </AlertDescription>
               </Alert>
-            ) : paidCharges.length === 0 ? (
+            ) : financialIncomes && financialIncomes.length === 0 ? (
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
-                <AlertTitle>Nenhuma cobrança paga</AlertTitle>
+                <AlertTitle>Nenhuma receita registrada</AlertTitle>
                 <AlertDescription>
-                  Não existem cobranças pagas para {currentYear}.
+                  Não existem receitas registradas para a unidade {unit} em {currentYear}.
                 </AlertDescription>
               </Alert>
             ) : (
@@ -268,33 +313,38 @@ const MinhasCobrancas = () => {
                     <TableRow>
                       <TableHead>Competência</TableHead>
                       <TableHead>Unidade</TableHead>
+                      <TableHead>Categoria</TableHead>
                       <TableHead>Valor</TableHead>
-                      <TableHead>Vencimento</TableHead>
                       <TableHead>Pagamento</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Observações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paidCharges.map((charge) => (
-                      <TableRow key={charge.id}>
-                        <TableCell className="font-medium">
-                          {formatMonthYear(charge.month, charge.year)}
-                        </TableCell>
-                        <TableCell>{charge.unit}</TableCell>
-                        <TableCell>{formatCurrency(parseFloat(charge.amount))}</TableCell>
-                        <TableCell>{formatDate(charge.due_date)}</TableCell>
-                        <TableCell>{formatDate(charge.payment_date)}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            className={`flex items-center ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
-                            variant="outline"
-                          >
-                            {statusColors[charge.status].icon}
-                            {statusColors[charge.status].label}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {financialIncomes?.map((income) => {
+                      // Extract month and year from reference_month (format: MM/YYYY)
+                      const [month, year] = income.reference_month.split('/');
+                      
+                      return (
+                        <TableRow key={income.id}>
+                          <TableCell className="font-medium">
+                            {month && year ? formatMonthYear(month, year) : income.reference_month}
+                          </TableCell>
+                          <TableCell>{income.unit || '-'}</TableCell>
+                          <TableCell>{income.category}</TableCell>
+                          <TableCell>{formatCurrency(parseFloat(income.amount))}</TableCell>
+                          <TableCell>{formatDate(income.payment_date || null)}</TableCell>
+                          <TableCell>
+                            {income.observations ? (
+                              <span className="line-clamp-2" title={income.observations}>
+                                {income.observations}
+                              </span>
+                            ) : (
+                              '-'
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
