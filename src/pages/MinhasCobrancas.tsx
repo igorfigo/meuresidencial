@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -81,14 +80,7 @@ function getDueDateFromPixSettings(month: string, year: string, dayOfMonth: stri
   const yearNum = parseInt(year);
   const dayNum = parseInt(dayOfMonth);
   
-  // Use a more reliable approach to create the date without timezone issues
-  const date = new Date();
-  date.setFullYear(yearNum);
-  date.setMonth(monthNum - 1);
-  date.setDate(dayNum);
-  
-  // Format as YYYY-MM-DD
-  return format(date, 'yyyy-MM-dd');
+  return `${yearNum}-${String(monthNum).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
 }
 
 const MinhasCobrancas = () => {
@@ -334,3 +326,4 @@ const MinhasCobrancas = () => {
 };
 
 export default MinhasCobrancas;
+
