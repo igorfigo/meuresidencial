@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -33,6 +32,24 @@ export function useBusinessContracts() {
   const normalizeDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  };
+  
+  // Helper function to determine contract status based on dates
+  const determineContractStatus = (endDate: string, currentStatus: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to midnight to compare dates only
+    
+    const normalizedEndDate = normalizeDate(endDate);
+    
+    if (normalizedEndDate < today) {
+      return 'expired';
+    } else if (currentStatus === 'expired') {
+      // If the contract was expired but now the end date is in the future, set it to active
+      return 'active';
+    }
+    
+    // Keep current status for other cases
+    return currentStatus;
   };
   
   // Fetch contracts from Supabase
@@ -106,9 +123,34 @@ export function useBusinessContracts() {
   // Update contract mutation
   const updateContractMutation = useMutation({
     mutationFn: async ({ id, contract }: { id: string, contract: Partial<BusinessContract> }) => {
+      // Determine if we need to update the status based on the end date
+      let updatedContract = { ...contract };
+      
+      // If end_date is being updated, check if status needs to change
+      if (contract.end_date) {
+        // If status is not explicitly set in the update, get the current contract to check its status
+        if (!contract.status) {
+          const { data: currentContract } = await supabase
+            .from('business_contracts')
+            .select('status')
+            .eq('id', id)
+            .single();
+          
+          if (currentContract) {
+            // Determine the new status based on the updated end date
+            updatedContract.status = determineContractStatus(
+              contract.end_date, 
+              currentContract.status
+            );
+          }
+        }
+      }
+      
+      console.log('Updating contract with data:', updatedContract);
+      
       const { data, error } = await supabase
         .from('business_contracts')
-        .update(contract)
+        .update(updatedContract)
         .eq('id', id)
         .select()
         .single();
@@ -147,7 +189,7 @@ export function useBusinessContracts() {
     }
   });
 
-  // Get contract attachments - Updated to use the new table name
+  // Get contract attachments - Using the new table name
   const getContractAttachments = async (contractId: string) => {
     const { data, error } = await supabase
       .from('business_contracts_attachments')
@@ -164,7 +206,7 @@ export function useBusinessContracts() {
     return data as ContractAttachment[];
   };
 
-  // Upload file attachment - Updated to use the new table name
+  // Upload file attachment - Using the new table name
   const uploadAttachment = async (contractId: string, file: File) => {
     try {
       // 1. Upload the file to storage
@@ -209,7 +251,7 @@ export function useBusinessContracts() {
     }
   };
 
-  // Delete attachment - Updated to use the new table name
+  // Delete attachment - Using the new table name
   const deleteAttachment = async (attachment: ContractAttachment) => {
     try {
       // 1. Delete the file from storage
