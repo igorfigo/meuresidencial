@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { UseFormReturn } from 'react-hook-form';
 import { 
   Form, 
   FormControl, 
@@ -14,6 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { 
+  DocumentFormValues, 
+  DocumentAttachment 
+} from '@/hooks/use-documents';
+import { 
   Paperclip, 
   X, 
   File, 
@@ -21,7 +23,8 @@ import {
   ArrowLeft, 
   Loader2, 
   Download, 
-  Trash2
+  Trash2,
+  Calendar
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -32,21 +35,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
-import { BusinessDocumentAttachment } from "@/pages/BusinessDocuments";
 
 interface DocumentFormProps {
-  form: UseFormReturn<{
-    id?: string;
-    tipo: string;
-    data_cadastro: Date;
-    observacoes?: string;
-  }, any, undefined>;
-  onSubmit: (data: any) => void;
+  form: ReturnType<typeof useForm<DocumentFormValues>>;
+  onSubmit: (data: DocumentFormValues) => void;
   isSubmitting: boolean;
   isEditing: boolean;
   onCancel: () => void;
   attachments: File[];
-  existingAttachments: BusinessDocumentAttachment[];
+  existingAttachments: DocumentAttachment[];
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   removeFile: (index: number) => void;
   removeExistingAttachment: (id: string) => void;
@@ -56,13 +53,12 @@ interface DocumentFormProps {
 }
 
 const documentTypes = [
-  { id: 'contrato', label: 'Contrato' },
-  { id: 'ata', label: 'Ata de Reunião' },
-  { id: 'registro', label: 'Registro Comercial' },
-  { id: 'nota_fiscal', label: 'Nota Fiscal' },
-  { id: 'certidao', label: 'Certidão' },
-  { id: 'alvara', label: 'Alvará' },
-  { id: 'outro', label: 'Outro' },
+  { id: 'convenção', label: 'Convenção do Condomínio' },
+  { id: 'regulamento', label: 'Regulamento Interno' },
+  { id: 'ata', label: 'Ata de Assembléia' },
+  { id: 'planta', label: 'Planta do Edifício' },
+  { id: 'apolice', label: 'Apólice de Seguro' },
+  { id: 'vistoria', label: 'Auto de Vistoria do Corpo de Bombeiros' },
 ];
 
 export const DocumentForm: React.FC<DocumentFormProps> = ({
@@ -88,18 +84,13 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
     }
   };
 
-  const handleDownload = async (attachment: BusinessDocumentAttachment) => {
+  const handleDownload = async (attachment: DocumentAttachment) => {
     try {
       const url = await getFileUrl(attachment.file_path);
       window.open(url, '_blank');
     } catch (error) {
       console.error("Error downloading file:", error);
     }
-  };
-
-  const formatDate = (date: Date | null) => {
-    if (!date) return '';
-    return format(date, 'yyyy-MM-dd');
   };
 
   return (
@@ -140,13 +131,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
             <FormItem>
               <FormLabel>Data</FormLabel>
               <FormControl>
-                <Input 
-                  type="date" 
-                  value={formatDate(field.value)}
-                  onChange={(e) => {
-                    field.onChange(e.target.value ? new Date(e.target.value) : null);
-                  }}
-                />
+                <Input type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -164,7 +149,6 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                   placeholder="Detalhes sobre o documento..."
                   className="min-h-[120px]"
                   {...field}
-                  value={field.value || ''}
                 />
               </FormControl>
               <FormMessage />
