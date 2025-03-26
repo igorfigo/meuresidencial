@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -127,9 +126,9 @@ export const ReservationsCalendar: React.FC = () => {
     if (isManager) {
       // Managers can delete any reservation
       return true;
-    } else if (isResident && user?.userId) {
+    } else if (isResident && user?.residentId) {
       // Residents can only delete their own reservations
-      return reservation.resident_id === user.userId;
+      return reservation.resident_id === user.residentId;
     }
     return false;
   };
