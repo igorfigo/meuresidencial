@@ -8,7 +8,8 @@ import {
   Pencil, 
   Trash, 
   File,
-  FolderOpen
+  FolderOpen,
+  Search
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -164,6 +165,16 @@ export const BusinessDocumentsList: React.FC<BusinessDocumentsListProps> = ({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleDocument(document.id);
+                      }}
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
