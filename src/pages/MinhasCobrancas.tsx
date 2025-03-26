@@ -80,40 +80,82 @@ const MinhasCobrancas = () => {
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
+  const unit = user?.unit;
   
+  // Using direct query method to avoid RLS policy issues
   const { data: charges, isLoading, error } = useQuery({
-    queryKey: ['resident-charges', residentId, matricula],
+    queryKey: ['resident-charges', residentId, matricula, unit],
     queryFn: async () => {
-      if (!residentId || !matricula) return [];
+      if (!residentId || !matricula || !unit) return [];
 
-      const { data, error } = await supabase
-        .from('resident_charges')
-        .select('*')
-        .eq('resident_id', residentId)
-        .eq('matricula', matricula)
-        .order('due_date', { ascending: false });
-        
-      if (error) {
-        console.error('Error fetching charges:', error);
-        throw new Error('Erro ao buscar cobranças');
-      }
-      
-      const today = new Date();
-      return (data || []).map((charge) => {
-        const dueDate = new Date(charge.due_date);
-        
-        let status = charge.status;
-        if (status === 'pending' && dueDate < today) {
-          status = 'overdue';
+      try {
+        // Query the direct financial_incomes table for paid charges
+        const { data: paidCharges, error: paidError } = await supabase
+          .from('financial_incomes')
+          .select('*')
+          .eq('matricula', matricula)
+          .eq('unit', unit)
+          .order('payment_date', { ascending: false });
+          
+        if (paidError) {
+          console.error('Error fetching paid charges:', paidError);
+        }
+
+        // Query pending charges
+        const { data: pendingCharges, error: pendingError } = await supabase
+          .from('resident_charges')
+          .select('*')
+          .eq('matricula', matricula)
+          .eq('unit', unit)
+          .eq('status', 'pending')
+          .order('due_date', { ascending: false });
+          
+        if (pendingError) {
+          console.error('Error fetching pending charges:', pendingError);
         }
         
-        return {
-          ...charge,
-          status
-        };
-      });
+        // Transform paid charges to match the Charge interface
+        const formattedPaidCharges = (paidCharges || []).map(income => {
+          const date = income.payment_date ? new Date(income.payment_date) : new Date();
+          const month = (date.getMonth() + 1).toString();
+          const year = date.getFullYear().toString();
+          
+          return {
+            id: income.id,
+            unit: income.unit || unit,
+            month: month,
+            year: year,
+            amount: income.amount,
+            status: 'paid' as const,
+            due_date: income.reference_month || '',
+            payment_date: income.payment_date
+          };
+        });
+        
+        // Transform pending charges and check for overdue
+        const today = new Date();
+        const formattedPendingCharges = (pendingCharges || []).map(charge => {
+          const dueDate = new Date(charge.due_date);
+          
+          let status = charge.status as 'pending' | 'paid' | 'overdue';
+          if (status === 'pending' && dueDate < today) {
+            status = 'overdue';
+          }
+          
+          return {
+            ...charge,
+            status
+          };
+        });
+        
+        // Combine the two sets of charges
+        return [...formattedPendingCharges, ...formattedPaidCharges];
+      } catch (err) {
+        console.error('Error in charge fetching function:', err);
+        throw new Error('Erro ao buscar cobranças');
+      }
     },
-    enabled: !!residentId && !!matricula
+    enabled: !!residentId && !!matricula && !!unit
   });
   
   const handleDownloadBoleto = (chargeId: string) => {
@@ -194,7 +236,10 @@ const MinhasCobrancas = () => {
                     {filteredCharges.map((charge) => (
                       <TableRow key={charge.id}>
                         <TableCell className="font-medium">
-                          {formatMonthYear(charge.month, charge.year)}
+                          {charge.status === 'paid' 
+                            ? charge.due_date // For paid charges, use reference_month
+                            : formatMonthYear(charge.month, charge.year)
+                          }
                         </TableCell>
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>{formatCurrency(parseFloat(charge.amount))}</TableCell>
