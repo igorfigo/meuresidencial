@@ -26,12 +26,12 @@ import MinhaAssinatura from '@/pages/MinhaAssinatura';
 import FaleConosco from '@/pages/FaleConosco';
 import GerenciarAvisos from '@/pages/GerenciarAvisos';
 import MinhasCobrancas from '@/pages/MinhasCobrancas';
+import BusinessManagement from '@/pages/BusinessManagement';
+import BusinessDespesas from '@/pages/BusinessDespesas';
+import BusinessContratos from '@/pages/BusinessContratos';
 
 // We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
-const BusinessManagement = () => <div>Business Management (Em Desenvolvimento)</div>;
-const BusinessDespesas = () => <div>Business Despesas (Em Desenvolvimento)</div>;
-const BusinessContratos = () => <div>Business Contratos (Em Desenvolvimento)</div>;
 const Servicos = () => <div>Serviços (Em Desenvolvimento)</div>;
 
 function App() {
