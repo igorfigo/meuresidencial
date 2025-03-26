@@ -267,13 +267,13 @@ const MinhasCobrancas = () => {
     return false;
   }) || [];
 
-  // Sort paid charges by reference month (year and month) in descending order
+  // Sort paid charges by reference month (year and month) in ascending order
   const sortedCharges = [...filteredCharges].sort((a, b) => {
     if (activeTab === 'paid') {
       const aDate = a.reference_month ? a.reference_month : `${a.year}-${a.month}`;
       const bDate = b.reference_month ? b.reference_month : `${b.year}-${b.month}`;
-      // Compare in descending order (most recent first)
-      return bDate.localeCompare(aDate);
+      // Compare in ascending order (oldest first)
+      return aDate.localeCompare(bDate);
     }
     return 0; // No sorting for pending tab
   });
