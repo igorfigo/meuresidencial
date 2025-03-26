@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X, MoreHorizontal, Download, FileEdit, Trash } from 'lucide-react';
+import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X, Download, FileEdit, Trash } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,6 @@ import { useBusinessContracts, ContractAttachment } from '@/hooks/use-business-c
 import { toast } from 'sonner';
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const ContractStatusBadge = ({ status }: { status: string }) => {
   const statusMap: Record<string, { label: string, variant: "default" | "destructive" | "outline" | "secondary" }> = {
@@ -273,8 +272,6 @@ const BusinessContratos = () => {
           <TableRow>
             <TableHead>Título</TableHead>
             <TableHead>Contraparte</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Valor</TableHead>
             <TableHead>Início</TableHead>
             <TableHead>Término</TableHead>
             <TableHead>Status</TableHead>
@@ -286,54 +283,57 @@ const BusinessContratos = () => {
             <TableRow key={contract.id}>
               <TableCell className="font-medium">{contract.title}</TableCell>
               <TableCell>{contract.counterparty}</TableCell>
-              <TableCell>{contractTypes.find(t => t.id === contract.type)?.label || contract.type}</TableCell>
-              <TableCell>{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(contract.value)}</TableCell>
               <TableCell>{new Date(contract.start_date).toLocaleDateString('pt-BR')}</TableCell>
               <TableCell>{new Date(contract.end_date).toLocaleDateString('pt-BR')}</TableCell>
               <TableCell><ContractStatusBadge status={contract.status} /></TableCell>
               <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleViewContract(contract)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      <span>Visualizar</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEditContract(contract)}>
-                      <FileEdit className="mr-2 h-4 w-4" />
-                      <span>Editar</span>
-                    </DropdownMenuItem>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>
-                          <Trash className="mr-2 h-4 w-4" />
-                          <span>Excluir</span>
-                        </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction 
-                            className="bg-red-600 hover:bg-red-700"
-                            onClick={() => handleDeleteContract(contract.id)}
-                          >
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleViewContract(contract)}
+                    title="Visualizar"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleEditContract(contract)}
+                    title="Editar"
+                  >
+                    <FileEdit className="h-4 w-4" />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-red-600"
+                        title="Excluir"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction 
+                          className="bg-red-600 hover:bg-red-700"
+                          onClick={() => handleDeleteContract(contract.id)}
+                        >
+                          Excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </TableCell>
             </TableRow>
           ))}
