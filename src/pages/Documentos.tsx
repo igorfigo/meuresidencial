@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -48,11 +47,9 @@ const Documentos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { user } = useApp();
   
-  // Check if the user is a resident
   const isResident = user?.isResident === true;
 
   useEffect(() => {
-    // If the user is a resident, update the last check time for documents
     if (isResident) {
       localStorage.setItem('lastDocumentsCheckTime', new Date().toISOString());
     }

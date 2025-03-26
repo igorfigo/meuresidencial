@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -73,47 +72,68 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [location.pathname, isFinanceiroPath, user?.isAdmin]);
 
   useEffect(() => {
-    // Only check for new content if the user is a resident
     if (user?.isResident) {
       checkForNewContent();
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user?.isResident) {
+      if (location.pathname === '/comunicados' && newAnnouncementsCount > 0) {
+        localStorage.setItem('lastAnnouncementsCheckTime', new Date().toISOString());
+        setNewAnnouncementsCount(0);
+      }
+      
+      if (location.pathname === '/documentos' && newDocumentsCount > 0) {
+        localStorage.setItem('lastDocumentsCheckTime', new Date().toISOString());
+        setNewDocumentsCount(0);
+      }
+    }
+  }, [location.pathname, newAnnouncementsCount, newDocumentsCount, user?.isResident]);
+
   const checkForNewContent = async () => {
     if (!user?.matricula) return;
 
     try {
-      // Get the last login time from localStorage or set it to now if it doesn't exist
+      console.log('Checking for new content in DashboardLayout');
       const lastLoginTime = localStorage.getItem('lastLoginTime') || new Date().toISOString();
       
-      // Check for new announcements
+      const lastAnnouncementsCheck = localStorage.getItem('lastAnnouncementsCheckTime') || lastLoginTime;
+      const lastDocumentsCheck = localStorage.getItem('lastDocumentsCheckTime') || lastLoginTime;
+      
+      console.log('Last login time:', lastLoginTime);
+      console.log('Last announcements check:', lastAnnouncementsCheck);
+      console.log('Last documents check:', lastDocumentsCheck);
+      
       const { data: announcements, error: announcementsError } = await supabase
         .from('announcements')
         .select('id')
         .eq('matricula', user.matricula)
-        .gte('created_at', lastLoginTime);
+        .gte('created_at', lastAnnouncementsCheck);
         
       if (announcementsError) {
         console.error('Error fetching new announcements:', announcementsError);
       } else {
+        console.log('New announcements found:', announcements?.length || 0);
         setNewAnnouncementsCount(announcements?.length || 0);
       }
       
-      // Check for new documents
       const { data: documents, error: documentsError } = await supabase
         .from('documents')
         .select('id')
         .eq('matricula', user.matricula)
-        .gte('created_at', lastLoginTime);
+        .gte('created_at', lastDocumentsCheck);
         
       if (documentsError) {
         console.error('Error fetching new documents:', documentsError);
       } else {
+        console.log('New documents found:', documents?.length || 0);
         setNewDocumentsCount(documents?.length || 0);
       }
       
-      // Update the last login time to now
-      localStorage.setItem('lastLoginTime', new Date().toISOString());
+      if (!localStorage.getItem('lastLoginTime')) {
+        localStorage.setItem('lastLoginTime', new Date().toISOString());
+      }
     } catch (error) {
       console.error('Error checking for new content:', error);
     }
@@ -314,7 +334,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             {item.icon}
             <span className={cn("ml-3", !sidebarOpen && "lg:hidden")}>{item.name}</span>
             {item.notificationCount ? (
-              <Badge variant="destructive" className="ml-2 px-1 py-0 min-w-5 h-5 flex items-center justify-center">
+              <Badge variant="notification" className="ml-2">
                 {item.notificationCount}
               </Badge>
             ) : null}
