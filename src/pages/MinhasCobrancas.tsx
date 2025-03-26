@@ -286,7 +286,12 @@ const MinhasCobrancas = () => {
                       <TableHead>Competência</TableHead>
                       <TableHead>Unidade</TableHead>
                       <TableHead>Valor</TableHead>
-                      <TableHead>Pagamento</TableHead>
+                      {activeTab === 'pending' && (
+                        <TableHead>Vencimento</TableHead>
+                      )}
+                      {activeTab === 'paid' && (
+                        <TableHead>Pagamento</TableHead>
+                      )}
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -301,7 +306,12 @@ const MinhasCobrancas = () => {
                         </TableCell>
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>{formatCurrency(parseFloat(charge.amount))}</TableCell>
-                        <TableCell>{formatDate(charge.payment_date)}</TableCell>
+                        {activeTab === 'pending' && (
+                          <TableCell>{formatDate(charge.due_date)}</TableCell>
+                        )}
+                        {activeTab === 'paid' && (
+                          <TableCell>{formatDate(charge.payment_date)}</TableCell>
+                        )}
                         <TableCell>
                           <Badge 
                             className={`flex items-center ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
