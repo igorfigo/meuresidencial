@@ -108,6 +108,17 @@ const BusinessDocumentos = () => {
 
   const onSubmit = async (data: BusinessDocumentFormValues) => {
     try {
+      // Check if there are either new attachments or existing attachments (for edit)
+      if (attachments.length === 0 && existingAttachments.length === 0) {
+        // Show toast notification
+        toast({
+          title: "Erro ao salvar documento",
+          description: "É necessário anexar pelo menos um arquivo.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       if (isEditing && selectedDocument) {
         await updateDocument.mutateAsync({
           id: selectedDocument.id,
