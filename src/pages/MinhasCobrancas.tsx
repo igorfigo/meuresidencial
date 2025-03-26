@@ -88,7 +88,7 @@ function formatDate(dateString: string | null) {
 
 const MinhasCobrancas = () => {
   const { user } = useApp();
-  const [activeTab, setActiveTab] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>('pending');
   const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
   const [qrCodeOpen, setQrCodeOpen] = useState(false);
   
@@ -117,6 +117,10 @@ const MinhasCobrancas = () => {
     },
     enabled: !!matricula
   });
+  
+  // Current year for filtering upcoming months
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
   
   // Fetch financial incomes for the resident's unit - only taxa_condominio category
   const { data: charges, isLoading, error } = useQuery({
@@ -172,11 +176,22 @@ const MinhasCobrancas = () => {
     },
     enabled: !!matricula && !!unit
   });
-  
-  const filteredCharges = charges?.filter(charge => {
-    if (activeTab === 'all') return true;
-    return charge.status === activeTab;
+
+  // Filter charges for this year's upcoming months (current month included) for the pending tab
+  const upcomingCharges = charges?.filter(charge => {
+    const chargeDate = new Date(charge.reference_month);
+    const chargeYear = chargeDate.getFullYear();
+    const chargeMonth = chargeDate.getMonth();
+    
+    // For pending tab, show only upcoming months of current year (including current month)
+    return chargeYear === currentYear && chargeMonth >= currentMonth && charge.status === 'pending';
   }) || [];
+
+  // Filter charges for paid tab
+  const paidCharges = charges?.filter(charge => charge.status === 'paid') || [];
+  
+  // Get the charges to display based on active tab
+  const displayCharges = activeTab === 'pending' ? upcomingCharges : paidCharges;
 
   const handleOpenQrCode = (charge: Charge) => {
     setSelectedCharge(charge);
@@ -206,10 +221,8 @@ const MinhasCobrancas = () => {
             </CardDescription>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
               <TabsList>
-                <TabsTrigger value="all">Todas</TabsTrigger>
                 <TabsTrigger value="pending">Pendentes</TabsTrigger>
                 <TabsTrigger value="paid">Pagas</TabsTrigger>
-                <TabsTrigger value="overdue">Atrasadas</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
@@ -227,12 +240,12 @@ const MinhasCobrancas = () => {
                   Ocorreu um erro ao carregar as cobranças. Por favor, tente novamente mais tarde.
                 </AlertDescription>
               </Alert>
-            ) : filteredCharges.length === 0 ? (
+            ) : displayCharges.length === 0 ? (
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertTitle>Nenhuma cobrança encontrada</AlertTitle>
                 <AlertDescription>
-                  Não existem cobranças {activeTab !== 'all' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para esta unidade.
+                  Não existem cobranças {activeTab === 'pending' ? 'pendentes' : 'pagas'} registradas para esta unidade.
                 </AlertDescription>
               </Alert>
             ) : (
@@ -250,7 +263,7 @@ const MinhasCobrancas = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredCharges.map((charge) => (
+                    {displayCharges.map((charge) => (
                       <TableRow key={charge.id}>
                         <TableCell className="font-medium">
                           {formatMonthYear(charge.reference_month)}
