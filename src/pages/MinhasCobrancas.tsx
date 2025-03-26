@@ -81,13 +81,14 @@ function getDueDateFromPixSettings(month: string, year: string, dayOfMonth: stri
   const yearNum = parseInt(year);
   const dayNum = parseInt(dayOfMonth);
   
-  // Create date in local timezone instead of UTC to avoid date shifts
-  const date = new Date(yearNum, monthNum - 1, dayNum);
+  // Use a more reliable approach to create the date without timezone issues
+  const date = new Date();
+  date.setFullYear(yearNum);
+  date.setMonth(monthNum - 1);
+  date.setDate(dayNum);
   
   // Format as YYYY-MM-DD
-  const formattedMonth = (date.getMonth() + 1).toString().padStart(2, '0');
-  const formattedDay = date.getDate().toString().padStart(2, '0');
-  return `${date.getFullYear()}-${formattedMonth}-${formattedDay}`;
+  return format(date, 'yyyy-MM-dd');
 }
 
 const MinhasCobrancas = () => {
