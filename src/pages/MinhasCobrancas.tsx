@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -72,6 +73,42 @@ function formatDate(dateString: string | null) {
   return format(date, 'dd/MM/yyyy', { locale: ptBR });
 }
 
+// Generate charges for all months of the current year
+function generateMonthlyCharges(existingCharges: Charge[]): Charge[] {
+  const currentYear = new Date().getFullYear().toString();
+  const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+  
+  // Create a map of existing charges by month
+  const existingChargesByMonth: Record<string, Charge> = {};
+  
+  existingCharges.forEach(charge => {
+    if (charge.year === currentYear) {
+      existingChargesByMonth[charge.month] = charge;
+    }
+  });
+  
+  // Generate pending charges for months that don't have one
+  return months.map(month => {
+    if (existingChargesByMonth[month]) {
+      return existingChargesByMonth[month];
+    } else {
+      return {
+        id: `pending-${month}-${currentYear}`,
+        unit: existingCharges.length > 0 ? existingCharges[0].unit : 'N/A',
+        month: month,
+        year: currentYear,
+        amount: existingCharges.length > 0 ? existingCharges[0].amount : '0',
+        status: 'pending',
+        due_date: `${currentYear}-${month}-10`, // Assuming due date is the 10th of each month
+        payment_date: null
+      };
+    }
+  }).sort((a, b) => {
+    // Sort by month (descending)
+    return parseInt(b.month) - parseInt(a.month);
+  });
+}
+
 const MinhasCobrancas = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<string>('pending');
@@ -114,11 +151,19 @@ const MinhasCobrancas = () => {
     enabled: !!residentId && !!matricula
   });
   
-  const filteredCharges = charges?.filter(charge => {
-    if (activeTab === 'pending') return charge.status === 'pending';
-    if (activeTab === 'paid') return charge.status === 'paid';
-    return false;
-  }) || [];
+  const filteredCharges = useMemo(() => {
+    if (!charges) return [];
+    
+    if (activeTab === 'pending') {
+      // For pending tab, show all months of current year
+      return generateMonthlyCharges(charges);
+    } else if (activeTab === 'paid') {
+      // For paid tab, show only paid charges (taxa de condominio)
+      return charges.filter(charge => charge.status === 'paid');
+    }
+    
+    return [];
+  }, [charges, activeTab]);
 
   return (
     <DashboardLayout>
