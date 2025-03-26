@@ -86,6 +86,12 @@ const BusinessContratos = () => {
     }
   }, [selectedContract, openEditContractDialog, editForm]);
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    return utcDate.toLocaleDateString('pt-BR');
+  };
+
   const handleSubmitNewContract = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -283,8 +289,8 @@ const BusinessContratos = () => {
             <TableRow key={contract.id}>
               <TableCell className="font-medium">{contract.title}</TableCell>
               <TableCell>{contract.counterparty}</TableCell>
-              <TableCell className="text-center">{new Date(contract.start_date).toLocaleDateString('pt-BR')}</TableCell>
-              <TableCell>{new Date(contract.end_date).toLocaleDateString('pt-BR')}</TableCell>
+              <TableCell className="text-center">{formatDate(contract.start_date)}</TableCell>
+              <TableCell>{formatDate(contract.end_date)}</TableCell>
               <TableCell><ContractStatusBadge status={contract.status} /></TableCell>
               <TableCell className="text-center">
                 <div className="flex justify-center gap-2">
@@ -557,11 +563,11 @@ const BusinessContratos = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-sm text-muted-foreground">Data Início</h3>
-                  <p className="text-base">{new Date(selectedContract.start_date).toLocaleDateString('pt-BR')}</p>
+                  <p className="text-base">{formatDate(selectedContract.start_date)}</p>
                 </div>
                 <div>
                   <h3 className="font-medium text-sm text-muted-foreground">Data Fim</h3>
-                  <p className="text-base">{new Date(selectedContract.end_date).toLocaleDateString('pt-BR')}</p>
+                  <p className="text-base">{formatDate(selectedContract.end_date)}</p>
                 </div>
                 <div>
                   <h3 className="font-medium text-sm text-muted-foreground">Status</h3>

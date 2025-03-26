@@ -28,6 +28,12 @@ export interface ContractAttachment {
 export function useBusinessContracts() {
   const queryClient = useQueryClient();
   
+  // Helper function to correctly compare dates without timezone issues
+  const normalizeDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  };
+  
   // Fetch contracts from Supabase
   const { data: contracts, isLoading } = useQuery({
     queryKey: ['business-contracts'],
@@ -45,8 +51,10 @@ export function useBusinessContracts() {
       
       // Check for expired contracts and update their status
       const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to midnight to compare dates only
+      
       const updatedContracts = data.map(contract => {
-        const endDate = new Date(contract.end_date);
+        const endDate = normalizeDate(contract.end_date);
         if (endDate < today && contract.status === 'active') {
           return { ...contract, status: 'expired' };
         }
