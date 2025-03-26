@@ -32,6 +32,10 @@ interface Charge {
   payment_date: string | null;
 }
 
+interface PixSettings {
+  diavencimento: string;
+}
+
 const statusColors = {
   pending: {
     background: 'bg-yellow-100',
@@ -72,6 +76,12 @@ function formatDate(dateString: string | null) {
   return format(date, 'dd/MM/yyyy', { locale: ptBR });
 }
 
+function getDueDateFromPixSettings(month: string, year: string, dayOfMonth: string): string {
+  // Create a date with the specified month, year and day
+  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(dayOfMonth));
+  return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+}
+
 const MinhasCobrancas = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<string>('pending');
@@ -80,40 +90,55 @@ const MinhasCobrancas = () => {
   const matricula = user?.matricula;
   const unit = user?.unit;
   
+  // Fetch PIX settings for due date
+  const { data: pixSettings } = useQuery({
+    queryKey: ['pix-settings', matricula],
+    queryFn: async () => {
+      if (!matricula) return null;
+
+      try {
+        const { data, error } = await supabase
+          .from('pix_receipt_settings')
+          .select('diavencimento')
+          .eq('matricula', matricula)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching PIX settings:', error);
+          return { diavencimento: '10' }; // Default to day 10 if error
+        }
+        
+        return data;
+      } catch (err) {
+        console.error('Error in PIX settings fetch:', err);
+        return { diavencimento: '10' }; // Default to day 10 if error
+      }
+    },
+    enabled: !!matricula
+  });
+  
   // Using direct query method to avoid RLS policy issues
-  const { data: charges, isLoading, error } = useQuery({
-    queryKey: ['resident-charges', residentId, matricula, unit],
+  const { data: paidCharges, isLoading: isLoadingPaid } = useQuery({
+    queryKey: ['resident-paid-charges', residentId, matricula, unit],
     queryFn: async () => {
       if (!residentId || !matricula || !unit) return [];
 
       try {
         // Query the direct financial_incomes table for paid charges
-        const { data: paidCharges, error: paidError } = await supabase
+        const { data, error } = await supabase
           .from('financial_incomes')
           .select('*')
           .eq('matricula', matricula)
           .eq('unit', unit)
           .order('payment_date', { ascending: false });
           
-        if (paidError) {
-          console.error('Error fetching paid charges:', paidError);
-        }
-
-        // Query pending charges
-        const { data: pendingCharges, error: pendingError } = await supabase
-          .from('resident_charges')
-          .select('*')
-          .eq('matricula', matricula)
-          .eq('unit', unit)
-          .eq('status', 'pending')
-          .order('due_date', { ascending: false });
-          
-        if (pendingError) {
-          console.error('Error fetching pending charges:', pendingError);
+        if (error) {
+          console.error('Error fetching paid charges:', error);
+          return [];
         }
         
         // Transform paid charges to match the Charge interface
-        const formattedPaidCharges = (paidCharges || []).map(income => {
+        return (data || []).map(income => {
           const date = income.payment_date ? new Date(income.payment_date) : new Date();
           const month = (date.getMonth() + 1).toString();
           const year = date.getFullYear().toString();
@@ -129,32 +154,86 @@ const MinhasCobrancas = () => {
             payment_date: income.payment_date
           };
         });
-        
-        // Transform pending charges and check for overdue
-        const today = new Date();
-        const formattedPendingCharges = (pendingCharges || []).map(charge => {
-          const dueDate = new Date(charge.due_date);
-          
-          let status = charge.status as 'pending' | 'paid' | 'overdue';
-          if (status === 'pending' && dueDate < today) {
-            status = 'overdue';
-          }
-          
-          return {
-            ...charge,
-            status
-          };
-        });
-        
-        // Combine the two sets of charges
-        return [...formattedPendingCharges, ...formattedPaidCharges];
       } catch (err) {
-        console.error('Error in charge fetching function:', err);
-        throw new Error('Erro ao buscar cobranças');
+        console.error('Error in paid charge fetching function:', err);
+        return [];
       }
     },
     enabled: !!residentId && !!matricula && !!unit
   });
+
+  // Get resident details to get condominium fee
+  const { data: residentDetails } = useQuery({
+    queryKey: ['resident-details', residentId],
+    queryFn: async () => {
+      if (!residentId) return null;
+
+      try {
+        const { data, error } = await supabase
+          .from('residents')
+          .select('valor_condominio')
+          .eq('id', residentId)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching resident details:', error);
+          return null;
+        }
+        
+        return data;
+      } catch (err) {
+        console.error('Error in resident details fetch:', err);
+        return null;
+      }
+    },
+    enabled: !!residentId
+  });
+
+  // Generate charges for all months of the current year
+  const generateCurrentYearCharges = (): Charge[] => {
+    if (!unit || !residentDetails?.valor_condominio) return [];
+    
+    const currentYear = new Date().getFullYear().toString();
+    const dueDay = pixSettings?.diavencimento || '10';
+    const today = new Date();
+    
+    const generatedCharges: Charge[] = [];
+    
+    // Generate charges for all 12 months
+    for (let month = 1; month <= 12; month++) {
+      const monthStr = month.toString().padStart(2, '0');
+      const dueDate = getDueDateFromPixSettings(monthStr, currentYear, dueDay);
+      
+      // Check if this month's charge is in the paid charges
+      const isPaid = paidCharges?.some(
+        charge => charge.month === monthStr && charge.year === currentYear
+      );
+      
+      if (!isPaid) {
+        // If not paid, add it as pending or overdue
+        const dueDateObj = new Date(dueDate);
+        const status = dueDateObj < today ? 'overdue' : 'pending';
+        
+        generatedCharges.push({
+          id: `generated-${currentYear}-${monthStr}`,
+          unit,
+          month: monthStr,
+          year: currentYear,
+          amount: residentDetails.valor_condominio,
+          status,
+          due_date: dueDate,
+          payment_date: null
+        });
+      }
+    }
+    
+    return generatedCharges;
+  };
+  
+  const isLoading = isLoadingPaid;
+  
+  // Combine paid charges with generated pending charges
+  const charges = [...(paidCharges || []), ...generateCurrentYearCharges()];
   
   const filteredCharges = charges?.filter(charge => {
     if (activeTab === 'pending') return charge.status === 'pending' || charge.status === 'overdue';
@@ -191,14 +270,6 @@ const MinhasCobrancas = () => {
                 <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
                 <span className="ml-2 text-lg text-muted-foreground">Carregando cobranças...</span>
               </div>
-            ) : error ? (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Erro</AlertTitle>
-                <AlertDescription>
-                  Ocorreu um erro ao carregar as cobranças. Por favor, tente novamente mais tarde.
-                </AlertDescription>
-              </Alert>
             ) : filteredCharges.length === 0 ? (
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
