@@ -102,7 +102,7 @@ const MinhasCobrancas = () => {
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
-  const unidade = user?.unidade;
+  const unidade = user?.unit; // Changed from unidade to unit to match the User type
 
   // Get current year for filtering charges
   const currentYear = new Date().getFullYear().toString();
