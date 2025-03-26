@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -29,7 +30,6 @@ import {
   ReceiptText,
   QrCode,
   CreditCard as PaymentIcon,
-  FolderArchive,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -104,7 +104,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       icon: <Briefcase className="h-5 w-5" />, 
       path: '/business-management',
       submenu: [
-        { name: 'Documentos', icon: <FolderArchive className="h-5 w-5" />, path: '/business-management' },
         { name: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" />, path: '/business-management/despesas' },
         { name: 'Contratos', icon: <FileText className="h-5 w-5" />, path: '/business-management/contratos' },
       ] 

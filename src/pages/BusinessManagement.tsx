@@ -1,18 +1,17 @@
 
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import AdminOnly from '@/components/AdminOnly';
-import { BusinessDocumentRepository } from '@/components/business/BusinessDocumentRepository';
 
 const BusinessManagement = () => {
   return (
-    <AdminOnly>
-      <DashboardLayout>
-        <div className="container mx-auto px-4 py-8">
-          <BusinessDocumentRepository />
+    <DashboardLayout>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-4">Business Management</h1>
+        <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+          <p className="text-yellow-700">Esta funcionalidade está em desenvolvimento.</p>
         </div>
-      </DashboardLayout>
-    </AdminOnly>
+      </div>
+    </DashboardLayout>
   );
 };
 
