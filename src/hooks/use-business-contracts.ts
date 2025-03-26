@@ -70,6 +70,29 @@ export function useBusinessContracts() {
     }
   });
 
+  // Update contract mutation
+  const updateContractMutation = useMutation({
+    mutationFn: async ({ id, contract }: { id: string, contract: Partial<BusinessContract> }) => {
+      const { data, error } = await supabase
+        .from('business_contracts')
+        .update(contract)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error updating contract:', error);
+        toast.error('Erro ao atualizar contrato');
+        throw error;
+      }
+      
+      return data as BusinessContract;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-contracts'] });
+    }
+  });
+
   // Delete contract mutation
   const deleteContractMutation = useMutation({
     mutationFn: async (contractId: string) => {
@@ -203,6 +226,10 @@ export function useBusinessContracts() {
     return createContractMutation.mutateAsync(newContract);
   };
 
+  const updateContract = async (id: string, contract: Partial<BusinessContract>) => {
+    return updateContractMutation.mutateAsync({ id, contract });
+  };
+
   const deleteContract = async (contractId: string) => {
     return deleteContractMutation.mutateAsync(contractId);
   };
@@ -211,6 +238,7 @@ export function useBusinessContracts() {
     contracts,
     isLoading,
     createContract,
+    updateContract,
     deleteContract,
     getContractAttachments,
     uploadAttachment,

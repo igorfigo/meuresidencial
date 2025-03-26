@@ -30,25 +30,39 @@ const ContractStatusBadge = ({ status }: { status: string }) => {
 
 const BusinessContratos = () => {
   const [openNewContractDialog, setOpenNewContractDialog] = useState(false);
+  const [openEditContractDialog, setOpenEditContractDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [openViewDialog, setOpenViewDialog] = useState(false);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [attachments, setAttachments] = useState<ContractAttachment[]>([]);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
   const [newContractFiles, setNewContractFiles] = useState<File[]>([]);
+  const [editContractFiles, setEditContractFiles] = useState<File[]>([]);
   
   const { 
     contracts, 
     isLoading, 
     createContract, 
+    updateContract,
     deleteContract,
     getContractAttachments,
     uploadAttachment,
     deleteAttachment,
     getFileUrl
   } = useBusinessContracts();
+
+  const editForm = useForm({
+    defaultValues: {
+      title: '',
+      counterparty: '',
+      type: '',
+      start_date: '',
+      end_date: '',
+      value: 0,
+      status: 'active' as 'active' | 'pending' | 'expired' | 'draft'
+    }
+  });
 
   const filteredContracts = contracts?.filter(contract => {
     const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -57,6 +71,21 @@ const BusinessContratos = () => {
     
     return matchesSearch && matchesType;
   });
+
+  useEffect(() => {
+    if (selectedContract && openEditContractDialog) {
+      // Set form values when a contract is selected for editing
+      editForm.reset({
+        title: selectedContract.title,
+        counterparty: selectedContract.counterparty,
+        type: selectedContract.type,
+        start_date: selectedContract.start_date,
+        end_date: selectedContract.end_date,
+        value: selectedContract.value,
+        status: selectedContract.status
+      });
+    }
+  }, [selectedContract, openEditContractDialog, editForm]);
 
   const handleSubmitNewContract = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -96,6 +125,43 @@ const BusinessContratos = () => {
     }
   };
 
+  const handleSubmitEditContract = async (data: any) => {
+    if (!selectedContract?.id) return;
+    
+    try {
+      // Update contract data
+      await updateContract(selectedContract.id, {
+        title: data.title,
+        counterparty: data.counterparty,
+        type: data.type,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        value: parseFloat(data.value),
+        status: data.status
+      });
+      
+      // Upload any new files
+      if (editContractFiles.length > 0) {
+        for (const file of editContractFiles) {
+          await uploadAttachment(selectedContract.id, file);
+        }
+      }
+      
+      toast.success("Contrato atualizado com sucesso");
+      setOpenEditContractDialog(false);
+      setEditContractFiles([]);
+      
+      // Refresh attachments if view dialog is still open
+      if (openViewDialog) {
+        const updatedAttachments = await getContractAttachments(selectedContract.id);
+        setAttachments(updatedAttachments);
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar contrato:", error);
+      toast.error("Erro ao atualizar contrato");
+    }
+  };
+
   const handleAddNewContractFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
@@ -106,8 +172,22 @@ const BusinessContratos = () => {
     event.target.value = '';
   };
 
+  const handleAddEditContractFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    const newFiles = Array.from(files);
+    setEditContractFiles(prev => [...prev, ...newFiles]);
+    
+    event.target.value = '';
+  };
+
   const handleRemoveNewContractFile = (index: number) => {
     setNewContractFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveEditContractFile = (index: number) => {
+    setEditContractFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteContract = async (id: string) => {
@@ -137,8 +217,8 @@ const BusinessContratos = () => {
 
   const handleEditContract = (contract: any) => {
     setSelectedContract(contract);
-    setOpenEditDialog(true);
-    toast.info("Edição de contrato (em desenvolvimento)");
+    setOpenEditContractDialog(true);
+    setEditContractFiles([]);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, contractId: string) => {
@@ -180,6 +260,13 @@ const BusinessContratos = () => {
     { id: 'lease', label: 'Aluguel' },
     { id: 'employment', label: 'Trabalho' },
     { id: 'other', label: 'Outro' }
+  ];
+
+  const contractStatusOptions = [
+    { id: 'active', label: 'Ativo' },
+    { id: 'pending', label: 'Pendente' },
+    { id: 'expired', label: 'Expirado' },
+    { id: 'draft', label: 'Rascunho' }
   ];
 
   const renderListView = () => (
@@ -548,6 +635,215 @@ const BusinessContratos = () => {
               Editar
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Contract Dialog */}
+      <Dialog open={openEditContractDialog} onOpenChange={setOpenEditContractDialog}>
+        <DialogContent className="sm:max-w-[525px]">
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(handleSubmitEditContract)}>
+              <DialogHeader>
+                <DialogTitle>Editar Contrato</DialogTitle>
+                <DialogDescription>
+                  Altere os dados do contrato abaixo. Você também pode adicionar novos anexos.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <FormField
+                  control={editForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label htmlFor="edit-title">Título</Label>
+                      <FormControl>
+                        <Input id="edit-title" required placeholder="Título do contrato" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editForm.control}
+                  name="counterparty"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label htmlFor="edit-counterparty">Contraparte</Label>
+                      <FormControl>
+                        <Input id="edit-counterparty" required placeholder="Empresa ou pessoa" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editForm.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label htmlFor="edit-type">Tipo</Label>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo de contrato" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {contractTypes.map(type => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={editForm.control}
+                    name="start_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Label htmlFor="edit-start-date">Data Início</Label>
+                        <FormControl>
+                          <Input id="edit-start-date" type="date" required {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={editForm.control}
+                    name="end_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Label htmlFor="edit-end-date">Data Fim</Label>
+                        <FormControl>
+                          <Input id="edit-end-date" type="date" required {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={editForm.control}
+                  name="value"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label htmlFor="edit-value">Valor (R$)</Label>
+                      <FormControl>
+                        <Input 
+                          id="edit-value" 
+                          type="number" 
+                          step="0.01" 
+                          required 
+                          placeholder="0,00" 
+                          {...field}
+                          value={field.value}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label htmlFor="edit-status">Status</Label>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {contractStatusOptions.map(status => (
+                            <SelectItem key={status.id} value={status.id}>
+                              {status.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid gap-2">
+                  <Label>Anexos adicionais</Label>
+                  <div className="border rounded-md p-4">
+                    {editContractFiles.length > 0 ? (
+                      <div className="space-y-2">
+                        {editContractFiles.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between border p-2 rounded">
+                            <div className="flex items-center space-x-2 overflow-hidden">
+                              <Paperclip className="h-4 w-4 shrink-0" />
+                              <span className="truncate">{file.name}</span>
+                            </div>
+                            <Button 
+                              type="button"
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleRemoveEditContractFile(index)}
+                              className="text-red-600"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 border border-dashed rounded-md">
+                        <p className="text-muted-foreground">Adicione novos anexos (opcional)</p>
+                      </div>
+                    )}
+                    
+                    <div className="mt-4">
+                      <Label htmlFor="editContractFileUpload" className="cursor-pointer">
+                        <div className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm w-full justify-center">
+                          <Paperclip className="h-4 w-4" />
+                          <span>Adicionar Anexo</span>
+                        </div>
+                        <Input 
+                          id="editContractFileUpload" 
+                          type="file" 
+                          className="hidden" 
+                          onChange={handleAddEditContractFile}
+                        />
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => {
+                  setOpenEditContractDialog(false);
+                  setEditContractFiles([]);
+                }}>
+                  Cancelar
+                </Button>
+                <Button type="submit">Salvar Alterações</Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </DashboardLayout>
