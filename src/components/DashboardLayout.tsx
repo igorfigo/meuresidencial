@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,8 +39,6 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -50,7 +49,6 @@ interface MenuItem {
   icon: React.ReactNode;
   path: string;
   submenu?: MenuItem[];
-  badgeCount?: number;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -60,8 +58,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
-  const [newAnnouncementsCount, setNewAnnouncementsCount] = useState(0);
-  const [newDocumentsCount, setNewDocumentsCount] = useState(0);
 
   const isFinanceiroPath = location.pathname.includes('/financeiro');
 
@@ -70,48 +66,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       setExpandedSubmenu('Financeiro');
     }
   }, [location.pathname, isFinanceiroPath, user?.isAdmin]);
-
-  useEffect(() => {
-    if (user?.isResident) {
-      fetchNewContentCounts();
-    }
-  }, [user]);
-
-  const fetchNewContentCounts = async () => {
-    if (!user?.selectedCondominium) return;
-
-    try {
-      let lastLoginTime = localStorage.getItem('lastLoginTime');
-      if (!lastLoginTime) {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        lastLoginTime = sevenDaysAgo.toISOString();
-      }
-
-      const { count: announcementsCount, error: announcementsError } = await supabase
-        .from('announcements')
-        .select('*', { count: 'exact', head: true })
-        .eq('matricula', user.selectedCondominium)
-        .gt('created_at', lastLoginTime);
-
-      if (announcementsError) throw announcementsError;
-
-      const { count: documentsCount, error: documentsError } = await supabase
-        .from('documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('matricula', user.selectedCondominium)
-        .gt('created_at', lastLoginTime);
-
-      if (documentsError) throw documentsError;
-
-      setNewAnnouncementsCount(announcementsCount || 0);
-      setNewDocumentsCount(documentsCount || 0);
-
-      localStorage.setItem('lastLoginTime', new Date().toISOString());
-    } catch (error) {
-      console.error('Error fetching new content counts:', error);
-    }
-  };
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
@@ -170,18 +124,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   const residentMenuItems: MenuItem[] = [
     { name: 'Visão Geral', icon: <Home className="h-5 w-5" />, path: '/dashboard' },
-    { 
-      name: 'Comunicados', 
-      icon: <MessageSquare className="h-5 w-5" />, 
-      path: '/comunicados',
-      badgeCount: newAnnouncementsCount
-    },
-    { 
-      name: 'Documentos Úteis', 
-      icon: <FileIcon className="h-5 w-5" />, 
-      path: '/documentos',
-      badgeCount: newDocumentsCount
-    },
+    { name: 'Comunicados', icon: <MessageSquare className="h-5 w-5" />, path: '/comunicados' },
+    { name: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" />, path: '/documentos' },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
     { name: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" />, path: '/servicos' },
     { name: 'Minhas Cobranças', icon: <PaymentIcon className="h-5 w-5" />, path: '/minhas-cobrancas' },
@@ -297,7 +241,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             to={item.path}
             className={({ isActive }) =>
               cn(
-                "flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 isActive
                   ? "bg-sidebar-accent text-white"
                   : "text-sidebar-foreground hover:bg-sidebar-accent/50"
@@ -305,15 +249,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             }
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="flex items-center">
-              {item.icon}
-              <span className={cn("ml-3", !sidebarOpen && "lg:hidden")}>{item.name}</span>
-            </div>
-            {item.badgeCount > 0 && (sidebarOpen || mobileMenuOpen) && (
-              <Badge variant="destructive">
-                {item.badgeCount}
-              </Badge>
-            )}
+            {item.icon}
+            <span className={cn("ml-3", !sidebarOpen && "lg:hidden")}>{item.name}</span>
           </NavLink>
         )}
       </div>
@@ -544,4 +481,3 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 };
 
 export default DashboardLayout;
-
