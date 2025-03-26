@@ -181,34 +181,53 @@ export function useBusinessDocuments() {
       if (attachments.length > 0) {
         setIsUploading(true);
         
-        for (let i = 0; i < attachments.length; i++) {
-          const file = attachments[i];
-          const filePath = `business/${documentId}/${file.name}`;
+        // First, ensure the business_files bucket exists
+        try {
+          // Check if the bucket exists
+          const { data: buckets } = await supabase.storage.listBuckets();
+          const bucketExists = buckets?.some(bucket => bucket.name === 'business_files');
           
-          // Upload file to storage
-          const { error: uploadError } = await supabase.storage
-            .from('business_files')
-            .upload(filePath, file);
+          // If bucket doesn't exist, we'll skip this step as it would need admin privileges
+          // The bucket should be created by an administrator in the Supabase dashboard
+          if (!bucketExists) {
+            throw new Error("Storage bucket 'business_files' does not exist. Please contact the administrator.");
+          }
           
-          if (uploadError) throw uploadError;
-          
-          // Save attachment record in database
-          const { error: attachmentError } = await supabase
-            .from('business_document_attachments')
-            .insert({
-              document_id: documentId,
-              file_path: filePath,
-              file_type: file.type,
-              file_name: file.name,
-            });
-          
-          if (attachmentError) throw attachmentError;
-          
-          // Update progress
-          setUploadProgress(Math.round(((i + 1) / attachments.length) * 100));
+          for (let i = 0; i < attachments.length; i++) {
+            const file = attachments[i];
+            const filePath = `business/${documentId}/${file.name}`;
+            
+            // Upload file to storage with public-read access
+            const { error: uploadError } = await supabase.storage
+              .from('business_files')
+              .upload(filePath, file, {
+                upsert: false,
+                cacheControl: '3600'
+              });
+            
+            if (uploadError) throw uploadError;
+            
+            // Save attachment record in database
+            const { error: attachmentError } = await supabase
+              .from('business_document_attachments')
+              .insert({
+                document_id: documentId,
+                file_path: filePath,
+                file_type: file.type,
+                file_name: file.name,
+              });
+            
+            if (attachmentError) throw attachmentError;
+            
+            // Update progress
+            setUploadProgress(Math.round(((i + 1) / attachments.length) * 100));
+          }
+        } catch (error) {
+          console.error('Error with storage bucket:', error);
+          throw error;
+        } finally {
+          setIsUploading(false);
         }
-        
-        setIsUploading(false);
       }
       
       toast({
@@ -223,7 +242,7 @@ export function useBusinessDocuments() {
       console.error('Error saving business document:', error);
       toast({
         title: 'Erro ao salvar documento',
-        description: 'Não foi possível salvar as informações.',
+        description: 'Não foi possível salvar as informações. Detalhes: ' + (error instanceof Error ? error.message : 'Erro desconhecido'),
         variant: 'destructive',
       });
     } finally {
