@@ -181,31 +181,50 @@ export function useBusinessDocuments() {
       if (attachments.length > 0) {
         setIsUploading(true);
         
-        // First, ensure the business_files bucket exists
         try {
           // Check if the bucket exists
           const { data: buckets } = await supabase.storage.listBuckets();
+          console.log('Available buckets:', buckets);
+          
           const bucketExists = buckets?.some(bucket => bucket.name === 'business_files');
           
-          // If bucket doesn't exist, we'll skip this step as it would need admin privileges
-          // The bucket should be created by an administrator in the Supabase dashboard
+          // If bucket doesn't exist, create it
           if (!bucketExists) {
-            throw new Error("Storage bucket 'business_files' does not exist. Please contact the administrator.");
+            console.log('Bucket does not exist, attempting to create it...');
+            
+            // Try to create the bucket (may need admin privileges)
+            try {
+              await supabase.rpc('create_storage_bucket', {
+                bucket_name: 'business_files',
+                bucket_public: true
+              });
+              console.log('Bucket created successfully');
+            } catch (error) {
+              console.error('Failed to create bucket. Using fallback method.', error);
+              throw new Error("Storage bucket 'business_files' does not exist and couldn't be created. Please contact the administrator.");
+            }
           }
           
           for (let i = 0; i < attachments.length; i++) {
             const file = attachments[i];
             const filePath = `business/${documentId}/${file.name}`;
             
+            console.log(`Uploading file ${i+1}/${attachments.length}: ${filePath}`);
+            
             // Upload file to storage with public-read access
-            const { error: uploadError } = await supabase.storage
+            const { data: uploadData, error: uploadError } = await supabase.storage
               .from('business_files')
               .upload(filePath, file, {
-                upsert: false,
+                upsert: true,
                 cacheControl: '3600'
               });
             
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+              console.error('Error uploading file:', uploadError);
+              throw uploadError;
+            }
+            
+            console.log('File uploaded successfully:', uploadData);
             
             // Save attachment record in database
             const { error: attachmentError } = await supabase
@@ -217,7 +236,10 @@ export function useBusinessDocuments() {
                 file_name: file.name,
               });
             
-            if (attachmentError) throw attachmentError;
+            if (attachmentError) {
+              console.error('Error saving attachment record:', attachmentError);
+              throw attachmentError;
+            }
             
             // Update progress
             setUploadProgress(Math.round(((i + 1) / attachments.length) * 100));
