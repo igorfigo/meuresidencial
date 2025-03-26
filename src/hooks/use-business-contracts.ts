@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -44,7 +43,32 @@ export function useBusinessContracts() {
         throw error;
       }
       
-      return data as BusinessContract[];
+      // Check for expired contracts and update their status
+      const today = new Date();
+      const updatedContracts = data.map(contract => {
+        const endDate = new Date(contract.end_date);
+        if (endDate < today && contract.status === 'active') {
+          return { ...contract, status: 'expired' };
+        }
+        return contract;
+      });
+      
+      // Update any contracts that have expired
+      const expiredContracts = updatedContracts.filter(
+        (contract, index) => contract.status === 'expired' && data[index].status !== 'expired'
+      );
+      
+      if (expiredContracts.length > 0) {
+        // Update expired contracts in the database
+        for (const contract of expiredContracts) {
+          await supabase
+            .from('business_contracts')
+            .update({ status: 'expired' })
+            .eq('id', contract.id);
+        }
+      }
+      
+      return updatedContracts as BusinessContract[];
     }
   });
 

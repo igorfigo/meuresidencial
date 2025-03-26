@@ -272,10 +272,10 @@ const BusinessContratos = () => {
           <TableRow>
             <TableHead>Título</TableHead>
             <TableHead>Contraparte</TableHead>
-            <TableHead>Início</TableHead>
+            <TableHead className="text-center">Início</TableHead>
             <TableHead>Término</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+            <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -283,11 +283,11 @@ const BusinessContratos = () => {
             <TableRow key={contract.id}>
               <TableCell className="font-medium">{contract.title}</TableCell>
               <TableCell>{contract.counterparty}</TableCell>
-              <TableCell>{new Date(contract.start_date).toLocaleDateString('pt-BR')}</TableCell>
+              <TableCell className="text-center">{new Date(contract.start_date).toLocaleDateString('pt-BR')}</TableCell>
               <TableCell>{new Date(contract.end_date).toLocaleDateString('pt-BR')}</TableCell>
               <TableCell><ContractStatusBadge status={contract.status} /></TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
+              <TableCell className="text-center">
+                <div className="flex justify-center gap-2">
                   <Button 
                     variant="ghost" 
                     size="sm" 
