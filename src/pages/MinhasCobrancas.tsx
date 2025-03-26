@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -20,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 
 interface Charge {
   id: string;
@@ -114,8 +116,17 @@ const MinhasCobrancas = () => {
     enabled: !!residentId && !!matricula
   });
   
+  const handleDownloadBoleto = (chargeId: string) => {
+    // In a real implementation, this would download the boleto 
+    // or redirect to a payment gateway
+    toast({
+      title: "Boleto solicitado",
+      description: "O boleto será gerado e disponibilizado em instantes.",
+    });
+  };
+
   const filteredCharges = charges?.filter(charge => {
-    if (activeTab === 'pending') return charge.status === 'pending';
+    if (activeTab === 'pending') return charge.status === 'pending' || charge.status === 'overdue';
     if (activeTab === 'paid') return charge.status === 'paid';
     return false;
   }) || [];
@@ -162,7 +173,7 @@ const MinhasCobrancas = () => {
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertTitle>Nenhuma cobrança encontrada</AlertTitle>
                 <AlertDescription>
-                  Não existem cobranças {activeTab !== 'pending' && `com status "${statusColors[activeTab as keyof typeof statusColors].label}"`} registradas para este condomínio.
+                  Não existem cobranças {activeTab === 'paid' ? "pagas" : "pendentes"} registradas para a sua unidade.
                 </AlertDescription>
               </Alert>
             ) : (
@@ -204,6 +215,7 @@ const MinhasCobrancas = () => {
                               variant="ghost"
                               size="sm"
                               className="text-brand-600 hover:text-brand-800 hover:bg-brand-50"
+                              onClick={() => handleDownloadBoleto(charge.id)}
                             >
                               <FileDown className="h-4 w-4 mr-1" />
                               Boleto
