@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -266,6 +267,17 @@ const MinhasCobrancas = () => {
     return false;
   }) || [];
 
+  // Sort paid charges by reference month (year and month) in descending order
+  const sortedCharges = [...filteredCharges].sort((a, b) => {
+    if (activeTab === 'paid') {
+      const aDate = a.reference_month ? a.reference_month : `${a.year}-${a.month}`;
+      const bDate = b.reference_month ? b.reference_month : `${b.year}-${b.month}`;
+      // Compare in descending order (most recent first)
+      return bDate.localeCompare(aDate);
+    }
+    return 0; // No sorting for pending tab
+  });
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -295,7 +307,7 @@ const MinhasCobrancas = () => {
                 <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
                 <span className="ml-2 text-lg text-muted-foreground">Carregando cobranças...</span>
               </div>
-            ) : filteredCharges.length === 0 ? (
+            ) : sortedCharges.length === 0 ? (
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertTitle>Nenhuma cobrança encontrada</AlertTitle>
@@ -321,7 +333,7 @@ const MinhasCobrancas = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredCharges.map((charge) => (
+                    {sortedCharges.map((charge) => (
                       <TableRow key={charge.id}>
                         <TableCell className="font-medium">
                           {formatMonthYear(charge.month, charge.year)}
