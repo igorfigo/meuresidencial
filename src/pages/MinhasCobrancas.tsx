@@ -200,6 +200,12 @@ const MinhasCobrancas = () => {
     
     const generatedCharges: Charge[] = [];
     
+    // First, clean the valor_condominio to only have numbers for calculations
+    // Remove currency symbols (R$) and any non-numeric characters except decimal points
+    let cleanedAmount = residentDetails.valor_condominio.replace(/[^\d.,]/g, '');
+    // Replace commas with dots for numerical operations
+    cleanedAmount = cleanedAmount.replace(',', '.');
+    
     for (let month = 1; month <= 12; month++) {
       const monthStr = month.toString().padStart(2, '0');
       const dueDate = getDueDateFromPixSettings(monthStr, currentYear, dueDay);
