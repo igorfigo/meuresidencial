@@ -178,13 +178,14 @@ const MinhasCobrancas = () => {
   });
 
   // Filter charges for this year's upcoming months (current month included) for the pending tab
+  // Changed to include all charges for current year's upcoming months regardless of status
   const upcomingCharges = charges?.filter(charge => {
     const chargeDate = new Date(charge.reference_month);
     const chargeYear = chargeDate.getFullYear();
     const chargeMonth = chargeDate.getMonth();
     
-    // For pending tab, show only upcoming months of current year (including current month)
-    return chargeYear === currentYear && chargeMonth >= currentMonth && charge.status === 'pending';
+    // For pending tab, show all charges for upcoming months of current year (including current month)
+    return chargeYear === currentYear && chargeMonth >= currentMonth;
   }) || [];
 
   // Filter charges for paid tab
