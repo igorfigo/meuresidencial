@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, User, Home } from 'lucide-react';
+import { User, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -40,16 +40,13 @@ interface Reservation {
 export const ReservationsCalendar: React.FC = () => {
   const { user } = useApp();
   const matricula = user?.selectedCondominium || user?.matricula || '';
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   
   const fetchReservations = async () => {
     if (!matricula) {
-      setLoading(false);
-      return;
+      return [];
     }
     
-    setLoading(true);
     try {
       // First get all common areas for this condominium
       const { data: commonAreas, error: areaError } = await supabase
@@ -59,13 +56,11 @@ export const ReservationsCalendar: React.FC = () => {
       
       if (areaError) {
         console.error('Error fetching common areas:', areaError);
-        setLoading(false);
-        return;
+        return [];
       }
       
       if (!commonAreas || commonAreas.length === 0) {
-        setLoading(false);
-        return;
+        return [];
       }
       
       const areaIds = commonAreas.map(area => area.id);
@@ -86,19 +81,22 @@ export const ReservationsCalendar: React.FC = () => {
       
       if (error) {
         console.error('Error fetching reservations:', error);
-      } else {
-        setReservations(data as unknown as Reservation[]);
+        return [];
       }
+      
+      return data as unknown as Reservation[];
     } catch (error) {
       console.error('Error in fetchReservations:', error);
-    } finally {
-      setLoading(false);
+      return [];
     }
   };
   
-  useEffect(() => {
-    fetchReservations();
-  }, [matricula]);
+  // Use React Query to manage the data fetching and caching
+  const { data: reservations = [], isLoading } = useQuery({
+    queryKey: ['reservations', matricula],
+    queryFn: fetchReservations,
+    enabled: !!matricula,
+  });
 
   return (
     <Card className="border-t-4 border-t-brand-600">
@@ -110,19 +108,10 @@ export const ReservationsCalendar: React.FC = () => {
               Visualize todas as reservas das áreas comuns
             </CardDescription>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchReservations}
-            className="self-end"
-          >
-            <Calendar className="mr-2 h-4 w-4" />
-            Atualizar
-          </Button>
         </div>
       </CardHeader>
       <CardContent>
-        {loading ? (
+        {isLoading ? (
           <div className="py-10 text-center text-muted-foreground">
             Carregando agenda de reservas...
           </div>

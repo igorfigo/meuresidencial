@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -45,7 +46,7 @@ interface CommonAreaReservationDialogProps {
     closing_time?: string;
     valor?: string;
   };
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 const formSchema = z.object({
@@ -64,6 +65,7 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
 }) => {
   const { user } = useApp();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -118,7 +120,14 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
       
       toast.success('Reserva criada com sucesso!');
       form.reset();
-      onSuccess();
+      
+      // Invalidate the reservations query to trigger a refetch
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+      onOpenChange(false);
       
     } catch (error: any) {
       console.error('Error during reservation submission:', error);
