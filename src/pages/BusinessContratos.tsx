@@ -340,7 +340,7 @@ const BusinessContratos = () => {
               {searchQuery || selectedType || activeTab !== 'todos' ? 
                 "Tente ajustar os filtros da sua busca ou" : 
                 "Você ainda não possui contratos cadastrados. Vamos"}
-              {" criar seu primeiro contrato agora?
+              {" criar seu primeiro contrato agora?"}
             </p>
             <Button onClick={() => setOpenNewContractDialog(true)}>
               <Plus className="mr-2 h-4 w-4" />
