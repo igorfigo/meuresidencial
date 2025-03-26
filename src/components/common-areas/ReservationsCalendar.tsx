@@ -2,10 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { User, Home } from 'lucide-react';
+import { User, Home, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -21,6 +22,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 interface Reservation {
   id: string;
@@ -41,6 +53,12 @@ export const ReservationsCalendar: React.FC = () => {
   const { user } = useApp();
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const queryClient = useQueryClient();
+  
+  const [reservationToDelete, setReservationToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Only managers (non-residents and non-admin users) can remove reservations
+  const isManager = user && !user.isAdmin && !user.isResident;
   
   const fetchReservations = async () => {
     if (!matricula) {
@@ -98,6 +116,38 @@ export const ReservationsCalendar: React.FC = () => {
     enabled: !!matricula,
   });
 
+  const handleDeleteClick = (id: string) => {
+    setReservationToDelete(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!reservationToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('common_area_reservations')
+        .delete()
+        .eq('id', reservationToDelete);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Reserva removida com sucesso');
+      
+      // Refresh the data
+      queryClient.invalidateQueries({ queryKey: ['reservations', matricula] });
+      
+    } catch (error: any) {
+      console.error('Error deleting reservation:', error);
+      toast.error(`Erro ao excluir: ${error.message}`);
+    } finally {
+      setIsDeleting(false);
+      setReservationToDelete(null);
+    }
+  };
+
   return (
     <Card className="border-t-4 border-t-brand-600">
       <CardHeader>
@@ -126,6 +176,7 @@ export const ReservationsCalendar: React.FC = () => {
                 <TableHead>Data</TableHead>
                 <TableHead>Área</TableHead>
                 <TableHead>Morador</TableHead>
+                {isManager && <TableHead className="w-[100px]">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -147,12 +198,46 @@ export const ReservationsCalendar: React.FC = () => {
                       </div>
                     </div>
                   </TableCell>
+                  {isManager && (
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
+                        onClick={() => handleDeleteClick(reservation.id)}
+                        title="Remover reserva"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
       </CardContent>
+
+      <AlertDialog open={!!reservationToDelete} onOpenChange={(open) => !open && setReservationToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta reserva? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-destructive text-destructive-foreground"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
