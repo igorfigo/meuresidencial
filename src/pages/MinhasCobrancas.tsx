@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency } from '@/utils/currency';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle, FileDown } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -20,8 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
 
 interface Charge {
   id: string;
@@ -158,15 +156,6 @@ const MinhasCobrancas = () => {
     enabled: !!residentId && !!matricula && !!unit
   });
   
-  const handleDownloadBoleto = (chargeId: string) => {
-    // In a real implementation, this would download the boleto 
-    // or redirect to a payment gateway
-    toast({
-      title: "Boleto solicitado",
-      description: "O boleto será gerado e disponibilizado em instantes.",
-    });
-  };
-
   const filteredCharges = charges?.filter(charge => {
     if (activeTab === 'pending') return charge.status === 'pending' || charge.status === 'overdue';
     if (activeTab === 'paid') return charge.status === 'paid';
@@ -226,10 +215,8 @@ const MinhasCobrancas = () => {
                       <TableHead>Competência</TableHead>
                       <TableHead>Unidade</TableHead>
                       <TableHead>Valor</TableHead>
-                      <TableHead>Vencimento</TableHead>
                       <TableHead>Pagamento</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -243,7 +230,6 @@ const MinhasCobrancas = () => {
                         </TableCell>
                         <TableCell>{charge.unit}</TableCell>
                         <TableCell>{formatCurrency(parseFloat(charge.amount))}</TableCell>
-                        <TableCell>{formatDate(charge.due_date)}</TableCell>
                         <TableCell>{formatDate(charge.payment_date)}</TableCell>
                         <TableCell>
                           <Badge 
@@ -253,19 +239,6 @@ const MinhasCobrancas = () => {
                             {statusColors[charge.status].icon}
                             {statusColors[charge.status].label}
                           </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {charge.status !== 'paid' && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-brand-600 hover:text-brand-800 hover:bg-brand-50"
-                              onClick={() => handleDownloadBoleto(charge.id)}
-                            >
-                              <FileDown className="h-4 w-4 mr-1" />
-                              Boleto
-                            </Button>
-                          )}
                         </TableCell>
                       </TableRow>
                     ))}
