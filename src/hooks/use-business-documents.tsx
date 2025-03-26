@@ -194,7 +194,10 @@ export function useBusinessDocuments() {
             
             // Try to create the bucket (may need admin privileges)
             try {
-              const { error } = await supabase.rpc<SupabaseRPCTypes['create_storage_bucket']['returns']>(
+              const { error } = await supabase.rpc<
+                SupabaseRPCTypes['create_storage_bucket']['args'],
+                SupabaseRPCTypes['create_storage_bucket']['returns']
+              >(
                 'create_storage_bucket',
                 {
                   bucket_name: 'business_files',
