@@ -24,7 +24,6 @@ import {
   Bug,
   Mail,
   QrCode,
-  FileCog,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -64,6 +63,7 @@ export function Sidebar() {
   useEffect(() => {
     setIsMenuOpen(false);
     
+    // Mark items as viewed when navigating to their respective pages
     if (location.pathname === '/comunicados') {
       markAsViewed('announcements');
     } else if (location.pathname === '/documentos') {
@@ -88,7 +88,6 @@ export function Sidebar() {
       submenu: [
         { path: '/business-management/despesas', label: 'Despesas da Empresa', icon: <Receipt className="h-5 w-5" /> },
         { path: '/business-management/contratos', label: 'Contratos', icon: <FileText className="h-5 w-5" /> },
-        { path: '/business-management/documentos', label: 'Documentos Administrativos', icon: <FileCog className="h-5 w-5" /> },
       ]
     },
   ];
