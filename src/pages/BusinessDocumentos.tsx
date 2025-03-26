@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { BusinessDocumentsList } from '@/components/business-documents/BusinessDocumentsList';
@@ -6,8 +5,10 @@ import { BusinessDocumentForm } from '@/components/business-documents/BusinessDo
 import { useForm } from 'react-hook-form';
 import { BusinessDocument, BusinessDocumentFormValues, BusinessDocumentAttachment, useBusinessDocuments } from '@/hooks/use-business-documents';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 const BusinessDocumentos = () => {
+  const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<BusinessDocument | null>(null);
@@ -32,7 +33,6 @@ const BusinessDocumentos = () => {
     },
   });
 
-  // Reset form when switching between create and edit modes
   useEffect(() => {
     if (isCreating) {
       form.reset({
@@ -45,7 +45,6 @@ const BusinessDocumentos = () => {
     }
   }, [isCreating, form]);
 
-  // Load document data when editing
   useEffect(() => {
     const loadDocumentData = async () => {
       if (selectedDocument && isEditing) {
@@ -55,7 +54,6 @@ const BusinessDocumentos = () => {
           observacoes: selectedDocument.observacoes || '',
         });
         
-        // Fetch attachments
         try {
           const attachments = await fetchDocumentAttachments(selectedDocument.id);
           setExistingAttachments(attachments);
@@ -108,9 +106,7 @@ const BusinessDocumentos = () => {
 
   const onSubmit = async (data: BusinessDocumentFormValues) => {
     try {
-      // Check if there are either new attachments or existing attachments (for edit)
       if (attachments.length === 0 && existingAttachments.length === 0) {
-        // Show toast notification
         toast({
           title: "Erro ao salvar documento",
           description: "É necessário anexar pelo menos um arquivo.",
