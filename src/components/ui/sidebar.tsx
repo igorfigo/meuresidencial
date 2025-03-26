@@ -41,12 +41,15 @@ import {
 } from './dropdown-menu';
 import { Skeleton } from './skeleton';
 import { SwitchCondominium } from './switch-condominium';
+import { supabase } from '@/integrations/supabase/client';
+import { Badge } from './badge';
 
 interface MenuItem {
   path: string;
   label: string;
   icon: React.ReactNode;
   submenu?: MenuItem[];
+  badgeCount?: number;
 }
 
 export function Sidebar() {
@@ -55,10 +58,58 @@ export function Sidebar() {
   const location = useLocation();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [newAnnouncementsCount, setNewAnnouncementsCount] = useState(0);
+  const [newDocumentsCount, setNewDocumentsCount] = useState(0);
 
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (user?.isResident) {
+      fetchNewContentCounts();
+    }
+  }, [user]);
+
+  const fetchNewContentCounts = async () => {
+    if (!user?.selectedCondominium) return;
+
+    try {
+      // Get last login time or use 7 days ago as default
+      let lastLoginTime = localStorage.getItem('lastLoginTime');
+      if (!lastLoginTime) {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        lastLoginTime = sevenDaysAgo.toISOString();
+      }
+
+      // Check for new announcements
+      const { count: announcementsCount, error: announcementsError } = await supabase
+        .from('announcements')
+        .select('*', { count: 'exact', head: true })
+        .eq('matricula', user.selectedCondominium)
+        .gt('created_at', lastLoginTime);
+
+      if (announcementsError) throw announcementsError;
+
+      // Check for new documents
+      const { count: documentsCount, error: documentsError } = await supabase
+        .from('documents')
+        .select('*', { count: 'exact', head: true })
+        .eq('matricula', user.selectedCondominium)
+        .gt('created_at', lastLoginTime);
+
+      if (documentsError) throw documentsError;
+
+      setNewAnnouncementsCount(announcementsCount || 0);
+      setNewDocumentsCount(documentsCount || 0);
+
+      // Update last login time
+      localStorage.setItem('lastLoginTime', new Date().toISOString());
+    } catch (error) {
+      console.error('Error fetching new content counts:', error);
+    }
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -106,8 +157,18 @@ export function Sidebar() {
   
   const residentMenuItems: MenuItem[] = [
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
-    { path: '/comunicados', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
-    { path: '/documentos', label: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" /> },
+    { 
+      path: '/comunicados', 
+      label: 'Comunicados', 
+      icon: <MessageSquare className="h-5 w-5" />,
+      badgeCount: newAnnouncementsCount
+    },
+    { 
+      path: '/documentos', 
+      label: 'Documentos Úteis', 
+      icon: <FileIcon className="h-5 w-5" />,
+      badgeCount: newDocumentsCount
+    },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/servicos', label: 'Serviços Gerais', icon: <Briefcase className="h-5 w-5" /> },
     { path: '/minhas-cobrancas', label: 'Minhas Cobranças', icon: <Receipt className="h-5 w-5" /> },
@@ -170,8 +231,15 @@ export function Sidebar() {
             href={item.path}
             className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
           >
-            {item.icon}
-            <span className="ml-3">{item.label}</span>
+            <div className="flex items-center">
+              {item.icon}
+              <span className="ml-3">{item.label}</span>
+            </div>
+            {item.badgeCount > 0 && (
+              <Badge variant="destructive" className="ml-auto">
+                {item.badgeCount}
+              </Badge>
+            )}
           </a>
         </li>
       );
