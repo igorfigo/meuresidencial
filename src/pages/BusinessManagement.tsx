@@ -17,7 +17,7 @@ const BusinessManagement = () => {
             <TabsList className="mb-4">
               <TabsTrigger value="documents">
                 <File className="h-4 w-4 mr-2" />
-                Documentos
+                Repositório de Documentos
               </TabsTrigger>
               <TabsTrigger value="overview">
                 <FolderArchive className="h-4 w-4 mr-2" />
