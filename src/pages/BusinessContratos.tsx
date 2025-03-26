@@ -37,6 +37,7 @@ const BusinessContratos = () => {
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [attachments, setAttachments] = useState<ContractAttachment[]>([]);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
+  const [newContractFiles, setNewContractFiles] = useState<File[]>([]);
   
   const { 
     contracts, 
@@ -70,7 +71,7 @@ const BusinessContratos = () => {
     const status = "active";
     
     try {
-      await createContract({
+      const newContract = await createContract({
         title,
         counterparty,
         type,
@@ -80,12 +81,33 @@ const BusinessContratos = () => {
         status
       });
       
+      if (newContractFiles.length > 0) {
+        for (const file of newContractFiles) {
+          await uploadAttachment(newContract.id, file);
+        }
+      }
+      
       toast.success("Contrato criado com sucesso");
       setOpenNewContractDialog(false);
+      setNewContractFiles([]);
     } catch (error) {
       console.error("Erro ao criar contrato:", error);
       toast.error("Erro ao criar contrato");
     }
+  };
+
+  const handleAddNewContractFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    const newFiles = Array.from(files);
+    setNewContractFiles(prev => [...prev, ...newFiles]);
+    
+    event.target.value = '';
+  };
+
+  const handleRemoveNewContractFile = (index: number) => {
+    setNewContractFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteContract = async (id: string) => {
@@ -250,7 +272,7 @@ const BusinessContratos = () => {
                   <DialogHeader>
                     <DialogTitle>Novo Contrato</DialogTitle>
                     <DialogDescription>
-                      Preencha os dados do contrato abaixo. Você poderá anexar arquivos depois de criar o contrato.
+                      Preencha os dados do contrato abaixo. Você pode anexar arquivos durante a criação do contrato.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
@@ -291,9 +313,58 @@ const BusinessContratos = () => {
                       <Label htmlFor="value">Valor (R$)</Label>
                       <Input id="value" name="value" type="number" step="0.01" required placeholder="0,00" />
                     </div>
+                    
+                    <div className="grid gap-2">
+                      <Label>Anexos</Label>
+                      <div className="border rounded-md p-4">
+                        {newContractFiles.length > 0 ? (
+                          <div className="space-y-2">
+                            {newContractFiles.map((file, index) => (
+                              <div key={index} className="flex items-center justify-between border p-2 rounded">
+                                <div className="flex items-center space-x-2 overflow-hidden">
+                                  <Paperclip className="h-4 w-4 shrink-0" />
+                                  <span className="truncate">{file.name}</span>
+                                </div>
+                                <Button 
+                                  type="button"
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => handleRemoveNewContractFile(index)}
+                                  className="text-red-600"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-6 border border-dashed rounded-md">
+                            <p className="text-muted-foreground">Nenhum anexo adicionado</p>
+                          </div>
+                        )}
+                        
+                        <div className="mt-4">
+                          <Label htmlFor="newContractFileUpload" className="cursor-pointer">
+                            <div className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm w-full justify-center">
+                              <Paperclip className="h-4 w-4" />
+                              <span>Adicionar Anexo</span>
+                            </div>
+                            <Input 
+                              id="newContractFileUpload" 
+                              type="file" 
+                              className="hidden" 
+                              onChange={handleAddNewContractFile}
+                            />
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setOpenNewContractDialog(false)}>
+                    <Button type="button" variant="outline" onClick={() => {
+                      setOpenNewContractDialog(false);
+                      setNewContractFiles([]);
+                    }}>
                       Cancelar
                     </Button>
                     <Button type="submit">Salvar</Button>
@@ -366,7 +437,6 @@ const BusinessContratos = () => {
         )}
       </div>
 
-      {/* Dialog de Visualização de Contrato */}
       <Dialog open={openViewDialog} onOpenChange={setOpenViewDialog}>
         <DialogContent className="sm:max-w-[725px]">
           <DialogHeader>
@@ -407,7 +477,6 @@ const BusinessContratos = () => {
                 </div>
               </div>
               
-              {/* Attachment Section */}
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-semibold">Anexos</h3>
