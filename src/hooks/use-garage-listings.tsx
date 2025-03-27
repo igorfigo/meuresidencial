@@ -89,16 +89,24 @@ export const useGarageListings = () => {
 
       setIsLoading(true);
       
+      console.log('Adding garage listing with data:', {
+        resident_id: user.residentId,
+        matricula: user.matricula,
+        description
+      });
+      
       const { data, error } = await supabase
         .from('garage_listings')
         .insert({
           resident_id: user.residentId,
           matricula: user.matricula,
           description,
+          is_available: true
         })
         .select();
 
       if (error) {
+        console.error('Error details:', error);
         throw error;
       }
       
