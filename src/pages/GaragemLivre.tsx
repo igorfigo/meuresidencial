@@ -4,7 +4,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CarIcon, PlusCircleIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from 'lucide-react';
+import { CarIcon, PlusCircleIcon, TrashIcon } from 'lucide-react';
 import { useGarageListings } from '@/hooks/use-garage-listings';
 import { useApp } from '@/contexts/AppContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -18,7 +18,6 @@ const GaragemLivre = () => {
     myGarageListings, 
     isLoading, 
     addGarageListing, 
-    toggleGarageListingAvailability, 
     deleteGarageListing 
   } = useGarageListings();
   
@@ -34,13 +33,6 @@ const GaragemLivre = () => {
         setDescription('');
         setIsDialogOpen(false);
       }
-    });
-  };
-  
-  const handleToggleAvailability = (id: string, currentStatus: boolean) => {
-    toggleGarageListingAvailability.mutate({
-      id,
-      isAvailable: !currentStatus
     });
   };
   
@@ -122,19 +114,7 @@ const GaragemLivre = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleToggleAvailability(listing.id, listing.is_available)}
-                            >
-                              {listing.is_available ? (
-                                <XCircleIcon className="h-4 w-4 mr-1" />
-                              ) : (
-                                <CheckCircleIcon className="h-4 w-4 mr-1" />
-                              )}
-                              {listing.is_available ? 'Marcar Indisponível' : 'Marcar Disponível'}
-                            </Button>
+                          <div>
                             <Button 
                               variant="destructive" 
                               size="sm"
