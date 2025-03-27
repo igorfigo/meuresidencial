@@ -222,75 +222,7 @@ const BusinessManagement: React.FC = () => {
         
         <Separator className="my-4" />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Gestores</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 text-green-500 mr-2" />
-                    <span className="text-sm font-medium">Ativos</span>
-                  </div>
-                  <span className="text-lg font-bold text-green-600">{stats.activeManagers}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <UserX className="h-4 w-4 text-red-500 mr-2" />
-                    <span className="text-sm font-medium">Inativos</span>
-                  </div>
-                  <span className="text-lg font-bold text-red-600">{stats.inactiveManagers}</span>
-                </div>
-                <div className="pt-2 mt-2 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Total</span>
-                    <span className="text-xl font-bold">{stats.activeManagers + stats.inactiveManagers}</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Preferência por Nota Fiscal</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.invoicePreference}</div>
-              <p className="text-xs text-muted-foreground">
-                Gestores que optam por nota fiscal
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Distribuição Geográfica</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="mt-2">
-                <h4 className="text-sm font-medium text-muted-foreground">Por Estado</h4>
-                <ul className="text-sm mt-1">
-                  {stats.locationStats.states.map(([state, count]) => (
-                    <li 
-                      key={state} 
-                      className="flex justify-between items-center py-1 px-2 hover:bg-gray-100 rounded cursor-pointer"
-                      onClick={() => handleStateClick(state)}
-                    >
-                      <span>{state}</span>
-                      <span className="font-medium">{count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-          
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="md:col-span-2">
             <CardHeader>
               <div className="flex items-center">
@@ -364,7 +296,7 @@ const BusinessManagement: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="md:col-span-3">
+          <Card className="md:col-span-2">
             <CardHeader className="pb-2">
               <div className="flex items-center">
                 <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
