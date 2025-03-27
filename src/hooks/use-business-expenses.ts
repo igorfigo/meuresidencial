@@ -16,6 +16,7 @@ export interface BusinessExpense {
   notes?: string;
   user_id?: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 export const useBusinessExpenses = () => {
@@ -41,7 +42,7 @@ export const useBusinessExpenses = () => {
   });
 
   const createExpense = useMutation({
-    mutationFn: async (expense: Omit<BusinessExpense, 'id' | 'created_at'>) => {
+    mutationFn: async (expense: Omit<BusinessExpense, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase
         .from('business_expenses')
         .insert([{ ...expense, user_id: user?.id }])
@@ -52,7 +53,7 @@ export const useBusinessExpenses = () => {
         throw error;
       }
 
-      return data[0];
+      return data[0] as BusinessExpense;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-expenses'] });
@@ -65,7 +66,7 @@ export const useBusinessExpenses = () => {
 
   const updateExpense = useMutation({
     mutationFn: async (expense: BusinessExpense) => {
-      const { id, ...rest } = expense;
+      const { id, created_at, updated_at, ...rest } = expense;
       const { data, error } = await supabase
         .from('business_expenses')
         .update(rest)
@@ -77,7 +78,7 @@ export const useBusinessExpenses = () => {
         throw error;
       }
 
-      return data[0];
+      return data[0] as BusinessExpense;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-expenses'] });

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -94,7 +93,7 @@ export function ExpenseForm({ open, onOpenChange, defaultValues, onSubmit }: Exp
   const handleSubmit = (values: ExpenseFormValues) => {
     const expense: BusinessExpense = {
       ...values,
-      ...(defaultValues?.id ? { id: defaultValues.id } : {}),
+      ...(defaultValues?.id ? { id: defaultValues.id } : {})
     };
     
     onSubmit(expense);
