@@ -51,7 +51,6 @@ const CadastroGestor = () => {
           <p className="text-muted-foreground mt-1">
             Cadastre e gerencie as informações do condomínio e do representante legal.
           </p>
-          <Separator className="mt-4" />
         </header>
 
         <Card className="mb-6 p-4 border-t-4 border-t-brand-600 shadow-md">
