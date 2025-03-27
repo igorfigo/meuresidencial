@@ -26,10 +26,15 @@ export const useBusinessExpenses = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Query to fetch all business expenses
-  const { data: expenses = [], isLoading: isLoadingExpenses, error } = useQuery({
+  const { data: expensesData = [], isLoading: isLoadingExpenses, error } = useQuery({
     queryKey: ['business-expenses'],
     queryFn: getBusinessExpenses,
   });
+
+  // Safely typecast expenses data
+  const expenses = Array.isArray(expensesData) && expensesData.length > 0 && !('error' in expensesData[0])
+    ? (expensesData as BusinessExpense[])
+    : [];
 
   // Mutation to create a new expense
   const createExpenseMutation = useMutation({
@@ -86,7 +91,7 @@ export const useBusinessExpenses = () => {
   });
 
   return {
-    expenses: expenses as BusinessExpense[],
+    expenses,
     isLoading: isLoading || isLoadingExpenses,
     error,
     createExpense: (expense: Omit<BusinessExpense, 'id' | 'created_at' | 'updated_at'>) => createExpenseMutation.mutate(expense),
