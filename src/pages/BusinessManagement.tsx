@@ -27,9 +27,24 @@ import { useBusinessExpenses } from '@/hooks/use-business-expenses';
 import { format, subMonths, startOfMonth, differenceInCalendarMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatToBRL } from '@/utils/currency';
-import { BarChart3, DollarSign, PieChart as PieChartIcon } from 'lucide-react';
+import { BarChart3, DollarSign, PieChartIcon } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
+
+// Category display names mapping
+const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
+  'aluguel': 'Aluguel',
+  'servicos-contabeis': 'Serviços Contábeis',
+  'folha-pagamento': 'Folha de Pagamento',
+  'impostos': 'Impostos',
+  'marketing': 'Marketing',
+  'tecnologia': 'Tecnologia',
+  'materiais': 'Materiais',
+  'servicos-terceirizados': 'Serviços Terceirizados',
+  'despesas-administrativas': 'Despesas Administrativas',
+  'outros': 'Outros'
+};
 
 const BusinessManagement: React.FC = () => {
   const { expenses } = useBusinessExpenses();
@@ -79,6 +94,7 @@ const BusinessManagement: React.FC = () => {
     
     return Object.entries(categoryTotals).map(([name, value]) => ({
       name,
+      displayName: CATEGORY_DISPLAY_NAMES[name] || name,
       value
     }));
   };
@@ -96,6 +112,14 @@ const BusinessManagement: React.FC = () => {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Business Management</h1>
         </div>
+        
+        <div className="prose dark:prose-invert max-w-none">
+          <p className="text-muted-foreground">
+            Painel de controle financeiro para gestão das despesas empresariais. Acompanhe os gastos por categoria e a evolução mensal.
+          </p>
+        </div>
+        
+        <Separator className="my-4" />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
@@ -138,16 +162,22 @@ const BusinessManagement: React.FC = () => {
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
-                      nameKey="name"
-                      label={({ name, percent }) => 
-                        `${name}: ${(percent * 100).toFixed(0)}%`
+                      nameKey="displayName"
+                      label={({ displayName, percent }) => 
+                        `${displayName}: ${(percent * 100).toFixed(0)}%`
                       }
                     >
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => formatToBRL(value)} />
+                    <Tooltip 
+                      formatter={(value: number) => formatToBRL(value)} 
+                      labelFormatter={(name) => {
+                        const item = categoryData.find(c => c.displayName === name);
+                        return item?.displayName || name;
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -158,7 +188,7 @@ const BusinessManagement: React.FC = () => {
                       className="w-3 h-3 mr-1 rounded-sm" 
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
-                    <span className="truncate">{category.name}</span>
+                    <span className="truncate">{category.displayName}</span>
                   </div>
                 ))}
               </div>
@@ -208,3 +238,4 @@ const BusinessManagement: React.FC = () => {
 };
 
 export default BusinessManagement;
+
