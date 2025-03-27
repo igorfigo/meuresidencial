@@ -24,6 +24,9 @@ export const SubscriptionDetailsCard = ({
   const [isLoading, setIsLoading] = useState(false);
   const [localCondominiumData, setLocalCondominiumData] = useState(condominiumData);
   
+  // Check if CNPJ is empty or null
+  const isCnpjEmpty = !localCondominiumData.cnpj || localCondominiumData.cnpj.trim() === '';
+  
   const handleTipoDocumentoChange = async (value: string) => {
     if (!user?.matricula) return;
     
@@ -137,19 +140,25 @@ export const SubscriptionDetailsCard = ({
         <div className="space-y-2">
           <Label htmlFor="tipoDocumento">Nota Fiscal / Recibo</Label>
           <Select 
-            value={localCondominiumData.tipodocumento || ''}
+            value={isCnpjEmpty ? 'recibo' : (localCondominiumData.tipodocumento || '')}
             onValueChange={handleTipoDocumentoChange}
+            disabled={isCnpjEmpty}
           >
             <SelectTrigger id="tipoDocumento">
               <SelectValue placeholder="Selecione o tipo de documento" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="notaFiscal">Nota Fiscal</SelectItem>
+                {!isCnpjEmpty && <SelectItem value="notaFiscal">Nota Fiscal</SelectItem>}
                 <SelectItem value="recibo">Recibo</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
+          {isCnpjEmpty && (
+            <p className="text-xs text-muted-foreground mt-1">
+              CNPJ não informado. Apenas Recibo disponível.
+            </p>
+          )}
         </div>
       </div>
       
