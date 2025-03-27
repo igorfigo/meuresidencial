@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X, Download, FileEdit, Trash } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -283,7 +282,6 @@ const BusinessContratos = () => {
             <TableHead>Contraparte</TableHead>
             <TableHead className="text-center">Início</TableHead>
             <TableHead>Término</TableHead>
-            <TableHead>Valor</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-center">Ações</TableHead>
           </TableRow>
@@ -295,7 +293,6 @@ const BusinessContratos = () => {
               <TableCell>{contract.counterparty}</TableCell>
               <TableCell className="text-center">{formatDate(contract.start_date)}</TableCell>
               <TableCell>{formatDate(contract.end_date)}</TableCell>
-              <TableCell>{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(contract.value)}</TableCell>
               <TableCell><ContractStatusBadge status={contract.status} /></TableCell>
               <TableCell className="text-center">
                 <div className="flex justify-center gap-2">
