@@ -84,6 +84,9 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
             placeholder="00.000.000/0001-00"
             maxLength={18}
           />
+          <p className="text-xs text-muted-foreground">
+            Informe todos os 14 dígitos ou deixe em branco.
+          </p>
         </div>
         
         <div className="space-y-2">

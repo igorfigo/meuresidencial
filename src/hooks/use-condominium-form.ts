@@ -196,7 +196,22 @@ export const useCondominiumForm = () => {
     }
   };
 
+  const validateCnpj = (cnpj: string): boolean => {
+    if (!cnpj || cnpj.trim() === '') {
+      return true;
+    }
+    
+    const cnpjDigits = cnpj.replace(/\D/g, '');
+    
+    return cnpjDigits.length === 14;
+  };
+
   const onSubmit = async (data: FormFields) => {
+    if (!validateCnpj(data.cnpj)) {
+      toast.error('CNPJ inválido. Informe todos os 14 dígitos ou deixe em branco.');
+      return;
+    }
+
     if (!isExistingRecord) {
       if (!data.senha) {
         toast.error('Senha é obrigatória para novos cadastros.');
@@ -214,7 +229,6 @@ export const useCondominiumForm = () => {
       }
     }
 
-    // Create base formatted data without password fields
     const formattedData: Record<string, any> = {
       matricula: data.matricula,
       cnpj: data.cnpj,
@@ -240,7 +254,6 @@ export const useCondominiumForm = () => {
       ativo: data.ativo
     };
 
-    // Only include password fields if they are filled
     if (data.senha && data.confirmarSenha) {
       formattedData.senha = data.senha;
       formattedData.confirmarsenha = data.confirmarSenha;
