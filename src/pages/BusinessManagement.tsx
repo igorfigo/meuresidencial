@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -16,6 +17,8 @@ import {
   Tooltip, 
   Legend, 
   ResponsiveContainer,
+  PieChart,
+  Pie,
   Cell
 } from 'recharts';
 import { ChartContainer } from '@/components/ui/chart';
@@ -24,39 +27,42 @@ import { useBusinessExpenses } from '@/hooks/use-business-expenses';
 import { format, subMonths, startOfMonth, differenceInCalendarMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatToBRL } from '@/utils/currency';
-import { BarChart3, DollarSign } from 'lucide-react';
+import { BarChart3, DollarSign, PieChartIcon } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
+// Category display names mapping
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   'aluguel': 'Aluguel',
-  'servicos-publicos': 'Serviços Públicos',
+  'servicos-contabeis': 'Serviços Contábeis',
   'folha-pagamento': 'Folha de Pagamento',
   'impostos': 'Impostos',
   'marketing': 'Marketing',
-  'suprimentos': 'Suprimentos',
-  'manutencao': 'Manutenção',
-  'software-assinaturas': 'Software/Assinaturas',
-  'servicos-juridicos': 'Serviços Jurídicos',
-  'servicos-contabeis': 'Serviços Contábeis',
-  'viagens': 'Viagens',
+  'tecnologia': 'Tecnologia',
+  'materiais': 'Materiais',
+  'servicos-terceirizados': 'Serviços Terceirizados',
+  'despesas-administrativas': 'Despesas Administrativas',
   'outros': 'Outros'
 };
 
 const BusinessManagement: React.FC = () => {
   const { expenses } = useBusinessExpenses();
 
+  // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
+  // Generate monthly expenses data for the last 12 months
   const getLast12MonthsData = () => {
     const today = new Date();
     const monthlyData = [];
     
+    // Create an array with the last 12 months
     for (let i = 11; i >= 0; i--) {
       const monthDate = subMonths(today, i);
       const monthStr = format(monthDate, 'MMM/yy', { locale: ptBR });
       
+      // Filter expenses for this month
       const monthlyExpenses = expenses.filter(expense => {
         const expenseDate = new Date(expense.date);
         const expenseMonth = startOfMonth(expenseDate);
@@ -75,6 +81,7 @@ const BusinessManagement: React.FC = () => {
     return monthlyData;
   };
 
+  // Generate category data
   const getCategoryData = () => {
     const categoryTotals: Record<string, number> = {};
     
@@ -89,7 +96,7 @@ const BusinessManagement: React.FC = () => {
       name,
       displayName: CATEGORY_DISPLAY_NAMES[name] || name,
       value
-    })).sort((a, b) => b.value - a.value);
+    }));
   };
 
   const monthlyData = getLast12MonthsData();
@@ -139,47 +146,51 @@ const BusinessManagement: React.FC = () => {
           <Card className="md:col-span-2">
             <CardHeader>
               <div className="flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
+                <PieChartIcon className="h-5 w-5 mr-2 text-blue-500" />
                 <CardTitle>Despesas por Categoria</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <div className="h-60">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={categoryData}
-                    layout="horizontal"
-                    margin={{ top: 5, right: 20, left: 20, bottom: 50 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="name" 
-                      tickFormatter={(value) => CATEGORY_DISPLAY_NAMES[value] || value}
-                      angle={-45}
-                      textAnchor="end"
-                      height={70}
-                    />
-                    <YAxis tickFormatter={formatTooltipValue} />
-                    <Tooltip 
-                      formatter={(value: number) => [formatToBRL(value), 'Valor']}
-                      labelFormatter={(name) => CATEGORY_DISPLAY_NAMES[name] || name}
-                    />
-                    <Bar 
-                      dataKey="value" 
-                      name="Valor"
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="displayName"
+                      label={({ displayName, percent }) => 
+                        `${displayName}: ${(percent * 100).toFixed(0)}%`
+                      }
                     >
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
-                    </Bar>
-                    <Legend 
-                      formatter={(value, entry) => {
-                        const dataItem = categoryData.find(item => item.name === (entry.payload as any).name);
-                        return dataItem?.displayName || value;
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: number) => formatToBRL(value)} 
+                      labelFormatter={(name) => {
+                        const item = categoryData.find(c => c.displayName === name);
+                        return item?.displayName || name;
                       }}
                     />
-                  </BarChart>
+                  </PieChart>
                 </ResponsiveContainer>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+                {categoryData.map((category, index) => (
+                  <div key={category.name} className="flex items-center text-xs">
+                    <div 
+                      className="w-3 h-3 mr-1 rounded-sm" 
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <span className="truncate">{category.displayName}</span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -227,3 +238,4 @@ const BusinessManagement: React.FC = () => {
 };
 
 export default BusinessManagement;
+
