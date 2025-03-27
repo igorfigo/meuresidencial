@@ -106,6 +106,27 @@ const BusinessManagement: React.FC = () => {
     return formatToBRL(value);
   };
 
+  // Custom formatter for the Legend component
+  const renderCategoryLegend = (props: any) => {
+    const { payload } = props;
+    
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+        {payload.map((entry: any, index: number) => (
+          <div key={`item-${index}`} className="flex items-center text-xs">
+            <div 
+              className="w-3 h-3 mr-1 rounded-sm" 
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="truncate">
+              {CATEGORY_DISPLAY_NAMES[entry.value] || entry.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -162,7 +183,7 @@ const BusinessManagement: React.FC = () => {
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
-                      nameKey="displayName"
+                      nameKey="name"
                       label={({ displayName, percent }) => 
                         `${displayName}: ${(percent * 100).toFixed(0)}%`
                       }
@@ -172,25 +193,20 @@ const BusinessManagement: React.FC = () => {
                       ))}
                     </Pie>
                     <Tooltip 
-                      formatter={(value: number) => formatToBRL(value)} 
+                      formatter={(value: number) => formatToBRL(value)}
                       labelFormatter={(name) => {
-                        const item = categoryData.find(c => c.displayName === name);
+                        const item = categoryData.find(c => c.name === name);
                         return item?.displayName || name;
+                      }}
+                    />
+                    <Legend 
+                      formatter={(value, entry) => {
+                        const categoryKey = value;
+                        return CATEGORY_DISPLAY_NAMES[categoryKey] || categoryKey;
                       }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
-                {categoryData.map((category, index) => (
-                  <div key={category.name} className="flex items-center text-xs">
-                    <div 
-                      className="w-3 h-3 mr-1 rounded-sm" 
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    />
-                    <span className="truncate">{category.displayName}</span>
-                  </div>
-                ))}
               </div>
             </CardContent>
           </Card>
@@ -238,4 +254,3 @@ const BusinessManagement: React.FC = () => {
 };
 
 export default BusinessManagement;
-
