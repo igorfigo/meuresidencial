@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
   Card, 
@@ -121,7 +120,28 @@ const BusinessManagement: React.FC = () => {
         
         <Separator className="my-4" />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center">
+                <DollarSign className="h-5 w-5 mr-2 text-blue-500" />
+                <CardTitle>Despesa Total</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-40">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-blue-600">
+                    {formatToBRL(totalExpenses)}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Total de {expenses.length} registros
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="md:col-span-2">
             <CardHeader>
               <div className="flex items-center">
@@ -173,29 +193,8 @@ const BusinessManagement: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center">
-                <DollarSign className="h-5 w-5 mr-2 text-blue-500" />
-                <CardTitle>Despesa Total</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-40">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-blue-600">
-                    {formatToBRL(totalExpenses)}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Total de {expenses.length} registros
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
           
-          <Card className="md:col-span-2">
+          <Card className="md:col-span-3">
             <CardHeader className="pb-2">
               <div className="flex items-center">
                 <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
