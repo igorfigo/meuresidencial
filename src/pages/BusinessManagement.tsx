@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
   Card, 
@@ -29,9 +28,6 @@ import { ptBR } from 'date-fns/locale';
 import { formatToBRL } from '@/utils/currency';
 import { BarChart3, DollarSign, PieChartIcon } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { BrazilMap } from '@/components/businessManagement/BrazilMap';
-import { supabase } from '@/integrations/supabase/client';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
@@ -49,35 +45,8 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   'outros': 'Outros'
 };
 
-interface LocationStats {
-  states: [string, number][];
-  cities: Record<string, [string, number][]>;
-  neighborhoods: [string, number][];
-}
-
-interface DashboardStats {
-  activeManagers: number;
-  invoicePreference: number;
-  locationStats: LocationStats;
-}
-
 const BusinessManagement: React.FC = () => {
   const { expenses } = useBusinessExpenses();
-  const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
-  const [stats, setStats] = useState<DashboardStats>({
-    activeManagers: 0,
-    invoicePreference: 0,
-    locationStats: {
-      states: [],
-      cities: {},
-      neighborhoods: []
-    }
-  });
-
-  React.useEffect(() => {
-    fetchDashboardData();
-  }, []);
 
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -129,85 +98,11 @@ const BusinessManagement: React.FC = () => {
     }));
   };
 
-  async function fetchDashboardData() {
-    try {
-      const { count: activeCount, error: activeError } = await supabase
-        .from('condominiums')
-        .select('*', { count: 'exact', head: true })
-        .eq('ativo', true);
-      
-      if (activeError) throw activeError;
-      
-      const { count: invoiceCount, error: invoiceError } = await supabase
-        .from('condominiums')
-        .select('*', { count: 'exact', head: true })
-        .eq('tipodocumento', 'notaFiscal');
-      
-      if (invoiceError) throw invoiceError;
-      
-      const { data: locationData, error: locationError } = await supabase
-        .from('condominiums')
-        .select('estado, cidade, bairro');
-      
-      if (locationError) throw locationError;
-      
-      const stateCount: Record<string, number> = {};
-      const cityByState: Record<string, Record<string, number>> = {};
-      const neighborhoodCount: Record<string, number> = {};
-      
-      locationData.forEach(item => {
-        if (item.estado) {
-          stateCount[item.estado] = (stateCount[item.estado] || 0) + 1;
-          
-          if (item.cidade) {
-            if (!cityByState[item.estado]) {
-              cityByState[item.estado] = {};
-            }
-            cityByState[item.estado][item.cidade] = (cityByState[item.estado][item.cidade] || 0) + 1;
-          }
-        }
-        
-        if (item.bairro) {
-          neighborhoodCount[item.bairro] = (neighborhoodCount[item.bairro] || 0) + 1;
-        }
-      });
-      
-      const topStates = Object.entries(stateCount)
-        .sort((a, b) => b[1] - a[1]);
-          
-      const citiesByState: Record<string, [string, number][]> = {};
-      Object.entries(cityByState).forEach(([state, cities]) => {
-        citiesByState[state] = Object.entries(cities).sort((a, b) => b[1] - a[1]);
-      });
-      
-      const topNeighborhoods = Object.entries(neighborhoodCount)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-      
-      setStats({
-        activeManagers: activeCount || 0,
-        invoicePreference: invoiceCount || 0,
-        locationStats: {
-          states: topStates,
-          cities: citiesByState,
-          neighborhoods: topNeighborhoods
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    }
-  }
-
   const monthlyData = getLast12MonthsData();
   const categoryData = getCategoryData();
 
   const formatTooltipValue = (value: number) => {
     return formatToBRL(value);
-  };
-
-  const handleStateClick = (state: string) => {
-    setSelectedState(state);
-    setIsStateDetailOpen(true);
   };
 
   return (
@@ -285,14 +180,19 @@ const BusinessManagement: React.FC = () => {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+                {categoryData.map((category, index) => (
+                  <div key={category.name} className="flex items-center text-xs">
+                    <div 
+                      className="w-3 h-3 mr-1 rounded-sm" 
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <span className="truncate">{category.displayName}</span>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
-          
-          {/* Brazil Map Component */}
-          <BrazilMap 
-            states={stats.locationStats.states} 
-            onStateClick={handleStateClick}
-          />
           
           <Card className="md:col-span-3">
             <CardHeader className="pb-2">
@@ -332,28 +232,6 @@ const BusinessManagement: React.FC = () => {
           </Card>
         </div>
       </div>
-
-      <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Cidades em {selectedState}</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            {selectedState && stats.locationStats.cities[selectedState] ? (
-              <ul className="space-y-2">
-                {stats.locationStats.cities[selectedState].map(([city, count]) => (
-                  <li key={city} className="flex justify-between items-center py-2 border-b">
-                    <span>{city}</span>
-                    <span className="font-medium">{count}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">Sem dados de cidades para este estado.</p>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
     </DashboardLayout>
   );
 };
