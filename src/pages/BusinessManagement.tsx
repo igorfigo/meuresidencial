@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -42,17 +43,7 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   'materiais': 'Materiais',
   'servicos-terceirizados': 'Serviços Terceirizados',
   'despesas-administrativas': 'Despesas Administrativas',
-  'outros': 'Outros',
-  'accounting': 'Serviços Contábeis',
-  'rent': 'Aluguel',
-  'payroll': 'Folha de Pagamento',
-  'taxes': 'Impostos',
-  'marketing-expenses': 'Marketing',
-  'technology': 'Tecnologia',
-  'materials': 'Materiais',
-  'outsourced-services': 'Serviços Terceirizados',
-  'administrative': 'Despesas Administrativas',
-  'other': 'Outros'
+  'outros': 'Outros'
 };
 
 const BusinessManagement: React.FC = () => {
@@ -113,6 +104,25 @@ const BusinessManagement: React.FC = () => {
 
   const formatTooltipValue = (value: number) => {
     return formatToBRL(value);
+  };
+
+  // Custom render for the PieChart legend
+  const renderCustomizedLegend = (props: any) => {
+    const { payload } = props;
+    
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+        {payload.map((entry: any, index: number) => (
+          <div key={`legend-${index}`} className="flex items-center text-xs">
+            <div 
+              className="w-3 h-3 mr-1 rounded-sm" 
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="truncate">{entry.value}</span>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -188,13 +198,14 @@ const BusinessManagement: React.FC = () => {
                       }}
                     />
                     <Legend 
-                      formatter={(value, entry) => {
-                        const dataEntry = categoryData.find(item => 
-                          item.name === entry.dataKey || 
-                          item.name === value
-                        );
-                        return dataEntry?.displayName || value;
-                      }}
+                      content={renderCustomizedLegend}
+                      payload={
+                        categoryData.map((item, index) => ({
+                          value: item.displayName,
+                          color: COLORS[index % COLORS.length],
+                          type: 'square'
+                        }))
+                      }
                     />
                   </PieChart>
                 </ResponsiveContainer>
