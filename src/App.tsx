@@ -61,7 +61,7 @@ function App() {
               <Route path="/gerar-faturas" element={<AuthRequired><GerarFaturas /></AuthRequired>} />
               <Route path="/gerenciar-avisos" element={<AuthRequired><GerenciarAvisos /></AuthRequired>} />
               <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
-              <Route path="/business-cost" element={<AdminOnly><BusinessCost /></AdminOnly>} />
+              <Route path="/despesas-empresariais" element={<AdminOnly><BusinessCost /></AdminOnly>} />
               
               {/* Manager Routes */}
               <Route path="/moradores" element={<AuthRequired><Moradores /></AuthRequired>} />

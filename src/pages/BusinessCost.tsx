@@ -14,7 +14,6 @@ import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/utils/currency';
 import { toast } from 'sonner';
 import { useBusinessExpenses, BusinessExpense } from '@/hooks/use-business-expenses';
-import { BusinessExpenseCharts } from '@/components/business/BusinessExpenseCharts';
 
 const expenseCategories = [
   { id: 'rent', label: 'Aluguel' },
@@ -189,11 +188,6 @@ const BusinessCost = () => {
             </Dialog>
           </div>
         </div>
-
-        {/* Charts Section */}
-        {!isLoading && expenses?.length > 0 && (
-          <BusinessExpenseCharts expenses={expenses} expenseCategories={expenseCategories} />
-        )}
 
         <div className="mb-8 flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
