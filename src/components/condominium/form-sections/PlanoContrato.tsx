@@ -17,10 +17,11 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   const { register, setValue, watch } = useFormContext<FormFields>();
   const { plans, isLoading: isLoadingPlans, getPlanValue } = usePlans();
   
-  // Watch for changes to planoContratado and desconto
+  // Watch for changes to planoContratado, desconto, and cnpj
   const planoContratado = watch('planoContratado');
   const desconto = watch('desconto');
   const valorPlano = watch('valorPlano');
+  const cnpj = watch('cnpj');
 
   // Effect to update valorPlano when planoContratado changes
   React.useEffect(() => {
@@ -41,6 +42,13 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     
     setValue('valorMensal', valorMensal);
   }, [valorPlano, desconto, setValue]);
+
+  // Effect to ensure tipoDocumento is 'recibo' when CNPJ is empty
+  React.useEffect(() => {
+    if (!cnpj || cnpj.trim() === '') {
+      setValue('tipoDocumento', 'recibo');
+    }
+  }, [cnpj, setValue]);
 
   const handlePlanoChange = (value: string) => {
     setValue('planoContratado', value);
@@ -68,6 +76,9 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     setValue('vencimento', '10');
     setValue('formaPagamento', 'pix');
   }, [setValue]);
+
+  // Check if CNPJ is empty to determine if tipoDocumento Select should be disabled
+  const isCnpjEmpty = !cnpj || cnpj.trim() === '';
 
   return (
     <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md">
@@ -163,17 +174,23 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
           <Select 
             value={watch('tipoDocumento')}
             onValueChange={(value) => setValue('tipoDocumento', value)}
+            disabled={isCnpjEmpty}
           >
             <SelectTrigger id="tipoDocumento">
               <SelectValue placeholder="Selecione o tipo de documento" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="notaFiscal">Nota Fiscal</SelectItem>
+                {!isCnpjEmpty && <SelectItem value="notaFiscal">Nota Fiscal</SelectItem>}
                 <SelectItem value="recibo">Recibo</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
+          {isCnpjEmpty && (
+            <p className="text-xs text-muted-foreground mt-1">
+              CNPJ não informado. Apenas Recibo disponível.
+            </p>
+          )}
         </div>
       </div>
     </Card>

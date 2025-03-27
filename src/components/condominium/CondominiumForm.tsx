@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { FormProvider } from 'react-hook-form';
+import React, { useEffect } from 'react';
+import { FormProvider, useWatch } from 'react-hook-form';
 import { Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InfoCondominio } from './form-sections/InfoCondominio';
@@ -27,6 +27,14 @@ export const CondominiumForm = ({
   toggleAtivoStatus
 }: CondominiumFormProps) => {
   const ativo = form.watch('ativo');
+  const cnpj = form.watch('cnpj');
+  
+  // Effect to ensure tipoDocumento is 'recibo' when CNPJ is empty on form load or change
+  useEffect(() => {
+    if (!cnpj || cnpj.trim() === '') {
+      form.setValue('tipoDocumento', 'recibo');
+    }
+  }, [cnpj, form]);
   
   return (
     <FormProvider {...form}>
