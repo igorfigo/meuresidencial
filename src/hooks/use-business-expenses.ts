@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useApp } from '@/contexts/AppContext';
@@ -24,12 +23,18 @@ export const useBusinessExpenses = () => {
     
     try {
       // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('business_expenses')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (fetchError) {
+        // Check for specific RLS policy error
+        if (fetchError.message?.includes('infinite recursion detected in policy')) {
+          throw new Error('Erro de permissão: Problema na política de segurança do banco de dados. Por favor, entre em contato com o suporte.');
+        }
+        throw fetchError;
+      }
       
       setExpenses(data as BusinessExpenseWithId[] || []);
     } catch (error: any) {
@@ -64,7 +69,7 @@ export const useBusinessExpenses = () => {
   const addExpense = async (expense: BusinessExpense) => {
     try {
       // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
-      const { data, error } = await supabase
+      const { data, error: addError } = await supabase
         .from('business_expenses')
         .insert([
           {
@@ -77,13 +82,20 @@ export const useBusinessExpenses = () => {
         ])
         .select();
       
-      if (error) throw error;
+      if (addError) {
+        // Check for specific RLS policy error
+        if (addError.message?.includes('infinite recursion detected in policy')) {
+          throw new Error('Erro de permissão: Problema na política de segurança do banco de dados. Por favor, entre em contato com o suporte.');
+        }
+        throw addError;
+      }
       
       toast.success('Despesa empresarial adicionada com sucesso');
       return data as BusinessExpenseWithId[];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding business expense:', error);
-      toast.error('Erro ao adicionar despesa empresarial');
+      const errorMessage = error?.message || 'Erro ao adicionar despesa empresarial';
+      toast.error(errorMessage);
       throw error;
     }
   };
@@ -93,7 +105,7 @@ export const useBusinessExpenses = () => {
     
     try {
       // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
-      const { data, error } = await supabase
+      const { data, error: editError } = await supabase
         .from('business_expenses')
         .update({
           category: expense.category,
@@ -106,13 +118,20 @@ export const useBusinessExpenses = () => {
         .eq('id', expense.id)
         .select();
       
-      if (error) throw error;
+      if (editError) {
+        // Check for specific RLS policy error
+        if (editError.message?.includes('infinite recursion detected in policy')) {
+          throw new Error('Erro de permissão: Problema na política de segurança do banco de dados. Por favor, entre em contato com o suporte.');
+        }
+        throw editError;
+      }
       
       toast.success('Despesa empresarial atualizada com sucesso');
       return data as BusinessExpenseWithId[];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating business expense:', error);
-      toast.error('Erro ao atualizar despesa empresarial');
+      const errorMessage = error?.message || 'Erro ao atualizar despesa empresarial';
+      toast.error(errorMessage);
       throw error;
     }
   };
@@ -121,10 +140,18 @@ export const useBusinessExpenses = () => {
     try {
       // First check if there are attachments to delete
       // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
-      const { data: attachments } = await supabase
+      const { data: attachments, error: attachmentsError } = await supabase
         .from('business_expense_attachments')
         .select('file_path')
         .eq('expense_id', id);
+      
+      if (attachmentsError) {
+        // Check for specific RLS policy error
+        if (attachmentsError.message?.includes('infinite recursion detected in policy')) {
+          throw new Error('Erro de permissão: Problema na política de segurança do banco de dados. Por favor, entre em contato com o suporte.');
+        }
+        throw attachmentsError;
+      }
       
       // Delete attachments from storage if they exist
       if (attachments && attachments.length > 0) {
@@ -137,28 +164,43 @@ export const useBusinessExpenses = () => {
       
       // Delete attachment records
       // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
-      await supabase
+      const { error: deleteAttachmentsError } = await supabase
         .from('business_expense_attachments')
         .delete()
         .eq('expense_id', id);
       
+      if (deleteAttachmentsError) {
+        // Check for specific RLS policy error
+        if (deleteAttachmentsError.message?.includes('infinite recursion detected in policy')) {
+          throw new Error('Erro de permissão: Problema na política de segurança do banco de dados. Por favor, entre em contato com o suporte.');
+        }
+        throw deleteAttachmentsError;
+      }
+      
       // Delete expense
       // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from('business_expenses')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (deleteError) {
+        // Check for specific RLS policy error
+        if (deleteError.message?.includes('infinite recursion detected in policy')) {
+          throw new Error('Erro de permissão: Problema na política de segurança do banco de dados. Por favor, entre em contato com o suporte.');
+        }
+        throw deleteError;
+      }
       
       // Update local state
       setExpenses(prev => prev.filter(expense => expense.id !== id));
       
       toast.success('Despesa empresarial excluída com sucesso');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing business expense:', error);
-      toast.error('Erro ao excluir despesa empresarial');
+      const errorMessage = error?.message || 'Erro ao excluir despesa empresarial';
+      toast.error(errorMessage);
       throw error;
     }
   };

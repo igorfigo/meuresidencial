@@ -1,14 +1,13 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, AlertCircle } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { BusinessExpenseForm, BusinessExpense } from '@/components/business/BusinessExpenseForm';
 import { BusinessExpensesList } from '@/components/business/BusinessExpensesList';
-import { useBusinessExpenses } from '@/hooks/use-business-expenses';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -32,9 +31,9 @@ const DespesasEmpresariais = () => {
       // Close the form dialog after submitting
       setIsFormDialogOpen(false);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting expense:', error);
-      toast.error('Erro ao salvar despesa');
+      // Toast error is already handled in the hook
     }
   };
   
@@ -81,6 +80,9 @@ const DespesasEmpresariais = () => {
       <DialogContent className={`${isMobile ? 'w-[95%]' : 'w-[650px]'} max-w-[90vw] p-0`}>
         <DialogHeader className="border-b px-6 py-4">
           <DialogTitle className="text-xl font-semibold">Nova Despesa Empresarial</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Adicione uma nova despesa empresarial ao sistema
+          </DialogDescription>
         </DialogHeader>
         <div className={`${isMobile ? 'px-4 py-4' : 'px-6 py-6'} overflow-y-auto max-h-[70vh]`}>
           <BusinessExpenseForm onSubmit={handleExpenseSubmit} />
@@ -104,9 +106,12 @@ const DespesasEmpresariais = () => {
         
         {error ? (
           <Alert variant="destructive" className="mb-6">
-            <AlertTitle>Erro ao carregar despesas empresariais</AlertTitle>
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erro no sistema</AlertTitle>
             <AlertDescription>
-              Ocorreu um erro ao tentar carregar as despesas. Por favor, tente novamente mais tarde ou entre em contato com o suporte.
+              {error.includes('política de segurança') 
+                ? 'Erro de permissão: Existe um problema na política de segurança do banco de dados. Por favor, entre em contato com o suporte técnico.'
+                : 'Ocorreu um erro ao tentar carregar as despesas. Por favor, tente novamente mais tarde ou entre em contato com o suporte.'}
             </AlertDescription>
           </Alert>
         ) : (
