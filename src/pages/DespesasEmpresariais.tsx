@@ -8,14 +8,13 @@ import { BusinessExpenseForm, BusinessExpense } from '@/components/business/Busi
 import { BusinessExpensesList } from '@/components/business/BusinessExpensesList';
 import { useBusinessExpenses } from '@/hooks/use-business-expenses';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const DespesasEmpresariais = () => {
   const { user } = useApp();
   const { addExpense, editExpense, isLoading } = useBusinessExpenses();
-  const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   
   const handleExpenseSubmit = async (data: BusinessExpense) => {
@@ -28,8 +27,8 @@ const DespesasEmpresariais = () => {
         await addExpense(data);
       }
       
-      // Close the form sheet after submitting
-      setIsFormSheetOpen(false);
+      // Close the form dialog after submitting
+      setIsFormDialogOpen(false);
       
     } catch (error) {
       console.error('Error submitting expense:', error);
@@ -64,47 +63,27 @@ const DespesasEmpresariais = () => {
     );
   }
   
-  // On mobile, we use a bottom drawer, on desktop we use a side sheet
-  const FormContainer = isMobile ? (
-    <Drawer open={isFormSheetOpen} onOpenChange={setIsFormSheetOpen}>
-      <DrawerTrigger asChild>
+  // Using a centered dialog instead of side sheet or bottom drawer
+  const FormDialog = (
+    <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+      <DialogTrigger asChild>
         <Button 
           className="gap-2" 
-          onClick={() => setIsFormSheetOpen(true)}
+          onClick={() => setIsFormDialogOpen(true)}
         >
           <PlusCircle className="h-5 w-5" />
           Nova Despesa
         </Button>
-      </DrawerTrigger>
-      <DrawerContent className="p-0">
-        <DrawerHeader className="border-b px-6 py-4">
-          <DrawerTitle className="text-xl font-semibold">Nova Despesa Empresarial</DrawerTitle>
-        </DrawerHeader>
-        <div className="px-6 py-6 overflow-y-auto max-h-[70vh]">
+      </DialogTrigger>
+      <DialogContent className={`${isMobile ? 'w-[95%]' : 'w-[650px]'} max-w-[90vw] p-0`}>
+        <DialogHeader className="border-b px-6 py-4">
+          <DialogTitle className="text-xl font-semibold">Nova Despesa Empresarial</DialogTitle>
+        </DialogHeader>
+        <div className={`${isMobile ? 'px-4 py-4' : 'px-6 py-6'} overflow-y-auto max-h-[70vh]`}>
           <BusinessExpenseForm onSubmit={handleExpenseSubmit} />
         </div>
-      </DrawerContent>
-    </Drawer>
-  ) : (
-    <Sheet open={isFormSheetOpen} onOpenChange={setIsFormSheetOpen}>
-      <SheetTrigger asChild>
-        <Button 
-          className="gap-2" 
-          onClick={() => setIsFormSheetOpen(true)}
-        >
-          <PlusCircle className="h-5 w-5" />
-          Nova Despesa
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="w-[450px] sm:w-[540px] p-0 overflow-hidden">
-        <SheetHeader className="border-b px-6 py-4">
-          <SheetTitle className="text-xl font-semibold">Nova Despesa Empresarial</SheetTitle>
-        </SheetHeader>
-        <div className="px-6 py-6 overflow-y-auto h-[calc(100vh-70px)]">
-          <BusinessExpenseForm onSubmit={handleExpenseSubmit} />
-        </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
   
   return (
@@ -116,7 +95,7 @@ const DespesasEmpresariais = () => {
             <p className="text-gray-500 mt-1">Gestão de despesas empresariais</p>
           </div>
           <div>
-            {FormContainer}
+            {FormDialog}
           </div>
         </div>
         
