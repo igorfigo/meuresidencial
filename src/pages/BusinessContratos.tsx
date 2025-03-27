@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatCurrency } from '@/utils/currency';
 
 const ContractStatusBadge = ({ status }: { status: string }) => {
   const statusMap: Record<string, { label: string, variant: "default" | "destructive" | "outline" | "secondary" }> = {
@@ -282,6 +283,7 @@ const BusinessContratos = () => {
             <TableHead>Contraparte</TableHead>
             <TableHead className="text-center">Início</TableHead>
             <TableHead>Término</TableHead>
+            <TableHead>Valor</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-center">Ações</TableHead>
           </TableRow>
@@ -293,6 +295,7 @@ const BusinessContratos = () => {
               <TableCell>{contract.counterparty}</TableCell>
               <TableCell className="text-center">{formatDate(contract.start_date)}</TableCell>
               <TableCell>{formatDate(contract.end_date)}</TableCell>
+              <TableCell>{formatCurrency(contract.value)}</TableCell>
               <TableCell><ContractStatusBadge status={contract.status} /></TableCell>
               <TableCell className="text-center">
                 <div className="flex justify-center gap-2">
@@ -561,7 +564,7 @@ const BusinessContratos = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-sm text-muted-foreground">Valor</h3>
-                  <p className="text-base">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedContract.value)}</p>
+                  <p className="text-base">{formatCurrency(selectedContract.value)}</p>
                 </div>
                 <div>
                   <h3 className="font-medium text-sm text-muted-foreground">Data Início</h3>
