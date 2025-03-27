@@ -47,6 +47,7 @@ export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
           title: expense.title,
           category: expense.category,
           vendor: expense.vendor,
+          // Convert amount to string for the form input
           amount: expense.amount.toString(),
           payment_date: new Date(expense.payment_date),
           description: expense.description || '',
