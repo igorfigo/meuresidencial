@@ -6,54 +6,19 @@ import { useApp } from '@/contexts/AppContext';
 import { BusinessExpenseForm, BusinessExpense } from '@/components/business/BusinessExpenseForm';
 import { BusinessExpensesList } from '@/components/business/BusinessExpensesList';
 import { useBusinessExpenses } from '@/hooks/use-business-expenses';
-import { supabase } from '@/integrations/supabase/client';
 
 const DespesasEmpresariais = () => {
   const { user } = useApp();
   const { addExpense, editExpense, isLoading } = useBusinessExpenses();
   
-  const handleExpenseSubmit = async (data: BusinessExpense, attachments?: File[]) => {
+  const handleExpenseSubmit = async (data: BusinessExpense) => {
     try {
       if (data.id) {
         // Edit existing expense
         await editExpense(data);
       } else {
         // Add new expense
-        const result = await addExpense(data);
-        
-        // Upload attachments if provided
-        if (attachments && attachments.length > 0 && result && result.length > 0) {
-          const expenseId = result[0]?.id;
-          
-          if (expenseId) {
-            // Upload each attachment to storage
-            for (const file of attachments) {
-              const filename = `${Date.now()}-${file.name}`;
-              const filePath = `business-expense-attachments/${expenseId}/${filename}`;
-              
-              const { error: uploadError } = await supabase.storage
-                .from('attachments')
-                .upload(filePath, file);
-              
-              if (uploadError) {
-                console.error('Error uploading file:', uploadError);
-                toast.error(`Erro ao anexar arquivo: ${file.name}`);
-                continue;
-              }
-              
-              // Save attachment info to the database
-              // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
-              await supabase.from('business_expense_attachments').insert({
-                expense_id: expenseId,
-                file_name: file.name,
-                file_path: filePath,
-                file_type: file.type
-              });
-            }
-            
-            toast.success('Comprovantes anexados com sucesso');
-          }
-        }
+        await addExpense(data);
       }
     } catch (error) {
       console.error('Error submitting expense:', error);

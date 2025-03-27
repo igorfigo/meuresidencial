@@ -10,8 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Paperclip } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { formatCurrencyInput } from '@/utils/currency';
 
 const businessExpenseCategories = [
@@ -32,8 +30,7 @@ const businessExpenseSchema = z.object({
   amount: z.string().min(1, { message: 'Valor é obrigatório' }),
   description: z.string().min(1, { message: 'Descrição é obrigatória' }),
   payment_date: z.string().min(1, { message: 'Data de pagamento é obrigatória' }),
-  observations: z.string().optional(),
-  attachments: z.instanceof(FileList).optional().transform(files => files ? Array.from(files) : [])
+  observations: z.string().optional()
 });
 
 export interface BusinessExpense {
@@ -53,7 +50,6 @@ interface BusinessExpenseFormProps {
 export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFormProps) => {
   const { user } = useApp();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [attachmentsList, setAttachmentsList] = useState<File[]>([]);
   
   const form = useForm<z.infer<typeof businessExpenseSchema>>({
     resolver: zodResolver(businessExpenseSchema),
@@ -62,27 +58,23 @@ export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFo
       amount: '',
       description: '',
       payment_date: '',
-      observations: '',
-      attachments: undefined
+      observations: ''
     }
   });
   
   const handleSubmit = async (values: z.infer<typeof businessExpenseSchema>) => {
     setIsSubmitting(true);
     try {
-      const { attachments, ...expenseData } = values;
-      
       await onSubmit(
         {
-          ...expenseData,
-          category: expenseData.category,
-          amount: expenseData.amount,
-          description: expenseData.description,
-          payment_date: expenseData.payment_date,
-          observations: expenseData.observations,
+          ...values,
+          category: values.category,
+          amount: values.amount,
+          description: values.description,
+          payment_date: values.payment_date,
+          observations: values.observations,
           id: initialData?.id
-        },
-        attachmentsList.length > 0 ? attachmentsList : undefined
+        }
       );
       
       if (!initialData) {
@@ -91,25 +83,12 @@ export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFo
           amount: '',
           description: '',
           payment_date: '',
-          observations: '',
-          attachments: undefined
+          observations: ''
         });
-        setAttachmentsList([]);
       }
     } finally {
       setIsSubmitting(false);
     }
-  };
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files);
-      setAttachmentsList([...attachmentsList, ...newFiles]);
-    }
-  };
-  
-  const removeAttachment = (index: number) => {
-    setAttachmentsList(prev => prev.filter((_, i) => i !== index));
   };
   
   return (
@@ -217,60 +196,6 @@ export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFo
                       value={field.value || ''}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="attachments"
-              render={({ field: { ref, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Anexos</FormLabel>
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => document.getElementById('business-file-upload')?.click()}
-                        className="w-full"
-                      >
-                        <Paperclip className="h-4 w-4 mr-2" />
-                        Anexar Comprovante
-                      </Button>
-                      <Input
-                        id="business-file-upload"
-                        type="file"
-                        className="hidden"
-                        onChange={handleFileChange}
-                        multiple
-                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-                      />
-                    </div>
-                    
-                    {attachmentsList.length > 0 && (
-                      <div className="grid gap-2 mt-2">
-                        {attachmentsList.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 border rounded">
-                            <div className="flex items-center text-sm">
-                              <Paperclip className="h-4 w-4 mr-2 text-muted-foreground" />
-                              <span className="truncate max-w-[200px]">{file.name}</span>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive h-8 px-2"
-                              onClick={() => removeAttachment(index)}
-                            >
-                              Remover
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
                   <FormMessage />
                 </FormItem>
               )}
