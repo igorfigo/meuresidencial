@@ -29,7 +29,6 @@ import { Separator } from '@/components/ui/separator';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
-// Category display names mapping
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   'aluguel': 'Aluguel',
   'servicos-publicos': 'Serviços Públicos',
@@ -48,20 +47,16 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
 const BusinessManagement: React.FC = () => {
   const { expenses } = useBusinessExpenses();
 
-  // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-  // Generate monthly expenses data for the last 12 months
   const getLast12MonthsData = () => {
     const today = new Date();
     const monthlyData = [];
     
-    // Create an array with the last 12 months
     for (let i = 11; i >= 0; i--) {
       const monthDate = subMonths(today, i);
       const monthStr = format(monthDate, 'MMM/yy', { locale: ptBR });
       
-      // Filter expenses for this month
       const monthlyExpenses = expenses.filter(expense => {
         const expenseDate = new Date(expense.date);
         const expenseMonth = startOfMonth(expenseDate);
@@ -80,7 +75,6 @@ const BusinessManagement: React.FC = () => {
     return monthlyData;
   };
 
-  // Generate category data
   const getCategoryData = () => {
     const categoryTotals: Record<string, number> = {};
     
@@ -154,17 +148,18 @@ const BusinessManagement: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={categoryData}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 90, bottom: 5 }}
+                    layout="horizontal"
+                    margin={{ top: 5, right: 20, left: 20, bottom: 50 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" tickFormatter={formatTooltipValue} />
-                    <YAxis 
-                      type="category" 
+                    <XAxis 
                       dataKey="name" 
-                      width={80}
                       tickFormatter={(value) => CATEGORY_DISPLAY_NAMES[value] || value}
+                      angle={-45}
+                      textAnchor="end"
+                      height={70}
                     />
+                    <YAxis tickFormatter={formatTooltipValue} />
                     <Tooltip 
                       formatter={(value: number) => [formatToBRL(value), 'Valor']}
                       labelFormatter={(name) => CATEGORY_DISPLAY_NAMES[name] || name}
