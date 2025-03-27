@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -28,6 +29,8 @@ import {
   MessagesSquare,
   Car,
   Receipt as ReceiptIcon,
+  BarChart3,
+  PieChart,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -64,6 +67,7 @@ export function Sidebar() {
   const navigate = useNavigate();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
   const { unreadAnnouncements, unreadDocuments, markAsViewed } = useNotifications();
 
   useEffect(() => {
@@ -74,10 +78,21 @@ export function Sidebar() {
     } else if (location.pathname === '/documentos') {
       markAsViewed('documents');
     }
+
+    // Check if we're on a business management page and expand the menu
+    if (location.pathname === '/business-management' || 
+        location.pathname === '/contratos' || 
+        location.pathname === '/despesas-empresariais') {
+      setExpandedSubmenu('Business Management');
+    }
   }, [location.pathname, markAsViewed]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const toggleSubmenu = (label: string) => {
+    setExpandedSubmenu(expandedSubmenu === label ? null : label);
   };
 
   const adminMenuItems: MenuItem[] = [
@@ -87,8 +102,16 @@ export function Sidebar() {
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
     { isSeparator: true, path: '', label: '', icon: null },
-    { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
-    { path: '/business-cost', label: 'Business Cost', icon: <ReceiptIcon className="h-5 w-5 text-blue-500" /> },
+    { 
+      path: '/business-management', 
+      label: 'Business Management', 
+      icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+      submenu: [
+        { path: '/business-management', label: 'Visão Geral', icon: <PieChart className="h-5 w-5 text-blue-500" /> },
+        { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
+        { path: '/despesas-empresariais', label: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" /> }
+      ]
+    },
   ];
   
   const managerMenuItems: MenuItem[] = [
@@ -160,29 +183,45 @@ export function Sidebar() {
       }
       
       if (item.submenu) {
+        const isExpanded = expandedSubmenu === item.label;
+        const isActive = location.pathname === item.path || 
+                        (item.submenu && item.submenu.some(subItem => location.pathname === subItem.path));
+        
         return (
           <li key={item.label} className="mb-1">
             <div className="flex flex-col">
-              <a
-                href={item.path}
-                className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+              <button
+                onClick={() => toggleSubmenu(item.label)}
+                className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${isActive ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
               >
                 {item.icon}
-                <span className="ml-3">{item.label}</span>
-              </a>
-              <ul className="pl-8 mt-1 space-y-1">
-                {item.submenu.map((subItem) => (
-                  <li key={subItem.label}>
-                    <a
-                      href={subItem.path}
-                      className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === subItem.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
-                    >
-                      {subItem.icon}
-                      <span className="ml-3">{subItem.label}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
+                <span className="ml-3 flex-1 text-left">{item.label}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              
+              {isExpanded && (
+                <ul className="pl-8 mt-1 space-y-1">
+                  {item.submenu.map((subItem) => (
+                    <li key={subItem.label}>
+                      <a
+                        href={subItem.path}
+                        className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === subItem.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+                      >
+                        {subItem.icon}
+                        <span className="ml-3">{subItem.label}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </li>
         );

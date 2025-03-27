@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,9 @@ import {
   Truck,
   DollarSign,
   MessagesSquare,
-  Car
+  Car,
+  BarChart3,
+  PieChart
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -69,10 +72,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { unreadAnnouncements, unreadDocuments, markAsViewed } = useNotifications();
 
   const isFinanceiroPath = location.pathname.includes('/financeiro');
+  const isBusinessPath = location.pathname.includes('/business-management') || 
+                         location.pathname.includes('/contratos') || 
+                         location.pathname.includes('/despesas-empresariais');
 
   useEffect(() => {
     if (isFinanceiroPath && !user?.isAdmin) {
       setExpandedSubmenu('Financeiro');
+    }
+    
+    if (isBusinessPath && user?.isAdmin) {
+      setExpandedSubmenu('Business Management');
     }
     
     if (location.pathname === '/comunicados') {
@@ -80,7 +90,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     } else if (location.pathname === '/documentos') {
       markAsViewed('documents');
     }
-  }, [location.pathname, isFinanceiroPath, user?.isAdmin, markAsViewed]);
+  }, [location.pathname, isFinanceiroPath, isBusinessPath, user?.isAdmin, markAsViewed]);
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
@@ -104,8 +114,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
     { isSeparator: true, name: '', icon: null, path: '' },
-    { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
-    { name: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" />, path: '/despesas-empresariais' },
+    { 
+      name: 'Business Management', 
+      icon: <BarChart3 className="h-5 w-5 text-blue-500" />, 
+      path: '/business-management',
+      submenu: [
+        { name: 'Dashboard', icon: <PieChart className="h-5 w-5 text-blue-500" />, path: '/business-management' },
+        { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
+        { name: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" />, path: '/despesas-empresariais' },
+      ]
+    },
   ];
 
   const managerMenuItems: MenuItem[] = [

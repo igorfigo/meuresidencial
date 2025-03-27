@@ -31,6 +31,7 @@ import BusinessContratos from '@/pages/BusinessContratos';
 import BusinessCost from '@/pages/BusinessCost';
 import SugestaoReclamacao from '@/pages/SugestaoReclamacao';
 import GaragemLivre from '@/pages/GaragemLivre';
+import BusinessManagement from '@/pages/BusinessManagement';
 
 // We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
@@ -60,6 +61,7 @@ function App() {
               <Route path="/cadastro-chave-pix" element={<AdminOnly><CadastroChavePix /></AdminOnly>} />
               <Route path="/gerar-faturas" element={<AuthRequired><GerarFaturas /></AuthRequired>} />
               <Route path="/gerenciar-avisos" element={<AuthRequired><GerenciarAvisos /></AuthRequired>} />
+              <Route path="/business-management" element={<AdminOnly><BusinessManagement /></AdminOnly>} />
               <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
               <Route path="/despesas-empresariais" element={<AdminOnly><BusinessCost /></AdminOnly>} />
               
