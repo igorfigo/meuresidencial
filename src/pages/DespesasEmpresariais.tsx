@@ -44,7 +44,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useBusinessExpenses, BusinessExpense } from '@/hooks/use-business-expenses';
+import { useBusinessExpenses, BusinessExpense, BusinessExpenseFormData } from '@/hooks/use-business-expenses';
 
 const expenseFormSchema = z.object({
   description: z.string().min(3, { message: 'A descrição deve ter pelo menos 3 caracteres' }),
