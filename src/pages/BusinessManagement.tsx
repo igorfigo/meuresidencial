@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -164,11 +165,22 @@ const BusinessManagement: React.FC = () => {
                       formatter={(value: number) => [formatToBRL(value), 'Valor']}
                       labelFormatter={(name) => CATEGORY_DISPLAY_NAMES[name] || name}
                     />
-                    <Bar dataKey="value" name="Valor">
+                    <Bar 
+                      dataKey="value" 
+                      name="Valor"
+                      nameKey="displayName"
+                    >
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Bar>
+                    <Legend 
+                      formatter={(value, entry) => {
+                        // Use the corresponding displayName from our data
+                        const dataItem = categoryData.find(item => item.name === entry.payload.name);
+                        return dataItem?.displayName || value;
+                      }}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
