@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -168,7 +167,6 @@ const BusinessManagement: React.FC = () => {
                     <Bar 
                       dataKey="value" 
                       name="Valor"
-                      nameKey="displayName"
                     >
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -176,8 +174,7 @@ const BusinessManagement: React.FC = () => {
                     </Bar>
                     <Legend 
                       formatter={(value, entry) => {
-                        // Use the corresponding displayName from our data
-                        const dataItem = categoryData.find(item => item.name === entry.payload.name);
+                        const dataItem = categoryData.find(item => item.name === (entry.payload as any).name);
                         return dataItem?.displayName || value;
                       }}
                     />
