@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -8,23 +9,27 @@ interface Condominium {
 }
 
 interface User {
-  id: string;
-  email: string;
   nome: string;
-  role: string;
-  matricula: string;
+  email: string;
   isAdmin: boolean;
-  isManager: boolean;
-  isResident: boolean;
-  unit?: string;
-  telefone?: string;
+  isResident?: boolean;
+  matricula?: string;
   nomeCondominio?: string;
-  selectedCondominium?: string;
+  condominiums?: Condominium[];
+  selectedCondominium?: string; // Storing the selected condominium matricula
+  
+  // Resident specific fields
   residentId?: string;
-  condominiums?: {
-    matricula: string;
-    nomeCondominio: string;
-  }[];
+  unit?: string;
+  
+  // Address related fields from condominium
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  cep?: string;
 }
 
 interface AppContextType {
@@ -43,9 +48,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check if user is already logged in from localStorage
     const storedUser = localStorage.getItem('condoUser');
     if (storedUser) {
       try {
+        // Add debugging to check the stored user
         const parsedUser = JSON.parse(storedUser);
         console.log("Stored user from localStorage:", parsedUser);
         console.log("Is stored user admin?", parsedUser.isAdmin);
@@ -62,6 +69,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const login = async (emailOrMatricula: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
+      // Verificar as credenciais do administrador
       if (emailOrMatricula.toLowerCase() === 'meuresidencialcom@gmail.com' && password === 'Bigdream@2025') {
         const adminUser = {
           nome: 'IGOR COSTA ALVES',
@@ -77,6 +85,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
+      // Check if it's a manager login with email
       const { data: emailData, error: emailError } = await supabase
         .from('condominiums')
         .select('*')
@@ -88,6 +97,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error("Erro ao verificar credenciais por email:", emailError);
       }
       
+      // Check if it's a manager login with matricula
       const { data: matriculaData, error: matriculaError } = await supabase
         .from('condominiums')
         .select('*')
@@ -99,10 +109,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error("Erro ao verificar credenciais por matrícula:", matriculaError);
       }
       
+      // Combine the results of both queries and ensure they're treated as arrays
       const emailDataArray = emailData || [];
       const matriculaDataArray = matriculaData || [];
       const allCondominiums = [...emailDataArray, ...matriculaDataArray];
       
+      // TypeScript cast to avoid type errors
       const typedCondominiums = allCondominiums as Array<{
         matricula: string;
         nomecondominio: string;
@@ -117,16 +129,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         cep?: string;
       }>;
       
+      // Remove duplicates if any (in case a condominium has the same email and matricula)
       const uniqueCondominiums = Array.from(
         new Map(typedCondominiums.map(item => [item.matricula, item])).values()
       );
       
       if (uniqueCondominiums.length > 0) {
+        // Format condominiums for the user object
         const condosFormatted = uniqueCondominiums.map(condo => ({
           matricula: condo.matricula,
           nomeCondominio: condo.nomecondominio || 'Condomínio'
         }));
         
+        // Use the first condominium as the selected one
         const firstCondo = uniqueCondominiums[0];
         
         const managerUser = {
@@ -138,6 +153,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           nomeCondominio: firstCondo.nomecondominio || 'Condomínio',
           condominiums: condosFormatted,
           selectedCondominium: firstCondo.matricula,
+          // Add address details
           rua: firstCondo.rua,
           numero: firstCondo.numero,
           complemento: firstCondo.complemento,
@@ -153,6 +169,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       
+      // Check for resident login (email is the registered email, password is their CPF)
       const { data: residents, error: residentError } = await supabase
         .from('residents')
         .select('*')
@@ -166,6 +183,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (residents && residents.length > 0) {
         const resident = residents[0];
         
+        // Get condominium info for the resident
         const { data: condoData, error: condoError } = await supabase
           .from('condominiums')
           .select('*')
@@ -193,6 +211,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           matricula: resident.matricula,
           unit: resident.unidade,
           nomeCondominio: condoData.nomecondominio || 'Condomínio',
+          // Add address details from condominium
           rua: condoData.rua,
           numero: condoData.numero,
           complemento: condoData.complemento,
@@ -206,17 +225,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('condoUser', JSON.stringify(residentUser));
         toast.success("Login de morador realizado com sucesso!");
         
+        // Create Supabase auth user if they don't exist yet
+        // This is for future use with RLS policies
         try {
+          // Check if there's already a user_id for this resident
           if (!resident.user_id) {
+            // Will handle linking auth users in a separate function when needed
             console.log("Resident login successful - future auth integration will be implemented");
           }
         } catch (authError) {
           console.error("Error in resident auth setup:", authError);
+          // Still allow login even if auth setup fails - this is just for future RLS
         }
         
         return true;
       }
       
+      // Simulação de falha no login
       toast.error("Credenciais inválidas ou usuário inativo. Tente novamente.");
       return false;
     } catch (error) {
@@ -234,6 +259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const selectedCondo = user.condominiums.find(c => c.matricula === matricula);
     if (!selectedCondo) return;
     
+    // Need to get the full condominium data to include address details
     supabase.from('condominiums')
       .select('*')
       .eq('matricula', matricula)
@@ -249,6 +275,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           matricula: selectedCondo.matricula,
           nomeCondominio: selectedCondo.nomeCondominio,
           selectedCondominium: selectedCondo.matricula,
+          // Add address details from fetched data
           rua: data.rua,
           numero: data.numero,
           complemento: data.complemento,

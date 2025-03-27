@@ -29,8 +29,6 @@ import GerenciarAvisos from '@/pages/GerenciarAvisos';
 import MinhasCobrancas from '@/pages/MinhasCobrancas';
 import BusinessContratos from '@/pages/BusinessContratos';
 import SugestaoReclamacao from '@/pages/SugestaoReclamacao';
-import GaragemLivre from '@/pages/GaragemLivre';
-import GaragensDisponiveisCondominio from '@/pages/GaragensDisponiveisCondominio';
 
 // We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
@@ -75,8 +73,6 @@ function App() {
               {/* Resident Routes */}
               <Route path="/minhas-cobrancas" element={<AuthRequired><MinhasCobrancas /></AuthRequired>} />
               <Route path="/sugestao-reclamacao" element={<AuthRequired><SugestaoReclamacao /></AuthRequired>} />
-              <Route path="/garagem-livre" element={<AuthRequired><GaragemLivre /></AuthRequired>} />
-              <Route path="/garagens-disponiveis" element={<AuthRequired><GaragensDisponiveisCondominio /></AuthRequired>} />
             </Routes>
             <Toaster />
           </div>

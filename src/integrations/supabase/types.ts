@@ -640,59 +640,6 @@ export type Database = {
           },
         ]
       }
-      garagens_livre: {
-        Row: {
-          created_at: string
-          descricao: string
-          email: string | null
-          id: string
-          matricula: string
-          nome_completo: string
-          observacoes: string | null
-          resident_id: string
-          telefone: string | null
-          unidade: string
-          updated_at: string
-          valor: string
-        }
-        Insert: {
-          created_at?: string
-          descricao: string
-          email?: string | null
-          id?: string
-          matricula: string
-          nome_completo: string
-          observacoes?: string | null
-          resident_id: string
-          telefone?: string | null
-          unidade: string
-          updated_at?: string
-          valor: string
-        }
-        Update: {
-          created_at?: string
-          descricao?: string
-          email?: string | null
-          id?: string
-          matricula?: string
-          nome_completo?: string
-          observacoes?: string | null
-          resident_id?: string
-          telefone?: string | null
-          unidade?: string
-          updated_at?: string
-          valor?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "garagens_livre_resident_id_fkey"
-            columns: ["resident_id"]
-            isOneToOne: false
-            referencedRelation: "residents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       news_items: {
         Row: {
           created_at: string
