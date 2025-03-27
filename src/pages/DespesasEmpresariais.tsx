@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useApp } from '@/contexts/AppContext';
 import { BusinessExpenseForm, BusinessExpense } from '@/components/business/BusinessExpenseForm';
 import { BusinessExpensesList } from '@/components/business/BusinessExpensesList';
@@ -12,14 +11,12 @@ import { supabase } from '@/integrations/supabase/client';
 const DespesasEmpresariais = () => {
   const { user } = useApp();
   const { addExpense, editExpense, isLoading } = useBusinessExpenses();
-  const [activeTab, setActiveTab] = useState<string>('list');
   
   const handleExpenseSubmit = async (data: BusinessExpense, attachments?: File[]) => {
     try {
       if (data.id) {
         // Edit existing expense
         await editExpense(data);
-        setActiveTab('list');
       } else {
         // Add new expense
         const result = await addExpense(data);
@@ -57,8 +54,6 @@ const DespesasEmpresariais = () => {
             toast.success('Comprovantes anexados com sucesso');
           }
         }
-        
-        setActiveTab('list');
       }
     } catch (error) {
       console.error('Error submitting expense:', error);
@@ -103,20 +98,17 @@ const DespesasEmpresariais = () => {
           </div>
         </div>
         
-        <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid w-full md:w-[400px] grid-cols-2">
-            <TabsTrigger value="list">Lista de Despesas</TabsTrigger>
-            <TabsTrigger value="new">Nova Despesa</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="list" className="mt-6">
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Lista de Despesas</h2>
             <BusinessExpensesList />
-          </TabsContent>
+          </div>
           
-          <TabsContent value="new" className="mt-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Nova Despesa</h2>
             <BusinessExpenseForm onSubmit={handleExpenseSubmit} />
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
