@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -83,7 +84,7 @@ const Dashboard = () => {
   
   useEffect(() => {
     if (user?.isAdmin) {
-      fetchDashboardData();
+      // Removed reference to non-existent fetchDashboardData function
       fetchDetailedStats();
     }
     if (!user?.isAdmin) {
@@ -316,7 +317,7 @@ const Dashboard = () => {
       
       if (regionError) throw regionError;
       
-      const regionCounts = {};
+      const regionCounts: Record<string, number> = {};
       regionData.forEach(item => {
         if (item.estado) {
           regionCounts[item.estado] = (regionCounts[item.estado] || 0) + 1;
