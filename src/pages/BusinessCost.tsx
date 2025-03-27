@@ -29,6 +29,12 @@ const expenseCategories = [
   { id: 'other', label: 'Outros' }
 ];
 
+// Helper function to get current year-month
+const getCurrentYearMonth = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+};
+
 const BusinessCost = () => {
   const [openNewExpenseDialog, setOpenNewExpenseDialog] = useState(false);
   const [openEditExpenseDialog, setOpenEditExpenseDialog] = useState(false);
@@ -60,13 +66,15 @@ const BusinessCost = () => {
     const amount = amountValue ? parseFloat(String(amountValue)) : 0;
     const date = String(formData.get('date') || '');
     const category = String(formData.get('category') || '');
+    const referenceMonth = String(formData.get('reference_month') || '');
     
     try {
       await createExpense({
         description,
         amount,
         date,
-        category
+        category,
+        reference_month: referenceMonth
       });
       
       setOpenNewExpenseDialog(false);
@@ -86,13 +94,15 @@ const BusinessCost = () => {
     const amount = amountValue ? parseFloat(String(amountValue)) : 0;
     const date = String(formData.get('date') || '');
     const category = String(formData.get('category') || '');
+    const referenceMonth = String(formData.get('reference_month') || '');
     
     try {
       await updateExpense(selectedExpense.id, {
         description,
         amount,
         date,
-        category
+        category,
+        reference_month: referenceMonth
       });
       
       setOpenEditExpenseDialog(false);
@@ -117,6 +127,18 @@ const BusinessCost = () => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
+  };
+
+  const formatReferenceMonth = (yearMonth?: string) => {
+    if (!yearMonth) return '-';
+    
+    const [year, month] = yearMonth.split('-');
+    const monthNames = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    
+    return `${monthNames[parseInt(month) - 1]}/${year}`;
   };
 
   return (
@@ -159,6 +181,16 @@ const BusinessCost = () => {
                     <div className="grid gap-2">
                       <Label htmlFor="date">Data</Label>
                       <Input id="date" name="date" type="date" required />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="reference_month">Mês de Referência</Label>
+                      <Input 
+                        id="reference_month" 
+                        name="reference_month" 
+                        type="month" 
+                        required 
+                        defaultValue={getCurrentYearMonth()}
+                      />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="category">Categoria</Label>
@@ -235,6 +267,7 @@ const BusinessCost = () => {
                 <TableRow>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Categoria</TableHead>
+                  <TableHead className="text-center">Mês Ref.</TableHead>
                   <TableHead className="text-center">Data</TableHead>
                   <TableHead>Valor</TableHead>
                   <TableHead className="text-center">Ações</TableHead>
@@ -247,6 +280,7 @@ const BusinessCost = () => {
                     <TableCell>
                       {expenseCategories.find(cat => cat.id === expense.category)?.label || expense.category}
                     </TableCell>
+                    <TableCell className="text-center">{formatReferenceMonth(expense.reference_month)}</TableCell>
                     <TableCell className="text-center">{formatDate(expense.date)}</TableCell>
                     <TableCell>{formatCurrency(expense.amount)}</TableCell>
                     <TableCell className="text-center">
@@ -355,6 +389,16 @@ const BusinessCost = () => {
                   type="date" 
                   required 
                   defaultValue={selectedExpense?.date}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-reference_month">Mês de Referência</Label>
+                <Input 
+                  id="edit-reference_month" 
+                  name="reference_month" 
+                  type="month" 
+                  required 
+                  defaultValue={selectedExpense?.reference_month || getCurrentYearMonth()}
                 />
               </div>
               <div className="grid gap-2">

@@ -15,6 +15,7 @@ export interface BusinessExpense {
   amount: number;
   date: string;
   category: string;
+  reference_month?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -48,12 +49,18 @@ export const useBusinessExpenses = () => {
         .map(item => {
           // At this point we know item is not null/undefined
           const validItem = item as any;
+          
+          // Ensure date is properly adjusted to prevent timezone issues
+          let dateObj = new Date(validItem.date);
+          dateObj.setDate(dateObj.getDate() + 1); // Add one day to fix timezone issue
+          
           return {
             id: validItem.id,
             description: validItem.description,
             amount: validItem.amount,
-            date: validItem.date,
+            date: dateObj.toISOString().split('T')[0], // Format as YYYY-MM-DD
             category: validItem.category,
+            reference_month: validItem.reference_month,
             created_at: validItem.created_at,
             updated_at: validItem.updated_at
           } as BusinessExpense;
