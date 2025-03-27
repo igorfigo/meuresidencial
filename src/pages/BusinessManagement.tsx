@@ -35,14 +35,16 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 // Category display names mapping
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   'aluguel': 'Aluguel',
-  'servicos-contabeis': 'Serviços Contábeis',
+  'servicos-publicos': 'Serviços Públicos',
   'folha-pagamento': 'Folha de Pagamento',
   'impostos': 'Impostos',
   'marketing': 'Marketing',
-  'tecnologia': 'Tecnologia',
-  'materiais': 'Materiais',
-  'servicos-terceirizados': 'Serviços Terceirizados',
-  'despesas-administrativas': 'Despesas Administrativas',
+  'suprimentos': 'Suprimentos',
+  'manutencao': 'Manutenção',
+  'software-assinaturas': 'Software/Assinaturas',
+  'servicos-juridicos': 'Serviços Jurídicos',
+  'servicos-contabeis': 'Serviços Contábeis',
+  'viagens': 'Viagens',
   'outros': 'Outros'
 };
 
@@ -118,7 +120,9 @@ const BusinessManagement: React.FC = () => {
               className="w-3 h-3 mr-1 rounded-sm" 
               style={{ backgroundColor: entry.color }}
             />
-            <span className="truncate">{entry.value}</span>
+            <span className="truncate">
+              {CATEGORY_DISPLAY_NAMES[entry.payload?.name] || entry.value}
+            </span>
           </div>
         ))}
       </div>
@@ -181,10 +185,11 @@ const BusinessManagement: React.FC = () => {
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
-                      nameKey="displayName"
-                      label={({ displayName, percent }) => 
-                        `${displayName}: ${(percent * 100).toFixed(0)}%`
-                      }
+                      nameKey="name"
+                      label={({ name, percent }) => {
+                        const displayName = CATEGORY_DISPLAY_NAMES[name] || name;
+                        return `${displayName}: ${(percent * 100).toFixed(0)}%`;
+                      }}
                     >
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -193,8 +198,7 @@ const BusinessManagement: React.FC = () => {
                     <Tooltip 
                       formatter={(value: number) => formatToBRL(value)} 
                       labelFormatter={(name) => {
-                        const item = categoryData.find(c => c.displayName === name);
-                        return item?.displayName || name;
+                        return CATEGORY_DISPLAY_NAMES[name] || name;
                       }}
                     />
                     <Legend 
@@ -203,7 +207,7 @@ const BusinessManagement: React.FC = () => {
                         categoryData.map((item, index) => ({
                           value: item.displayName,
                           color: COLORS[index % COLORS.length],
-                          type: 'square'
+                          payload: { name: item.name }
                         }))
                       }
                     />
