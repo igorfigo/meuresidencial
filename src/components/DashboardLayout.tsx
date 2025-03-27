@@ -32,6 +32,7 @@ import {
   Truck,
   DollarSign,
   MessagesSquare,
+  Parking,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -147,6 +148,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
     { name: 'Serviços Gerais', icon: <Truck className="h-5 w-5" />, path: '/servicos' },
     { name: 'Minhas Cobranças', icon: <PaymentIcon className="h-5 w-5" />, path: '/minhas-cobrancas' },
+    { name: 'Garagem Livre', icon: <Parking className="h-5 w-5" />, path: '/garagem-livre' },
     { name: 'Sugestão/Reclamação', icon: <MessagesSquare className="h-5 w-5" />, path: '/sugestao-reclamacao' },
   ];
 
