@@ -185,42 +185,6 @@ export type Database = {
           },
         ]
       }
-      business_expenses: {
-        Row: {
-          amount: number
-          category: string
-          created_at: string
-          description: string | null
-          id: string
-          payment_date: string
-          title: string
-          updated_at: string
-          vendor: string
-        }
-        Insert: {
-          amount: number
-          category: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          payment_date: string
-          title: string
-          updated_at?: string
-          vendor: string
-        }
-        Update: {
-          amount?: number
-          category?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          payment_date?: string
-          title?: string
-          updated_at?: string
-          vendor?: string
-        }
-        Relationships: []
-      }
       common_area_reservations: {
         Row: {
           common_area_id: string
