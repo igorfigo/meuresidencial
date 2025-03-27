@@ -10,13 +10,13 @@ import { useBusinessExpenses } from '@/hooks/use-business-expenses';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { useMediaQuery } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const DespesasEmpresariais = () => {
   const { user } = useApp();
   const { addExpense, editExpense, isLoading } = useBusinessExpenses();
   const [isFormSheetOpen, setIsFormSheetOpen] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   
   const handleExpenseSubmit = async (data: BusinessExpense) => {
     try {
