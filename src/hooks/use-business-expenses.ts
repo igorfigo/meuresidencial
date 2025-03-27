@@ -31,9 +31,18 @@ export const useBusinessExpenses = () => {
     queryFn: getBusinessExpenses,
   });
 
-  // Safely typecast expenses data
-  const expenses = Array.isArray(expensesData) && expensesData.length > 0 && !('error' in expensesData[0])
-    ? (expensesData as BusinessExpense[])
+  // Safely typecast expenses data, filter out any potential error objects
+  // First cast to unknown, then check if it's an array and if it has the required properties
+  const expenses = Array.isArray(expensesData) 
+    ? expensesData
+        .filter(item => 
+          typeof item === 'object' && 
+          item !== null && 
+          !('error' in item) && 
+          'id' in item && 
+          'description' in item
+        )
+        .map(item => item as BusinessExpense)
     : [];
 
   // Mutation to create a new expense
