@@ -1,7 +1,7 @@
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Users, FileText, MapPin, Wallet, Home, Bug, BellRing, FileCheck, Receipt, PiggyBank, ArrowDownCircle, ArrowUpCircle, Clock } from 'lucide-react';
+import { Users, FileText, MapPin, Wallet, Home, Bug, BellRing, FileCheck, Receipt, PiggyBank, ArrowDownCircle, ArrowUpCircle, Clock, UserX, UserCheck, FileText as FileTextIcon } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -73,8 +73,19 @@ const Dashboard = () => {
     }
   });
   
+  const [statsDetails, setStatsDetails] = useState({
+    activeManagers: 0,
+    inactiveManagers: 0,
+    invoicePreference: 0,
+    bankSlipPreference: 0,
+    regionData: []
+  });
+  
   useEffect(() => {
-    fetchDashboardData();
+    if (user?.isAdmin) {
+      fetchDashboardData();
+      fetchDetailedStats();
+    }
     if (!user?.isAdmin) {
       fetchLatestNews();
       fetchResidentCount();
@@ -268,7 +279,7 @@ const Dashboard = () => {
     }
   };
 
-  async function fetchDashboardData() {
+  const fetchDetailedStats = async () => {
     try {
       const { count: activeCount, error: activeError } = await supabase
         .from('condominiums')
@@ -277,6 +288,13 @@ const Dashboard = () => {
       
       if (activeError) throw activeError;
       
+      const { count: inactiveCount, error: inactiveError } = await supabase
+        .from('condominiums')
+        .select('*', { count: 'exact', head: true })
+        .eq('ativo', false);
+      
+      if (inactiveError) throw inactiveError;
+      
       const { count: invoiceCount, error: invoiceError } = await supabase
         .from('condominiums')
         .select('*', { count: 'exact', head: true })
@@ -284,61 +302,42 @@ const Dashboard = () => {
       
       if (invoiceError) throw invoiceError;
       
-      const { data: locationData, error: locationError } = await supabase
+      const { count: bankSlipCount, error: bankSlipError } = await supabase
         .from('condominiums')
-        .select('estado, cidade, bairro');
+        .select('*', { count: 'exact', head: true })
+        .eq('tipodocumento', 'boleto');
       
-      if (locationError) throw locationError;
+      if (bankSlipError) throw bankSlipError;
       
-      const stateCount: Record<string, number> = {};
-      const cityByState: Record<string, Record<string, number>> = {};
-      const neighborhoodCount: Record<string, number> = {};
+      const { data: regionData, error: regionError } = await supabase
+        .from('condominiums')
+        .select('estado')
+        .not('estado', 'is', null);
       
-      locationData.forEach(item => {
+      if (regionError) throw regionError;
+      
+      const regionCounts = {};
+      regionData.forEach(item => {
         if (item.estado) {
-          stateCount[item.estado] = (stateCount[item.estado] || 0) + 1;
-          
-          if (item.cidade) {
-            if (!cityByState[item.estado]) {
-              cityByState[item.estado] = {};
-            }
-            cityByState[item.estado][item.cidade] = (cityByState[item.estado][item.cidade] || 0) + 1;
-          }
-        }
-        
-        if (item.cidade) {
-        }
-        
-        if (item.bairro) {
-          neighborhoodCount[item.bairro] = (neighborhoodCount[item.bairro] || 0) + 1;
+          regionCounts[item.estado] = (regionCounts[item.estado] || 0) + 1;
         }
       });
       
-      const topStates = Object.entries(stateCount)
-        .sort((a, b) => b[1] - a[1]);
-          
-      const citiesByState: Record<string, [string, number][]> = {};
-      Object.entries(cityByState).forEach(([state, cities]) => {
-        citiesByState[state] = Object.entries(cities).sort((a, b) => b[1] - a[1]);
-      });
-      
-      const topNeighborhoods = Object.entries(neighborhoodCount)
+      const topRegions = Object.entries(regionCounts)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
       
-      setStats({
+      setStatsDetails({
         activeManagers: activeCount || 0,
+        inactiveManagers: inactiveCount || 0,
         invoicePreference: invoiceCount || 0,
-        locationStats: {
-          states: topStates,
-          cities: citiesByState,
-          neighborhoods: topNeighborhoods
-        }
+        bankSlipPreference: bankSlipCount || 0,
+        regionData: topRegions
       });
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('Error fetching detailed stats:', error);
     }
-  }
+  };
 
   const isRecentNews = (createdAt: string): boolean => {
     try {
@@ -424,7 +423,91 @@ const Dashboard = () => {
   };
 
   const renderAdminDashboard = () => (
-    <></>
+    <>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="card-hover border-t-4 border-t-purple-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Status dos Gestores</CardTitle>
+            <div className="flex space-x-2">
+              <UserCheck className="h-4 w-4 text-green-600" />
+              <UserX className="h-4 w-4 text-red-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                  <span className="text-sm text-muted-foreground">Ativos</span>
+                </div>
+                <div className="text-xl font-bold">{statsDetails.activeManagers}</div>
+              </div>
+              <div>
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-red-500"></div>
+                  <span className="text-sm text-muted-foreground">Inativos</span>
+                </div>
+                <div className="text-xl font-bold">{statsDetails.inactiveManagers}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="card-hover border-t-4 border-t-blue-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Preferência de Pagamento</CardTitle>
+            <FileTextIcon className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-amber-500"></div>
+                  <span className="text-sm text-muted-foreground">Boleto</span>
+                </div>
+                <div className="text-xl font-bold">{statsDetails.bankSlipPreference}</div>
+              </div>
+              <div>
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                  <span className="text-sm text-muted-foreground">Nota Fiscal</span>
+                </div>
+                <div className="text-xl font-bold">{statsDetails.invoicePreference}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="card-hover border-t-4 border-t-green-600 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Distribuição Regional</CardTitle>
+            <MapPin className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {statsDetails.regionData.map(([region, count], index) => (
+                <div key={region} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className={`h-3 w-3 rounded-full ${
+                      index === 0 ? "bg-green-500" :
+                      index === 1 ? "bg-blue-500" :
+                      index === 2 ? "bg-purple-500" :
+                      index === 3 ? "bg-amber-500" :
+                      "bg-gray-500"
+                    }`}></div>
+                    <span className="text-sm">{region}</span>
+                  </div>
+                  <span className="font-medium">{count}</span>
+                </div>
+              ))}
+              {statsDetails.regionData.length === 0 && (
+                <div className="text-sm text-gray-500">Sem dados regionais</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 
   const renderResidentDashboard = () => (
