@@ -98,43 +98,6 @@ const BusinessManagement: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="md:col-span-3">
-            <CardHeader className="pb-2">
-              <div className="flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
-                <CardTitle>Evolução de Despesas (Últimos 12 Meses)</CardTitle>
-              </div>
-              <CardDescription>
-                Acompanhe a evolução mensal das despesas empresariais
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={monthlyData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis tickFormatter={formatTooltipValue} />
-                    <Tooltip 
-                      formatter={(value: number) => [formatToBRL(value), 'Total']} 
-                      labelFormatter={(label) => `Mês: ${label}`}
-                    />
-                    <Legend />
-                    <Bar 
-                      dataKey="total" 
-                      name="Despesas" 
-                      fill="#6366f1" 
-                      radius={[4, 4, 0, 0]} 
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card>
             <CardHeader>
               <div className="flex items-center">
@@ -198,6 +161,43 @@ const BusinessManagement: React.FC = () => {
                     <span className="truncate">{category.name}</span>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="md:col-span-3">
+            <CardHeader className="pb-2">
+              <div className="flex items-center">
+                <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
+                <CardTitle>Evolução de Despesas (Últimos 12 Meses)</CardTitle>
+              </div>
+              <CardDescription>
+                Acompanhe a evolução mensal das despesas empresariais
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={monthlyData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={formatTooltipValue} />
+                    <Tooltip 
+                      formatter={(value: number) => [formatToBRL(value), 'Total']} 
+                      labelFormatter={(label) => `Mês: ${label}`}
+                    />
+                    <Legend />
+                    <Bar 
+                      dataKey="total" 
+                      name="Despesas" 
+                      fill="#6366f1" 
+                      radius={[4, 4, 0, 0]} 
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
