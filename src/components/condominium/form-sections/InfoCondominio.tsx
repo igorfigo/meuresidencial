@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,20 @@ interface InfoCondominioProps {
 export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
   const { register, watch, setValue } = useFormContext<FormFields>();
   const [isLoadingCep, setIsLoadingCep] = React.useState(false);
+  
+  const cep = watch('cep');
+  const numero = watch('numero');
+  
+  // Effect to update matricula when cep and numero change
+  useEffect(() => {
+    if (cep && numero) {
+      const cleanCep = cep.replace(/\D/g, '');
+      const cleanNumero = numero.replace(/\D/g, '');
+      if (cleanCep.length > 0 && cleanNumero.length > 0) {
+        setValue('matricula', `${cleanCep}${cleanNumero}`);
+      }
+    }
+  }, [cep, numero, setValue]);
 
   const handleCepSearch = async () => {
     const cepValue = watch('cep');
@@ -55,6 +70,25 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
       handleInputChange(newEvent as React.ChangeEvent<HTMLInputElement>);
     }
   };
+  
+  const handleNumeroChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setValue('numero', value);
+    
+    // Update the matricula field if both CEP and numero are present
+    const currentCep = watch('cep');
+    if (currentCep && value) {
+      const cleanCep = currentCep.replace(/\D/g, '');
+      const cleanNumero = value.replace(/\D/g, '');
+      if (cleanCep.length > 0 && cleanNumero.length > 0) {
+        setValue('matricula', `${cleanCep}${cleanNumero}`);
+      }
+    }
+    
+    if (handleInputChange) {
+      handleInputChange(e);
+    }
+  };
 
   return (
     <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md">
@@ -71,7 +105,7 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
             className="bg-gray-100"
           />
           <p className="text-xs text-muted-foreground">
-            Este campo é gerado automaticamente após preencher CEP e Número.
+            Este campo é gerado automaticamente combinando CEP e Número.
           </p>
         </div>
 
@@ -135,7 +169,7 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
           <Input
             id="numero"
             {...register('numero')}
-            onChange={handleInputChange}
+            onChange={handleNumeroChange}
             placeholder="Número"
           />
         </div>
