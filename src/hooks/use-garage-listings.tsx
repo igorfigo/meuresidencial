@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -126,7 +125,7 @@ export const useGarageListings = () => {
     }
   });
 
-  // Toggle availability of a garage listing
+  // Toggle availability of a garage listing - keeping implementation but not exporting
   const toggleGarageListingAvailability = useMutation({
     mutationFn: async ({ id, isAvailable }: { id: string; isAvailable: boolean }) => {
       setIsLoading(true);
@@ -196,7 +195,6 @@ export const useGarageListings = () => {
     myGarageListings,
     isLoading: isLoading || isLoadingListings || isLoadingMyListings,
     addGarageListing,
-    toggleGarageListingAvailability,
     deleteGarageListing
   };
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -103,13 +102,9 @@ const GaragemLivre = () => {
                               </p>
                               <div className="mt-2">
                                 <span 
-                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    listing.is_available 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : 'bg-red-100 text-red-800'
-                                  }`}
+                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
                                 >
-                                  {listing.is_available ? 'Disponível' : 'Indisponível'}
+                                  Disponível
                                 </span>
                               </div>
                             </div>
