@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency } from '@/utils/currency';
+import { Separator } from "@/components/ui/separator";
 
 const ContractStatusBadge = ({ status }: { status: string }) => {
   const statusMap: Record<string, { label: string, variant: "default" | "destructive" | "outline" | "secondary" }> = {
@@ -356,12 +357,13 @@ const BusinessContratos = () => {
   return (
     <DashboardLayout>
       <div className="container max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+          <div className="w-full">
             <h1 className="text-3xl font-bold tracking-tight">Contratos</h1>
             <p className="text-muted-foreground mt-1">
               Gerencie todos os contratos da empresa
             </p>
+            <Separator className="mt-4 w-full" />
           </div>
           
           <div className="flex mt-4 md:mt-0 space-x-2">

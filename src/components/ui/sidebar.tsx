@@ -27,6 +27,7 @@ import {
   DollarSign,
   MessagesSquare,
   Car,
+  Receipt as ReceiptIcon,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -87,7 +88,7 @@ export function Sidebar() {
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
     { isSeparator: true, path: '', label: '', icon: null },
     { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
-    { path: '/despesas-empresariais', label: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" /> },
+    { path: '/business-cost', label: 'Business Cost', icon: <ReceiptIcon className="h-5 w-5 text-blue-500" /> },
   ];
   
   const managerMenuItems: MenuItem[] = [
