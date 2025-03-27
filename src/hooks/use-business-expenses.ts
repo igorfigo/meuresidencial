@@ -31,29 +31,30 @@ export const useBusinessExpenses = () => {
     queryFn: getBusinessExpenses,
   });
 
-  // Safely typecast expenses data, filter out any potential error objects
+  // Safely typecast expenses data and filter out any potential error objects
   const expenses = Array.isArray(expensesData) 
     ? expensesData
         .filter(item => {
-          // Ensure item is not null, is an object, and has the required properties
+          // Check if item is valid and has required properties
           return item !== null && 
-            typeof item === 'object' && 
-            !('error' in item) && 
-            'id' in item && 
-            'description' in item;
+                 typeof item === 'object' && 
+                 !('error' in item) && 
+                 'id' in item && 
+                 'description' in item;
         })
         .map(item => {
-          // At this point we've verified item has the required properties
+          // Use type assertion after verification
+          const validItem = item as any;
           return {
-            id: item.id,
-            description: item.description,
-            amount: item.amount,
-            date: item.date,
-            category: item.category,
-            payment_method: item.payment_method,
-            status: item.status,
-            created_at: item.created_at,
-            updated_at: item.updated_at
+            id: validItem.id,
+            description: validItem.description,
+            amount: validItem.amount,
+            date: validItem.date,
+            category: validItem.category,
+            payment_method: validItem.payment_method,
+            status: validItem.status,
+            created_at: validItem.created_at,
+            updated_at: validItem.updated_at
           } as BusinessExpense;
         })
     : [];
