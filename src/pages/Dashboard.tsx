@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -84,7 +83,6 @@ const Dashboard = () => {
   
   useEffect(() => {
     if (user?.isAdmin) {
-      // Removed reference to non-existent fetchDashboardData function
       fetchDetailedStats();
     }
     if (!user?.isAdmin) {
@@ -426,7 +424,7 @@ const Dashboard = () => {
   const renderAdminDashboard = () => (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="card-hover border-t-4 border-t-purple-600 shadow-md">
+        <Card className="card-hover border-t-4 border-t-blue-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Status dos Gestores</CardTitle>
             <div className="flex space-x-2">
@@ -436,18 +434,12 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                  <span className="text-sm text-muted-foreground">Ativos</span>
-                </div>
+              <div className="text-center">
+                <span className="text-sm text-muted-foreground">Ativos</span>
                 <div className="text-xl font-bold">{statsDetails.activeManagers}</div>
               </div>
-              <div>
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                  <span className="text-sm text-muted-foreground">Inativos</span>
-                </div>
+              <div className="text-center">
+                <span className="text-sm text-muted-foreground">Inativos</span>
                 <div className="text-xl font-bold">{statsDetails.inactiveManagers}</div>
               </div>
             </div>
@@ -461,25 +453,19 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded-full bg-amber-500"></div>
-                  <span className="text-sm text-muted-foreground">Boleto</span>
-                </div>
+              <div className="text-center">
+                <span className="text-sm text-muted-foreground">Boleto</span>
                 <div className="text-xl font-bold">{statsDetails.bankSlipPreference}</div>
               </div>
-              <div>
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                  <span className="text-sm text-muted-foreground">Nota Fiscal</span>
-                </div>
+              <div className="text-center">
+                <span className="text-sm text-muted-foreground">Nota Fiscal</span>
                 <div className="text-xl font-bold">{statsDetails.invoicePreference}</div>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="card-hover border-t-4 border-t-green-600 shadow-md">
+        <Card className="card-hover border-t-4 border-t-blue-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Distribuição Regional</CardTitle>
             <MapPin className="h-4 w-4 text-green-600" />
