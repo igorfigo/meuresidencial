@@ -42,7 +42,8 @@ export const useBusinessExpenses = () => {
         throw error;
       }
 
-      return data as BusinessExpense[];
+      // Explicitly cast the result to the correct type
+      return (data as unknown) as BusinessExpense[];
     }
   });
 
@@ -60,7 +61,8 @@ export const useBusinessExpenses = () => {
         throw error;
       }
 
-      return data[0] as BusinessExpense;
+      // Explicitly cast the first item in the result array to the correct type
+      return (data[0] as unknown) as BusinessExpense;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-expenses'] });

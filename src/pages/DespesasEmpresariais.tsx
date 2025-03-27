@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -83,13 +82,12 @@ const DespesasEmpresariais = () => {
 
   const onSubmit = (data: ExpenseFormValues) => {
     setFormError(null);
-    // Ensure all required fields are present before submitting
-    const expenseData = {
+    const expenseData: BusinessExpenseFormData = {
       description: data.description,
       amount: data.amount,
       category: data.category,
       expense_date: data.expense_date,
-      notes: data.notes || null,
+      notes: data.notes || undefined
     };
     
     createExpense(expenseData, {
