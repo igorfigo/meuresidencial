@@ -32,17 +32,30 @@ export const useBusinessExpenses = () => {
   });
 
   // Safely typecast expenses data, filter out any potential error objects
-  // First cast to unknown, then check if it's an array and if it has the required properties
   const expenses = Array.isArray(expensesData) 
     ? expensesData
-        .filter(item => 
-          typeof item === 'object' && 
-          item !== null && 
-          !('error' in item) && 
-          'id' in item && 
-          'description' in item
-        )
-        .map(item => item as BusinessExpense)
+        .filter(item => {
+          // Ensure item is not null, is an object, and has the required properties
+          return item !== null && 
+            typeof item === 'object' && 
+            !('error' in item) && 
+            'id' in item && 
+            'description' in item;
+        })
+        .map(item => {
+          // At this point we've verified item has the required properties
+          return {
+            id: item.id,
+            description: item.description,
+            amount: item.amount,
+            date: item.date,
+            category: item.category,
+            payment_method: item.payment_method,
+            status: item.status,
+            created_at: item.created_at,
+            updated_at: item.updated_at
+          } as BusinessExpense;
+        })
     : [];
 
   // Mutation to create a new expense
