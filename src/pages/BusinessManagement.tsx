@@ -189,17 +189,11 @@ const BusinessManagement: React.FC = () => {
                     />
                     <Legend 
                       formatter={(value, entry) => {
-                        const item = entry.payload;
-                        if (item) {
-                          const matchingCategory = categoryData.find(cat => 
-                            cat.name === item.name || cat.displayName === item.value
-                          );
-                          
-                          if (matchingCategory) {
-                            return matchingCategory.displayName;
-                          }
-                        }
-                        return value;
+                        const dataEntry = categoryData.find(item => 
+                          item.name === entry.dataKey || 
+                          item.name === value
+                        );
+                        return dataEntry?.displayName || value;
                       }}
                     />
                   </PieChart>
