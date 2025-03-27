@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, Receipt, Trash, Eye } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -313,7 +312,7 @@ const BusinessCost = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredExpenses.map((expense) => (
+                {filteredExpenses.map((expense: BusinessExpense) => (
                   <TableRow key={expense.id}>
                     <TableCell className="font-medium">{expense.description}</TableCell>
                     <TableCell>

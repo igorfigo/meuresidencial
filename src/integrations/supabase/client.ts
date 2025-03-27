@@ -599,7 +599,7 @@ export const deletePixKey = async (matricula: string) => {
 export const getBusinessExpenses = async () => {
   try {
     const { data, error } = await supabase
-      .from('business_expenses')
+      .from('business_expenses' as any)
       .select('*')
       .order('created_at', { ascending: false });
     
@@ -625,7 +625,7 @@ export const saveBusinessExpense = async (expenseData: {
 }) => {
   try {
     const { data, error } = await supabase
-      .from('business_expenses')
+      .from('business_expenses' as any)
       .insert([expenseData])
       .select();
     
@@ -651,7 +651,7 @@ export const updateBusinessExpense = async (id: string, expenseData: {
 }) => {
   try {
     const { data, error } = await supabase
-      .from('business_expenses')
+      .from('business_expenses' as any)
       .update({
         ...expenseData,
         updated_at: new Date().toISOString()
@@ -674,7 +674,7 @@ export const updateBusinessExpense = async (id: string, expenseData: {
 export const deleteBusinessExpense = async (id: string) => {
   try {
     const { error } = await supabase
-      .from('business_expenses')
+      .from('business_expenses' as any)
       .delete()
       .eq('id', id);
     

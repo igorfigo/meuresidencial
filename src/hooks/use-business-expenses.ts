@@ -86,7 +86,7 @@ export const useBusinessExpenses = () => {
   });
 
   return {
-    expenses,
+    expenses: expenses as BusinessExpense[],
     isLoading: isLoading || isLoadingExpenses,
     error,
     createExpense: (expense: Omit<BusinessExpense, 'id' | 'created_at' | 'updated_at'>) => createExpenseMutation.mutate(expense),
