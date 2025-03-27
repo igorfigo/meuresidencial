@@ -143,12 +143,14 @@ const BusinessCost = () => {
     e.preventDefault();
     
     const formData = new FormData(e.currentTarget);
-    const description = formData.get('description');
-    const amount = parseFloat(formData.get('amount'));
-    const date = formData.get('date');
-    const category = formData.get('category');
-    const payment_method = formData.get('payment_method');
-    const status = formData.get('status');
+    // Type cast the form values to ensure they are strings
+    const description = String(formData.get('description') || '');
+    const amountValue = formData.get('amount');
+    const amount = amountValue ? parseFloat(String(amountValue)) : 0;
+    const date = String(formData.get('date') || '');
+    const category = String(formData.get('category') || '');
+    const payment_method = String(formData.get('payment_method') || '');
+    const status = String(formData.get('status') || '');
     
     try {
       await createExpense({
@@ -174,12 +176,14 @@ const BusinessCost = () => {
     if (!selectedExpense?.id) return;
     
     const formData = new FormData(e.currentTarget);
-    const description = formData.get('description');
-    const amount = parseFloat(formData.get('amount'));
-    const date = formData.get('date');
-    const category = formData.get('category');
-    const payment_method = formData.get('payment_method');
-    const status = formData.get('status');
+    // Type cast the form values to ensure they are strings
+    const description = String(formData.get('description') || '');
+    const amountValue = formData.get('amount');
+    const amount = amountValue ? parseFloat(String(amountValue)) : 0;
+    const date = String(formData.get('date') || '');
+    const category = String(formData.get('category') || '');
+    const payment_method = String(formData.get('payment_method') || '');
+    const status = String(formData.get('status') || '');
     
     try {
       await updateExpense(selectedExpense.id, {
