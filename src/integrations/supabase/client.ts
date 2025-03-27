@@ -594,3 +594,98 @@ export const deletePixKey = async (matricula: string) => {
     throw error;
   }
 };
+
+// Business Expenses functions
+export const getBusinessExpenses = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('business_expenses')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching business expenses:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getBusinessExpenses:', error);
+    throw error;
+  }
+};
+
+export const saveBusinessExpense = async (expenseData: {
+  description: string;
+  amount: number;
+  date: string;
+  category: string;
+  payment_method: string;
+  status: string;
+}) => {
+  try {
+    const { data, error } = await supabase
+      .from('business_expenses')
+      .insert([expenseData])
+      .select();
+    
+    if (error) {
+      console.error('Error creating business expense:', error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in saveBusinessExpense:', error);
+    throw error;
+  }
+};
+
+export const updateBusinessExpense = async (id: string, expenseData: {
+  description?: string;
+  amount?: number;
+  date?: string;
+  category?: string;
+  payment_method?: string;
+  status?: string;
+}) => {
+  try {
+    const { data, error } = await supabase
+      .from('business_expenses')
+      .update({
+        ...expenseData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select();
+    
+    if (error) {
+      console.error('Error updating business expense:', error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in updateBusinessExpense:', error);
+    throw error;
+  }
+};
+
+export const deleteBusinessExpense = async (id: string) => {
+  try {
+    const { error } = await supabase
+      .from('business_expenses')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting business expense:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in deleteBusinessExpense:', error);
+    throw error;
+  }
+};

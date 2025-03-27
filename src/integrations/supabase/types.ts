@@ -185,6 +185,42 @@ export type Database = {
           },
         ]
       }
+      business_expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          payment_method: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          payment_method: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          payment_method?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       common_area_reservations: {
         Row: {
           common_area_id: string

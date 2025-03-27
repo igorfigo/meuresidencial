@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Search, Receipt, FileText, Trash, Download, Eye } from 'lucide-react';
+import { Plus, Search, Receipt, Trash, Eye } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,63 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/utils/currency';
 import { toast } from 'sonner';
-
-// Placeholder for hooks we'll implement later
-const useBusinessCosts = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [expenses, setExpenses] = useState([
-    {
-      id: '1',
-      description: 'Aluguel de escritório',
-      amount: 2500,
-      date: '2025-03-15',
-      category: 'rent',
-      payment_method: 'bank_transfer',
-      status: 'paid'
-    },
-    {
-      id: '2',
-      description: 'Conta de energia',
-      amount: 450.75,
-      date: '2025-03-10',
-      category: 'utilities',
-      payment_method: 'direct_debit',
-      status: 'paid'
-    },
-    {
-      id: '3',
-      description: 'Material de escritório',
-      amount: 325.30,
-      date: '2025-03-20',
-      category: 'supplies',
-      payment_method: 'credit_card',
-      status: 'pending'
-    }
-  ]);
-
-  const createExpense = (expense) => {
-    setExpenses([...expenses, { ...expense, id: Date.now().toString() }]);
-    return Promise.resolve({ id: Date.now().toString() });
-  };
-
-  const updateExpense = (id, data) => {
-    setExpenses(expenses.map(expense => expense.id === id ? { ...expense, ...data } : expense));
-    return Promise.resolve();
-  };
-
-  const deleteExpense = (id) => {
-    setExpenses(expenses.filter(expense => expense.id !== id));
-    return Promise.resolve();
-  };
-
-  return { 
-    expenses, 
-    isLoading, 
-    createExpense, 
-    updateExpense, 
-    deleteExpense 
-  };
-};
+import { useBusinessExpenses, BusinessExpense } from '@/hooks/use-business-expenses';
 
 const expenseCategories = [
   { id: 'rent', label: 'Aluguel' },
@@ -102,7 +46,7 @@ const expenseStatus = [
   { id: 'cancelled', label: 'Cancelado', variant: 'outline' }
 ];
 
-const ExpenseStatusBadge = ({ status }) => {
+const ExpenseStatusBadge = ({ status }: { status: string }) => {
   const statusInfo = expenseStatus.find(s => s.id === status) || { label: status, variant: 'default' };
   
   return (
@@ -122,15 +66,15 @@ const BusinessCost = () => {
   const [openEditExpenseDialog, setOpenEditExpenseDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [selectedExpense, setSelectedExpense] = useState<BusinessExpense | null>(null);
   
   const { 
     expenses, 
     isLoading, 
-    createExpense, 
+    createExpense,
     updateExpense,
     deleteExpense 
-  } = useBusinessCosts();
+  } = useBusinessExpenses();
 
   const filteredExpenses = expenses?.filter(expense => {
     const matchesSearch = expense.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -139,11 +83,10 @@ const BusinessCost = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleSubmitNewExpense = async (e) => {
+  const handleSubmitNewExpense = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     const formData = new FormData(e.currentTarget);
-    // Type cast the form values to ensure they are strings
     const description = String(formData.get('description') || '');
     const amountValue = formData.get('amount');
     const amount = amountValue ? parseFloat(String(amountValue)) : 0;
@@ -162,21 +105,18 @@ const BusinessCost = () => {
         status
       });
       
-      toast.success("Despesa registrada com sucesso");
       setOpenNewExpenseDialog(false);
     } catch (error) {
       console.error("Erro ao registrar despesa:", error);
-      toast.error("Erro ao registrar despesa");
     }
   };
 
-  const handleSubmitEditExpense = async (e) => {
+  const handleSubmitEditExpense = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!selectedExpense?.id) return;
     
     const formData = new FormData(e.currentTarget);
-    // Type cast the form values to ensure they are strings
     const description = String(formData.get('description') || '');
     const amountValue = formData.get('amount');
     const amount = amountValue ? parseFloat(String(amountValue)) : 0;
@@ -195,30 +135,26 @@ const BusinessCost = () => {
         status
       });
       
-      toast.success("Despesa atualizada com sucesso");
       setOpenEditExpenseDialog(false);
     } catch (error) {
       console.error("Erro ao atualizar despesa:", error);
-      toast.error("Erro ao atualizar despesa");
     }
   };
 
-  const handleDeleteExpense = async (id) => {
+  const handleDeleteExpense = async (id: string) => {
     try {
       await deleteExpense(id);
-      toast.success("Despesa excluída com sucesso");
     } catch (error) {
       console.error("Erro ao excluir despesa:", error);
-      toast.error("Erro ao excluir despesa");
     }
   };
 
-  const handleEditExpense = (expense) => {
+  const handleEditExpense = (expense: BusinessExpense) => {
     setSelectedExpense(expense);
     setOpenEditExpenseDialog(true);
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
   };
