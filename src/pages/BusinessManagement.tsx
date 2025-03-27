@@ -27,10 +27,8 @@ import { useBusinessExpenses } from '@/hooks/use-business-expenses';
 import { format, subMonths, startOfMonth, differenceInCalendarMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatToBRL } from '@/utils/currency';
-import { BarChart3, DollarSign, PieChartIcon, Users, UserX } from 'lucide-react';
+import { BarChart3, DollarSign, PieChartIcon } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { supabase } from '@/integrations/supabase/client';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
@@ -50,8 +48,6 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
 
 const BusinessManagement: React.FC = () => {
   const { expenses } = useBusinessExpenses();
-  const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
 
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -103,108 +99,11 @@ const BusinessManagement: React.FC = () => {
     }));
   };
 
-  const [stats, setStats] = useState({
-    activeManagers: 0,
-    inactiveManagers: 0,
-    invoicePreference: 0,
-    locationStats: {
-      states: [] as [string, number][],
-      cities: {} as Record<string, [string, number][]>,
-      neighborhoods: [] as [string, number][]
-    }
-  });
-
-  React.useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  async function fetchDashboardData() {
-    try {
-      const { count: activeCount, error: activeError } = await supabase
-        .from('condominiums')
-        .select('*', { count: 'exact', head: true })
-        .eq('ativo', true);
-      
-      if (activeError) throw activeError;
-      
-      const { count: inactiveCount, error: inactiveError } = await supabase
-        .from('condominiums')
-        .select('*', { count: 'exact', head: true })
-        .eq('ativo', false);
-      
-      if (inactiveError) throw inactiveError;
-      
-      const { count: invoiceCount, error: invoiceError } = await supabase
-        .from('condominiums')
-        .select('*', { count: 'exact', head: true })
-        .eq('tipodocumento', 'notaFiscal');
-      
-      if (invoiceError) throw invoiceError;
-      
-      const { data: locationData, error: locationError } = await supabase
-        .from('condominiums')
-        .select('estado, cidade, bairro');
-      
-      if (locationError) throw locationError;
-      
-      const stateCount: Record<string, number> = {};
-      const cityByState: Record<string, Record<string, number>> = {};
-      const neighborhoodCount: Record<string, number> = {};
-      
-      locationData.forEach(item => {
-        if (item.estado) {
-          stateCount[item.estado] = (stateCount[item.estado] || 0) + 1;
-          
-          if (item.cidade) {
-            if (!cityByState[item.estado]) {
-              cityByState[item.estado] = {};
-            }
-            cityByState[item.estado][item.cidade] = (cityByState[item.estado][item.cidade] || 0) + 1;
-          }
-        }
-        
-        if (item.bairro) {
-          neighborhoodCount[item.bairro] = (neighborhoodCount[item.bairro] || 0) + 1;
-        }
-      });
-      
-      const topStates = Object.entries(stateCount)
-        .sort((a, b) => b[1] - a[1]);
-          
-      const citiesByState: Record<string, [string, number][]> = {};
-      Object.entries(cityByState).forEach(([state, cities]) => {
-        citiesByState[state] = Object.entries(cities).sort((a, b) => b[1] - a[1]);
-      });
-      
-      const topNeighborhoods = Object.entries(neighborhoodCount)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-      
-      setStats({
-        activeManagers: activeCount || 0,
-        inactiveManagers: inactiveCount || 0,
-        invoicePreference: invoiceCount || 0,
-        locationStats: {
-          states: topStates,
-          cities: citiesByState,
-          neighborhoods: topNeighborhoods
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    }
-  }
-
   const monthlyData = getLast12MonthsData();
   const categoryData = getCategoryData();
 
   const formatTooltipValue = (value: number) => {
     return formatToBRL(value);
-  };
-
-  const handleStateClick = (state: string) => {
-    setSelectedState(state);
-    setIsStateDetailOpen(true);
   };
 
   return (
@@ -222,75 +121,7 @@ const BusinessManagement: React.FC = () => {
         
         <Separator className="my-4" />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Gestores</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 text-green-500 mr-2" />
-                    <span className="text-sm font-medium">Ativos</span>
-                  </div>
-                  <span className="text-lg font-bold text-green-600">{stats.activeManagers}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <UserX className="h-4 w-4 text-red-500 mr-2" />
-                    <span className="text-sm font-medium">Inativos</span>
-                  </div>
-                  <span className="text-lg font-bold text-red-600">{stats.inactiveManagers}</span>
-                </div>
-                <div className="pt-2 mt-2 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Total</span>
-                    <span className="text-xl font-bold">{stats.activeManagers + stats.inactiveManagers}</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Preferência por Nota Fiscal</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.invoicePreference}</div>
-              <p className="text-xs text-muted-foreground">
-                Gestores que optam por nota fiscal
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Distribuição Geográfica</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="mt-2">
-                <h4 className="text-sm font-medium text-muted-foreground">Por Estado</h4>
-                <ul className="text-sm mt-1">
-                  {stats.locationStats.states.map(([state, count]) => (
-                    <li 
-                      key={state} 
-                      className="flex justify-between items-center py-1 px-2 hover:bg-gray-100 rounded cursor-pointer"
-                      onClick={() => handleStateClick(state)}
-                    >
-                      <span>{state}</span>
-                      <span className="font-medium">{count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-          
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="md:col-span-2">
             <CardHeader>
               <div className="flex items-center">
@@ -364,7 +195,7 @@ const BusinessManagement: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="md:col-span-3">
+          <Card className="md:col-span-2">
             <CardHeader className="pb-2">
               <div className="flex items-center">
                 <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
@@ -402,28 +233,6 @@ const BusinessManagement: React.FC = () => {
           </Card>
         </div>
       </div>
-
-      <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Cidades em {selectedState}</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            {selectedState && stats.locationStats.cities[selectedState] ? (
-              <ul className="space-y-2">
-                {stats.locationStats.cities[selectedState].map(([city, count]) => (
-                  <li key={city} className="flex justify-between items-center py-2 border-b">
-                    <span>{city}</span>
-                    <span className="font-medium">{count}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">Sem dados de cidades para este estado.</p>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
     </DashboardLayout>
   );
 };
