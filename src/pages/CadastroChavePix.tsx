@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -268,6 +270,7 @@ const CadastroChavePix = () => {
           <div>
             <h1 className="text-2xl font-bold mb-2">Cadastro Chave PIX / Juros</h1>
             <p className="text-gray-500">Cadastre e gerencie as chaves PIX disponíveis para recebimento.</p>
+            <Separator className="mt-4" />
           </div>
         </div>
         
