@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlanUpgradeDialog } from './PlanUpgradeDialog';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface SubscriptionDetailsCardProps {
   condominiumData: any;
@@ -23,6 +25,7 @@ export const SubscriptionDetailsCard = ({
 }: SubscriptionDetailsCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [localCondominiumData, setLocalCondominiumData] = useState(condominiumData);
+  const navigate = useNavigate();
   
   // Check if CNPJ is empty or null
   const isCnpjEmpty = !localCondominiumData.cnpj || localCondominiumData.cnpj.trim() === '';
@@ -68,6 +71,10 @@ export const SubscriptionDetailsCard = ({
   
   const handlePlanUpgrade = (updatedData: any) => {
     setLocalCondominiumData(updatedData);
+  };
+  
+  const navigateToContactPage = () => {
+    navigate('/fale-conosco');
   };
   
   const planDetails = getCurrentPlanDetails();
@@ -155,9 +162,22 @@ export const SubscriptionDetailsCard = ({
             </SelectContent>
           </Select>
           {isCnpjEmpty && (
-            <p className="text-xs text-muted-foreground mt-1">
-              CNPJ não informado. Apenas Recibo disponível.
-            </p>
+            <div className="mt-1">
+              <p className="text-xs text-muted-foreground">
+                CNPJ não informado. Apenas Recibo disponível.
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Para alterar este campo é necessário ter um CNPJ cadastrado. 
+                Entre em contato com o administrador através do 
+                <Button 
+                  variant="link" 
+                  className="h-auto p-0 text-xs text-brand-600 font-medium" 
+                  onClick={navigateToContactPage}
+                >
+                  Fale Conosco
+                </Button>.
+              </p>
+            </div>
           )}
         </div>
       </div>
