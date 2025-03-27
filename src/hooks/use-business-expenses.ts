@@ -13,6 +13,7 @@ export interface BusinessExpense {
   notes?: string | null;
   created_at: string;
   updated_at: string;
+  user_id?: string | null;
 }
 
 export interface BusinessExpenseFormData {
@@ -21,6 +22,7 @@ export interface BusinessExpenseFormData {
   category: string;
   expense_date: string;
   notes?: string;
+  user_id?: string | null;
 }
 
 export const useBusinessExpenses = () => {
@@ -49,10 +51,19 @@ export const useBusinessExpenses = () => {
 
   const createExpenseMutation = useMutation({
     mutationFn: async (expenseData: BusinessExpenseFormData) => {
+      // Get the current user's ID
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Add the user_id to the expense data
+      const expenseWithUserId = {
+        ...expenseData,
+        user_id: user?.id
+      };
+      
       // Cast the table name to any to bypass TypeScript errors temporarily
       const { data, error } = await supabase
         .from('business_expenses' as any)
-        .insert([expenseData])
+        .insert([expenseWithUserId])
         .select();
 
       if (error) {
