@@ -40,7 +40,6 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
-  // Fix the type issue by ensuring amount is a string in defaultValues
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
     defaultValues: expense
