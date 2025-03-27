@@ -15,8 +15,6 @@ export interface BusinessExpense {
   amount: number;
   date: string;
   category: string;
-  payment_method: string;
-  status: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -41,10 +39,11 @@ export const useBusinessExpenses = () => {
           }
           
           // Now we can safely check properties
-          return typeof item === 'object' && 
-                 !('error' in item) && 
-                 'id' in item && 
-                 'description' in item;
+          const validItem = item as any; // Cast to any to avoid TS errors
+          return typeof validItem === 'object' && 
+                 !('error' in validItem) && 
+                 'id' in validItem && 
+                 'description' in validItem;
         })
         .map(item => {
           // At this point we know item is not null/undefined
@@ -55,8 +54,6 @@ export const useBusinessExpenses = () => {
             amount: validItem.amount,
             date: validItem.date,
             category: validItem.category,
-            payment_method: validItem.payment_method,
-            status: validItem.status,
             created_at: validItem.created_at,
             updated_at: validItem.updated_at
           } as BusinessExpense;

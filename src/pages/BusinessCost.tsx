@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Plus, Search, Receipt, Trash, Eye } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -27,38 +28,6 @@ const expenseCategories = [
   { id: 'taxes', label: 'Impostos' },
   { id: 'other', label: 'Outros' }
 ];
-
-const paymentMethods = [
-  { id: 'credit_card', label: 'Cartão de Crédito' },
-  { id: 'bank_transfer', label: 'Transferência Bancária' },
-  { id: 'direct_debit', label: 'Débito Direto' },
-  { id: 'cash', label: 'Dinheiro' },
-  { id: 'pix', label: 'PIX' },
-  { id: 'check', label: 'Cheque' },
-  { id: 'other', label: 'Outro' }
-];
-
-const expenseStatus = [
-  { id: 'paid', label: 'Pago', variant: 'default' },
-  { id: 'pending', label: 'Pendente', variant: 'warning' },
-  { id: 'overdue', label: 'Atrasado', variant: 'destructive' },
-  { id: 'cancelled', label: 'Cancelado', variant: 'outline' }
-];
-
-const ExpenseStatusBadge = ({ status }: { status: string }) => {
-  const statusInfo = expenseStatus.find(s => s.id === status) || { label: status, variant: 'default' };
-  
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-      statusInfo.variant === 'destructive' ? 'bg-red-100 text-red-800' :
-      statusInfo.variant === 'warning' ? 'bg-amber-100 text-amber-800' :
-      statusInfo.variant === 'outline' ? 'bg-gray-100 text-gray-800' :
-      'bg-green-100 text-green-800'
-    }`}>
-      {statusInfo.label}
-    </span>
-  );
-};
 
 const BusinessCost = () => {
   const [openNewExpenseDialog, setOpenNewExpenseDialog] = useState(false);
@@ -91,17 +60,13 @@ const BusinessCost = () => {
     const amount = amountValue ? parseFloat(String(amountValue)) : 0;
     const date = String(formData.get('date') || '');
     const category = String(formData.get('category') || '');
-    const payment_method = String(formData.get('payment_method') || '');
-    const status = String(formData.get('status') || '');
     
     try {
       await createExpense({
         description,
         amount,
         date,
-        category,
-        payment_method,
-        status
+        category
       });
       
       setOpenNewExpenseDialog(false);
@@ -121,17 +86,13 @@ const BusinessCost = () => {
     const amount = amountValue ? parseFloat(String(amountValue)) : 0;
     const date = String(formData.get('date') || '');
     const category = String(formData.get('category') || '');
-    const payment_method = String(formData.get('payment_method') || '');
-    const status = String(formData.get('status') || '');
     
     try {
       await updateExpense(selectedExpense.id, {
         description,
         amount,
         date,
-        category,
-        payment_method,
-        status
+        category
       });
       
       setOpenEditExpenseDialog(false);
@@ -214,36 +175,6 @@ const BusinessCost = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="payment_method">Método de Pagamento</Label>
-                      <Select name="payment_method" required defaultValue="">
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o método de pagamento" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {paymentMethods.map(method => (
-                            <SelectItem key={method.id} value={method.id}>
-                              {method.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="status">Status</Label>
-                      <Select name="status" required defaultValue="pending">
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {expenseStatus.map(status => (
-                            <SelectItem key={status.id} value={status.id}>
-                              {status.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setOpenNewExpenseDialog(false)}>
@@ -306,8 +237,6 @@ const BusinessCost = () => {
                   <TableHead>Categoria</TableHead>
                   <TableHead className="text-center">Data</TableHead>
                   <TableHead>Valor</TableHead>
-                  <TableHead>Método</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead className="text-center">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -320,10 +249,6 @@ const BusinessCost = () => {
                     </TableCell>
                     <TableCell className="text-center">{formatDate(expense.date)}</TableCell>
                     <TableCell>{formatCurrency(expense.amount)}</TableCell>
-                    <TableCell>
-                      {paymentMethods.find(m => m.id === expense.payment_method)?.label || expense.payment_method}
-                    </TableCell>
-                    <TableCell><ExpenseStatusBadge status={expense.status} /></TableCell>
                     <TableCell className="text-center">
                       <div className="flex justify-center gap-2">
                         <Button 
@@ -442,36 +367,6 @@ const BusinessCost = () => {
                     {expenseCategories.map(category => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-payment_method">Método de Pagamento</Label>
-                <Select name="payment_method" required defaultValue={selectedExpense?.payment_method || ""}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o método de pagamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {paymentMethods.map(method => (
-                      <SelectItem key={method.id} value={method.id}>
-                        {method.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-status">Status</Label>
-                <Select name="status" required defaultValue={selectedExpense?.status || "pending"}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {expenseStatus.map(status => (
-                      <SelectItem key={status.id} value={status.id}>
-                        {status.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
