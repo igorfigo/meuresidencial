@@ -185,6 +185,51 @@ export type Database = {
           },
         ]
       }
+      business_expenses: {
+        Row: {
+          amount: string
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          notes: string | null
+          payment_method: string
+          reference: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: string
+          category: string
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          notes?: string | null
+          payment_method: string
+          reference: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: string
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          reference?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       common_area_reservations: {
         Row: {
           common_area_id: string
@@ -1033,6 +1078,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_auth_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
