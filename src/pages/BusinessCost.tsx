@@ -25,6 +25,7 @@ const expenseCategories = [
   { id: 'maintenance', label: 'Manutenção' },
   { id: 'software', label: 'Software/Assinaturas' },
   { id: 'legal', label: 'Serviços Jurídicos' },
+  { id: 'accounting', label: 'Serviços Contábeis' },
   { id: 'taxes', label: 'Impostos' },
   { id: 'other', label: 'Outros' }
 ];
