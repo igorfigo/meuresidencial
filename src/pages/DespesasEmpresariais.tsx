@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { PlusCircle, AlertCircle } from 'lucide-react';
@@ -17,9 +16,12 @@ const DespesasEmpresariais = () => {
   const { user } = useApp();
   const { addExpense, editExpense, isLoading, error } = useBusinessExpenses();
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const isMobile = useIsMobile();
   
   const handleExpenseSubmit = async (data: BusinessExpense) => {
+    setFormError(null);
+    
     try {
       if (data.id) {
         // Edit existing expense
@@ -34,7 +36,8 @@ const DespesasEmpresariais = () => {
       
     } catch (error: any) {
       console.error('Error submitting expense:', error);
-      // Toast error is already handled in the hook
+      setFormError(error?.message || 'Erro ao processar a operação');
+      // Keep dialog open when there's an error
     }
   };
   
@@ -72,7 +75,10 @@ const DespesasEmpresariais = () => {
       <DialogTrigger asChild>
         <Button 
           className="gap-2" 
-          onClick={() => setIsFormDialogOpen(true)}
+          onClick={() => {
+            setFormError(null);
+            setIsFormDialogOpen(true);
+          }}
         >
           <PlusCircle className="h-5 w-5" />
           Nova Despesa
@@ -85,6 +91,21 @@ const DespesasEmpresariais = () => {
             Adicione uma nova despesa empresarial ao sistema
           </DialogDescription>
         </DialogHeader>
+        
+        {formError && (
+          <div className="px-6 pt-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erro no sistema</AlertTitle>
+              <AlertDescription>
+                {formError.includes('política de segurança') 
+                  ? 'Erro de permissão: Existe um problema na política de segurança do banco de dados. Por favor, entre em contato com o suporte técnico.'
+                  : formError}
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+        
         <div className={`${isMobile ? 'px-4 py-4' : 'px-6 py-6'} overflow-y-auto max-h-[70vh]`}>
           <BusinessExpenseForm onSubmit={handleExpenseSubmit} />
         </div>
