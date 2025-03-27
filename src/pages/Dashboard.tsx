@@ -424,59 +424,7 @@ const Dashboard = () => {
   };
 
   const renderAdminDashboard = () => (
-    <>
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Gestores Ativos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeManagers}</div>
-            <p className="text-xs text-muted-foreground">
-              Gestores com status ativo no sistema
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Preferência por Nota Fiscal</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.invoicePreference}</div>
-            <p className="text-xs text-muted-foreground">
-              Gestores que optam por nota fiscal
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Distribuição Geográfica</CardTitle>
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="mt-2">
-              <h4 className="text-sm font-medium text-muted-foreground">Por Estado</h4>
-              <ul className="text-sm mt-1">
-                {stats.locationStats.states.map(([state, count]) => (
-                  <li 
-                    key={state} 
-                    className="flex justify-between items-center py-1 px-2 hover:bg-gray-100 rounded cursor-pointer"
-                    onClick={() => handleStateClick(state)}
-                  >
-                    <span>{state}</span>
-                    <span className="font-medium">{count}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-    </>
+    <></>
   );
 
   const renderResidentDashboard = () => (
@@ -860,4 +808,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
