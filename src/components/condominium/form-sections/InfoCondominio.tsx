@@ -21,19 +21,17 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
   
   const cep = watch('cep');
   const numero = watch('numero');
-  const matricula = watch('matricula');
-  const isExistingMatricula = !!matricula && matricula.trim() !== '';
   
-  // Effect to update matricula when cep and numero change (only if matricula is not already set)
+  // Effect to update matricula when cep and numero change
   useEffect(() => {
-    if (!isExistingMatricula && cep && numero) {
+    if (cep && numero) {
       const cleanCep = cep.replace(/\D/g, '');
       const cleanNumero = numero.replace(/\D/g, '');
       if (cleanCep.length > 0 && cleanNumero.length > 0) {
         setValue('matricula', `${cleanCep}${cleanNumero}`);
       }
     }
-  }, [cep, numero, setValue, isExistingMatricula]);
+  }, [cep, numero, setValue]);
 
   const handleCepSearch = async () => {
     const cepValue = watch('cep');
@@ -77,15 +75,13 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
     const { value } = e.target;
     setValue('numero', value);
     
-    // Update the matricula field if both CEP and numero are present (only if matricula is not already set)
-    if (!isExistingMatricula) {
-      const currentCep = watch('cep');
-      if (currentCep && value) {
-        const cleanCep = currentCep.replace(/\D/g, '');
-        const cleanNumero = value.replace(/\D/g, '');
-        if (cleanCep.length > 0 && cleanNumero.length > 0) {
-          setValue('matricula', `${cleanCep}${cleanNumero}`);
-        }
+    // Update the matricula field if both CEP and numero are present
+    const currentCep = watch('cep');
+    if (currentCep && value) {
+      const cleanCep = currentCep.replace(/\D/g, '');
+      const cleanNumero = value.replace(/\D/g, '');
+      if (cleanCep.length > 0 && cleanNumero.length > 0) {
+        setValue('matricula', `${cleanCep}${cleanNumero}`);
       }
     }
     
@@ -109,7 +105,7 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
             className="bg-gray-100"
           />
           <p className="text-xs text-muted-foreground">
-            Este campo é gerado automaticamente combinando CEP e Número e não pode ser alterado após o cadastro.
+            Este campo é gerado automaticamente combinando CEP e Número.
           </p>
         </div>
 
@@ -136,13 +132,11 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
               onChange={handleInputChange}
               placeholder="00000-000"
               className="flex-1"
-              disabled={isExistingMatricula}
-              readOnly={isExistingMatricula}
             />
             <Button 
               type="button" 
               onClick={handleCepSearch}
-              disabled={isLoadingCep || isExistingMatricula}
+              disabled={isLoadingCep}
               className="bg-brand-600 hover:bg-brand-700"
             >
               {isLoadingCep ? "Buscando..." : <Search className="h-4 w-4" />}
@@ -177,8 +171,6 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
             {...register('numero')}
             onChange={handleNumeroChange}
             placeholder="Número"
-            disabled={isExistingMatricula}
-            readOnly={isExistingMatricula}
           />
         </div>
         
