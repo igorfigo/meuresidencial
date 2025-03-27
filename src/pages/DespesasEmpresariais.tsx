@@ -76,11 +76,11 @@ const DespesasEmpresariais = () => {
           Nova Despesa
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="px-4 pt-4 pb-8">
-        <DrawerHeader className="px-0">
-          <DrawerTitle>Nova Despesa Empresarial</DrawerTitle>
+      <DrawerContent className="p-0">
+        <DrawerHeader className="border-b px-6 py-4">
+          <DrawerTitle className="text-xl font-semibold">Nova Despesa Empresarial</DrawerTitle>
         </DrawerHeader>
-        <div className="p-0 overflow-y-auto max-h-[70vh]">
+        <div className="px-6 py-6 overflow-y-auto max-h-[70vh]">
           <BusinessExpenseForm onSubmit={handleExpenseSubmit} />
         </div>
       </DrawerContent>
@@ -96,11 +96,13 @@ const DespesasEmpresariais = () => {
           Nova Despesa
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[450px] sm:w-[540px] overflow-y-auto">
-        <SheetHeader className="mb-4">
-          <SheetTitle>Nova Despesa Empresarial</SheetTitle>
+      <SheetContent className="w-[450px] sm:w-[540px] p-0 overflow-hidden">
+        <SheetHeader className="border-b px-6 py-4">
+          <SheetTitle className="text-xl font-semibold">Nova Despesa Empresarial</SheetTitle>
         </SheetHeader>
-        <BusinessExpenseForm onSubmit={handleExpenseSubmit} />
+        <div className="px-6 py-6 overflow-y-auto h-[calc(100vh-70px)]">
+          <BusinessExpenseForm onSubmit={handleExpenseSubmit} />
+        </div>
       </SheetContent>
     </Sheet>
   );

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { DollarSign, Calendar, FileText, Info } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -93,19 +94,25 @@ export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFo
   return (
     <div className="w-full">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          {/* Category Field */}
           <FormField
             control={form.control}
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Categoria*</FormLabel>
+                <FormLabel className="flex items-center gap-2 font-medium text-base">
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand-50 text-brand-600">
+                    <FileText className="h-4 w-4" />
+                  </span>
+                  Categoria*
+                </FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12">
                       <SelectValue placeholder="Selecione uma categoria" />
                     </SelectTrigger>
                   </FormControl>
@@ -122,16 +129,23 @@ export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFo
             )}
           />
           
+          {/* Amount Field */}
           <FormField
             control={form.control}
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Valor*</FormLabel>
+                <FormLabel className="flex items-center gap-2 font-medium text-base">
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand-50 text-brand-600">
+                    <DollarSign className="h-4 w-4" />
+                  </span>
+                  Valor*
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="0,00"
                     isCurrency
+                    className="h-12"
                     onChange={(e) => {
                       const formattedValue = formatCurrencyInput(e.target.value.replace(/\D/g, ''));
                       field.onChange(formattedValue);
@@ -144,15 +158,22 @@ export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFo
             )}
           />
           
+          {/* Description Field */}
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Descrição*</FormLabel>
+                <FormLabel className="flex items-center gap-2 font-medium text-base">
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand-50 text-brand-600">
+                    <Info className="h-4 w-4" />
+                  </span>
+                  Descrição*
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Descrição da despesa"
+                    className="h-12"
                     {...field}
                   />
                 </FormControl>
@@ -161,15 +182,22 @@ export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFo
             )}
           />
           
+          {/* Payment Date Field */}
           <FormField
             control={form.control}
             name="payment_date"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data de Pagamento*</FormLabel>
+                <FormLabel className="flex items-center gap-2 font-medium text-base">
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand-50 text-brand-600">
+                    <Calendar className="h-4 w-4" />
+                  </span>
+                  Data de Pagamento*
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="date"
+                    className="h-12"
                     {...field}
                   />
                 </FormControl>
@@ -178,15 +206,22 @@ export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFo
             )}
           />
           
+          {/* Observations Field */}
           <FormField
             control={form.control}
             name="observations"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Observações</FormLabel>
+                <FormLabel className="flex items-center gap-2 font-medium text-base">
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-brand-50 text-brand-600">
+                    <FileText className="h-4 w-4" />
+                  </span>
+                  Observações
+                </FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Observações sobre esta despesa"
+                    className="min-h-[120px] resize-none"
                     {...field}
                     value={field.value || ''}
                   />
@@ -196,8 +231,13 @@ export const BusinessExpenseForm = ({ onSubmit, initialData }: BusinessExpenseFo
             )}
           />
           
-          <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={isSubmitting}>
+          {/* Submit Button */}
+          <div className="flex justify-end pt-6 border-t">
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="h-12 px-6"
+            >
               {isSubmitting ? 'Salvando...' : initialData ? 'Atualizar' : 'Adicionar'}
             </Button>
           </div>
