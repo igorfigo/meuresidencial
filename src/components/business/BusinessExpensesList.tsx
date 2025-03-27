@@ -17,6 +17,16 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+interface AttachmentData {
+  id: string;
+  expense_id: string;
+  file_name: string;
+  file_path: string;
+  file_type: string;
+  created_at: string;
+  publicUrl?: string;
+}
+
 export const BusinessExpensesList = () => {
   const { 
     expenses, 
@@ -28,7 +38,7 @@ export const BusinessExpensesList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedExpense, setSelectedExpense] = useState<BusinessExpenseWithId | null>(null);
   const [showAttachments, setShowAttachments] = useState(false);
-  const [attachments, setAttachments] = useState<any[]>([]);
+  const [attachments, setAttachments] = useState<AttachmentData[]>([]);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   
   const itemsPerPage = 10;
@@ -95,15 +105,21 @@ export const BusinessExpensesList = () => {
     try {
       const attachmentsData = await getAttachments(expense.id);
       
-      for (const attachment of attachmentsData) {
-        const { data } = supabase.storage
-          .from('attachments')
-          .getPublicUrl(attachment.file_path);
-        
-        attachment.publicUrl = data.publicUrl;
-      }
+      // Add publicUrl to each attachment
+      const attachmentsWithUrls = await Promise.all(
+        attachmentsData.map(async (attachment) => {
+          const { data } = supabase.storage
+            .from('attachments')
+            .getPublicUrl(attachment.file_path);
+          
+          return {
+            ...attachment,
+            publicUrl: data.publicUrl
+          };
+        })
+      );
       
-      setAttachments(attachmentsData);
+      setAttachments(attachmentsWithUrls as AttachmentData[]);
     } catch (error) {
       console.error('Error fetching attachments:', error);
     }

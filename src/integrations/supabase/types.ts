@@ -185,6 +185,74 @@ export type Database = {
           },
         ]
       }
+      business_expense_attachments: {
+        Row: {
+          created_at: string
+          expense_id: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          expense_id: string
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          expense_id?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_expense_attachments_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "business_expenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_expenses: {
+        Row: {
+          amount: string
+          category: string
+          created_at: string
+          description: string
+          id: string
+          observations: string | null
+          payment_date: string
+          updated_at: string
+        }
+        Insert: {
+          amount: string
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          observations?: string | null
+          payment_date: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          observations?: string | null
+          payment_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       common_area_reservations: {
         Row: {
           common_area_id: string

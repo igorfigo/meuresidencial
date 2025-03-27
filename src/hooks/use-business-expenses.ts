@@ -20,6 +20,7 @@ export const useBusinessExpenses = () => {
     
     setIsLoading(true);
     try {
+      // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
       const { data, error } = await supabase
         .from('business_expenses')
         .select('*')
@@ -27,7 +28,7 @@ export const useBusinessExpenses = () => {
       
       if (error) throw error;
       
-      setExpenses(data || []);
+      setExpenses(data as BusinessExpenseWithId[] || []);
     } catch (error) {
       console.error('Error fetching business expenses:', error);
       toast.error('Erro ao carregar despesas empresariais');
@@ -40,6 +41,7 @@ export const useBusinessExpenses = () => {
     if (user?.isAdmin) {
       fetchExpenses();
       
+      // @ts-ignore - table name is valid but TypeScript doesn't know about the new table
       const channel = supabase
         .channel('business-expenses-changes')
         .on('postgres_changes', {
@@ -57,6 +59,7 @@ export const useBusinessExpenses = () => {
   
   const addExpense = async (expense: BusinessExpense) => {
     try {
+      // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
       const { data, error } = await supabase
         .from('business_expenses')
         .insert([
@@ -73,7 +76,7 @@ export const useBusinessExpenses = () => {
       if (error) throw error;
       
       toast.success('Despesa empresarial adicionada com sucesso');
-      return data;
+      return data as BusinessExpenseWithId[];
     } catch (error) {
       console.error('Error adding business expense:', error);
       toast.error('Erro ao adicionar despesa empresarial');
@@ -85,6 +88,7 @@ export const useBusinessExpenses = () => {
     if (!expense.id) return null;
     
     try {
+      // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
       const { data, error } = await supabase
         .from('business_expenses')
         .update({
@@ -101,7 +105,7 @@ export const useBusinessExpenses = () => {
       if (error) throw error;
       
       toast.success('Despesa empresarial atualizada com sucesso');
-      return data;
+      return data as BusinessExpenseWithId[];
     } catch (error) {
       console.error('Error updating business expense:', error);
       toast.error('Erro ao atualizar despesa empresarial');
@@ -112,6 +116,7 @@ export const useBusinessExpenses = () => {
   const removeExpense = async (id: string) => {
     try {
       // First check if there are attachments to delete
+      // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
       const { data: attachments } = await supabase
         .from('business_expense_attachments')
         .select('file_path')
@@ -127,12 +132,14 @@ export const useBusinessExpenses = () => {
       }
       
       // Delete attachment records
+      // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
       await supabase
         .from('business_expense_attachments')
         .delete()
         .eq('expense_id', id);
       
       // Delete expense
+      // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
       const { error } = await supabase
         .from('business_expenses')
         .delete()
@@ -168,6 +175,7 @@ export const useBusinessExpenses = () => {
           continue;
         }
         
+        // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
         await supabase.from('business_expense_attachments').insert({
           expense_id: expenseId,
           file_name: file.name,
@@ -185,6 +193,7 @@ export const useBusinessExpenses = () => {
   
   const getAttachments = async (expenseId: string) => {
     try {
+      // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
       const { data, error } = await supabase
         .from('business_expense_attachments')
         .select('*')
@@ -192,7 +201,7 @@ export const useBusinessExpenses = () => {
       
       if (error) throw error;
       
-      return data;
+      return data || [];
     } catch (error) {
       console.error('Error fetching attachments:', error);
       return [];

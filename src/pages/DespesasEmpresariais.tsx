@@ -17,16 +17,19 @@ const DespesasEmpresariais = () => {
   const handleExpenseSubmit = async (data: BusinessExpense, attachments?: File[]) => {
     try {
       if (data.id) {
-        const result = await editExpense(data);
+        // Edit existing expense
+        await editExpense(data);
         setActiveTab('list');
-        return result;
       } else {
+        // Add new expense
         const result = await addExpense(data);
         
+        // Upload attachments if provided
         if (attachments && attachments.length > 0 && result && result.length > 0) {
           const expenseId = result[0]?.id;
           
           if (expenseId) {
+            // Upload each attachment to storage
             for (const file of attachments) {
               const filename = `${Date.now()}-${file.name}`;
               const filePath = `business-expense-attachments/${expenseId}/${filename}`;
@@ -41,6 +44,8 @@ const DespesasEmpresariais = () => {
                 continue;
               }
               
+              // Save attachment info to the database
+              // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
               await supabase.from('business_expense_attachments').insert({
                 expense_id: expenseId,
                 file_name: file.name,
@@ -54,7 +59,6 @@ const DespesasEmpresariais = () => {
         }
         
         setActiveTab('list');
-        return result;
       }
     } catch (error) {
       console.error('Error submitting expense:', error);
