@@ -106,6 +106,25 @@ const BusinessManagement: React.FC = () => {
     return formatToBRL(value);
   };
 
+  // Custom render for the PieChart legend
+  const renderCustomizedLegend = (props: any) => {
+    const { payload } = props;
+    
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+        {payload.map((entry: any, index: number) => (
+          <div key={`legend-${index}`} className="flex items-center text-xs">
+            <div 
+              className="w-3 h-3 mr-1 rounded-sm" 
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="truncate">{entry.value}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -178,19 +197,18 @@ const BusinessManagement: React.FC = () => {
                         return item?.displayName || name;
                       }}
                     />
+                    <Legend 
+                      content={renderCustomizedLegend}
+                      payload={
+                        categoryData.map((item, index) => ({
+                          value: item.displayName,
+                          color: COLORS[index % COLORS.length],
+                          type: 'square'
+                        }))
+                      }
+                    />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
-                {categoryData.map((category, index) => (
-                  <div key={category.name} className="flex items-center text-xs">
-                    <div 
-                      className="w-3 h-3 mr-1 rounded-sm" 
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    />
-                    <span className="truncate">{category.displayName}</span>
-                  </div>
-                ))}
               </div>
             </CardContent>
           </Card>
@@ -238,4 +256,3 @@ const BusinessManagement: React.FC = () => {
 };
 
 export default BusinessManagement;
-
