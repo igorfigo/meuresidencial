@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
@@ -7,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import { fetchAddressByCep } from '@/services/cepService';
 import { toast } from 'sonner';
-import { formatCnpj } from '@/utils/currency';
 import type { FormFields } from '@/hooks/use-condominium-form';
 
 interface InfoCondominioProps {
@@ -45,17 +45,6 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
     }
   };
 
-  const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '');
-    const cnpjValue = value.slice(0, 14);
-    const formattedCnpj = formatCnpj(cnpjValue);
-    setValue('cnpj', formattedCnpj);
-    if (handleInputChange) {
-      const newEvent = { ...e, target: { ...e.target, value: formattedCnpj, name: 'cnpj' } };
-      handleInputChange(newEvent as React.ChangeEvent<HTMLInputElement>);
-    }
-  };
-
   return (
     <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md">
       <h2 className="text-xl font-semibold mb-4">Informações Condomínio</h2>
@@ -80,9 +69,8 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
           <Input
             id="cnpj"
             {...register('cnpj')}
-            onChange={handleCnpjChange}
+            onChange={handleInputChange}
             placeholder="00.000.000/0001-00"
-            maxLength={18}
           />
         </div>
         
