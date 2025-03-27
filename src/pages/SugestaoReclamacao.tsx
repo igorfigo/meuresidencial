@@ -75,7 +75,7 @@ const SugestaoReclamacao = () => {
       // Get manager's email from the user's condominium data
       const { data: condominiumData, error: condoError } = await supabase
         .from('condominiums')
-        .select('email_representante')
+        .select('emaillegal') // Changed from 'email_representante' to 'emaillegal'
         .eq('matricula', user.matricula)
         .single();
       
@@ -83,7 +83,7 @@ const SugestaoReclamacao = () => {
         throw new Error('Não foi possível encontrar o email do síndico');
       }
       
-      const managerEmail = condominiumData.email_representante;
+      const managerEmail = condominiumData.emaillegal; // Changed from 'email_representante' to 'emaillegal'
       
       if (!managerEmail) {
         throw new Error('Email do síndico não cadastrado');
