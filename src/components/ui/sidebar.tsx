@@ -1,4 +1,3 @@
-
 import {
   Home,
   LayoutDashboard,
@@ -27,6 +26,7 @@ import {
   Briefcase,
   DollarSign,
   MessagesSquare,
+  Car,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -130,6 +130,7 @@ export function Sidebar() {
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/servicos', label: 'Serviços Gerais', icon: <Truck className="h-5 w-5" /> },
     { path: '/minhas-cobrancas', label: 'Minhas Cobranças', icon: <Receipt className="h-5 w-5" /> },
+    { path: '/garagem-livre', label: 'Garagem Livre', icon: <Car className="h-5 w-5" /> },
     { path: '/sugestao-reclamacao', label: 'Sugestão/Reclamação', icon: <MessagesSquare className="h-5 w-5" /> },
   ];
 

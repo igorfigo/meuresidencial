@@ -640,6 +640,44 @@ export type Database = {
           },
         ]
       }
+      garage_listings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_available: boolean | null
+          matricula: string
+          resident_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_available?: boolean | null
+          matricula: string
+          resident_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_available?: boolean | null
+          matricula?: string
+          resident_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "garage_listings_resident_id_fkey"
+            columns: ["resident_id"]
+            isOneToOne: false
+            referencedRelation: "residents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       news_items: {
         Row: {
           created_at: string
