@@ -620,7 +620,6 @@ export const saveBusinessExpense = async (expenseData: {
   amount: number;
   date: string;
   category: string;
-  reference_month?: string;
 }) => {
   try {
     const { data, error } = await supabase
@@ -645,7 +644,6 @@ export const updateBusinessExpense = async (id: string, expenseData: {
   amount?: number;
   date?: string;
   category?: string;
-  reference_month?: string;
 }) => {
   try {
     const { data, error } = await supabase

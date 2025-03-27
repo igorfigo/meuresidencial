@@ -15,7 +15,6 @@ export interface BusinessExpense {
   amount: number;
   date: string;
   category: string;
-  reference_month?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -60,7 +59,6 @@ export const useBusinessExpenses = () => {
             amount: validItem.amount,
             date: dateObj.toISOString().split('T')[0], // Format as YYYY-MM-DD
             category: validItem.category,
-            reference_month: validItem.reference_month,
             created_at: validItem.created_at,
             updated_at: validItem.updated_at
           } as BusinessExpense;
