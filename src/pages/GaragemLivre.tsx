@@ -61,19 +61,19 @@ const GaragemLivre = () => {
     <DashboardLayout>
       <div className="container mx-auto py-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Garagem Livre</h1>
-          <p className="text-gray-600 mt-2">
-            Sistema de compartilhamento de vagas de garagem entre moradores do condomínio. 
-            Cadastre suas vagas disponíveis ou encontre vagas para alugar.
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold">Garagem Livre</h1>
+              <p className="text-gray-600 mt-2">
+                Sistema de compartilhamento de vagas de garagem.
+              </p>
+            </div>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <PlusCircleIcon className="h-4 w-4 mr-2" />
+              Cadastrar Vaga
+            </Button>
+          </div>
           <Separator className="mt-4" />
-        </div>
-
-        <div className="flex justify-end mb-6">
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <PlusCircleIcon className="h-4 w-4 mr-2" />
-            Cadastrar Vaga
-          </Button>
         </div>
 
         <div className="space-y-6">
