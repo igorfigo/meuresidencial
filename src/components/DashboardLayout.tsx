@@ -70,10 +70,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { unreadAnnouncements, unreadDocuments, markAsViewed } = useNotifications();
 
   const isFinanceiroPath = location.pathname.includes('/financeiro');
+  const isBusinessPath = location.pathname.includes('/contratos') || location.pathname.includes('/business-cost');
 
   useEffect(() => {
     if (isFinanceiroPath && !user?.isAdmin) {
       setExpandedSubmenu('Financeiro');
+    }
+    
+    if (isBusinessPath && user?.isAdmin) {
+      setExpandedSubmenu('Business Management');
     }
     
     if (location.pathname === '/comunicados') {
@@ -81,7 +86,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     } else if (location.pathname === '/documentos') {
       markAsViewed('documents');
     }
-  }, [location.pathname, isFinanceiroPath, user?.isAdmin, markAsViewed]);
+  }, [location.pathname, isFinanceiroPath, isBusinessPath, user?.isAdmin, markAsViewed]);
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
@@ -108,7 +113,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { 
       name: 'Business Management', 
       icon: <BarChart3 className="h-5 w-5 text-blue-500" />, 
-      path: '/business-management',
+      path: '#',
       submenu: [
         { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
         { name: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" />, path: '/business-cost' },
@@ -476,7 +481,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           {sidebarOpen ? (
             <div className="flex items-center space-x-3">
               <NavLink to="/perfil" className="flex-grow flex items-center space-x-3 hover:opacity-80 transition-opacity">
-                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
+                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white mb-2">
                   {user?.nome?.charAt(0) || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">

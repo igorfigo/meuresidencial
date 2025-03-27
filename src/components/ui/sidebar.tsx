@@ -90,12 +90,12 @@ export function Sidebar() {
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
     { isSeparator: true, path: '', label: '', icon: null },
     { 
-      path: '/business-management', 
+      path: '#', 
       label: 'Business Management', 
       icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
       submenu: [
         { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
-        { path: '/business-cost', label: 'Business Cost', icon: <ReceiptIcon className="h-5 w-5 text-blue-500" /> },
+        { path: '/business-cost', label: 'Business Cost', icon: <DollarSign className="h-5 w-5 text-blue-500" /> },
       ]
     },
   ];
@@ -172,13 +172,13 @@ export function Sidebar() {
         return (
           <li key={item.label} className="mb-1">
             <div className="flex flex-col">
-              <a
-                href={item.path}
-                className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${location.pathname === item.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+              <div
+                className={`flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${location.pathname === item.path ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
               >
                 {item.icon}
                 <span className="ml-3">{item.label}</span>
-              </a>
+                <ChevronDown className="ml-auto h-4 w-4" />
+              </div>
               <ul className="pl-8 mt-1 space-y-1">
                 {item.submenu.map((subItem) => (
                   <li key={subItem.label}>
