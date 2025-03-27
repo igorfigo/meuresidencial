@@ -355,6 +355,7 @@ export const CadastroPlanos = () => {
           <p className="text-muted-foreground mt-1">
             Cadastre e gerencie os planos disponíveis para os condomínios.
           </p>
+          <Separator className="mt-4" />
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

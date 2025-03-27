@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -27,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -268,6 +270,7 @@ const CadastroChavePix = () => {
           <div>
             <h1 className="text-2xl font-bold mb-2">Cadastro Chave PIX / Juros</h1>
             <p className="text-gray-500">Cadastre e gerencie as chaves PIX disponíveis para recebimento.</p>
+            <Separator className="mt-4" />
           </div>
         </div>
         
