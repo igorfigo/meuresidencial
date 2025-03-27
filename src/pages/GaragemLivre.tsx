@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -130,13 +129,6 @@ const GaragemLivre = () => {
                   <h3 className="text-lg font-medium text-gray-600 mb-1">
                     Você ainda não cadastrou vagas de garagem
                   </h3>
-                  <p className="text-gray-500 mb-4 max-w-md mx-auto">
-                    Se você possui vagas de garagem disponíveis, cadastre-as aqui para que outros moradores possam entrar em contato.
-                  </p>
-                  <Button onClick={() => setIsDialogOpen(true)}>
-                    <PlusCircleIcon className="h-4 w-4 mr-2" />
-                    Cadastrar Vaga
-                  </Button>
                 </div>
               )}
             </CardContent>
