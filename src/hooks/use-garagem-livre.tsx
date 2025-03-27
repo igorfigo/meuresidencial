@@ -8,18 +8,19 @@ interface GaragemLivre {
   matricula: string;
   unidade: string;
   nome_completo: string;
-  telefone: string;
-  email: string;
+  telefone: string | null;
+  email: string | null;
   descricao: string;
   valor: string;
   observacoes?: string;
   created_at: string;
+  resident_id: string;
 }
 
 interface CreateGaragemLivreParams {
   nome_completo: string;
-  telefone: string;
-  email: string;
+  telefone: string | null;
+  email: string | null;
   unidade: string;
   descricao: string;
   valor: string;
@@ -38,11 +39,12 @@ export function useGaragemLivre() {
     queryFn: async () => {
       if (!residentId) return [];
       
-      const { data, error } = await supabase
+      // Use casting to work around the type error
+      const { data, error } = await (supabase
         .from('garagens_livre')
         .select('*')
         .eq('resident_id', residentId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any);
         
       if (error) {
         console.error('Error fetching garagens:', error);
@@ -61,7 +63,8 @@ export function useGaragemLivre() {
         throw new Error('Usuário não identificado');
       }
       
-      const { data, error } = await supabase
+      // Use casting to work around the type error
+      const { data, error } = await (supabase
         .from('garagens_livre')
         .insert([
           {
@@ -77,7 +80,7 @@ export function useGaragemLivre() {
           }
         ])
         .select()
-        .single();
+        .single() as any);
         
       if (error) {
         console.error('Error adding garagem:', error);
@@ -94,11 +97,12 @@ export function useGaragemLivre() {
   // Delete a garagem
   const { mutateAsync: deleteGaragem } = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      // Use casting to work around the type error
+      const { error } = await (supabase
         .from('garagens_livre')
         .delete()
         .eq('id', id)
-        .eq('resident_id', residentId); // For security, ensure user can only delete their own listings
+        .eq('resident_id', residentId) as any); // For security, ensure user can only delete their own listings
         
       if (error) {
         console.error('Error deleting garagem:', error);
@@ -113,7 +117,7 @@ export function useGaragemLivre() {
   });
 
   return {
-    garagens,
+    garagens: garagens as GaragemLivre[],
     isLoading,
     error,
     addGaragem,

@@ -2,7 +2,10 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Parking, Plus, Trash2 } from 'lucide-react';
+import { 
+  // Replace Parking with alternatives from Lucide
+  Car, Plus, Trash2 
+} from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -52,8 +55,8 @@ const GaragemLivre = () => {
       await addGaragem({
         ...formData,
         nome_completo: user?.nome || '',
-        telefone: user?.telefone || '',
-        email: user?.email || '',
+        telefone: user?.telefone || null,
+        email: user?.email || null,
         unidade: user?.unit || '',
       });
 
@@ -212,7 +215,7 @@ const GaragemLivre = () => {
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle className="text-xl flex items-center">
-                <Parking className="h-5 w-5 mr-2 text-purple-600" />
+                <Car className="h-5 w-5 mr-2 text-purple-600" />
                 Minhas Garagens Disponíveis
               </CardTitle>
               <CardDescription>
