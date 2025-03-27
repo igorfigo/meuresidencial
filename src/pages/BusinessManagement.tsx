@@ -23,15 +23,15 @@ import {
 import { ChartContainer } from '@/components/ui/chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBusinessExpenses } from '@/hooks/use-business-expenses';
-import { useBusinessContracts } from '@/hooks/use-business-contracts';
 import { format, subMonths, startOfMonth, differenceInCalendarMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatToBRL } from '@/utils/currency';
-import { BarChart3, DollarSign, PieChartIcon, FileText } from 'lucide-react';
+import { BarChart3, DollarSign, PieChartIcon } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
+// Category display names mapping
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   'aluguel': 'Aluguel',
   'servicos-contabeis': 'Serviços Contábeis',
@@ -47,20 +47,21 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
 
 const BusinessManagement: React.FC = () => {
   const { expenses } = useBusinessExpenses();
-  const { contracts } = useBusinessContracts();
 
+  // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-  const activeContracts = contracts ? contracts.filter(contract => contract.status === 'active').length : 0;
-
+  // Generate monthly expenses data for the last 12 months
   const getLast12MonthsData = () => {
     const today = new Date();
     const monthlyData = [];
     
+    // Create an array with the last 12 months
     for (let i = 11; i >= 0; i--) {
       const monthDate = subMonths(today, i);
       const monthStr = format(monthDate, 'MMM/yy', { locale: ptBR });
       
+      // Filter expenses for this month
       const monthlyExpenses = expenses.filter(expense => {
         const expenseDate = new Date(expense.date);
         const expenseMonth = startOfMonth(expenseDate);
@@ -79,6 +80,7 @@ const BusinessManagement: React.FC = () => {
     return monthlyData;
   };
 
+  // Generate category data
   const getCategoryData = () => {
     const categoryTotals: Record<string, number> = {};
     
@@ -118,43 +120,29 @@ const BusinessManagement: React.FC = () => {
         
         <Separator className="my-4" />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="md:col-span-1">
-            <CardHeader className="pb-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
               <div className="flex items-center">
                 <DollarSign className="h-5 w-5 mr-2 text-blue-500" />
-                <CardTitle>Resumo Financeiro</CardTitle>
+                <CardTitle>Despesa Total</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="border-r pr-6">
-                  <div className="flex flex-col items-center">
-                    <p className="text-sm text-gray-500 mb-1">Despesa Total</p>
-                    <p className="text-xl font-bold text-blue-600">
-                      {formatToBRL(totalExpenses)}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {expenses.length} registros
-                    </p>
-                  </div>
-                </div>
-                <div className="pl-6">
-                  <div className="flex flex-col items-center">
-                    <p className="text-sm text-gray-500 mb-1">Contratos Ativos</p>
-                    <p className="text-xl font-bold text-green-600">
-                      {activeContracts}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      de {contracts ? contracts.length : 0} total
-                    </p>
-                  </div>
+              <div className="flex items-center justify-center h-40">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-blue-600">
+                    {formatToBRL(totalExpenses)}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Total de {expenses.length} registros
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-1">
+          <Card className="md:col-span-2">
             <CardHeader>
               <div className="flex items-center">
                 <PieChartIcon className="h-5 w-5 mr-2 text-blue-500" />
@@ -206,7 +194,7 @@ const BusinessManagement: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="md:col-span-2">
+          <Card className="md:col-span-3">
             <CardHeader className="pb-2">
               <div className="flex items-center">
                 <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
