@@ -28,6 +28,8 @@ import {
   MessagesSquare,
   Car,
   Receipt as ReceiptIcon,
+  ChevronDown,
+  BarChart3,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -87,8 +89,15 @@ export function Sidebar() {
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
     { isSeparator: true, path: '', label: '', icon: null },
-    { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
-    { path: '/business-cost', label: 'Business Cost', icon: <ReceiptIcon className="h-5 w-5 text-blue-500" /> },
+    { 
+      path: '/business-management', 
+      label: 'Business Management', 
+      icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+      submenu: [
+        { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
+        { path: '/business-cost', label: 'Business Cost', icon: <ReceiptIcon className="h-5 w-5 text-blue-500" /> },
+      ]
+    },
   ];
   
   const managerMenuItems: MenuItem[] = [

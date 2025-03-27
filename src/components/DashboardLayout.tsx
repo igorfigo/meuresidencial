@@ -32,7 +32,8 @@ import {
   Truck,
   DollarSign,
   MessagesSquare,
-  Car
+  Car,
+  BarChart3,
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -104,8 +105,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
     { isSeparator: true, name: '', icon: null, path: '' },
-    { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
-    { name: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" />, path: '/despesas-empresariais' },
+    { 
+      name: 'Business Management', 
+      icon: <BarChart3 className="h-5 w-5 text-blue-500" />, 
+      path: '/business-management',
+      submenu: [
+        { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
+        { name: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" />, path: '/business-cost' },
+      ]
+    },
   ];
 
   const managerMenuItems: MenuItem[] = [
