@@ -35,15 +35,19 @@ export const useBusinessExpenses = () => {
   const expenses = Array.isArray(expensesData) 
     ? expensesData
         .filter(item => {
-          // Check if item is valid and has required properties
-          return item !== null && 
-                 typeof item === 'object' && 
+          // First check if item is null or undefined before proceeding
+          if (item === null || item === undefined) {
+            return false;
+          }
+          
+          // Now we can safely check properties
+          return typeof item === 'object' && 
                  !('error' in item) && 
                  'id' in item && 
                  'description' in item;
         })
         .map(item => {
-          // Use type assertion after verification
+          // At this point we know item is not null/undefined
           const validItem = item as any;
           return {
             id: validItem.id,
