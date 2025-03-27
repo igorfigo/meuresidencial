@@ -13,12 +13,15 @@ export interface BusinessExpenseWithId extends BusinessExpense {
 export const useBusinessExpenses = () => {
   const { user } = useApp();
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [expenses, setExpenses] = useState<BusinessExpenseWithId[]>([]);
   
   const fetchExpenses = async () => {
     if (!user?.isAdmin) return;
     
     setIsLoading(true);
+    setError(null);
+    
     try {
       // @ts-ignore - using string table name which is valid but TypeScript doesn't know about the new table
       const { data, error } = await supabase
@@ -29,8 +32,9 @@ export const useBusinessExpenses = () => {
       if (error) throw error;
       
       setExpenses(data as BusinessExpenseWithId[] || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching business expenses:', error);
+      setError(error?.message || 'Erro ao carregar despesas empresariais');
       toast.error('Erro ao carregar despesas empresariais');
     } finally {
       setIsLoading(false);
@@ -210,6 +214,7 @@ export const useBusinessExpenses = () => {
   
   return {
     isLoading,
+    error,
     expenses,
     addExpense,
     editExpense,

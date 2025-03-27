@@ -3,11 +3,12 @@ import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { DollarSign, FileText, Calendar, Trash2, Eye, Paperclip } from 'lucide-react';
+import { DollarSign, FileText, Calendar, Trash2, Eye, Paperclip, AlertCircle } from 'lucide-react';
 import { useBusinessExpenses, BusinessExpenseWithId } from '@/hooks/use-business-expenses';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import {
   Pagination,
   PaginationContent,
@@ -31,6 +32,7 @@ export const BusinessExpensesList = () => {
   const { 
     expenses, 
     isLoading, 
+    error,
     removeExpense,
     getAttachments 
   } = useBusinessExpenses();
@@ -143,6 +145,25 @@ export const BusinessExpensesList = () => {
           <div className="flex items-center justify-center h-32">
             <p className="text-muted-foreground">Carregando despesas...</p>
           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Despesas Empresariais</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erro ao carregar despesas</AlertTitle>
+            <AlertDescription>
+              Ocorreu um erro ao carregar os dados. Por favor, tente novamente mais tarde.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     );

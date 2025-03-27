@@ -10,10 +10,12 @@ import { useBusinessExpenses } from '@/hooks/use-business-expenses';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const DespesasEmpresariais = () => {
   const { user } = useApp();
-  const { addExpense, editExpense, isLoading } = useBusinessExpenses();
+  const { addExpense, editExpense, isLoading, error } = useBusinessExpenses();
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   
@@ -55,8 +57,9 @@ const DespesasEmpresariais = () => {
       <DashboardLayout>
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-6">Despesas Empresariais</h1>
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-pulse text-lg text-gray-500">Carregando dados...</div>
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-64 w-full" />
           </div>
         </div>
       </DashboardLayout>
@@ -99,10 +102,19 @@ const DespesasEmpresariais = () => {
           </div>
         </div>
         
-        <div className="border-t pt-6 mt-6">
-          <h2 className="text-xl font-semibold mb-4">Lista de Despesas</h2>
-          <BusinessExpensesList />
-        </div>
+        {error ? (
+          <Alert variant="destructive" className="mb-6">
+            <AlertTitle>Erro ao carregar despesas empresariais</AlertTitle>
+            <AlertDescription>
+              Ocorreu um erro ao tentar carregar as despesas. Por favor, tente novamente mais tarde ou entre em contato com o suporte.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <div className="border-t pt-6 mt-6">
+            <h2 className="text-xl font-semibold mb-4">Lista de Despesas</h2>
+            <BusinessExpensesList />
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
