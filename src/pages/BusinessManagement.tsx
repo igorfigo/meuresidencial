@@ -16,8 +16,6 @@ import {
   Tooltip, 
   Legend, 
   ResponsiveContainer,
-  PieChart,
-  Pie,
   Cell
 } from 'recharts';
 import { ChartContainer } from '@/components/ui/chart';
@@ -26,7 +24,7 @@ import { useBusinessExpenses } from '@/hooks/use-business-expenses';
 import { format, subMonths, startOfMonth, differenceInCalendarMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatToBRL } from '@/utils/currency';
-import { BarChart3, DollarSign, PieChartIcon } from 'lucide-react';
+import { BarChart3, DollarSign } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
@@ -97,7 +95,7 @@ const BusinessManagement: React.FC = () => {
       name,
       displayName: CATEGORY_DISPLAY_NAMES[name] || name,
       value
-    }));
+    })).sort((a, b) => b.value - a.value);
   };
 
   const monthlyData = getLast12MonthsData();
@@ -105,27 +103,6 @@ const BusinessManagement: React.FC = () => {
 
   const formatTooltipValue = (value: number) => {
     return formatToBRL(value);
-  };
-
-  // Custom render for the PieChart legend
-  const renderCustomizedLegend = (props: any) => {
-    const { payload } = props;
-    
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
-        {payload.map((entry: any, index: number) => (
-          <div key={`legend-${index}`} className="flex items-center text-xs">
-            <div 
-              className="w-3 h-3 mr-1 rounded-sm" 
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="truncate">
-              {CATEGORY_DISPLAY_NAMES[entry.payload.name] || entry.value}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
   };
 
   return (
@@ -168,40 +145,36 @@ const BusinessManagement: React.FC = () => {
           <Card className="md:col-span-2">
             <CardHeader>
               <div className="flex items-center">
-                <PieChartIcon className="h-5 w-5 mr-2 text-blue-500" />
+                <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
                 <CardTitle>Despesas por Categoria</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <div className="h-60">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      nameKey="name"
-                      label={({ name, percent }) => {
-                        const displayName = CATEGORY_DISPLAY_NAMES[name] || name;
-                        return `${displayName}: ${(percent * 100).toFixed(0)}%`;
-                      }}
-                    >
+                  <BarChart
+                    data={categoryData}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 90, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" tickFormatter={formatTooltipValue} />
+                    <YAxis 
+                      type="category" 
+                      dataKey="name" 
+                      width={80}
+                      tickFormatter={(value) => CATEGORY_DISPLAY_NAMES[value] || value}
+                    />
+                    <Tooltip 
+                      formatter={(value: number) => [formatToBRL(value), 'Valor']}
+                      labelFormatter={(name) => CATEGORY_DISPLAY_NAMES[name] || name}
+                    />
+                    <Bar dataKey="value" name="Valor">
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value: number) => formatToBRL(value)} 
-                      labelFormatter={(name) => {
-                        return CATEGORY_DISPLAY_NAMES[name] || name;
-                      }}
-                    />
-                    <Legend content={renderCustomizedLegend} />
-                  </PieChart>
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
