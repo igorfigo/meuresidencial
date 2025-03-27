@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -121,7 +120,7 @@ const BusinessManagement: React.FC = () => {
               style={{ backgroundColor: entry.color }}
             />
             <span className="truncate">
-              {CATEGORY_DISPLAY_NAMES[entry.payload?.name] || entry.value}
+              {CATEGORY_DISPLAY_NAMES[entry.payload.name] || entry.value}
             </span>
           </div>
         ))}
@@ -201,16 +200,7 @@ const BusinessManagement: React.FC = () => {
                         return CATEGORY_DISPLAY_NAMES[name] || name;
                       }}
                     />
-                    <Legend 
-                      content={renderCustomizedLegend}
-                      payload={
-                        categoryData.map((item, index) => ({
-                          value: item.displayName,
-                          color: COLORS[index % COLORS.length],
-                          payload: { name: item.name }
-                        }))
-                      }
-                    />
+                    <Legend content={renderCustomizedLegend} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
