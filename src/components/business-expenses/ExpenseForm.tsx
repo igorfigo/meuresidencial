@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -31,7 +30,7 @@ const expenseSchema = z.object({
   description: z.string().nullable().optional(),
 });
 
-type ExpenseFormValues = z.infer<typeof expenseSchema>;
+export type ExpenseFormValues = z.infer<typeof expenseSchema>;
 
 interface ExpenseFormProps {
   expense?: BusinessExpense;
@@ -42,24 +41,14 @@ interface ExpenseFormProps {
 export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
-    defaultValues: expense
-      ? {
-          title: expense.title,
-          category: expense.category,
-          vendor: expense.vendor,
-          // Convert amount to string for the form input
-          amount: expense.amount.toString(),
-          payment_date: new Date(expense.payment_date),
-          description: expense.description || '',
-        }
-      : {
-          title: '',
-          category: '',
-          vendor: '',
-          amount: '',
-          payment_date: new Date(),
-          description: '',
-        },
+    defaultValues: {
+      title: expense?.title || '',
+      category: expense?.category || '',
+      vendor: expense?.vendor || '',
+      amount: expense ? expense.amount.toString() : '',
+      payment_date: expense ? new Date(expense.payment_date) : new Date(),
+      description: expense?.description || '',
+    },
   });
 
   const handleSubmit = (values: ExpenseFormValues) => {
@@ -126,7 +115,6 @@ export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
                     placeholder="0.00" 
                     {...field} 
                     onChange={(e) => {
-                      // Allow only numbers and decimal points
                       const value = e.target.value.replace(/[^0-9.]/g, '');
                       field.onChange(value);
                     }}
