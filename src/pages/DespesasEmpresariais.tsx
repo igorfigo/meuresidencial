@@ -83,7 +83,16 @@ const DespesasEmpresariais = () => {
 
   const onSubmit = (data: ExpenseFormValues) => {
     setFormError(null);
-    createExpense(data, {
+    // Ensure all required fields are present before submitting
+    const expenseData = {
+      description: data.description,
+      amount: data.amount,
+      category: data.category,
+      expense_date: data.expense_date,
+      notes: data.notes || null,
+    };
+    
+    createExpense(expenseData, {
       onSuccess: () => {
         setDialogOpen(false);
         form.reset();

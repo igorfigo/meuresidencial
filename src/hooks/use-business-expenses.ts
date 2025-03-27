@@ -30,8 +30,10 @@ export const useBusinessExpenses = () => {
   const { data: expenses = [], isLoading, error } = useQuery({
     queryKey: ['business-expenses'],
     queryFn: async () => {
+      // Cast the table name to any to bypass TypeScript errors temporarily
+      // This is needed because the types haven't been updated to include business_expenses
       const { data, error } = await supabase
-        .from('business_expenses')
+        .from('business_expenses' as any)
         .select('*')
         .order('expense_date', { ascending: false });
 
@@ -46,8 +48,9 @@ export const useBusinessExpenses = () => {
 
   const createExpenseMutation = useMutation({
     mutationFn: async (expenseData: BusinessExpenseFormData) => {
+      // Cast the table name to any to bypass TypeScript errors temporarily
       const { data, error } = await supabase
-        .from('business_expenses')
+        .from('business_expenses' as any)
         .insert([expenseData])
         .select();
 
@@ -72,8 +75,9 @@ export const useBusinessExpenses = () => {
 
   const deleteExpenseMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Cast the table name to any to bypass TypeScript errors temporarily
       const { error } = await supabase
-        .from('business_expenses')
+        .from('business_expenses' as any)
         .delete()
         .eq('id', id);
 
