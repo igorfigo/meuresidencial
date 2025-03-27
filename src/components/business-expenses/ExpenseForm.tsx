@@ -56,6 +56,7 @@ export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
           category: '',
           vendor: '',
           amount: '',
+          payment_date: undefined,
           description: '',
         },
   });

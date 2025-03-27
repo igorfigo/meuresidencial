@@ -14,7 +14,7 @@ export default function BusinessExpenses() {
   } = useBusinessExpenses();
 
   return (
-    <DashboardLayout title="Business Expenses">
+    <DashboardLayout>
       <div className="container mx-auto py-6">
         <ExpensesList
           expenses={expenses || []}
