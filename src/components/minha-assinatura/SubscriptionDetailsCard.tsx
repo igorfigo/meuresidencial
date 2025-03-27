@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -72,7 +73,7 @@ export const SubscriptionDetailsCard = ({
   };
   
   const navigateToContactPage = () => {
-    navigate('/fale-conosco');
+    navigate('/contato');
   };
   
   const planDetails = getCurrentPlanDetails();
