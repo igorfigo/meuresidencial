@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -44,6 +45,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useApp } from '@/contexts/AppContext';
 import { useBusinessExpenses, BusinessExpense, BusinessExpenseFormData } from '@/hooks/use-business-expenses';
 
 const expenseFormSchema = z.object({
@@ -58,6 +60,9 @@ type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
 
 const DespesasEmpresariais = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { user } = useApp();
+  const isAdmin = user?.isAdmin === true;
+  
   const {
     expenses,
     isLoading,
@@ -81,6 +86,11 @@ const DespesasEmpresariais = () => {
   });
 
   const onSubmit = (data: ExpenseFormValues) => {
+    if (!isAdmin) {
+      setFormError("Apenas administradores podem adicionar despesas empresariais.");
+      return;
+    }
+    
     setFormError(null);
     const expenseData: BusinessExpenseFormData = {
       description: data.description,
@@ -117,6 +127,11 @@ const DespesasEmpresariais = () => {
   };
 
   const handleDeleteExpense = (expense: BusinessExpense) => {
+    if (!isAdmin) {
+      setFormError("Apenas administradores podem excluir despesas empresariais.");
+      return;
+    }
+    
     if (window.confirm(`Tem certeza que deseja excluir a despesa "${expense.description}"?`)) {
       deleteExpense(expense.id);
     }
@@ -127,55 +142,92 @@ const DespesasEmpresariais = () => {
       <div className="px-4 md:px-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Despesas Empresariais</h1>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Nova Despesa
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[550px]">
-              <DialogHeader>
-                <DialogTitle>Adicionar Nova Despesa</DialogTitle>
-                <DialogDescription>
-                  Preencha os dados da despesa empresarial abaixo.
-                </DialogDescription>
-              </DialogHeader>
-              
-              {formError && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{formError}</AlertDescription>
-                </Alert>
-              )}
-              
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descrição</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Aluguel do escritório" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-2 gap-4">
+          
+          {isAdmin && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Nova Despesa
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[550px]">
+                <DialogHeader>
+                  <DialogTitle>Adicionar Nova Despesa</DialogTitle>
+                  <DialogDescription>
+                    Preencha os dados da despesa empresarial abaixo.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                {formError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{formError}</AlertDescription>
+                  </Alert>
+                )}
+                
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
                       control={form.control}
-                      name="amount"
+                      name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Valor (R$)</FormLabel>
+                          <FormLabel>Descrição</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ex: Aluguel do escritório" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Valor (R$)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Ex: 1000,00" 
+                                type="text"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="category"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Categoria</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Ex: Aluguel" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <FormField
+                      control={form.control}
+                      name="expense_date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data da Despesa</FormLabel>
                           <FormControl>
                             <Input 
-                              placeholder="Ex: 1000,00" 
-                              type="text"
+                              type="date" 
                               {...field} 
                             />
                           </FormControl>
@@ -186,13 +238,14 @@ const DespesasEmpresariais = () => {
                     
                     <FormField
                       control={form.control}
-                      name="category"
+                      name="notes"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Categoria</FormLabel>
+                          <FormLabel>Observações</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Ex: Aluguel" 
+                            <Textarea 
+                              placeholder="Observações adicionais (opcional)" 
+                              className="min-h-[80px]"
                               {...field} 
                             />
                           </FormControl>
@@ -200,52 +253,17 @@ const DespesasEmpresariais = () => {
                         </FormItem>
                       )}
                     />
-                  </div>
-                  
-                  <FormField
-                    control={form.control}
-                    name="expense_date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data da Despesa</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="date" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Observações</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Observações adicionais (opcional)" 
-                            className="min-h-[80px]"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <DialogFooter>
-                    <Button type="submit" disabled={isCreating}>
-                      {isCreating ? 'Salvando...' : 'Salvar Despesa'}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+                    
+                    <DialogFooter>
+                      <Button type="submit" disabled={isCreating}>
+                        {isCreating ? 'Salvando...' : 'Salvar Despesa'}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <Card>
@@ -268,7 +286,7 @@ const DespesasEmpresariais = () => {
                 <DollarSign className="mx-auto h-12 w-12 text-muted-foreground/50" />
                 <h3 className="mt-2 text-lg font-medium">Nenhuma despesa registrada</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Clique em "Nova Despesa" para adicionar a primeira despesa.
+                  {isAdmin ? 'Clique em "Nova Despesa" para adicionar a primeira despesa.' : 'Entre em contato com um administrador para adicionar despesas.'}
                 </p>
               </div>
             ) : (
@@ -280,7 +298,7 @@ const DespesasEmpresariais = () => {
                       <TableHead>Data</TableHead>
                       <TableHead>Categoria</TableHead>
                       <TableHead>Valor</TableHead>
-                      <TableHead className="w-[80px]">Ações</TableHead>
+                      {isAdmin && <TableHead className="w-[80px]">Ações</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -290,16 +308,18 @@ const DespesasEmpresariais = () => {
                         <TableCell>{formatDate(expense.expense_date)}</TableCell>
                         <TableCell>{expense.category}</TableCell>
                         <TableCell>{formatCurrency(expense.amount)}</TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteExpense(expense)}
-                            title="Excluir despesa"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </TableCell>
+                        {isAdmin && (
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteExpense(expense)}
+                              title="Excluir despesa"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
