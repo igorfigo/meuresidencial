@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +26,6 @@ export const SubscriptionDetailsCard = ({
   const [localCondominiumData, setLocalCondominiumData] = useState(condominiumData);
   const navigate = useNavigate();
   
-  // Check if CNPJ is empty or null
   const isCnpjEmpty = !localCondominiumData.cnpj || localCondominiumData.cnpj.trim() === '';
   
   const handleTipoDocumentoChange = async (value: string) => {
@@ -168,7 +166,7 @@ export const SubscriptionDetailsCard = ({
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Para alterar este campo é necessário ter um CNPJ cadastrado. 
-                Entre em contato com o administrador através do 
+                Entre em contato com o administrador através do{" "}
                 <Button 
                   variant="link" 
                   className="h-auto p-0 text-xs text-brand-600 font-medium" 
