@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -78,6 +79,7 @@ export function Sidebar() {
       markAsViewed('documents');
     }
 
+    // Check if we're on a business management page and expand the menu
     if (location.pathname === '/business-management' || 
         location.pathname === '/contratos' || 
         location.pathname === '/despesas-empresariais') {
@@ -94,7 +96,7 @@ export function Sidebar() {
   };
 
   const adminMenuItems: MenuItem[] = [
-    { path: '/overview', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
+    { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <UserPlus className="h-5 w-5" /> },
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
@@ -113,7 +115,7 @@ export function Sidebar() {
   ];
   
   const managerMenuItems: MenuItem[] = [
-    { path: '/overview', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
+    { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { path: '/moradores', label: 'Moradores', icon: <Users className="h-5 w-5" /> },
     { path: '/comunicados', label: 'Comunicados', icon: <MessageSquare className="h-5 w-5" /> },
     { path: '/documentos', label: 'Documentos Úteis', icon: <FileIcon className="h-5 w-5" /> },
@@ -136,7 +138,7 @@ export function Sidebar() {
   ];
   
   const residentMenuItems: MenuItem[] = [
-    { path: '/overview', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
+    { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
     { 
       path: '/comunicados', 
       label: 'Comunicados', 

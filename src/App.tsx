@@ -46,7 +46,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/overview" element={<AuthRequired><Dashboard /></AuthRequired>} />
+              <Route path="/dashboard" element={<AuthRequired><Dashboard /></AuthRequired>} />
               <Route path="/perfil" element={<AuthRequired><UserProfile /></AuthRequired>} />
               
               {/* Financeiro Routes */}
@@ -79,9 +79,6 @@ function App() {
               <Route path="/minhas-cobrancas" element={<AuthRequired><MinhasCobrancas /></AuthRequired>} />
               <Route path="/garagem-livre" element={<AuthRequired><GaragemLivre /></AuthRequired>} />
               <Route path="/sugestao-reclamacao" element={<AuthRequired><SugestaoReclamacao /></AuthRequired>} />
-              
-              {/* Legacy route - redirect for backward compatibility */}
-              <Route path="/dashboard" element={<AuthRequired><Dashboard /></AuthRequired>} />
             </Routes>
             <Toaster />
           </div>
