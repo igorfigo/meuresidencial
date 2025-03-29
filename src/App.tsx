@@ -1,97 +1,149 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner';
-import { AppProvider } from '@/contexts/AppContext';
-import { queryClient } from '@/lib/react-query';
-import AuthRequired from '@/components/AuthRequired';
-import AdminOnly from '@/components/AdminOnly';
-import Index from '@/pages/Index';
-import Login from '@/pages/Login';
-import Dashboard from '@/pages/Dashboard';
-import UserProfile from '@/pages/UserProfile';
-import FinanceiroDashboard from '@/pages/FinanceiroDashboard';
-import FinanceiroReceitasDespesas from '@/pages/FinanceiroReceitasDespesas';
-import FinanceiroRecebimentoPix from '@/pages/FinanceiroRecebimentoPix';
-import FinanceiroPrestacaoContas from '@/pages/FinanceiroPrestacaoContas';
-import CadastroGestor from '@/pages/CadastroGestor';
-import CadastroPlanos from '@/pages/CadastroPlanos';
-import CadastroChavePix from '@/pages/CadastroChavePix';
-import Moradores from '@/pages/Moradores';
-import Comunicados from '@/pages/Comunicados';
-import Documentos from '@/pages/Documentos';
-import AreasComuns from '@/pages/AreasComuns';
-import Dedetizacoes from '@/pages/Dedetizacoes';
-import MinhaAssinatura from '@/pages/MinhaAssinatura';
-import FaleConosco from '@/pages/FaleConosco';
-import GerenciarAvisos from '@/pages/GerenciarAvisos';
-import MinhasCobrancas from '@/pages/MinhasCobrancas';
-import BusinessContratos from '@/pages/BusinessContratos';
-import BusinessCost from '@/pages/BusinessCost';
-import SugestaoReclamacao from '@/pages/SugestaoReclamacao';
-import GaragemLivre from '@/pages/GaragemLivre';
-import BusinessManagement from '@/pages/BusinessManagement';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { createClient } from '@supabase/supabase-js';
+import { AppContext } from './contexts/AppContext';
+import { useLocalStorage } from './hooks/use-local-storage';
+import Index from './pages/Index';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Moradores from './pages/Moradores';
+import Comunicados from './pages/Comunicados';
+import Documentos from './pages/Documentos';
+import FinanceiroDashboard from './pages/FinanceiroDashboard';
+import FinanceiroReceitasDespesas from './pages/FinanceiroReceitasDespesas';
+import FinanceiroRecebimentoPix from './pages/FinanceiroRecebimentoPix';
+import FinanceiroPrestacaoContas from './pages/FinanceiroPrestacaoContas';
+import AreasComuns from './pages/AreasComuns';
+import Dedetizacoes from './pages/Dedetizacoes';
+import Servicos from './pages/Servicos';
+import MinhasCobrancas from './pages/MinhasCobrancas';
+import GaragemLivre from './pages/GaragemLivre';
+import SugestaoReclamacao from './pages/SugestaoReclamacao';
+import UserProfile from './pages/UserProfile';
+import MinhaAssinatura from './pages/MinhaAssinatura';
 import DadosHistoricos from './pages/DadosHistoricos';
+import FaleConosco from './pages/FaleConosco';
+import CadastroGestor from './pages/CadastroGestor';
+import CadastroPlanos from './pages/CadastroPlanos';
+import CadastroChavePix from './pages/CadastroChavePix';
+import GerenciarAvisos from './pages/GerenciarAvisos';
+import BusinessManagement from './pages/BusinessManagement';
+import BusinessContratos from './pages/BusinessContratos';
+import BusinessCost from './pages/BusinessCost';
+import NotFound from './pages/NotFound';
+import { useToast } from '@/components/ui/use-toast';
+import WebsiteTraffic from './pages/WebsiteTraffic';
+import TrackingRoute from './components/traffic/TrackingRoute';
+import AdminOnly from './components/AdminOnly';
 
-const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
-const Servicos = () => <div>Serviços (Em Desenvolvimento)</div>;
+const App: React.FC = () => {
+  const [user, setUser] = useLocalStorage('user', null);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!user);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-function App() {
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      setIsAuthenticated(true);
+    }
+    setIsLoading(false);
+  }, [setUser]);
+
+  const login = (userData: any) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('user');
+    toast({
+      title: "Desconectado!",
+      description: "Você foi desconectado com sucesso.",
+    })
+  };
+
+  const switchCondominium = (matricula: string) => {
+    if (user && user.condominiums) {
+      const selectedCondominium = user.condominiums.find(condo => condo.matricula === matricula);
+      if (selectedCondominium) {
+        const updatedUser = {
+          ...user,
+          selectedCondominium: selectedCondominium.matricula,
+          nomeCondominio: selectedCondominium.nomeCondominio
+        };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        toast({
+          title: "Condomínio alterado!",
+          description: `Você está gerenciando o condomínio ${selectedCondominium.nomeCondominio}.`,
+        })
+      }
+    }
+  };
+
+  const AuthRequired = ({ children }: { children: React.ReactNode }) => {
+    return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  };
+
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <AppProvider>
-          <div className="app">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/dashboard" element={<AuthRequired><Dashboard /></AuthRequired>} />
-              <Route path="/perfil" element={<AuthRequired><UserProfile /></AuthRequired>} />
+    <AppContext.Provider value={{ 
+      user, 
+      isAuthenticated, 
+      isLoading,
+      login, 
+      logout,
+      switchCondominium
+    }}>
+      <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/track/:code" element={<TrackingRoute />} />
+            
+            {/* Protected routes */}
+            <Route element={<AuthRequired />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/moradores" element={<Moradores />} />
+              <Route path="/comunicados" element={<Comunicados />} />
+              <Route path="/documentos" element={<Documentos />} />
+              <Route path="/financeiro/dashboard" element={<FinanceiroDashboard />} />
+              <Route path="/financeiro/receitas-despesas" element={<FinanceiroReceitasDespesas />} />
+              <Route path="/financeiro/recebimento-pix" element={<FinanceiroRecebimentoPix />} />
+              <Route path="/financeiro/prestacao-contas" element={<FinanceiroPrestacaoContas />} />
+              <Route path="/areas-comuns" element={<AreasComuns />} />
+              <Route path="/dedetizacoes" element={<Dedetizacoes />} />
+              <Route path="/servicos" element={<Servicos />} />
+              <Route path="/minhas-cobrancas" element={<MinhasCobrancas />} />
+              <Route path="/garagem-livre" element={<GaragemLivre />} />
+              <Route path="/sugestao-reclamacao" element={<SugestaoReclamacao />} />
+              <Route path="/perfil" element={<UserProfile />} />
+              <Route path="/minha-assinatura" element={<MinhaAssinatura />} />
+              <Route path="/dados-historicos" element={<DadosHistoricos />} />
+              <Route path="/contato" element={<FaleConosco />} />
               
-              {/* Financeiro Routes */}
-              <Route path="/financeiro/dashboard" element={<AuthRequired><FinanceiroDashboard /></AuthRequired>} />
-              <Route path="/financeiro/receitas-despesas" element={<AuthRequired><FinanceiroReceitasDespesas /></AuthRequired>} />
-              <Route path="/financeiro/recebimento-pix" element={<AuthRequired><FinanceiroRecebimentoPix /></AuthRequired>} />
-              <Route path="/financeiro/prestacao-contas" element={<AuthRequired><FinanceiroPrestacaoContas /></AuthRequired>} />
+              {/* Admin only routes */}
+              <Route element={<AdminOnly />}>
+                <Route path="/cadastro-gestor" element={<CadastroGestor />} />
+                <Route path="/cadastro-planos" element={<CadastroPlanos />} />
+                <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
+                <Route path="/gerenciar-avisos" element={<GerenciarAvisos />} />
+                <Route path="/business-management" element={<BusinessManagement />} />
+                <Route path="/contratos" element={<BusinessContratos />} />
+                <Route path="/despesas-empresariais" element={<BusinessCost />} />
+                <Route path="/website-traffic" element={<WebsiteTraffic />} />
+              </Route>
               
-              {/* Admin Routes */}
-              <Route path="/cadastro-gestor" element={<AdminOnly><CadastroGestor /></AdminOnly>} />
-              <Route path="/cadastro-planos" element={<AdminOnly><CadastroPlanos /></AdminOnly>} />
-              <Route path="/cadastro-chave-pix" element={<AdminOnly><CadastroChavePix /></AdminOnly>} />
-              <Route path="/gerar-faturas" element={<AuthRequired><GerarFaturas /></AuthRequired>} />
-              <Route path="/gerenciar-avisos" element={<AuthRequired><GerenciarAvisos /></AuthRequired>} />
-              <Route path="/business-management" element={<AdminOnly><BusinessManagement /></AdminOnly>} />
-              <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
-              <Route path="/despesas-empresariais" element={<AdminOnly><BusinessCost /></AdminOnly>} />
-              
-              {/* Manager Routes */}
-              <Route path="/moradores" element={<AuthRequired><Moradores /></AuthRequired>} />
-              <Route path="/comunicados" element={<AuthRequired><Comunicados /></AuthRequired>} />
-              <Route path="/documentos" element={<AuthRequired><Documentos /></AuthRequired>} />
-              <Route path="/areas-comuns" element={<AuthRequired><AreasComuns /></AuthRequired>} />
-              <Route path="/dedetizacoes" element={<AuthRequired><Dedetizacoes /></AuthRequired>} />
-              <Route path="/servicos" element={<AuthRequired><Servicos /></AuthRequired>} />
-              <Route path="/minha-assinatura" element={<AuthRequired><MinhaAssinatura /></AuthRequired>} />
-              <Route path="/contato" element={<AuthRequired><FaleConosco /></AuthRequired>} />
-              
-              {/* Resident Routes */}
-              <Route path="/minhas-cobrancas" element={<AuthRequired><MinhasCobrancas /></AuthRequired>} />
-              <Route path="/garagem-livre" element={<AuthRequired><GaragemLivre /></AuthRequired>} />
-              <Route path="/sugestao-reclamacao" element={<AuthRequired><SugestaoReclamacao /></AuthRequired>} />
-              
-              {/* New Route */}
-              <Route path="/dados-historicos" element={
-                <AuthRequired>
-                  <DadosHistoricos />
-                </AuthRequired>
-              } />
-            </Routes>
-            <Toaster />
-          </div>
-        </AppProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+              {/* Fallback for Not Found */}
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+      </Router>
+    </AppContext.Provider>
   );
-}
+};
 
 export default App;

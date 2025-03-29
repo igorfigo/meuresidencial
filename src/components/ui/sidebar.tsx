@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -31,6 +32,7 @@ import {
   BarChart3,
   PieChart,
   History,
+  Link,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -109,7 +111,8 @@ export function Sidebar() {
       submenu: [
         { path: '/business-management', label: 'Visão Geral', icon: <PieChart className="h-5 w-5 text-blue-500" /> },
         { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
-        { path: '/despesas-empresariais', label: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" /> }
+        { path: '/despesas-empresariais', label: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" /> },
+        { path: '/website-traffic', label: 'Website Traffic', icon: <Link className="h-5 w-5 text-blue-500" /> }
       ]
     },
   ];
