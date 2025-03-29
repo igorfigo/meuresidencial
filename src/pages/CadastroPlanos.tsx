@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ type FormFields = {
   nome: string;
   descricao: string;
   valor: string;
+  max_moradores: number;
 };
 
 interface PlanChangeLog {
@@ -54,11 +56,12 @@ export const CadastroPlanos = () => {
       codigo: '',
       nome: '',
       descricao: '',
-      valor: ''
+      valor: '',
+      max_moradores: 50
     }
   });
 
-  const { reset, handleSubmit, setValue, getValues } = form;
+  const { reset, handleSubmit, setValue, getValues, register } = form;
 
   const fetchPlans = async () => {
     try {
@@ -158,6 +161,16 @@ export const CadastroPlanos = () => {
       });
     }
     
+    if (oldPlan.max_moradores !== newPlan.max_moradores) {
+      changes.push({
+        codigo: oldPlan.codigo,
+        campo: 'Máximo de Moradores',
+        valor_anterior: oldPlan.max_moradores?.toString() || '50',
+        valor_novo: newPlan.max_moradores?.toString() || '50',
+        usuario: user?.email || null
+      });
+    }
+    
     for (const change of changes) {
       await supabase
         .from('plan_change_logs')
@@ -201,6 +214,7 @@ export const CadastroPlanos = () => {
           nome: formattedData.nome,
           descricao: formattedData.descricao,
           valor: formattedData.valor,
+          max_moradores: formattedData.max_moradores,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'codigo'
@@ -212,7 +226,8 @@ export const CadastroPlanos = () => {
         await registerChangeLog(oldPlan, {
           ...data,
           codigo: data.codigo.toUpperCase(),
-          valor: data.valor
+          valor: data.valor,
+          max_moradores: data.max_moradores
         });
       }
       
@@ -249,7 +264,8 @@ export const CadastroPlanos = () => {
             codigo: '',
             nome: '',
             descricao: '',
-            valor: ''
+            valor: '',
+            max_moradores: 50
           });
           setIsExistingRecord(false);
           setChangeLogs([]);
@@ -271,7 +287,8 @@ export const CadastroPlanos = () => {
       codigo: plan.codigo,
       nome: plan.nome,
       descricao: plan.descricao || '',
-      valor: planValue
+      valor: planValue,
+      max_moradores: plan.max_moradores || 50
     });
     setIsExistingRecord(true);
   };
@@ -405,6 +422,22 @@ export const CadastroPlanos = () => {
                   <p className="text-xs text-muted-foreground">Digite apenas os números no formato 0,00</p>
                 </div>
                 
+                <div className="space-y-2">
+                  <Label htmlFor="max_moradores">Máximo de Moradores</Label>
+                  <Input
+                    id="max_moradores"
+                    type="number"
+                    min="1"
+                    placeholder="50"
+                    {...form.register('max_moradores', { 
+                      required: true,
+                      valueAsNumber: true,
+                      min: 1
+                    })}
+                  />
+                  <p className="text-xs text-muted-foreground">Número máximo de moradores permitidos para este plano</p>
+                </div>
+                
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
@@ -427,13 +460,14 @@ export const CadastroPlanos = () => {
                       <TableHead>Código</TableHead>
                       <TableHead>Nome</TableHead>
                       <TableHead>Valor</TableHead>
+                      <TableHead>Máx. Moradores</TableHead>
                       <TableHead>Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {plans.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-4">
+                        <TableCell colSpan={5} className="text-center py-4">
                           Nenhum plano cadastrado.
                         </TableCell>
                       </TableRow>
@@ -443,6 +477,7 @@ export const CadastroPlanos = () => {
                           <TableCell className="font-medium">{plan.codigo}</TableCell>
                           <TableCell>{plan.nome}</TableCell>
                           <TableCell>{formatCurrency(plan.valor)}</TableCell>
+                          <TableCell>{plan.max_moradores || 50}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button 

@@ -9,6 +9,7 @@ export interface Plan {
   nome: string;
   descricao?: string;
   valor: string;
+  max_moradores?: number;
   created_at?: string;
   updated_at?: string;
 }

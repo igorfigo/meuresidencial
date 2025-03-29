@@ -912,6 +912,7 @@ export type Database = {
           created_at: string | null
           descricao: string | null
           id: string
+          max_moradores: number | null
           nome: string
           updated_at: string | null
           valor: string
@@ -921,6 +922,7 @@ export type Database = {
           created_at?: string | null
           descricao?: string | null
           id?: string
+          max_moradores?: number | null
           nome: string
           updated_at?: string | null
           valor: string
@@ -930,6 +932,7 @@ export type Database = {
           created_at?: string | null
           descricao?: string | null
           id?: string
+          max_moradores?: number | null
           nome?: string
           updated_at?: string | null
           valor?: string

@@ -14,7 +14,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, numberOnly, isCurrency, hidePrefix = false, onChange, value, ...props }, ref) => {
     // Handle keydown for number-only inputs
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (numberOnly) {
+      if (numberOnly && type !== 'number') {
         // Allow only numbers, arrows, backspace, delete, tab
         const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
         const isNumber = /^[0-9]$/i.test(e.key);
