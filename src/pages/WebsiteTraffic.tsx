@@ -97,18 +97,27 @@ const WebsiteTraffic: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('traffic_sources')
-        .select('*, visits_count:traffic_visits(count)')
-        .order('created_at', { ascending: false });
+        .select('*');
       
       if (error) throw error;
       
-      const formattedSources = data.map(source => ({
-        ...source,
-        visits_count: source.visits_count?.count || 0,
-        tracking_url: `${baseUrl}/track/${source.unique_code}`
-      }));
+      // Fetch visit counts separately
+      const sourcesWithCounts = await Promise.all(
+        (data || []).map(async (source) => {
+          const { count, error: countError } = await supabase
+            .from('traffic_visits')
+            .select('*', { count: 'exact', head: true })
+            .eq('source_id', source.id);
+          
+          return {
+            ...source,
+            visits_count: countError ? 0 : (count || 0),
+            tracking_url: `${baseUrl}/track/${source.unique_code}`
+          };
+        })
+      );
       
-      setSources(formattedSources);
+      setSources(sourcesWithCounts);
     } catch (error) {
       console.error('Error fetching traffic sources:', error);
       toast({
@@ -212,7 +221,7 @@ const WebsiteTraffic: React.FC = () => {
       
       if (error) throw error;
       
-      const newSource = {
+      const newSource: TrafficSource = {
         ...data,
         tracking_url: `${baseUrl}/track/${data.unique_code}`,
         visits_count: 0

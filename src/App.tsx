@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import { AppContext } from './contexts/AppContext';
 import { useLocalStorage } from './hooks/use-local-storage';
 import Index from './pages/Index';
@@ -35,6 +35,11 @@ import { useToast } from '@/components/ui/use-toast';
 import WebsiteTraffic from './pages/WebsiteTraffic';
 import TrackingRoute from './components/traffic/TrackingRoute';
 import AdminOnly from './components/AdminOnly';
+
+// Define the interface for AdminOnly component's props
+interface AdminOnlyProps {
+  children: React.ReactNode;
+}
 
 const App: React.FC = () => {
   const [user, setUser] = useLocalStorage('user', null);
@@ -105,7 +110,7 @@ const App: React.FC = () => {
             <Route path="/track/:code" element={<TrackingRoute />} />
             
             {/* Protected routes */}
-            <Route element={<AuthRequired />}>
+            <Route path="/" element={<AuthRequired><Outlet /></AuthRequired>}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/moradores" element={<Moradores />} />
               <Route path="/comunicados" element={<Comunicados />} />
@@ -126,7 +131,7 @@ const App: React.FC = () => {
               <Route path="/contato" element={<FaleConosco />} />
               
               {/* Admin only routes */}
-              <Route element={<AdminOnly />}>
+              <Route path="/" element={<AdminOnly><Outlet /></AdminOnly>}>
                 <Route path="/cadastro-gestor" element={<CadastroGestor />} />
                 <Route path="/cadastro-planos" element={<CadastroPlanos />} />
                 <Route path="/cadastro-chave-pix" element={<CadastroChavePix />} />
