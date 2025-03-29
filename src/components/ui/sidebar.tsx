@@ -132,7 +132,6 @@ export function Sidebar() {
     },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/dedetizacoes', label: 'Dedetizações', icon: <Bug className="h-5 w-5" /> },
-    { path: '/servicos', label: 'Serviços Gerais', icon: <Truck className="h-5 w-5" /> },
     { path: '/dados-historicos', label: 'Dados Históricos', icon: <History className="h-5 w-5" /> },
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/contato', label: 'Fale Conosco', icon: <Mail className="h-5 w-5" /> },
@@ -153,7 +152,6 @@ export function Sidebar() {
       badge: unreadDocuments > 0 ? unreadDocuments : undefined
     },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
-    { path: '/servicos', label: 'Serviços Gerais', icon: <Truck className="h-5 w-5" /> },
     { path: '/minhas-cobrancas', label: 'Minhas Cobranças', icon: <Receipt className="h-5 w-5" /> },
     { path: '/garagem-livre', label: 'Garagem Livre', icon: <Car className="h-5 w-5" /> },
     { path: '/sugestao-reclamacao', label: 'Sugestão/Reclamação', icon: <MessagesSquare className="h-5 w-5" /> },

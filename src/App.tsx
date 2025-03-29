@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -34,7 +35,6 @@ import BusinessManagement from '@/pages/BusinessManagement';
 import DadosHistoricos from './pages/DadosHistoricos';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
-const Servicos = () => <div>Serviços (Em Desenvolvimento)</div>;
 
 function App() {
   return (
@@ -70,7 +70,6 @@ function App() {
               <Route path="/documentos" element={<AuthRequired><Documentos /></AuthRequired>} />
               <Route path="/areas-comuns" element={<AuthRequired><AreasComuns /></AuthRequired>} />
               <Route path="/dedetizacoes" element={<AuthRequired><Dedetizacoes /></AuthRequired>} />
-              <Route path="/servicos" element={<AuthRequired><Servicos /></AuthRequired>} />
               <Route path="/minha-assinatura" element={<AuthRequired><MinhaAssinatura /></AuthRequired>} />
               <Route path="/contato" element={<AuthRequired><FaleConosco /></AuthRequired>} />
               
