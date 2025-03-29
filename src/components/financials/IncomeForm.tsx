@@ -159,8 +159,15 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
       const isValidDate = validatePaymentDate(values.payment_date);
       
       if (!isValidDate) {
-        const adjustmentDate = new Date(lastBalanceAdjustmentDate!);
-        const formattedDate = adjustmentDate.toLocaleDateString('pt-BR');
+        // Fix: Create proper date object but avoid timezone issues by adding 
+        // the time segment when parsing the date
+        const adjustmentDate = new Date(lastBalanceAdjustmentDate! + 'T00:00:00');
+        // Format the date correctly
+        const day = adjustmentDate.getDate();
+        const month = adjustmentDate.getMonth() + 1;
+        const year = adjustmentDate.getFullYear();
+        const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+        
         setDateError(`A data de recebimento não pode ser anterior à data do último ajuste de saldo (${formattedDate})`);
         return;
       }
