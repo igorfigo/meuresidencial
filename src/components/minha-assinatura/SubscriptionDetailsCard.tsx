@@ -182,13 +182,7 @@ export const SubscriptionDetailsCard = ({
         </div>
       </div>
       
-      <div className="mt-6 flex flex-col md:flex-row md:justify-between gap-4">
-        <div>
-          <CancelSubscriptionDialog 
-            condominiumMatricula={user.matricula}
-            userEmail={user.email}
-          />
-        </div>
+      <div className="mt-6 flex flex-col md:flex-row md:justify-end gap-4">
         <div>
           <PlanUpgradeDialog 
             condominiumData={localCondominiumData}
@@ -196,6 +190,12 @@ export const SubscriptionDetailsCard = ({
             userEmail={user.email}
             onPlanUpgrade={handlePlanUpgrade}
             formatCurrencyDisplay={formatCurrencyDisplay}
+          />
+        </div>
+        <div>
+          <CancelSubscriptionDialog 
+            condominiumMatricula={user.matricula}
+            userEmail={user.email}
           />
         </div>
       </div>

@@ -60,8 +60,7 @@ export const CancelSubscriptionDialog = ({ condominiumMatricula, userEmail }: Ca
     <>
       <Button 
         variant="destructive" 
-        onClick={() => setIsOpen(true)} 
-        className="mt-4"
+        onClick={() => setIsOpen(true)}
       >
         <X className="mr-2 h-4 w-4" /> Cancelar Assinatura
       </Button>
