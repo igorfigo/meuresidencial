@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -80,16 +79,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   useEffect(() => {
     if (isFinanceiroPath && !user?.isAdmin) {
       setExpandedSubmenu('Financeiro');
-    } else if (isBusinessPath && user?.isAdmin) {
+    }
+    
+    if (isBusinessPath && user?.isAdmin) {
       setExpandedSubmenu('Business Management');
-    } else {
-      // If we're not on a financial or business page, close the menus
-      if (expandedSubmenu === 'Financeiro' && !isFinanceiroPath) {
-        setExpandedSubmenu(null);
-      }
-      if (expandedSubmenu === 'Business Management' && !isBusinessPath) {
-        setExpandedSubmenu(null);
-      }
     }
     
     if (location.pathname === '/comunicados') {
@@ -97,7 +90,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     } else if (location.pathname === '/documentos') {
       markAsViewed('documents');
     }
-  }, [location.pathname, isFinanceiroPath, isBusinessPath, user?.isAdmin, markAsViewed, expandedSubmenu]);
+  }, [location.pathname, isFinanceiroPath, isBusinessPath, user?.isAdmin, markAsViewed]);
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
