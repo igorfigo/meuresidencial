@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +13,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { FinancialIncome } from '@/hooks/use-finances';
 import { formatCurrencyInput } from '@/utils/currency';
 import { toast } from 'sonner';
-import { Info } from 'lucide-react';
 
 const incomeCategories = [
   { value: 'taxa_condominio', label: 'Taxa de Condomínio' },
@@ -284,12 +282,6 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                         value={field.value || ''}
                       />
                     </FormControl>
-                    {lastBalanceAdjustmentDate && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        <Info className="inline-block h-3 w-3 mr-1" />
-                        Última data de ajuste: {new Date(lastBalanceAdjustmentDate).toLocaleDateString('pt-BR')}
-                      </p>
-                    )}
                     {dateError && <p className="text-xs text-destructive mt-1">{dateError}</p>}
                     <FormMessage />
                   </FormItem>

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Paperclip, Info } from 'lucide-react';
+import { Paperclip } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FinancialExpense } from '@/hooks/use-finances';
 import { formatCurrencyInput } from '@/utils/currency';
@@ -264,12 +264,6 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                         {...field}
                       />
                     </FormControl>
-                    {lastBalanceAdjustmentDate && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        <Info className="inline-block h-3 w-3 mr-1" />
-                        Última data de ajuste: {new Date(lastBalanceAdjustmentDate).toLocaleDateString('pt-BR')}
-                      </p>
-                    )}
                     {dateError && <p className="text-xs text-destructive mt-1">{dateError}</p>}
                     <FormMessage />
                   </FormItem>
