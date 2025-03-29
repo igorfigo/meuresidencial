@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Paperclip } from 'lucide-react';
+import { Paperclip, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FinancialExpense } from '@/hooks/use-finances';
 import { formatCurrencyInput } from '@/utils/currency';
@@ -47,6 +47,8 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
   const { user } = useApp();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachmentsList, setAttachmentsList] = useState<File[]>([]);
+  const [lastBalanceAdjustmentDate, setLastBalanceAdjustmentDate] = useState<string | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
   
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
@@ -60,9 +62,54 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
       attachments: undefined
     }
   });
+
+  useEffect(() => {
+    const fetchLastBalanceAdjustmentDate = async () => {
+      if (!user?.selectedCondominium) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('balance_adjustments')
+          .select('adjustment_date')
+          .eq('matricula', user.selectedCondominium)
+          .order('adjustment_date', { ascending: false })
+          .limit(1);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const adjustmentDate = new Date(data[0].adjustment_date);
+          // Format as YYYY-MM-DD for comparison with HTML input date format
+          const formattedDate = adjustmentDate.toISOString().split('T')[0];
+          setLastBalanceAdjustmentDate(formattedDate);
+        }
+      } catch (error) {
+        console.error('Error fetching last balance adjustment date:', error);
+      }
+    };
+    
+    fetchLastBalanceAdjustmentDate();
+  }, [user?.selectedCondominium]);
+  
+  const validatePaymentDate = (paymentDate: string): boolean => {
+    if (!lastBalanceAdjustmentDate) return true;
+    
+    // Compare the two dates
+    return new Date(paymentDate) >= new Date(lastBalanceAdjustmentDate);
+  };
   
   const handleSubmit = async (values: z.infer<typeof expenseSchema>) => {
     if (!user?.selectedCondominium) return;
+    
+    setDateError(null);
+    
+    // Check if payment date is valid
+    const isValidDate = validatePaymentDate(values.payment_date);
+    
+    if (!isValidDate) {
+      setDateError(`A data de pagamento não pode ser anterior à data do último ajuste de saldo (${new Date(lastBalanceAdjustmentDate!).toLocaleDateString('pt-BR')})`);
+      return;
+    }
     
     setIsSubmitting(true);
     try {
@@ -94,6 +141,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
           attachments: undefined
         });
         setAttachmentsList([]);
+        setDateError(null);
       }
     } finally {
       setIsSubmitting(false);
@@ -216,6 +264,13 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                         {...field}
                       />
                     </FormControl>
+                    {lastBalanceAdjustmentDate && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <Info className="inline-block h-3 w-3 mr-1" />
+                        Última data de ajuste: {new Date(lastBalanceAdjustmentDate).toLocaleDateString('pt-BR')}
+                      </p>
+                    )}
+                    {dateError && <p className="text-xs text-destructive mt-1">{dateError}</p>}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -295,7 +350,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
             />
             
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting || !!dateError}>
                 {isSubmitting ? 'Salvando...' : initialData ? 'Atualizar' : 'Adicionar'}
               </Button>
             </div>

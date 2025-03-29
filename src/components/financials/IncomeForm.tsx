@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { FinancialIncome } from '@/hooks/use-finances';
 import { formatCurrencyInput } from '@/utils/currency';
 import { toast } from 'sonner';
+import { Info } from 'lucide-react';
 
 const incomeCategories = [
   { value: 'taxa_condominio', label: 'Taxa de Condomínio' },
@@ -41,6 +42,8 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   const [units, setUnits] = useState<{ value: string; label: string; }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
+  const [lastBalanceAdjustmentDate, setLastBalanceAdjustmentDate] = useState<string | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
   
   const form = useForm<z.infer<typeof incomeSchema>>({
     resolver: zodResolver(incomeSchema),
@@ -74,7 +77,32 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
       }
     };
     
+    const fetchLastBalanceAdjustmentDate = async () => {
+      if (!user?.selectedCondominium) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('balance_adjustments')
+          .select('adjustment_date')
+          .eq('matricula', user.selectedCondominium)
+          .order('adjustment_date', { ascending: false })
+          .limit(1);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const adjustmentDate = new Date(data[0].adjustment_date);
+          // Format as YYYY-MM-DD for comparison with HTML input date format
+          const formattedDate = adjustmentDate.toISOString().split('T')[0];
+          setLastBalanceAdjustmentDate(formattedDate);
+        }
+      } catch (error) {
+        console.error('Error fetching last balance adjustment date:', error);
+      }
+    };
+    
     fetchUnits();
+    fetchLastBalanceAdjustmentDate();
   }, [user?.selectedCondominium]);
   
   const checkDuplicateIncome = async (values: z.infer<typeof incomeSchema>) => {
@@ -107,8 +135,27 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     }
   };
   
+  const validatePaymentDate = (paymentDate: string | undefined): boolean => {
+    if (!paymentDate || !lastBalanceAdjustmentDate) return true;
+    
+    // Compare the two dates
+    return new Date(paymentDate) >= new Date(lastBalanceAdjustmentDate);
+  };
+  
   const handleSubmit = async (values: z.infer<typeof incomeSchema>) => {
     if (!user?.selectedCondominium) return;
+    
+    setDateError(null);
+    
+    // Check if payment date is provided and valid
+    if (values.payment_date) {
+      const isValidDate = validatePaymentDate(values.payment_date);
+      
+      if (!isValidDate) {
+        setDateError(`A data de recebimento não pode ser anterior à data do último ajuste de saldo (${new Date(lastBalanceAdjustmentDate!).toLocaleDateString('pt-BR')})`);
+        return;
+      }
+    }
     
     setIsSubmitting(true);
     try {
@@ -141,6 +188,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
           unit: '',
           observations: ''
         });
+        setDateError(null);
       }
     } finally {
       setIsSubmitting(false);
@@ -236,6 +284,13 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                         value={field.value || ''}
                       />
                     </FormControl>
+                    {lastBalanceAdjustmentDate && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <Info className="inline-block h-3 w-3 mr-1" />
+                        Última data de ajuste: {new Date(lastBalanceAdjustmentDate).toLocaleDateString('pt-BR')}
+                      </p>
+                    )}
+                    {dateError && <p className="text-xs text-destructive mt-1">{dateError}</p>}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -289,7 +344,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
             />
             
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isSubmitting || isCheckingDuplicate}>
+              <Button type="submit" disabled={isSubmitting || isCheckingDuplicate || !!dateError}>
                 {isSubmitting ? 'Salvando...' : isCheckingDuplicate ? 'Verificando...' : initialData ? 'Atualizar' : 'Adicionar'}
               </Button>
             </div>
