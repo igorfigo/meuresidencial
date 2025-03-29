@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -84,6 +85,11 @@ export function Sidebar() {
         location.pathname === '/contratos' || 
         location.pathname === '/despesas-empresariais') {
       setExpandedSubmenu('Business Management');
+    }
+    
+    // Check if we're on a financial page and expand the menu
+    if (location.pathname.includes('/financeiro')) {
+      setExpandedSubmenu('Financeiro');
     }
   }, [location.pathname, markAsViewed]);
 

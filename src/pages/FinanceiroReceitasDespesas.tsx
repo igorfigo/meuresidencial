@@ -10,6 +10,8 @@ import { useFinances, FinancialIncome, FinancialExpense } from '@/hooks/use-fina
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
 
 const FinanceiroReceitasDespesas = () => {
   const { user } = useApp();
@@ -31,6 +33,7 @@ const FinanceiroReceitasDespesas = () => {
   } = useFinances();
   
   const [activeTab, setActiveTab] = useState<string>('income');
+  const [isFormsOpen, setIsFormsOpen] = useState(true);
   
   const handleIncomeSubmit = async (data: FinancialIncome) => {
     try {
@@ -228,20 +231,28 @@ const FinanceiroReceitasDespesas = () => {
           </div>
         </div>
         
-        <Tabs defaultValue="income" value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid w-full md:w-[400px] grid-cols-2">
-            <TabsTrigger value="income">Receitas</TabsTrigger>
-            <TabsTrigger value="expense">Despesas</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="income" className="mt-6">
-            <IncomeForm onSubmit={handleIncomeSubmit} />
-          </TabsContent>
-          
-          <TabsContent value="expense" className="mt-6">
-            <ExpenseForm onSubmit={handleExpenseSubmit} />
-          </TabsContent>
-        </Tabs>
+        <Collapsible open={isFormsOpen} onOpenChange={setIsFormsOpen} className="mb-8">
+          <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-2">
+            <span className="text-lg font-medium">Formulário de Receitas/Despesas</span>
+            <ChevronDown className={`h-5 w-5 transition-transform ${isFormsOpen ? 'transform rotate-180' : ''}`} />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <Tabs defaultValue="income" value={activeTab} onValueChange={setActiveTab} className="mb-8">
+              <TabsList className="grid w-full md:w-[400px] grid-cols-2">
+                <TabsTrigger value="income">Receitas</TabsTrigger>
+                <TabsTrigger value="expense">Despesas</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="income" className="mt-6">
+                <IncomeForm onSubmit={handleIncomeSubmit} />
+              </TabsContent>
+              
+              <TabsContent value="expense" className="mt-6">
+                <ExpenseForm onSubmit={handleExpenseSubmit} />
+              </TabsContent>
+            </Tabs>
+          </CollapsibleContent>
+        </Collapsible>
         
         <div className="mb-8">
           <RecentTransactions 
