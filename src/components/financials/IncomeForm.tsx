@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -89,8 +90,8 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
         if (error) throw error;
         
         if (data && data.length > 0) {
-          const adjustmentDate = new Date(data[0].adjustment_date);
           // Format as YYYY-MM-DD for comparison with HTML input date format
+          const adjustmentDate = new Date(data[0].adjustment_date);
           const formattedDate = adjustmentDate.toISOString().split('T')[0];
           setLastBalanceAdjustmentDate(formattedDate);
         }
@@ -136,8 +137,16 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   const validatePaymentDate = (paymentDate: string | undefined): boolean => {
     if (!paymentDate || !lastBalanceAdjustmentDate) return true;
     
+    // Create date objects for comparison (ignoring time)
+    const paymentDateObj = new Date(paymentDate);
+    const adjustmentDateObj = new Date(lastBalanceAdjustmentDate);
+    
+    // Set both times to midnight to ensure we're only comparing dates
+    paymentDateObj.setHours(0, 0, 0, 0);
+    adjustmentDateObj.setHours(0, 0, 0, 0);
+    
     // Compare the two dates
-    return new Date(paymentDate) >= new Date(lastBalanceAdjustmentDate);
+    return paymentDateObj >= adjustmentDateObj;
   };
   
   const handleSubmit = async (values: z.infer<typeof incomeSchema>) => {
@@ -150,7 +159,9 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
       const isValidDate = validatePaymentDate(values.payment_date);
       
       if (!isValidDate) {
-        setDateError(`A data de recebimento não pode ser anterior à data do último ajuste de saldo (${new Date(lastBalanceAdjustmentDate!).toLocaleDateString('pt-BR')})`);
+        const adjustmentDate = new Date(lastBalanceAdjustmentDate!);
+        const formattedDate = adjustmentDate.toLocaleDateString('pt-BR');
+        setDateError(`A data de recebimento não pode ser anterior à data do último ajuste de saldo (${formattedDate})`);
         return;
       }
     }

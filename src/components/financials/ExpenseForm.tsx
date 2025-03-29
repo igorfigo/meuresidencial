@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -79,7 +78,6 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
         
         if (data && data.length > 0) {
           const adjustmentDate = new Date(data[0].adjustment_date);
-          // Format as YYYY-MM-DD for comparison with HTML input date format
           const formattedDate = adjustmentDate.toISOString().split('T')[0];
           setLastBalanceAdjustmentDate(formattedDate);
         }
@@ -91,11 +89,16 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
     fetchLastBalanceAdjustmentDate();
   }, [user?.selectedCondominium]);
   
-  const validatePaymentDate = (paymentDate: string): boolean => {
-    if (!lastBalanceAdjustmentDate) return true;
+  const validatePaymentDate = (paymentDate: string | undefined): boolean => {
+    if (!paymentDate || !lastBalanceAdjustmentDate) return true;
     
-    // Compare the two dates
-    return new Date(paymentDate) >= new Date(lastBalanceAdjustmentDate);
+    const paymentDateObj = new Date(paymentDate);
+    const adjustmentDateObj = new Date(lastBalanceAdjustmentDate);
+    
+    paymentDateObj.setHours(0, 0, 0, 0);
+    adjustmentDateObj.setHours(0, 0, 0, 0);
+    
+    return paymentDateObj >= adjustmentDateObj;
   };
   
   const handleSubmit = async (values: z.infer<typeof expenseSchema>) => {
@@ -103,19 +106,21 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
     
     setDateError(null);
     
-    // Check if payment date is valid
-    const isValidDate = validatePaymentDate(values.payment_date);
-    
-    if (!isValidDate) {
-      setDateError(`A data de pagamento não pode ser anterior à data do último ajuste de saldo (${new Date(lastBalanceAdjustmentDate!).toLocaleDateString('pt-BR')})`);
-      return;
+    if (values.payment_date) {
+      const isValidDate = validatePaymentDate(values.payment_date);
+      
+      if (!isValidDate) {
+        const adjustmentDate = new Date(lastBalanceAdjustmentDate!);
+        const formattedDate = adjustmentDate.toLocaleDateString('pt-BR');
+        setDateError(`A data de pagamento não pode ser anterior à data do último ajuste de saldo (${formattedDate})`);
+        return;
+      }
     }
     
     setIsSubmitting(true);
     try {
       const { attachments, ...expenseData } = values;
       
-      // Don't modify the dates - pass them directly to avoid the 1-day shift
       await onSubmit(
         {
           ...expenseData,
