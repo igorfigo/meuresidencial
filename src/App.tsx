@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -38,9 +39,9 @@ const Servicos = () => <div>Serviços (Em Desenvolvimento)</div>;
 
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <AppProvider>
+    <QueryClientProvider client={queryClient}>
+      <AppProvider>
+        <BrowserRouter>
           <div className="app">
             <Routes>
               <Route path="/" element={<Index />} />
@@ -88,9 +89,9 @@ function App() {
             </Routes>
             <Toaster />
           </div>
-        </AppProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+        </BrowserRouter>
+      </AppProvider>
+    </QueryClientProvider>
   );
 }
 
