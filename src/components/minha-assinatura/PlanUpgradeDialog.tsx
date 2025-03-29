@@ -51,6 +51,33 @@ export const PlanUpgradeDialog = ({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('');
   const [selectedPlanValue, setSelectedPlanValue] = useState('R$ 0,00');
+  const [isValidatingPlan, setIsValidatingPlan] = useState(false);
+  const [residentsCount, setResidentsCount] = useState(0);
+  const [planError, setPlanError] = useState<string | null>(null);
+  
+  // Fetch the number of residents for the condominium
+  const fetchResidentsCount = async () => {
+    if (!userMatricula) return;
+    
+    try {
+      const { count, error } = await supabase
+        .from('residents')
+        .select('*', { count: 'exact', head: true })
+        .eq('matricula', userMatricula);
+      
+      if (error) throw error;
+      
+      setResidentsCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching residents count:', error);
+    }
+  };
+  
+  useEffect(() => {
+    if (showUpgradeDialog) {
+      fetchResidentsCount();
+    }
+  }, [showUpgradeDialog, userMatricula]);
   
   useEffect(() => {
     if (condominiumData?.planocontratado) {
@@ -65,7 +92,39 @@ export const PlanUpgradeDialog = ({
     }
   }, [selectedPlan, getPlanValue]);
   
+  // Validate if the selected plan can support the current number of residents
+  const validatePlanChange = (planCode: string) => {
+    setPlanError(null);
+    
+    if (!planCode) return true;
+    
+    const selectedPlanDetails = plans.find(p => p.codigo === planCode);
+    
+    if (selectedPlanDetails && selectedPlanDetails.max_moradores !== undefined) {
+      if (residentsCount > selectedPlanDetails.max_moradores) {
+        setPlanError(`Este plano suporta no máximo ${selectedPlanDetails.max_moradores} moradores. 
+        Seu condomínio possui ${residentsCount} moradores cadastrados.`);
+        return false;
+      }
+    }
+    
+    return true;
+  };
+  
+  const handlePlanChange = (value: string) => {
+    setSelectedPlan(value);
+    validatePlanChange(value);
+  };
+  
   const handleSavePlanUpgrade = async () => {
+    setIsValidatingPlan(true);
+    
+    if (!validatePlanChange(selectedPlan)) {
+      setIsValidatingPlan(false);
+      return;
+    }
+    
+    setIsValidatingPlan(false);
     setShowConfirmDialog(true);
   };
   
@@ -142,6 +201,14 @@ export const PlanUpgradeDialog = ({
     }
   };
 
+  // Get the max_moradores for the currently selected plan to display in the UI
+  const getSelectedPlanMaxResidents = () => {
+    if (!selectedPlan) return '';
+    
+    const selectedPlanDetails = plans.find(p => p.codigo === selectedPlan);
+    return selectedPlanDetails?.max_moradores?.toString() || '';
+  };
+
   return (
     <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
       <DialogTrigger asChild>
@@ -160,7 +227,7 @@ export const PlanUpgradeDialog = ({
             <Label htmlFor="upgradePlan">Plano Contratado</Label>
             <Select 
               value={selectedPlan}
-              onValueChange={setSelectedPlan}
+              onValueChange={handlePlanChange}
               disabled={isLoadingPlans}
             >
               <SelectTrigger id="upgradePlan">
@@ -182,6 +249,9 @@ export const PlanUpgradeDialog = ({
                 </SelectGroup>
               </SelectContent>
             </Select>
+            {planError && (
+              <p className="text-xs text-red-500 mt-1">{planError}</p>
+            )}
           </div>
           
           <div className="space-y-2">
@@ -192,6 +262,19 @@ export const PlanUpgradeDialog = ({
               readOnly
               className="bg-gray-100"
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="maxResidents">Máximo de Moradores</Label>
+            <Input
+              id="maxResidents"
+              value={getSelectedPlanMaxResidents()}
+              readOnly
+              className="bg-gray-100"
+            />
+            <p className="text-xs text-muted-foreground">
+              Número atual de moradores: {residentsCount}
+            </p>
           </div>
           
           <div className="space-y-2">
@@ -224,7 +307,9 @@ export const PlanUpgradeDialog = ({
         <DialogFooter>
           <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
             <AlertDialogTrigger asChild>
-              <Button onClick={handleSavePlanUpgrade}>Salvar Alterações</Button>
+              <Button onClick={handleSavePlanUpgrade} disabled={!!planError || isValidatingPlan}>
+                {isValidatingPlan ? 'Validando...' : 'Salvar Alterações'}
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
