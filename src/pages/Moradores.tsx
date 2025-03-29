@@ -7,6 +7,8 @@ import { ResidentsList } from '@/components/resident/ResidentsList';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 const Moradores = () => {
   const { 
@@ -19,7 +21,8 @@ const Moradores = () => {
     deleteResident, 
     isSubmitting, 
     isDeleting,
-    refetch 
+    refetch,
+    planLimitError
   } = useResidents();
   
   const [showForm, setShowForm] = useState(false);
@@ -66,13 +69,22 @@ const Moradores = () => {
               Gerencie os moradores do seu condomínio
             </p>
           </div>
-          {!showForm && (
+          {!showForm && !planLimitError && (
             <Button onClick={handleNewResident} className="bg-brand-600 hover:bg-brand-700">
               <Plus className="mr-2 h-4 w-4" />
               Novo Morador
             </Button>
           )}
         </div>
+
+        {planLimitError && !editingResident && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {planLimitError}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="border-t pt-6">
           {showForm ? (

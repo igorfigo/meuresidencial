@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { usePlans } from './use-plans';
 
 // Form validation schema
 export const residentSchema = z.object({
@@ -43,6 +44,8 @@ export const useResidents = () => {
   const matricula = user?.matricula || '';
   const [editingResident, setEditingResident] = useState<Resident | null>(null);
   const queryClient = useQueryClient();
+  const { plans, isLoading: isLoadingPlans } = usePlans();
+  const [planLimitError, setPlanLimitError] = useState<string | null>(null);
 
   // Initialize form with default values
   const form = useForm<ResidentFormValues>({
@@ -110,6 +113,63 @@ export const useResidents = () => {
     enabled: !!matricula
   });
 
+  // Helper function to check resident count against plan limit
+  const checkPlanResidentLimit = async (): Promise<boolean> => {
+    if (!matricula) return false;
+
+    try {
+      // Get current condominium data to check plan
+      const { data: condominiumData, error: condoError } = await supabase
+        .from('condominiums')
+        .select('planocontratado')
+        .eq('matricula', matricula)
+        .single();
+      
+      if (condoError) {
+        console.error("Error fetching condominium data:", condoError);
+        return false;
+      }
+
+      const planCode = condominiumData?.planocontratado;
+      if (!planCode) return false;
+
+      // Find plan details to get max_moradores
+      const selectedPlan = plans.find(p => p.codigo === planCode);
+      if (!selectedPlan || !selectedPlan.max_moradores) return false;
+
+      // Get current resident count
+      const { count, error: countError } = await supabase
+        .from('residents')
+        .select('*', { count: 'exact', head: true })
+        .eq('matricula', matricula);
+      
+      if (countError) {
+        console.error("Error counting residents:", countError);
+        return false;
+      }
+
+      const currentCount = count || 0;
+      
+      // If editing an existing resident, we're not adding to the count
+      if (editingResident) {
+        return true;
+      }
+      
+      // Check if adding a new resident would exceed the limit
+      if (currentCount >= selectedPlan.max_moradores) {
+        setPlanLimitError(`Limite de moradores atingido (${currentCount}/${selectedPlan.max_moradores}). 
+        Faça upgrade do seu plano para cadastrar mais moradores.`);
+        return false;
+      }
+
+      setPlanLimitError(null);
+      return true;
+    } catch (error) {
+      console.error("Error checking plan limit:", error);
+      return false;
+    }
+  };
+
   // Helper function to check for duplicate unit in the condominium
   const checkDuplicateUnit = async (unidade: string, residentId?: string): Promise<boolean> => {
     // Skip check if no unidade or matricula
@@ -140,6 +200,12 @@ export const useResidents = () => {
   // Mutation to create a new resident
   const createMutation = useMutation({
     mutationFn: async (values: ResidentFormValues) => {
+      // Check plan limit first
+      const isPlanLimitOk = await checkPlanResidentLimit();
+      if (!isPlanLimitOk) {
+        throw new Error(planLimitError || 'Limite de moradores atingido para o plano atual');
+      }
+      
       // Check for duplicate unit before creating
       const isDuplicateUnit = await checkDuplicateUnit(values.unidade);
       if (isDuplicateUnit) {
@@ -270,7 +336,7 @@ export const useResidents = () => {
   return {
     form,
     residents,
-    isLoading,
+    isLoading: isLoading || isLoadingPlans,
     error,
     editingResident,
     setEditingResident,
@@ -279,6 +345,7 @@ export const useResidents = () => {
     deleteResident: deleteMutation.mutate,
     isSubmitting: createMutation.isPending || updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
-    refetch
+    refetch,
+    planLimitError
   };
 };
