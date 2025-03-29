@@ -36,11 +36,6 @@ import WebsiteTraffic from './pages/WebsiteTraffic';
 import TrackingRoute from './components/traffic/TrackingRoute';
 import AdminOnly from './components/AdminOnly';
 
-// Define the interface for AdminOnly component's props
-interface AdminOnlyProps {
-  children: React.ReactNode;
-}
-
 const App: React.FC = () => {
   const [user, setUser] = useLocalStorage('user', null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!user);
