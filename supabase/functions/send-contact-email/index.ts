@@ -60,6 +60,7 @@ serve(async (req) => {
     let emailContent;
     let emailSubject;
     let fromEmail;
+    let recipient;
     
     if (isComplaint) {
       emailContent = complaintEmailContent;
