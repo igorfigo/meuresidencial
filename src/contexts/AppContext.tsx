@@ -32,9 +32,14 @@ interface User {
   cep?: string;
 }
 
+interface LoginResult {
+  success: boolean;
+  inactive?: boolean;
+}
+
 interface AppContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -66,7 +71,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsLoading(false);
   }, []);
 
-  const login = async (emailOrMatricula: string, password: string): Promise<boolean> => {
+  const login = async (emailOrMatricula: string, password: string): Promise<LoginResult> => {
     setIsLoading(true);
     try {
       // Verificar as credenciais do administrador
@@ -82,7 +87,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setUser(adminUser);
         localStorage.setItem('condoUser', JSON.stringify(adminUser));
         toast.success("Login realizado com sucesso!");
-        return true;
+        return { success: true };
       }
       
       // Check if it's a manager login with email
@@ -90,8 +95,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .from('condominiums')
         .select('*')
         .eq('emaillegal', emailOrMatricula.toLowerCase())
-        .eq('senha', password)
-        .eq('ativo', true);
+        .eq('senha', password);
       
       if (emailError) {
         console.error("Erro ao verificar credenciais por email:", emailError);
@@ -102,11 +106,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .from('condominiums')
         .select('*')
         .eq('matricula', emailOrMatricula)
-        .eq('senha', password)
-        .eq('ativo', true);
+        .eq('senha', password);
       
       if (matriculaError) {
         console.error("Erro ao verificar credenciais por matrícula:", matriculaError);
+      }
+      
+      // Check if manager exists but is inactive
+      const inactiveCheck = await checkInactiveManager(emailOrMatricula, password);
+      if (inactiveCheck.inactive) {
+        toast.error("Conta desativada. Entre em contato com a administração.");
+        return { success: false, inactive: true };
       }
       
       // Combine the results of both queries and ensure they're treated as arrays
@@ -166,7 +176,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setUser(managerUser);
         localStorage.setItem('condoUser', JSON.stringify(managerUser));
         toast.success("Login realizado com sucesso!");
-        return true;
+        return { success: true };
       }
       
       // Check for resident login (email is the registered email, password is their CPF)
@@ -194,12 +204,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (condoError) {
           console.error("Erro ao obter dados do condomínio do morador:", condoError);
           toast.error("Não foi possível obter os dados do condomínio associado a este morador.");
-          return false;
+          return { success: false };
         }
         
         if (!condoData) {
           toast.error("Condomínio não encontrado ou inativo.");
-          return false;
+          return { success: false };
         }
         
         const residentUser = {
@@ -238,18 +248,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           // Still allow login even if auth setup fails - this is just for future RLS
         }
         
-        return true;
+        return { success: true };
       }
       
       // Simulação de falha no login
       toast.error("Credenciais inválidas ou usuário inativo. Tente novamente.");
-      return false;
+      return { success: false };
     } catch (error) {
       console.error("Erro ao realizar login:", error);
       toast.error("Erro ao realizar login. Tente novamente.");
-      return false;
+      return { success: false };
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Check if manager exists but is inactive
+  const checkInactiveManager = async (emailOrMatricula: string, password: string) => {
+    try {
+      // Check by email
+      const { data: inactiveEmailData } = await supabase
+        .from('condominiums')
+        .select('*')
+        .eq('emaillegal', emailOrMatricula.toLowerCase())
+        .eq('senha', password)
+        .eq('ativo', false);
+        
+      // Check by matricula
+      const { data: inactiveMatriculaData } = await supabase
+        .from('condominiums')
+        .select('*')
+        .eq('matricula', emailOrMatricula)
+        .eq('senha', password)
+        .eq('ativo', false);
+        
+      const hasInactiveAccount = 
+        (inactiveEmailData && inactiveEmailData.length > 0) || 
+        (inactiveMatriculaData && inactiveMatriculaData.length > 0);
+        
+      return { inactive: hasInactiveAccount };
+    } catch (error) {
+      console.error("Error checking inactive account:", error);
+      return { inactive: false };
     }
   };
 

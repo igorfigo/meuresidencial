@@ -15,6 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [inactiveAccount, setInactiveAccount] = useState(false);
   const { login } = useApp();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('manager');
@@ -27,10 +28,15 @@ const Login = () => {
     }
     
     setLoading(true);
-    const success = await login(identifier, password);
-    if (success) {
+    setInactiveAccount(false);
+    const result = await login(identifier, password);
+    
+    if (result.success) {
       navigate('/dashboard');
+    } else if (result.inactive) {
+      setInactiveAccount(true);
     }
+    
     setLoading(false);
   };
 
@@ -54,7 +60,16 @@ const Login = () => {
             </TabsList>
             
             <TabsContent value="manager">
-              {/* Information box removed as requested */}
+              {/* Inactive account alert */}
+              {inactiveAccount && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Conta desativada</AlertTitle>
+                  <AlertDescription>
+                    Sua conta de síndico está desativada. Por favor, entre em contato com a administração do sistema para reativá-la.
+                  </AlertDescription>
+                </Alert>
+              )}
             </TabsContent>
             
             <TabsContent value="resident">
@@ -196,3 +211,4 @@ const Login = () => {
 };
 
 export default Login;
+
