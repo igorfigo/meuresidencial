@@ -46,8 +46,7 @@ interface AppContextType {
   switchCondominium: (matricula: string) => void;
 }
 
-// Export the AppContext so it can be imported in App.tsx
-export const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

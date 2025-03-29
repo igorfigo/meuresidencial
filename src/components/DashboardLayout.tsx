@@ -35,8 +35,7 @@ import {
   Car,
   BarChart3,
   PieChart,
-  History,
-  Link
+  History
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -123,7 +122,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         { name: 'Dashboard', icon: <PieChart className="h-5 w-5 text-blue-500" />, path: '/business-management' },
         { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
         { name: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" />, path: '/despesas-empresariais' },
-        { name: 'Website Traffic', icon: <Link className="h-5 w-5 text-blue-500" />, path: '/website-traffic' },
       ]
     },
   ];

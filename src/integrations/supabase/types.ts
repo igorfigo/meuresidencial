@@ -1034,62 +1034,6 @@ export type Database = {
           },
         ]
       }
-      traffic_sources: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          source: string
-          unique_code: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          source: string
-          unique_code: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          source?: string
-          unique_code?: string
-        }
-        Relationships: []
-      }
-      traffic_visits: {
-        Row: {
-          created_at: string
-          id: string
-          referrer: string | null
-          source_id: string
-          user_agent: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          referrer?: string | null
-          source_id: string
-          user_agent?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          referrer?: string | null
-          source_id?: string
-          user_agent?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "traffic_visits_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "traffic_sources"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           created_at: string
