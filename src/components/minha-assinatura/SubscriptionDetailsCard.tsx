@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlanUpgradeDialog } from './PlanUpgradeDialog';
+import { CancelSubscriptionDialog } from './CancelSubscriptionDialog';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -181,14 +182,22 @@ export const SubscriptionDetailsCard = ({
         </div>
       </div>
       
-      <div className="mt-6 flex justify-end">
-        <PlanUpgradeDialog 
-          condominiumData={localCondominiumData}
-          userMatricula={user.matricula}
-          userEmail={user.email}
-          onPlanUpgrade={handlePlanUpgrade}
-          formatCurrencyDisplay={formatCurrencyDisplay}
-        />
+      <div className="mt-6 flex flex-col md:flex-row md:justify-between gap-4">
+        <div>
+          <CancelSubscriptionDialog 
+            condominiumMatricula={user.matricula}
+            userEmail={user.email}
+          />
+        </div>
+        <div>
+          <PlanUpgradeDialog 
+            condominiumData={localCondominiumData}
+            userMatricula={user.matricula}
+            userEmail={user.email}
+            onPlanUpgrade={handlePlanUpgrade}
+            formatCurrencyDisplay={formatCurrencyDisplay}
+          />
+        </div>
       </div>
     </Card>
   );

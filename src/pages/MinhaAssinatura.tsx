@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -47,7 +48,25 @@ const MinhaAssinatura = () => {
     return getCurrentPlanDetails(condominiumData, plans);
   };
 
-  if (!isAuthenticated || !user || user.isAdmin) {
+  // Check if the user is a manager (not admin and not resident)
+  const isManager = isAuthenticated && user && !user.isAdmin && !user.isResident;
+
+  if (!isAuthenticated || !user) {
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto py-6">
+          <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
+          <Separator className="mb-2" />
+          <p className="text-gray-600 mb-6">
+            Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
+          </p>
+          <p>Você precisa estar autenticado para acessar esta página.</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+  
+  if (user.isAdmin) {
     return (
       <DashboardLayout>
         <div className="container mx-auto py-6">
@@ -57,6 +76,21 @@ const MinhaAssinatura = () => {
             Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
           </p>
           <p>Esta página está disponível apenas para usuários de condomínios.</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (user.isResident) {
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto py-6">
+          <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
+          <Separator className="mb-2" />
+          <p className="text-gray-600 mb-6">
+            Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
+          </p>
+          <p>Esta página está disponível apenas para administradores de condomínios.</p>
         </div>
       </DashboardLayout>
     );
