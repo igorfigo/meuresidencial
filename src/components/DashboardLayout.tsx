@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -35,7 +34,8 @@ import {
   MessagesSquare,
   Car,
   BarChart3,
-  PieChart
+  PieChart,
+  History
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -145,6 +145,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
     { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
     { name: 'Serviços Gerais', icon: <Truck className="h-5 w-5" />, path: '/servicos' },
+    { name: 'Dados Históricos', icon: <History className="h-5 w-5" />, path: '/dados-historicos' },
     { name: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" />, path: '/minha-assinatura' },
     { name: 'Fale Conosco', icon: <Mail className="h-5 w-5" />, path: '/contato' },
   ];
@@ -486,7 +487,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           {sidebarOpen ? (
             <div className="flex items-center space-x-3">
               <NavLink to="/perfil" className="flex-grow flex items-center space-x-3 hover:opacity-80 transition-opacity">
-                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
+                <div className="h-9 w-9 rounded-full bg-sidebar-accent flex items-center justify-center text-white mb-2">
                   {user?.nome?.charAt(0) || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">

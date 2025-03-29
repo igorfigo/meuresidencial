@@ -1,4 +1,3 @@
-
 import {
   Home,
   LayoutDashboard,
@@ -31,6 +30,7 @@ import {
   Receipt as ReceiptIcon,
   BarChart3,
   PieChart,
+  History,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -133,6 +133,7 @@ export function Sidebar() {
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/dedetizacoes', label: 'Dedetizações', icon: <Bug className="h-5 w-5" /> },
     { path: '/servicos', label: 'Serviços Gerais', icon: <Truck className="h-5 w-5" /> },
+    { path: '/dados-historicos', label: 'Dados Históricos', icon: <History className="h-5 w-5" /> },
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/contato', label: 'Fale Conosco', icon: <Mail className="h-5 w-5" /> },
   ];

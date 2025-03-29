@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -32,8 +31,8 @@ import BusinessCost from '@/pages/BusinessCost';
 import SugestaoReclamacao from '@/pages/SugestaoReclamacao';
 import GaragemLivre from '@/pages/GaragemLivre';
 import BusinessManagement from '@/pages/BusinessManagement';
+import DadosHistoricos from './pages/DadosHistoricos';
 
-// We'll create placeholder components for the missing pages
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 const Servicos = () => <div>Serviços (Em Desenvolvimento)</div>;
 
@@ -79,6 +78,13 @@ function App() {
               <Route path="/minhas-cobrancas" element={<AuthRequired><MinhasCobrancas /></AuthRequired>} />
               <Route path="/garagem-livre" element={<AuthRequired><GaragemLivre /></AuthRequired>} />
               <Route path="/sugestao-reclamacao" element={<AuthRequired><SugestaoReclamacao /></AuthRequired>} />
+              
+              {/* New Route */}
+              <Route path="/dados-historicos" element={
+                <AuthRequired>
+                  <DadosHistoricos />
+                </AuthRequired>
+              } />
             </Routes>
             <Toaster />
           </div>
