@@ -116,8 +116,13 @@ export const useBusinessDocuments = () => {
     try {
       setIsUploading(true);
       
-      // Create a unique file path
-      const filePath = `business-documents/${documentId}/${file.name}`;
+      // Create a sanitized file name to avoid path issues
+      const timestamp = new Date().getTime();
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+      
+      // Use a simpler file path format
+      const filePath = `${documentId}/${fileName}`;
       
       // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage
