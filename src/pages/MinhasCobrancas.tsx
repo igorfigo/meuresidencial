@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, BRLToNumber } from '@/utils/currency';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle, Banknote } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PixPaymentModal } from '@/components/pix/PixPaymentModal';
 
 interface Charge {
   id: string;
@@ -34,6 +36,9 @@ interface Charge {
 
 interface PixSettings {
   diavencimento: string;
+  tipochave: string;
+  chavepix: string;
+  jurosaodia: string;
 }
 
 const statusColors = {
@@ -112,6 +117,8 @@ function getDueDateFromPixSettings(month: string, year: string, dayOfMonth: stri
 const MinhasCobrancas = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<string>('pending');
+  const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
+  const [isPixModalOpen, setIsPixModalOpen] = useState(false);
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
@@ -151,19 +158,19 @@ const MinhasCobrancas = () => {
       try {
         const { data, error } = await supabase
           .from('pix_receipt_settings')
-          .select('diavencimento')
+          .select('diavencimento, tipochave, chavepix, jurosaodia')
           .eq('matricula', matricula)
           .single();
           
         if (error) {
           console.error('Error fetching PIX settings:', error);
-          return { diavencimento: '10' };
+          return { diavencimento: '10', tipochave: 'cpf', chavepix: '', jurosaodia: '0.033' };
         }
         
         return data;
       } catch (err) {
         console.error('Error in PIX settings fetch:', err);
-        return { diavencimento: '10' };
+        return { diavencimento: '10', tipochave: 'cpf', chavepix: '', jurosaodia: '0.033' };
       }
     },
     enabled: !!matricula
@@ -308,10 +315,30 @@ const MinhasCobrancas = () => {
     if (activeTab === 'paid') {
       const aDate = a.reference_month ? a.reference_month : `${a.year}-${a.month}`;
       const bDate = b.reference_month ? b.reference_month : `${b.year}-${b.month}`;
-      return aDate.localeCompare(bDate);
+      return bDate.localeCompare(aDate);
+    } else {
+      const dueDateA = new Date(a.due_date);
+      const dueDateB = new Date(b.due_date);
+      return dueDateA.getTime() - dueDateB.getTime();
     }
-    return 0;
   });
+
+  const handleOpenPixModal = (charge: Charge) => {
+    setSelectedCharge(charge);
+    setIsPixModalOpen(true);
+  };
+
+  const handleClosePixModal = () => {
+    setIsPixModalOpen(false);
+    setSelectedCharge(null);
+  };
+
+  const calculateDaysPastDue = (dueDate: string): number => {
+    const today = new Date();
+    const dueDateObj = new Date(dueDate);
+    if (dueDateObj > today) return 0;
+    return differenceInDays(today, dueDateObj);
+  };
 
   return (
     <DashboardLayout>
@@ -365,6 +392,9 @@ const MinhasCobrancas = () => {
                         <TableHead>Pagamento</TableHead>
                       )}
                       <TableHead>Status</TableHead>
+                      {activeTab === 'pending' && pixSettings?.chavepix && (
+                        <TableHead className="text-right">Ações</TableHead>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -392,6 +422,19 @@ const MinhasCobrancas = () => {
                             {statusColors[charge.status].label}
                           </Badge>
                         </TableCell>
+                        {activeTab === 'pending' && pixSettings?.chavepix && (
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex items-center gap-1"
+                              onClick={() => handleOpenPixModal(charge)}
+                            >
+                              <Banknote className="h-4 w-4" />
+                              Gerar PIX
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -401,6 +444,19 @@ const MinhasCobrancas = () => {
           </CardContent>
         </Card>
       </div>
+
+      {selectedCharge && pixSettings && (
+        <PixPaymentModal
+          isOpen={isPixModalOpen}
+          onClose={handleClosePixModal}
+          amount={selectedCharge.amount}
+          dueDate={formatDate(selectedCharge.due_date) || ''}
+          pixKey={pixSettings.chavepix}
+          pixKeyType={pixSettings.tipochave}
+          daysDue={calculateDaysPastDue(selectedCharge.due_date)}
+          interestRate={pixSettings.jurosaodia}
+        />
+      )}
     </DashboardLayout>
   );
 };
