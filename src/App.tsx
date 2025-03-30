@@ -28,6 +28,7 @@ import FaleConosco from '@/pages/FaleConosco';
 import GerenciarAvisos from '@/pages/GerenciarAvisos';
 import MinhasCobrancas from '@/pages/MinhasCobrancas';
 import BusinessContratos from '@/pages/BusinessContratos';
+import BusinessDocuments from '@/pages/BusinessDocuments';
 import BusinessCost from '@/pages/BusinessCost';
 import SugestaoReclamacao from '@/pages/SugestaoReclamacao';
 import GaragemLivre from '@/pages/GaragemLivre';
@@ -62,6 +63,7 @@ function App() {
               <Route path="/gerenciar-avisos" element={<AuthRequired><GerenciarAvisos /></AuthRequired>} />
               <Route path="/business-management" element={<AdminOnly><BusinessManagement /></AdminOnly>} />
               <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
+              <Route path="/business-documents" element={<AdminOnly><BusinessDocuments /></AdminOnly>} />
               <Route path="/despesas-empresariais" element={<AdminOnly><BusinessCost /></AdminOnly>} />
               
               {/* Manager Routes */}

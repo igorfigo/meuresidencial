@@ -595,6 +595,149 @@ export const deletePixKey = async (matricula: string) => {
   }
 };
 
+// Business Documents functions
+export const getBusinessDocuments = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('business_documents')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching business documents:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getBusinessDocuments:', error);
+    throw error;
+  }
+};
+
+export const getBusinessDocumentById = async (id: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('business_documents')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching business document:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in getBusinessDocumentById:', error);
+    return null;
+  }
+};
+
+export const saveBusinessDocument = async (documentData: {
+  title: string;
+  date: string;
+}) => {
+  try {
+    const { data, error } = await supabase
+      .from('business_documents')
+      .insert([documentData])
+      .select();
+    
+    if (error) {
+      console.error('Error creating business document:', error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in saveBusinessDocument:', error);
+    throw error;
+  }
+};
+
+export const deleteBusinessDocument = async (id: string) => {
+  try {
+    const { error } = await supabase
+      .from('business_documents')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting business document:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in deleteBusinessDocument:', error);
+    throw error;
+  }
+};
+
+export const getBusinessDocumentAttachments = async (documentId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('business_document_attachments')
+      .select('*')
+      .eq('document_id', documentId);
+    
+    if (error) {
+      console.error('Error fetching document attachments:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getBusinessDocumentAttachments:', error);
+    throw error;
+  }
+};
+
+export const saveBusinessDocumentAttachment = async (attachmentData: {
+  document_id: string;
+  file_path: string;
+  file_type: string;
+  file_name: string;
+}) => {
+  try {
+    const { data, error } = await supabase
+      .from('business_document_attachments')
+      .insert([attachmentData])
+      .select();
+    
+    if (error) {
+      console.error('Error creating document attachment:', error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in saveBusinessDocumentAttachment:', error);
+    throw error;
+  }
+};
+
+export const deleteBusinessDocumentAttachment = async (id: string) => {
+  try {
+    const { error } = await supabase
+      .from('business_document_attachments')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting document attachment:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in deleteBusinessDocumentAttachment:', error);
+    throw error;
+  }
+};
+
 // Business Expenses functions
 export const getBusinessExpenses = async () => {
   try {
