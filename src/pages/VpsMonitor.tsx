@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,7 +49,6 @@ interface VirtualMachine {
   created_at: string;
 }
 
-// Mock performance data for the charts
 const generateMockPerformanceData = () => {
   const data = [];
   const now = new Date();
@@ -85,8 +83,6 @@ const VpsMonitor: React.FC = () => {
       try {
         setIsLoading(true);
         
-        // In a real application, this API call should be made from a server/edge function
-        // to protect the API key
         const response = await fetch('https://developers.hostinger.com/api/vps/v1/virtual-machines', {
           method: 'GET',
           headers: {
@@ -105,11 +101,9 @@ const VpsMonitor: React.FC = () => {
         setVpsData(data);
         setError(null);
         
-        // Generate mock performance data for demonstration
         const mockData = generateMockPerformanceData();
         setPerformanceData(mockData);
         
-        // Set current usage values (would come from API in real implementation)
         setCpuUsage(Math.floor(Math.random() * 60) + 20);
         setMemoryUsage(Math.floor(Math.random() * 50) + 30);
         setDiskUsage(Math.floor(Math.random() * 30) + 10);
@@ -125,9 +119,7 @@ const VpsMonitor: React.FC = () => {
 
     fetchVpsData();
     
-    // Simulate refreshing data every 30 seconds
     const interval = setInterval(() => {
-      // Update mock usage values every 30 seconds
       setCpuUsage(Math.floor(Math.random() * 60) + 20);
       setMemoryUsage(Math.floor(Math.random() * 50) + 30);
       setDiskUsage(Math.floor(Math.random() * 30) + 10);
@@ -149,7 +141,7 @@ const VpsMonitor: React.FC = () => {
   };
 
   const getStatusColor = (state: string | undefined) => {
-    if (!state) return 'bg-gray-500'; // Handle case when state is undefined
+    if (!state) return 'bg-gray-500';
     
     switch (state.toLowerCase()) {
       case 'running':
@@ -244,7 +236,6 @@ const VpsMonitor: React.FC = () => {
           <div className="space-y-8">
             {vpsData.map((vm) => (
               <div key={vm.id} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Overview Section */}
                 <Card className="col-span-1 lg:col-span-12 border-t-4 border-t-blue-600 shadow-md">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
@@ -325,7 +316,6 @@ const VpsMonitor: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                {/* Performance Charts */}
                 <Card className="col-span-1 lg:col-span-6">
                   <CardHeader>
                     <CardTitle>CPU Utilização</CardTitle>
@@ -462,7 +452,6 @@ const VpsMonitor: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                {/* Details Section */}
                 <Card className="col-span-1 lg:col-span-12">
                   <CardHeader>
                     <CardTitle>Informações Detalhadas</CardTitle>
