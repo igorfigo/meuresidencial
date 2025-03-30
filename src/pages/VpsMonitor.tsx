@@ -23,39 +23,15 @@ import {
 } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { useQuery } from '@tanstack/react-query';
+import { 
+  fetchVpsData, 
+  fetchVpsMetrics, 
+  fetchHistoricalData, 
+  VirtualMachine, 
+  PerformanceMetrics 
+} from '@/services/hostingerService';
 
-interface VirtualMachine {
-  id: number;
-  hostname: string;
-  state: string;
-  actions_lock: string;
-  cpus: number;
-  memory: number;
-  disk: number;
-  bandwidth: number;
-  ns1: string;
-  ns2: string;
-  ipv4: {
-    id: number;
-    address: string;
-    ptr: string;
-  }[];
-  ipv6?: {
-    id: number;
-    address: string;
-    ptr: string;
-  }[];
-  template: {
-    id: number;
-    name: string;
-    description: string;
-    documentation: string;
-  };
-  created_at: string;
-  firewall_group_id: number | null;
-}
-
-interface PerformanceData {
+interface FormattedPerformanceData {
   time: string;
   cpu: number;
   memory: number;
@@ -63,57 +39,17 @@ interface PerformanceData {
   bandwidth: number;
 }
 
-const API_BASE_URL = 'https://developers.hostinger.com/api/vps/v1';
-const API_TOKEN = 'ncntBGCzyt5bTmyI31FnsCpw0iW4k9D4RhNhW2qP769dbb81';
-
-const fetchVpsData = async (): Promise<VirtualMachine[]> => {
-  console.log('Fetching VPS data...');
-  const response = await fetch(`${API_BASE_URL}/virtual-machines`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${API_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error('API Error:', errorData);
-    throw new Error(`API request failed with status ${response.status}: ${errorData.message || 'Unknown error'}`);
-  }
-
-  const data = await response.json();
-  console.log('VPS Data received:', data);
-  return data;
-};
-
-const generatePerformanceData = (duration: number = 24): PerformanceData[] => {
-  const data = [];
-  const now = new Date();
-  
-  for (let i = 0; i < duration; i++) {
-    const time = new Date(now);
-    time.setHours(now.getHours() - duration + i);
-    
-    data.push({
-      time: time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      cpu: Math.floor(Math.random() * 60) + 20, // Random between 20-80%
-      memory: Math.floor(Math.random() * 50) + 30, // Random between 30-80%
-      disk: Math.floor(Math.random() * 30) + 10, // Random between 10-40%
-      bandwidth: Math.floor(Math.random() * 500) + 100, // Random between 100-600 MB
-    });
-  }
-  
-  return data;
-};
-
 const VpsMonitor: React.FC = () => {
-  const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
-  const [cpuUsage, setCpuUsage] = useState<number>(0);
-  const [memoryUsage, setMemoryUsage] = useState<number>(0);
-  const [diskUsage, setDiskUsage] = useState<number>(0);
+  const [currentMetrics, setCurrentMetrics] = useState<PerformanceMetrics | null>(null);
+  const [historicalData, setHistoricalData] = useState<FormattedPerformanceData[]>([]);
+  const [activeVmId, setActiveVmId] = useState<number | null>(null);
 
-  const { data: vpsData, isLoading, error } = useQuery({
+  // Fetch VPS list data
+  const { 
+    data: vpsData, 
+    isLoading: isLoadingVpsData, 
+    error: vpsError 
+  } = useQuery({
     queryKey: ['vps-data'],
     queryFn: fetchVpsData,
     staleTime: 30000, // 30 seconds
@@ -127,28 +63,88 @@ const VpsMonitor: React.FC = () => {
     }
   });
 
-  // Update usage values when data is fetched
-  useEffect(() => {
-    if (vpsData && vpsData.length > 0) {
-      console.log('Updating usage values with VPS data');
-      updateUsageValues();
-      setPerformanceData(generatePerformanceData());
+  // Fetch current metrics
+  const { 
+    data: metrics, 
+    isLoading: isLoadingMetrics,
+    refetch: refetchMetrics
+  } = useQuery({
+    queryKey: ['vps-metrics', activeVmId],
+    queryFn: () => activeVmId ? fetchVpsMetrics(activeVmId) : Promise.resolve(null),
+    enabled: !!activeVmId,
+    staleTime: 15000, // 15 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds
+    meta: {
+      onError: (err: Error) => {
+        console.error('Error fetching metrics:', err);
+        toast.error('Falha ao buscar métricas atuais');
+      }
     }
-  }, [vpsData]);
+  });
 
-  const updateUsageValues = () => {
-    setCpuUsage(Math.floor(Math.random() * 60) + 20);
-    setMemoryUsage(Math.floor(Math.random() * 50) + 30);
-    setDiskUsage(Math.floor(Math.random() * 30) + 10);
-  };
-  
+  // Fetch historical data
+  const { 
+    data: histData, 
+    isLoading: isLoadingHistData 
+  } = useQuery({
+    queryKey: ['vps-historical-data', activeVmId],
+    queryFn: () => activeVmId ? fetchHistoricalData(activeVmId) : Promise.resolve([]),
+    enabled: !!activeVmId,
+    staleTime: 300000, // 5 minutes
+    refetchInterval: 300000, // Refresh every 5 minutes
+    meta: {
+      onError: (err: Error) => {
+        console.error('Error fetching historical data:', err);
+        toast.error('Falha ao buscar dados históricos');
+      }
+    }
+  });
+
+  // Set active VM when data is loaded
+  useEffect(() => {
+    if (vpsData && vpsData.length > 0 && !activeVmId) {
+      setActiveVmId(vpsData[0].id);
+      console.log('Set active VM ID:', vpsData[0].id);
+    }
+  }, [vpsData, activeVmId]);
+
+  // Update current metrics when data is fetched
+  useEffect(() => {
+    if (metrics) {
+      setCurrentMetrics(metrics);
+      console.log('Updated current metrics:', metrics);
+    }
+  }, [metrics]);
+
+  // Format historical data for charts
+  useEffect(() => {
+    if (histData && histData.length > 0) {
+      const formattedData = histData.map(point => ({
+        time: new Date(point.timestamp).toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        cpu: point.cpu,
+        memory: point.memory,
+        disk: point.disk,
+        bandwidth: point.bandwidth
+      }));
+      
+      setHistoricalData(formattedData);
+      console.log('Updated historical data with', formattedData.length, 'points');
+    }
+  }, [histData]);
+
+  // Refresh metrics every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      updateUsageValues();
+      if (activeVmId) {
+        refetchMetrics();
+      }
     }, 30000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [activeVmId, refetchMetrics]);
 
   const formatBytes = (bytes: number, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
@@ -191,13 +187,13 @@ const VpsMonitor: React.FC = () => {
 
   // Log errors and responses for debugging
   useEffect(() => {
-    if (error) {
-      console.error('VPS Data error:', error);
+    if (vpsError) {
+      console.error('VPS Data error:', vpsError);
     }
     if (vpsData) {
       console.log('VPS Data in component:', vpsData);
     }
-  }, [vpsData, error]);
+  }, [vpsData, vpsError]);
 
   return (
     <DashboardLayout>
@@ -214,7 +210,7 @@ const VpsMonitor: React.FC = () => {
         
         <Separator className="my-4" />
         
-        {isLoading ? (
+        {isLoadingVpsData ? (
           <div className="grid grid-cols-1 gap-6">
             <Card className="border-t-4 border-t-blue-600 shadow-md">
               <CardHeader className="pb-2">
@@ -237,7 +233,7 @@ const VpsMonitor: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-        ) : error ? (
+        ) : vpsError ? (
           <Card className="border-t-4 border-t-red-600 shadow-md">
             <CardHeader>
               <div className="flex items-center">
@@ -246,7 +242,7 @@ const VpsMonitor: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p>{(error as Error).message}</p>
+              <p>{(vpsError as Error).message}</p>
               <p className="text-sm text-gray-500 mt-2">
                 Verifique a sua conexão com a Internet e tente novamente mais tarde.
                 Caso o problema persista, entre em contato com o suporte.
@@ -290,9 +286,9 @@ const VpsMonitor: React.FC = () => {
                         <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
                           <Cpu className="h-4 w-4 mr-1" /> CPU
                         </div>
-                        <Progress value={cpuUsage} className="h-2" />
+                        <Progress value={currentMetrics?.cpu || 0} className="h-2" />
                         <div className="flex justify-between text-xs">
-                          <span>{cpuUsage}% em uso</span>
+                          <span>{currentMetrics?.cpu.toFixed(1) || '0.0'}% em uso</span>
                           <span>{vm.cpus} Cores</span>
                         </div>
                       </div>
@@ -301,9 +297,9 @@ const VpsMonitor: React.FC = () => {
                         <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
                           <Database className="h-4 w-4 mr-1" /> Memória
                         </div>
-                        <Progress value={memoryUsage} className="h-2" />
+                        <Progress value={currentMetrics?.memory || 0} className="h-2" />
                         <div className="flex justify-between text-xs">
-                          <span>{memoryUsage}% em uso</span>
+                          <span>{currentMetrics?.memory.toFixed(1) || '0.0'}% em uso</span>
                           <span>{formatBytes(vm.memory * 1024 * 1024)}</span>
                         </div>
                       </div>
@@ -312,9 +308,9 @@ const VpsMonitor: React.FC = () => {
                         <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
                           <HardDrive className="h-4 w-4 mr-1" /> Disco
                         </div>
-                        <Progress value={diskUsage} className="h-2" />
+                        <Progress value={currentMetrics?.disk || 0} className="h-2" />
                         <div className="flex justify-between text-xs">
-                          <span>{diskUsage}% em uso</span>
+                          <span>{currentMetrics?.disk.toFixed(1) || '0.0'}% em uso</span>
                           <span>{formatBytes(vm.disk * 1024 * 1024)}</span>
                         </div>
                       </div>
@@ -356,30 +352,36 @@ const VpsMonitor: React.FC = () => {
                   </CardHeader>
                   <CardContent className="pt-2">
                     <div className="h-[250px]">
-                      <ChartContainer config={{
-                        cpu: { label: "CPU", color: "#2563eb" }
-                      }}>
-                        <LineChart data={performanceData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="time" />
-                          <YAxis unit="%" />
-                          <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                indicator="line"
-                              />
-                            }
-                          />
-                          <Legend />
-                          <Line
-                            type="monotone"
-                            dataKey="cpu"
-                            name="CPU"
-                            stroke="var(--color-cpu)"
-                            strokeWidth={2}
-                          />
-                        </LineChart>
-                      </ChartContainer>
+                      {isLoadingHistData ? (
+                        <div className="flex items-center justify-center h-full">
+                          <Skeleton className="h-full w-full rounded-md" />
+                        </div>
+                      ) : (
+                        <ChartContainer config={{
+                          cpu: { label: "CPU", color: "#2563eb" }
+                        }}>
+                          <LineChart data={historicalData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="time" />
+                            <YAxis unit="%" domain={[0, 100]} />
+                            <ChartTooltip
+                              content={
+                                <ChartTooltipContent
+                                  indicator="line"
+                                />
+                              }
+                            />
+                            <Legend />
+                            <Line
+                              type="monotone"
+                              dataKey="cpu"
+                              name="CPU"
+                              stroke="var(--color-cpu)"
+                              strokeWidth={2}
+                            />
+                          </LineChart>
+                        </ChartContainer>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -391,30 +393,36 @@ const VpsMonitor: React.FC = () => {
                   </CardHeader>
                   <CardContent className="pt-2">
                     <div className="h-[250px]">
-                      <ChartContainer config={{
-                        memory: { label: "Memória", color: "#10b981" }
-                      }}>
-                        <LineChart data={performanceData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="time" />
-                          <YAxis unit="%" />
-                          <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                indicator="line"
-                              />
-                            }
-                          />
-                          <Legend />
-                          <Line
-                            type="monotone"
-                            dataKey="memory"
-                            name="Memória"
-                            stroke="var(--color-memory)"
-                            strokeWidth={2}
-                          />
-                        </LineChart>
-                      </ChartContainer>
+                      {isLoadingHistData ? (
+                        <div className="flex items-center justify-center h-full">
+                          <Skeleton className="h-full w-full rounded-md" />
+                        </div>
+                      ) : (
+                        <ChartContainer config={{
+                          memory: { label: "Memória", color: "#10b981" }
+                        }}>
+                          <LineChart data={historicalData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="time" />
+                            <YAxis unit="%" domain={[0, 100]} />
+                            <ChartTooltip
+                              content={
+                                <ChartTooltipContent
+                                  indicator="line"
+                                />
+                              }
+                            />
+                            <Legend />
+                            <Line
+                              type="monotone"
+                              dataKey="memory"
+                              name="Memória"
+                              stroke="var(--color-memory)"
+                              strokeWidth={2}
+                            />
+                          </LineChart>
+                        </ChartContainer>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -426,30 +434,36 @@ const VpsMonitor: React.FC = () => {
                   </CardHeader>
                   <CardContent className="pt-2">
                     <div className="h-[250px]">
-                      <ChartContainer config={{
-                        disk: { label: "Disco", color: "#f59e0b" }
-                      }}>
-                        <LineChart data={performanceData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="time" />
-                          <YAxis unit="%" />
-                          <ChartTooltip
-                            content={
-                              <ChartTooltipContent
-                                indicator="line"
-                              />
-                            }
-                          />
-                          <Legend />
-                          <Line
-                            type="monotone"
-                            dataKey="disk"
-                            name="Disco"
-                            stroke="var(--color-disk)"
-                            strokeWidth={2}
-                          />
-                        </LineChart>
-                      </ChartContainer>
+                      {isLoadingHistData ? (
+                        <div className="flex items-center justify-center h-full">
+                          <Skeleton className="h-full w-full rounded-md" />
+                        </div>
+                      ) : (
+                        <ChartContainer config={{
+                          disk: { label: "Disco", color: "#f59e0b" }
+                        }}>
+                          <LineChart data={historicalData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="time" />
+                            <YAxis unit="%" domain={[0, 100]} />
+                            <ChartTooltip
+                              content={
+                                <ChartTooltipContent
+                                  indicator="line"
+                                />
+                              }
+                            />
+                            <Legend />
+                            <Line
+                              type="monotone"
+                              dataKey="disk"
+                              name="Disco"
+                              stroke="var(--color-disk)"
+                              strokeWidth={2}
+                            />
+                          </LineChart>
+                        </ChartContainer>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -461,26 +475,32 @@ const VpsMonitor: React.FC = () => {
                   </CardHeader>
                   <CardContent className="pt-2">
                     <div className="h-[250px]">
-                      <ChartContainer config={{
-                        bandwidth: { label: "Banda", color: "#8b5cf6" }
-                      }}>
-                        <BarChart data={performanceData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="time" />
-                          <YAxis unit=" MB" />
-                          <ChartTooltip
-                            content={
-                              <ChartTooltipContent />
-                            }
-                          />
-                          <Legend />
-                          <Bar
-                            dataKey="bandwidth"
-                            name="Banda"
-                            fill="var(--color-bandwidth)"
-                          />
-                        </BarChart>
-                      </ChartContainer>
+                      {isLoadingHistData ? (
+                        <div className="flex items-center justify-center h-full">
+                          <Skeleton className="h-full w-full rounded-md" />
+                        </div>
+                      ) : (
+                        <ChartContainer config={{
+                          bandwidth: { label: "Banda", color: "#8b5cf6" }
+                        }}>
+                          <BarChart data={historicalData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="time" />
+                            <YAxis unit=" MB" />
+                            <ChartTooltip
+                              content={
+                                <ChartTooltipContent />
+                              }
+                            />
+                            <Legend />
+                            <Bar
+                              dataKey="bandwidth"
+                              name="Banda"
+                              fill="var(--color-bandwidth)"
+                            />
+                          </BarChart>
+                        </ChartContainer>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
