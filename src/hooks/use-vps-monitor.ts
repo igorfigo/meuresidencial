@@ -37,35 +37,35 @@ export interface VPSServer {
   created_at: string;
 }
 
-// Accurate data based on the Hostinger dashboard screenshot
+// Example data for development/demo
 const mockServers: VPSServer[] = [
   {
     id: 'vps-1',
-    name: 'Ubuntu 24.04',
+    name: 'Production Server',
     status: 'running',
     ip: '82.25.76.200',
-    hostname: 'srv754093.hstgr.cloud',
+    hostname: HOSTINGER_HOSTNAME,
     cpu: {
-      cores: 1, // KVM 1 as shown in dashboard
-      utilization: 4 // 4% CPU usage as shown
+      cores: 4,
+      utilization: 35
     },
     memory: {
-      total: 4, // 4 GB total memory
-      used: 0.84, // 21% of 4GB is approximately 0.84GB
-      utilization: 21 // 21% memory usage as shown
+      total: 8,
+      used: 4.3,
+      utilization: 54
     },
     disk: {
-      total: 50, // 50 GB total disk space
-      used: 10, // 10 GB used as shown
-      utilization: 20 // 10GB of 50GB is 20%
+      total: 100,
+      used: 45,
+      utilization: 45
     },
     network: {
-      incoming: 4.2, // 4.2 MB as shown for incoming traffic
-      outgoing: 1.0 // 1.0 MB as shown for outgoing traffic
+      incoming: 6.8,
+      outgoing: 3.5
     },
-    os: 'Ubuntu 24.04 with CloudPanel',
-    location: 'Brazil - São Paulo',
-    created_at: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString() // 16 days ago based on uptime
+    os: 'Ubuntu 22.04 LTS',
+    location: 'Europe (Helsinki)',
+    created_at: '2023-01-15T14:30:00Z'
   }
 ];
 
@@ -112,7 +112,7 @@ export function useVPSMonitor() {
     enabled: !!selectedServerId && servers.length > 0,
   });
 
-  // Generate realistic time series data for charts based on actual metrics
+  // Generate some mock time series data for charts
   const generateTimeSeriesData = (range: '1h' | '24h' | '7d' | '30d', metricName: string) => {
     const now = new Date();
     const data = [];
@@ -139,41 +139,34 @@ export function useVPSMonitor() {
         break;
     }
     
-    // Using actual metrics as baseline
     for (let i = pointCount - 1; i >= 0; i--) {
       const timestamp = new Date(now.getTime() - i * intervalMinutes * 60 * 1000);
       let value;
       
       switch (metricName) {
         case 'cpu':
-          // Base value of 4% with small variations
-          value = 4 + (Math.random() > 0.9 ? 8 * Math.random() : Math.random() * 2);
+          // Simulate CPU usage with daily patterns
+          value = 20 + 30 * Math.sin(i/12) + Math.random() * 15;
           break;
         case 'memory':
-          // Base value of 21% with small variations
-          value = 21 + Math.sin(i/10) * 3 + Math.random() * 2;
+          // Memory tends to be more stable
+          value = 50 + 15 * Math.sin(i/24) + Math.random() * 10;
           break;
         case 'disk':
-          // Disk usage is steady with very slight increase
-          value = 20 + i * 0.005 + Math.random() * 0.5;
+          // Disk usage tends to increase slowly
+          value = 30 + i * 0.05 + Math.random() * 2;
           break;
         case 'network':
-          // Network with occasional spikes based on actual traffic
-          const isSpike = Math.random() > 0.95;
-          if (metricName === 'incoming') {
-            value = isSpike ? 4.2 + Math.random() * 2 : 1 + Math.random() * 0.5;
-          } else {
-            value = isSpike ? 1.0 + Math.random() * 1 : 0.2 + Math.random() * 0.3;
-          }
+          // Network traffic with spikes
+          value = 3 + 2 * Math.sin(i/8) + (Math.random() > 0.9 ? 8 * Math.random() : 0);
           break;
         default:
           value = Math.random() * 100;
       }
       
-      // Ensure values are within reasonable ranges
       data.push({
         time: timestamp.toISOString(),
-        value: Math.max(0, value) // Keep values non-negative
+        value: Math.min(Math.max(0, value), 100) // Keep between 0-100
       });
     }
     
