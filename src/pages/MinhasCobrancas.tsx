@@ -393,7 +393,7 @@ const MinhasCobrancas = () => {
                       )}
                       <TableHead>Status</TableHead>
                       {activeTab === 'pending' && pixSettings?.chavepix && (
-                        <TableHead className="text-right">Ações</TableHead>
+                        <TableHead className="text-center">Ações</TableHead>
                       )}
                     </TableRow>
                   </TableHeader>
@@ -423,7 +423,7 @@ const MinhasCobrancas = () => {
                           </Badge>
                         </TableCell>
                         {activeTab === 'pending' && pixSettings?.chavepix && (
-                          <TableCell className="text-right">
+                          <TableCell className="text-center">
                             <Button
                               size="sm"
                               variant="outline"

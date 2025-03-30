@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { QrCode, Copy, CopyCheck, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useApp } from '@/contexts/AppContext';
 
 interface PixPaymentModalProps {
   isOpen: boolean;
@@ -27,12 +28,17 @@ export function PixPaymentModal({
   daysDue, 
   interestRate 
 }: PixPaymentModalProps) {
+  const { user } = useApp();
   const [activeTab, setActiveTab] = useState<string>('code');
   const [pixCode, setPixCode] = useState<string>('');
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [finalAmount, setFinalAmount] = useState<string>(amount);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  // Obtém o nome do condomínio e a cidade do usuário logado
+  const merchantName = user?.nomeCondominio || "Condomínio";
+  const merchantCity = user?.cidade || "SÃO PAULO";
   
   useEffect(() => {
     if (isOpen) {
@@ -41,7 +47,7 @@ export function PixPaymentModal({
       setFinalAmount(calculatedAmount);
       
       // Gerar o código PIX e QR Code
-      const pixData = generatePixData(pixKey, pixKeyType, calculatedAmount);
+      const pixData = generatePixData(pixKey, pixKeyType, calculatedAmount, merchantName, merchantCity);
       setPixCode(pixData.code);
       setQrCodeUrl(`https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(pixData.code)}&choe=UTF-8`);
       setIsLoading(false);
@@ -49,7 +55,7 @@ export function PixPaymentModal({
       setIsCopied(false);
       setIsLoading(true);
     }
-  }, [isOpen, amount, daysDue, interestRate, pixKey, pixKeyType]);
+  }, [isOpen, amount, daysDue, interestRate, pixKey, pixKeyType, merchantName, merchantCity]);
 
   const calculateAmountWithInterest = (
     baseAmount: string, 
@@ -72,14 +78,27 @@ export function PixPaymentModal({
   const generatePixData = (
     key: string, 
     keyType: string, 
-    value: string
+    value: string,
+    merchantName: string,
+    merchantCity: string
   ) => {
     // Implementação baseada no Manual de Padrões para Iniciação do Pix do BCB
     // https://www.bcb.gov.br/estabilidadefinanceira/pix
     
-    const merchantName = "Condomínio";
-    const merchantCity = "SÃO PAULO";
     const numericValue = value.replace(/[^\d,]/g, '').replace(',', '.');
+    
+    // Normalizando o nome do comerciante (removendo acentos e limitando tamanho)
+    const normalizedMerchantName = merchantName
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .substring(0, 25);
+    
+    // Normalizando a cidade (removendo acentos e limitando tamanho)
+    const normalizedMerchantCity = merchantCity
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .substring(0, 15);
     
     // ID da transação (opcional)
     const txid = Math.random().toString(36).substring(2, 15);
@@ -95,9 +114,9 @@ export function PixPaymentModal({
       '52': '0000', // Merchant Category Code (MCC)
       '53': '986', // Transaction Currency (BRL)
       '54': numericValue, // Transaction Amount
-      '58': merchantCity, // Country Code (BR)
-      '59': merchantName, // Merchant Name
-      '60': 'BRASIL', // Merchant City
+      '58': normalizedMerchantCity, // Merchant City
+      '59': normalizedMerchantName, // Merchant Name
+      '60': 'BRASIL', // Country Code
       '62': { // Additional Data Field
         '05': txid // Reference Label
       }
@@ -105,7 +124,7 @@ export function PixPaymentModal({
 
     // Esta é uma versão simplificada. Na prática, precisaria seguir o padrão EMV
     // completamente, incluindo o cálculo de CRC e formatação correta.
-    const pixCode = `00020126330014br.gov.bcb.pix0111${key}52040000530398654${numericValue.padStart(12, '0')}5802BR5903${merchantName}6007BRASIL62070503${txid}6304`;
+    const pixCode = `00020126330014br.gov.bcb.pix0111${key}52040000530398654${numericValue.padStart(12, '0')}5802BR5903${normalizedMerchantName}6007${normalizedMerchantCity}62070503${txid}6304`;
     
     return {
       code: pixCode,
@@ -152,6 +171,8 @@ export function PixPaymentModal({
                   )}
                   <p>Tipo de chave: {pixKeyType.toUpperCase()}</p>
                   <p>Vencimento: {dueDate}</p>
+                  <p>Recebedor: {merchantName}</p>
+                  <p>Cidade: {merchantCity}</p>
                 </div>
               </div>
             </div>
