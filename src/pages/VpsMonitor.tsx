@@ -25,13 +25,16 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { useQuery } from '@tanstack/react-query';
 
 interface VirtualMachine {
-  id: string;
+  id: number;
   hostname: string;
   state: string;
+  actions_lock: string;
   cpus: number;
   memory: number;
   disk: number;
   bandwidth: number;
+  ns1: string;
+  ns2: string;
   ipv4: {
     id: number;
     address: string;
@@ -49,6 +52,7 @@ interface VirtualMachine {
     documentation: string;
   };
   created_at: string;
+  firewall_group_id: number | null;
 }
 
 interface PerformanceData {
@@ -59,21 +63,27 @@ interface PerformanceData {
   bandwidth: number;
 }
 
+const API_BASE_URL = 'https://developers.hostinger.com/api/vps/v1';
+const API_TOKEN = 'ncntBGCzyt5bTmyI31FnsCpw0iW4k9D4RhNhW2qP769dbb81';
+
 const fetchVpsData = async (): Promise<VirtualMachine[]> => {
-  const response = await fetch('https://developers.hostinger.com/api/vps/v1/virtual-machines', {
+  console.log('Fetching VPS data...');
+  const response = await fetch(`${API_BASE_URL}/virtual-machines`, {
     method: 'GET',
     headers: {
-      'Authorization': 'Bearer ncntBGCzyt5bTmyI31FnsCpw0iW4k9D4RhNhW2qP769dbb81',
+      'Authorization': `Bearer ${API_TOKEN}`,
       'Content-Type': 'application/json',
     },
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    console.error('API Error:', errorData);
+    throw new Error(`API request failed with status ${response.status}: ${errorData.message || 'Unknown error'}`);
   }
 
   const data = await response.json();
-  console.log('VPS Data:', data);
+  console.log('VPS Data received:', data);
   return data;
 };
 
@@ -112,14 +122,15 @@ const VpsMonitor: React.FC = () => {
     meta: {
       onError: (err: Error) => {
         console.error('Error fetching VPS data:', err);
-        toast.error('Failed to fetch VPS data');
+        toast.error(`Falha ao buscar dados do VPS: ${err.message}`);
       }
     }
   });
 
   // Update usage values when data is fetched
   useEffect(() => {
-    if (vpsData) {
+    if (vpsData && vpsData.length > 0) {
+      console.log('Updating usage values with VPS data');
       updateUsageValues();
       setPerformanceData(generatePerformanceData());
     }
@@ -160,6 +171,7 @@ const VpsMonitor: React.FC = () => {
       case 'stopped':
         return 'bg-red-500';
       case 'restarting':
+      case 'rebuilding':
         return 'bg-yellow-500';
       default:
         return 'bg-gray-500';
@@ -176,6 +188,16 @@ const VpsMonitor: React.FC = () => {
       minute: '2-digit'
     }).format(date);
   };
+
+  // Log errors and responses for debugging
+  useEffect(() => {
+    if (error) {
+      console.error('VPS Data error:', error);
+    }
+    if (vpsData) {
+      console.log('VPS Data in component:', vpsData);
+    }
+  }, [vpsData, error]);
 
   return (
     <DashboardLayout>
@@ -520,6 +542,14 @@ const VpsMonitor: React.FC = () => {
                         <TableRow>
                           <TableCell className="font-medium">IPv6</TableCell>
                           <TableCell>{vm.ipv6?.[0]?.address || 'N/A'}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Name Server 1</TableCell>
+                          <TableCell>{vm.ns1 || 'N/A'}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Name Server 2</TableCell>
+                          <TableCell>{vm.ns2 || 'N/A'}</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">Data de Criação</TableCell>
