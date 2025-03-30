@@ -11,35 +11,28 @@ import { toast } from 'sonner';
 
 interface VirtualMachine {
   id: string;
-  name: string;
-  status: string;
-  os: {
+  hostname: string;
+  state: string; // Note: the actual API returns 'state' not 'status'
+  cpus: number;
+  memory: number;
+  disk: number;
+  bandwidth: number;
+  ipv4: {
+    id: number;
+    address: string;
+    ptr: string;
+  }[];
+  ipv6?: {
+    id: number;
+    address: string;
+    ptr: string;
+  }[];
+  template: {
+    id: number;
     name: string;
-    version: string;
+    description: string;
+    documentation: string;
   };
-  resources: {
-    cpu: {
-      cores: number;
-      usage: number;
-    };
-    ram: {
-      total: number;
-      usage: number;
-    };
-    disk: {
-      total: number;
-      usage: number;
-    };
-  };
-  network: {
-    ipv4: string;
-    ipv6?: string;
-    traffic: {
-      total: number;
-      used: number;
-    };
-  };
-  location: string;
   created_at: string;
 }
 
@@ -70,15 +63,7 @@ const VpsMonitor: React.FC = () => {
         const data = await response.json();
         console.log('VPS Data:', data);
         
-        // The API might return data in a different format, adjust accordingly
-        if (data.virtual_machines) {
-          setVpsData(data.virtual_machines);
-        } else if (Array.isArray(data)) {
-          setVpsData(data);
-        } else {
-          setVpsData([data]);
-        }
-
+        setVpsData(data);
         setError(null);
       } catch (err) {
         console.error('Error fetching VPS data:', err);
@@ -104,8 +89,10 @@ const VpsMonitor: React.FC = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusColor = (state: string | undefined) => {
+    if (!state) return 'bg-gray-500'; // Handle case when state is undefined
+    
+    switch (state.toLowerCase()) {
       case 'running':
         return 'bg-green-500';
       case 'stopped':
@@ -204,14 +191,14 @@ const VpsMonitor: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Server className="h-5 w-5 mr-2 text-blue-500" />
-                      <CardTitle>{vm.name}</CardTitle>
+                      <CardTitle>{vm.hostname}</CardTitle>
                     </div>
-                    <Badge className={`${getStatusColor(vm.status)} text-white`}>
-                      {vm.status}
+                    <Badge className={`${getStatusColor(vm.state)} text-white`}>
+                      {vm.state}
                     </Badge>
                   </div>
                   <CardDescription>
-                    {vm.os?.name} {vm.os?.version}
+                    {vm.template?.name || 'Sistema Operacional não especificado'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -223,14 +210,15 @@ const VpsMonitor: React.FC = () => {
                           CPU
                         </div>
                         <div className="text-lg font-semibold">
-                          {vm.resources?.cpu?.cores} Cores
+                          {vm.cpus} Cores
                         </div>
+                        {/* No CPU usage info provided by the API, so we'll show a static progress */}
                         <Progress 
-                          value={vm.resources?.cpu?.usage || 0} 
+                          value={0} 
                           className="h-2" 
                         />
                         <div className="text-xs text-right">
-                          {vm.resources?.cpu?.usage || 0}%
+                          N/A
                         </div>
                       </div>
                       
@@ -240,14 +228,15 @@ const VpsMonitor: React.FC = () => {
                           RAM
                         </div>
                         <div className="text-lg font-semibold">
-                          {formatBytes(vm.resources?.ram?.total || 0)}
+                          {formatBytes(vm.memory * 1024 * 1024)}
                         </div>
+                        {/* No RAM usage info provided by the API */}
                         <Progress 
-                          value={(vm.resources?.ram?.usage / vm.resources?.ram?.total) * 100 || 0}
+                          value={0}
                           className="h-2" 
                         />
                         <div className="text-xs text-right">
-                          {formatBytes(vm.resources?.ram?.usage || 0)}
+                          N/A
                         </div>
                       </div>
                       
@@ -257,14 +246,15 @@ const VpsMonitor: React.FC = () => {
                           Disk
                         </div>
                         <div className="text-lg font-semibold">
-                          {formatBytes(vm.resources?.disk?.total || 0)}
+                          {formatBytes(vm.disk * 1024 * 1024)}
                         </div>
+                        {/* No disk usage info provided by the API */}
                         <Progress 
-                          value={(vm.resources?.disk?.usage / vm.resources?.disk?.total) * 100 || 0} 
+                          value={0} 
                           className="h-2" 
                         />
                         <div className="text-xs text-right">
-                          {formatBytes(vm.resources?.disk?.usage || 0)}
+                          N/A
                         </div>
                       </div>
                     </div>
@@ -274,12 +264,14 @@ const VpsMonitor: React.FC = () => {
                         <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                           <Globe className="h-4 w-4 inline mr-1" /> IP
                         </div>
-                        <div className="text-sm">
-                          IPv4: {vm.network?.ipv4 || 'N/A'}
-                        </div>
-                        {vm.network?.ipv6 && (
+                        {vm.ipv4 && vm.ipv4.length > 0 && (
+                          <div className="text-sm">
+                            IPv4: {vm.ipv4[0].address || 'N/A'}
+                          </div>
+                        )}
+                        {vm.ipv6 && vm.ipv6.length > 0 && (
                           <div className="text-sm truncate">
-                            IPv6: {vm.network.ipv6}
+                            IPv6: {vm.ipv6[0].address || 'N/A'}
                           </div>
                         )}
                       </div>
@@ -291,24 +283,21 @@ const VpsMonitor: React.FC = () => {
                         <div className="text-sm">
                           {vm.created_at ? formatDate(vm.created_at) : 'N/A'}
                         </div>
-                        <div className="text-sm">
-                          Local: {vm.location || 'N/A'}
-                        </div>
                       </div>
                     </div>
                     
-                    {vm.network?.traffic && (
+                    {vm.bandwidth && (
                       <div className="space-y-1">
                         <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Tráfego de Rede
+                          Largura de Banda
                         </div>
                         <Progress 
-                          value={(vm.network.traffic.used / vm.network.traffic.total) * 100 || 0} 
+                          value={0} 
                           className="h-2" 
                         />
                         <div className="flex justify-between text-xs">
-                          <span>Usado: {formatBytes(vm.network.traffic.used)}</span>
-                          <span>Total: {formatBytes(vm.network.traffic.total)}</span>
+                          <span>Usado: N/A</span>
+                          <span>Total: {formatBytes(vm.bandwidth * 1024)}</span>
                         </div>
                       </div>
                     )}
