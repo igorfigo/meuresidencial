@@ -33,6 +33,7 @@ import {
   PieChart,
   History,
   Files,
+  Server,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';

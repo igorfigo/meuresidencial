@@ -5,12 +5,15 @@ import { toast } from 'sonner';
 
 // Hostinger API key
 const HOSTINGER_API_KEY = 'qR8zk8dPobzkEljGRnuUNnoShgs99kKh4QAM1OOa2ee17f18';
+// Hostinger Server Hostname
+const HOSTINGER_HOSTNAME = 'srv754093.hstgr.cloud';
 
 export interface VPSServer {
   id: string;
   name: string;
   status: 'running' | 'stopped' | 'restarting' | 'error';
   ip: string;
+  hostname: string;
   cpu: {
     cores: number;
     utilization: number;
@@ -41,6 +44,7 @@ const mockServers: VPSServer[] = [
     name: 'Production Server',
     status: 'running',
     ip: '193.122.123.45',
+    hostname: HOSTINGER_HOSTNAME,
     cpu: {
       cores: 4,
       utilization: 42
@@ -68,6 +72,7 @@ const mockServers: VPSServer[] = [
     name: 'Staging Server',
     status: 'running',
     ip: '193.122.124.67',
+    hostname: 'staging.' + HOSTINGER_HOSTNAME,
     cpu: {
       cores: 2,
       utilization: 18
@@ -205,6 +210,7 @@ export function useVPSMonitor() {
     try {
       // This would be an API call to restart the server
       console.log(`Restarting server ${serverId} using API key ${HOSTINGER_API_KEY}`);
+      console.log(`Hostname: ${HOSTINGER_HOSTNAME}`);
       toast.success(`Server ${serverId} is restarting`);
       return true;
     } catch (error) {
@@ -218,6 +224,7 @@ export function useVPSMonitor() {
     try {
       // This would be an API call to stop the server
       console.log(`Stopping server ${serverId} using API key ${HOSTINGER_API_KEY}`);
+      console.log(`Hostname: ${HOSTINGER_HOSTNAME}`);
       toast.success(`Server ${serverId} is stopping`);
       return true;
     } catch (error) {
@@ -231,6 +238,7 @@ export function useVPSMonitor() {
     try {
       // This would be an API call to start the server
       console.log(`Starting server ${serverId} using API key ${HOSTINGER_API_KEY}`);
+      console.log(`Hostname: ${HOSTINGER_HOSTNAME}`);
       toast.success(`Server ${serverId} is starting`);
       return true;
     } catch (error) {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -277,6 +276,9 @@ const VPSMonitor: React.FC = () => {
               <CardDescription>
                 IP: {serverDetails.ip} • Location: {serverDetails.location}
               </CardDescription>
+              <CardDescription>
+                Hostname: {serverDetails.hostname}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -522,6 +524,10 @@ const VPSMonitor: React.FC = () => {
                   <TableRow>
                     <TableCell className="font-medium">Created</TableCell>
                     <TableCell>{formatDateOutput(serverDetails.created_at)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Hostname</TableCell>
+                    <TableCell>{serverDetails.hostname}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
