@@ -6,9 +6,8 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Server, Activity, Database, Clock, Globe, Cpu, HardDrive, MonitorSmartphone } from 'lucide-react';
+import { Server, Activity, Database, Clock, Globe, Cpu, HardDrive, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   LineChart,
@@ -242,110 +241,98 @@ const VpsMonitor: React.FC = () => {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="mb-4">
-              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-              <TabsTrigger value="performance">Desempenho</TabsTrigger>
-              <TabsTrigger value="details">Detalhes</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {vpsData.map((vm) => (
-                  <React.Fragment key={vm.id}>
-                    <Card className="col-span-1 md:col-span-3 border-t-4 border-t-blue-600 shadow-md">
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <Server className="h-5 w-5 mr-2 text-blue-500" />
-                            <CardTitle>{vm.hostname}</CardTitle>
-                          </div>
-                          <Badge className={`${getStatusColor(vm.state)} text-white`}>
-                            {vm.state}
-                          </Badge>
+          <div className="space-y-8">
+            {vpsData.map((vm) => (
+              <div key={vm.id} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Overview Section */}
+                <Card className="col-span-1 lg:col-span-12 border-t-4 border-t-blue-600 shadow-md">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Server className="h-5 w-5 mr-2 text-blue-500" />
+                        <CardTitle>{vm.hostname}</CardTitle>
+                      </div>
+                      <Badge className={`${getStatusColor(vm.state)} text-white`}>
+                        {vm.state}
+                      </Badge>
+                    </div>
+                    <CardDescription>
+                      {vm.template?.name || 'Sistema Operacional não especificado'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="space-y-3">
+                        <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <Cpu className="h-4 w-4 mr-1" /> CPU
                         </div>
-                        <CardDescription>
-                          {vm.template?.name || 'Sistema Operacional não especificado'}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div className="space-y-3">
-                            <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                              <Cpu className="h-4 w-4 mr-1" /> CPU
-                            </div>
-                            <Progress value={cpuUsage} className="h-2" />
-                            <div className="flex justify-between text-xs">
-                              <span>{cpuUsage}% em uso</span>
-                              <span>{vm.cpus} Cores</span>
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-3">
-                            <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                              <Database className="h-4 w-4 mr-1" /> Memória
-                            </div>
-                            <Progress value={memoryUsage} className="h-2" />
-                            <div className="flex justify-between text-xs">
-                              <span>{memoryUsage}% em uso</span>
-                              <span>{formatBytes(vm.memory * 1024 * 1024)}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-3">
-                            <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                              <HardDrive className="h-4 w-4 mr-1" /> Disco
-                            </div>
-                            <Progress value={diskUsage} className="h-2" />
-                            <div className="flex justify-between text-xs">
-                              <span>{diskUsage}% em uso</span>
-                              <span>{formatBytes(vm.disk * 1024 * 1024)}</span>
-                            </div>
-                          </div>
+                        <Progress value={cpuUsage} className="h-2" />
+                        <div className="flex justify-between text-xs">
+                          <span>{cpuUsage}% em uso</span>
+                          <span>{vm.cpus} Cores</span>
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-4 mt-6">
-                          <div>
-                            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                              <Globe className="h-4 w-4 inline mr-1" /> IP
-                            </div>
-                            {vm.ipv4 && vm.ipv4.length > 0 && (
-                              <div className="text-sm">
-                                IPv4: {vm.ipv4[0].address || 'N/A'}
-                              </div>
-                            )}
-                            {vm.ipv6 && vm.ipv6.length > 0 && (
-                              <div className="text-sm truncate">
-                                IPv6: {vm.ipv6[0].address || 'N/A'}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div>
-                            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                              <Clock className="h-4 w-4 inline mr-1" /> Criado em
-                            </div>
-                            <div className="text-sm">
-                              {vm.created_at ? formatDate(vm.created_at) : 'N/A'}
-                            </div>
-                          </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <Database className="h-4 w-4 mr-1" /> Memória
                         </div>
-                      </CardContent>
-                    </Card>
-                  </React.Fragment>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="performance" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
+                        <Progress value={memoryUsage} className="h-2" />
+                        <div className="flex justify-between text-xs">
+                          <span>{memoryUsage}% em uso</span>
+                          <span>{formatBytes(vm.memory * 1024 * 1024)}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <HardDrive className="h-4 w-4 mr-1" /> Disco
+                        </div>
+                        <Progress value={diskUsage} className="h-2" />
+                        <div className="flex justify-between text-xs">
+                          <span>{diskUsage}% em uso</span>
+                          <span>{formatBytes(vm.disk * 1024 * 1024)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mt-6">
+                      <div>
+                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          <Globe className="h-4 w-4 inline mr-1" /> IP
+                        </div>
+                        {vm.ipv4 && vm.ipv4.length > 0 && (
+                          <div className="text-sm">
+                            IPv4: {vm.ipv4[0].address || 'N/A'}
+                          </div>
+                        )}
+                        {vm.ipv6 && vm.ipv6.length > 0 && (
+                          <div className="text-sm truncate">
+                            IPv6: {vm.ipv6[0].address || 'N/A'}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          <Clock className="h-4 w-4 inline mr-1" /> Criado em
+                        </div>
+                        <div className="text-sm">
+                          {vm.created_at ? formatDate(vm.created_at) : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Performance Charts */}
+                <Card className="col-span-1 lg:col-span-6">
                   <CardHeader>
                     <CardTitle>CPU Utilização</CardTitle>
                     <CardDescription>Utilização de CPU nas últimas 24 horas</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-2">
-                    <div className="h-[300px]">
+                    <div className="h-[250px]">
                       <ChartContainer config={{
                         cpu: { label: "CPU", color: "#2563eb" }
                       }}>
@@ -374,13 +361,13 @@ const VpsMonitor: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                <Card>
+                <Card className="col-span-1 lg:col-span-6">
                   <CardHeader>
                     <CardTitle>Memória Utilização</CardTitle>
                     <CardDescription>Utilização de memória nas últimas 24 horas</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-2">
-                    <div className="h-[300px]">
+                    <div className="h-[250px]">
                       <ChartContainer config={{
                         memory: { label: "Memória", color: "#10b981" }
                       }}>
@@ -409,13 +396,13 @@ const VpsMonitor: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                <Card>
+                <Card className="col-span-1 lg:col-span-6">
                   <CardHeader>
                     <CardTitle>Utilização de Disco</CardTitle>
                     <CardDescription>Utilização de disco nas últimas 24 horas</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-2">
-                    <div className="h-[300px]">
+                    <div className="h-[250px]">
                       <ChartContainer config={{
                         disk: { label: "Disco", color: "#f59e0b" }
                       }}>
@@ -444,13 +431,13 @@ const VpsMonitor: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                <Card>
+                <Card className="col-span-1 lg:col-span-6">
                   <CardHeader>
                     <CardTitle>Bandwidth Utilização</CardTitle>
                     <CardDescription>Utilização de banda nas últimas 24 horas</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-2">
-                    <div className="h-[300px]">
+                    <div className="h-[250px]">
                       <ChartContainer config={{
                         bandwidth: { label: "Banda", color: "#8b5cf6" }
                       }}>
@@ -474,12 +461,9 @@ const VpsMonitor: React.FC = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="details" className="space-y-6">
-              {vpsData.map((vm) => (
-                <Card key={vm.id}>
+                
+                {/* Details Section */}
+                <Card className="col-span-1 lg:col-span-12">
                   <CardHeader>
                     <CardTitle>Informações Detalhadas</CardTitle>
                     <CardDescription>Especificações técnicas do servidor {vm.hostname}</CardDescription>
@@ -564,9 +548,9 @@ const VpsMonitor: React.FC = () => {
                     )}
                   </CardContent>
                 </Card>
-              ))}
-            </TabsContent>
-          </Tabs>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </DashboardLayout>
