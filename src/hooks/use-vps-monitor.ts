@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 // Hostinger API key
-const HOSTINGER_API_KEY = 'qR8zk8dPobzkEljGRnuUNnoShgs99kKh4QAM1OOa2ee17f18';
+const HOSTINGER_API_KEY = 'aWdvLMMLSurB1aDIqIia1pG3dvdSxADixTjtryaUe3255bc2';
 // Hostinger Server Hostname
 const HOSTINGER_HOSTNAME = 'srv754093.hstgr.cloud';
 
