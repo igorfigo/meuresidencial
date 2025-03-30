@@ -109,16 +109,21 @@ const VpsMonitor: React.FC = () => {
     staleTime: 30000, // 30 seconds
     refetchInterval: 60000, // Refresh every minute
     retry: 2,
-    onSuccess: () => {
-      // Update usage values based on real data or simulated metrics
-      updateUsageValues();
-      setPerformanceData(generatePerformanceData());
-    },
-    onError: (err) => {
-      console.error('Error fetching VPS data:', err);
-      toast.error('Failed to fetch VPS data');
+    meta: {
+      onError: (err: Error) => {
+        console.error('Error fetching VPS data:', err);
+        toast.error('Failed to fetch VPS data');
+      }
     }
   });
+
+  // Update usage values when data is fetched
+  useEffect(() => {
+    if (vpsData) {
+      updateUsageValues();
+      setPerformanceData(generatePerformanceData());
+    }
+  }, [vpsData]);
 
   const updateUsageValues = () => {
     setCpuUsage(Math.floor(Math.random() * 60) + 20);
