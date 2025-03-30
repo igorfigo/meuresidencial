@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +34,7 @@ interface FormattedPerformanceData {
   time: string;
   cpu: number;
   memory: number;
+  memoryMB: number;
   disk: number;
   bandwidth: number;
 }
@@ -44,7 +44,6 @@ const VpsMonitor: React.FC = () => {
   const [historicalData, setHistoricalData] = useState<FormattedPerformanceData[]>([]);
   const [activeVmId, setActiveVmId] = useState<number | null>(null);
 
-  // Fetch VPS list data
   const { 
     data: vpsData, 
     isLoading: isLoadingVpsData, 
@@ -52,8 +51,8 @@ const VpsMonitor: React.FC = () => {
   } = useQuery({
     queryKey: ['vps-data'],
     queryFn: fetchVpsData,
-    staleTime: 30000, // 30 seconds
-    refetchInterval: 60000, // Refresh every minute
+    staleTime: 30000,
+    refetchInterval: 60000,
     retry: 2,
     meta: {
       onError: (err: Error) => {
@@ -63,7 +62,6 @@ const VpsMonitor: React.FC = () => {
     }
   });
 
-  // Fetch current metrics
   const { 
     data: metrics, 
     isLoading: isLoadingMetrics,
@@ -72,8 +70,8 @@ const VpsMonitor: React.FC = () => {
     queryKey: ['vps-metrics', activeVmId],
     queryFn: () => activeVmId ? fetchVpsMetrics(activeVmId) : Promise.resolve(null),
     enabled: !!activeVmId,
-    staleTime: 15000, // 15 seconds
-    refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 15000,
+    refetchInterval: 30000,
     meta: {
       onError: (err: Error) => {
         console.error('Error fetching metrics:', err);
@@ -82,7 +80,6 @@ const VpsMonitor: React.FC = () => {
     }
   });
 
-  // Fetch historical data
   const { 
     data: histData, 
     isLoading: isLoadingHistData 
@@ -90,8 +87,8 @@ const VpsMonitor: React.FC = () => {
     queryKey: ['vps-historical-data', activeVmId],
     queryFn: () => activeVmId ? fetchHistoricalData(activeVmId) : Promise.resolve([]),
     enabled: !!activeVmId,
-    staleTime: 300000, // 5 minutes
-    refetchInterval: 300000, // Refresh every 5 minutes
+    staleTime: 300000,
+    refetchInterval: 300000,
     meta: {
       onError: (err: Error) => {
         console.error('Error fetching historical data:', err);
@@ -100,7 +97,6 @@ const VpsMonitor: React.FC = () => {
     }
   });
 
-  // Set active VM when data is loaded
   useEffect(() => {
     if (vpsData && vpsData.length > 0 && !activeVmId) {
       setActiveVmId(vpsData[0].id);
@@ -108,7 +104,6 @@ const VpsMonitor: React.FC = () => {
     }
   }, [vpsData, activeVmId]);
 
-  // Update current metrics when data is fetched
   useEffect(() => {
     if (metrics) {
       setCurrentMetrics(metrics);
@@ -116,7 +111,6 @@ const VpsMonitor: React.FC = () => {
     }
   }, [metrics]);
 
-  // Format historical data for charts
   useEffect(() => {
     if (histData && histData.length > 0) {
       const formattedData = histData.map(point => ({
@@ -126,6 +120,7 @@ const VpsMonitor: React.FC = () => {
         }),
         cpu: point.cpu,
         memory: point.memory,
+        memoryMB: point.memoryMB,
         disk: point.disk,
         bandwidth: point.bandwidth
       }));
@@ -135,7 +130,6 @@ const VpsMonitor: React.FC = () => {
     }
   }, [histData]);
 
-  // Refresh metrics every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       if (activeVmId) {
@@ -185,7 +179,6 @@ const VpsMonitor: React.FC = () => {
     }).format(date);
   };
 
-  // Log errors and responses for debugging
   useEffect(() => {
     if (vpsError) {
       console.error('VPS Data error:', vpsError);
@@ -389,7 +382,7 @@ const VpsMonitor: React.FC = () => {
                 <Card className="col-span-1 lg:col-span-6">
                   <CardHeader>
                     <CardTitle>Memória Utilização</CardTitle>
-                    <CardDescription>Utilização de memória nas últimas 24 horas</CardDescription>
+                    <CardDescription>Utilização de memória nas últimas 24 horas (MB)</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-2">
                     <div className="h-[250px]">
@@ -399,12 +392,16 @@ const VpsMonitor: React.FC = () => {
                         </div>
                       ) : (
                         <ChartContainer config={{
-                          memory: { label: "Memória", color: "#10b981" }
+                          memoryMB: { label: "Memória (MB)", color: "#10b981" }
                         }}>
                           <LineChart data={historicalData}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="time" />
-                            <YAxis unit="%" domain={[0, 100]} />
+                            <YAxis 
+                              unit=" MB" 
+                              domain={[0, 500]} 
+                              allowDataOverflow={true}
+                            />
                             <ChartTooltip
                               content={
                                 <ChartTooltipContent
@@ -415,9 +412,9 @@ const VpsMonitor: React.FC = () => {
                             <Legend />
                             <Line
                               type="monotone"
-                              dataKey="memory"
-                              name="Memória"
-                              stroke="var(--color-memory)"
+                              dataKey="memoryMB"
+                              name="Memória (MB)"
+                              stroke="var(--color-memoryMB)"
                               strokeWidth={2}
                             />
                           </LineChart>

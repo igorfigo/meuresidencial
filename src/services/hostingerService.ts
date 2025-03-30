@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 
 export const API_BASE_URL = 'https://developers.hostinger.com/api/vps/v1';
@@ -37,6 +38,7 @@ export interface VirtualMachine {
 export interface PerformanceMetrics {
   cpu: number;
   memory: number;
+  memoryMB: number; // Added memoryMB for absolute memory usage in MB
   disk: number;
   bandwidth: number;
   timestamp: string;
@@ -96,6 +98,11 @@ export const fetchVpsMetrics = async (vmId: number): Promise<PerformanceMetrics>
     // We'll use more conservative and realistic values
     const cpuUsage = isRunning ? Math.max(2, Math.min(30, Math.random() * 10 + 5)) : 0;
     const memoryUsage = isRunning ? Math.max(20, Math.min(60, Math.random() * 20 + 25)) : 0;
+    
+    // Calculate memory in MB based on total memory and usage percentage
+    const totalMemoryMB = data.memory; // Memory is in MB in the VM data
+    const memoryMB = isRunning ? Math.floor(totalMemoryMB * (memoryUsage / 100)) : 0;
+    
     const diskUsage = isRunning ? Math.max(15, Math.min(35, Math.random() * 10 + 15)) : 0;
     // Bandwidth varies, but generally lower
     const bandwidth = isRunning ? Math.max(50, Math.min(500, Math.random() * 150 + 200)) : 0;
@@ -103,6 +110,7 @@ export const fetchVpsMetrics = async (vmId: number): Promise<PerformanceMetrics>
     return {
       cpu: parseFloat(cpuUsage.toFixed(1)),
       memory: parseFloat(memoryUsage.toFixed(1)),
+      memoryMB: parseFloat(memoryMB.toFixed(0)),
       disk: parseFloat(diskUsage.toFixed(1)),
       bandwidth: parseFloat(bandwidth.toFixed(0)),
       timestamp: new Date().toISOString()
@@ -115,6 +123,7 @@ export const fetchVpsMetrics = async (vmId: number): Promise<PerformanceMetrics>
     return {
       cpu: 3.5,
       memory: 45.2,
+      memoryMB: 150,
       disk: 18.7,
       bandwidth: 250,
       timestamp: new Date().toISOString()
@@ -130,7 +139,7 @@ export const fetchHistoricalData = async (vmId: number): Promise<PerformanceMetr
     // In a real scenario, we would call the metrics history endpoint if available
     // For now, we'll generate realistic looking historical data based on VM state
     
-    // Try to get the VM state first to base our data on
+    // Try to get the VM state and memory size first to base our data on
     const response = await fetch(`${API_BASE_URL}/virtual-machines/${vmId}`, {
       method: 'GET',
       headers: {
@@ -140,9 +149,12 @@ export const fetchHistoricalData = async (vmId: number): Promise<PerformanceMetr
     });
 
     let vmState = 'running';
+    let totalMemoryMB = 1024; // Default 1GB if we can't get the real value
+    
     if (response.ok) {
       const data = await response.json();
       vmState = data.state;
+      totalMemoryMB = data.memory; // Memory in MB
     }
     
     const data: PerformanceMetrics[] = [];
@@ -167,6 +179,10 @@ export const fetchHistoricalData = async (vmId: number): Promise<PerformanceMetr
       const hourFactor = hour / 24;
       const cpuUsage = isRunning ? Math.max(1, Math.min(30, cpuBase + (Math.sin(hourFactor * Math.PI * 2) * 4))) : 0;
       const memoryUsage = isRunning ? Math.max(15, Math.min(65, memoryBase + (Math.cos(hourFactor * Math.PI) * 8))) : 0;
+      
+      // Calculate memory in MB based on percentage and total memory
+      const memoryMB = isRunning ? Math.floor(totalMemoryMB * (memoryUsage / 100)) : 0;
+      
       const diskUsage = isRunning ? Math.max(10, Math.min(35, diskBase + (i * 0.03))) : 0; // Slight increase over time
       
       // Bandwidth varies throughout the day with peaks
@@ -176,6 +192,7 @@ export const fetchHistoricalData = async (vmId: number): Promise<PerformanceMetr
       data.push({
         cpu: parseFloat(cpuUsage.toFixed(1)),
         memory: parseFloat(memoryUsage.toFixed(1)),
+        memoryMB: parseFloat(memoryMB.toFixed(0)),
         disk: parseFloat(diskUsage.toFixed(1)),
         bandwidth: parseFloat(bandwidth.toFixed(0)),
         timestamp: timePoint.toISOString()
