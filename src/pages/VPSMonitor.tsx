@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -9,7 +10,6 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Select, 
   SelectContent, 
@@ -69,8 +69,6 @@ const VPSMonitor: React.FC = () => {
     stopServer,
     startServer
   } = useVPSMonitor();
-
-  const [activeTab, setActiveTab] = useState('overview');
 
   const formatDateOutput = (dateString: string) => {
     try {
@@ -135,7 +133,7 @@ const VPSMonitor: React.FC = () => {
 
   const renderServersList = () => {
     if (isLoadingServers) {
-      return Array(2).fill(0).map((_, i) => (
+      return Array(1).fill(0).map((_, i) => (
         <Card key={i} className="mb-4">
           <CardHeader className="pb-2">
             <Skeleton className="h-4 w-1/3" />
@@ -222,125 +220,117 @@ const VPSMonitor: React.FC = () => {
     }
 
     return (
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex justify-between items-center mb-4">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
-            <TabsTrigger value="details">Details</TabsTrigger>
-          </TabsList>
-          
-          <div className="flex items-center space-x-2">
-            {serverDetails.status === 'running' ? (
-              <>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleServerAction('restart')}
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Restart
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleServerAction('stop')}
-                >
-                  <StopCircle className="h-4 w-4 mr-2" />
-                  Stop
-                </Button>
-              </>
-            ) : (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => handleServerAction('start')}
-              >
-                <PlayCircle className="h-4 w-4 mr-2" />
-                Start
-              </Button>
-            )}
-            <Button variant="outline" size="icon">
-              <Power className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <TabsContent value="overview" className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
-                <CardTitle>{serverDetails.name}</CardTitle>
-                {getStatusBadge(serverDetails.status)}
-              </div>
-              <CardDescription>
-                IP: {serverDetails.ip} • Location: {serverDetails.location}
-              </CardDescription>
-              <CardDescription>
-                Hostname: {serverDetails.hostname}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium flex items-center">
-                      <CpuIcon className="h-4 w-4 mr-1" /> CPU Usage
-                    </span>
-                    <span className="text-sm">{serverDetails.cpu.utilization}%</span>
-                  </div>
-                  <Progress value={serverDetails.cpu.utilization} className="h-2" />
-                  <p className="text-xs text-muted-foreground">{serverDetails.cpu.cores} cores</p>
+      <div className="space-y-6">
+        {/* Server Overview */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <CardTitle>{serverDetails.name}</CardTitle>
+              {getStatusBadge(serverDetails.status)}
+            </div>
+            <CardDescription>
+              IP: {serverDetails.ip} • Location: {serverDetails.location}
+            </CardDescription>
+            <CardDescription>
+              Hostname: {serverDetails.hostname}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium flex items-center">
+                    <CpuIcon className="h-4 w-4 mr-1" /> CPU Usage
+                  </span>
+                  <span className="text-sm">{serverDetails.cpu.utilization}%</span>
                 </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium flex items-center">
-                      <DatabaseIcon className="h-4 w-4 mr-1" /> Memory Usage
-                    </span>
-                    <span className="text-sm">{serverDetails.memory.utilization}%</span>
-                  </div>
-                  <Progress value={serverDetails.memory.utilization} className="h-2" />
-                  <p className="text-xs text-muted-foreground">
-                    {serverDetails.memory.used.toFixed(1)} GB / {serverDetails.memory.total} GB
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium flex items-center">
-                      <HardDrive className="h-4 w-4 mr-1" /> Disk Usage
-                    </span>
-                    <span className="text-sm">{serverDetails.disk.utilization}%</span>
-                  </div>
-                  <Progress value={serverDetails.disk.utilization} className="h-2" />
-                  <p className="text-xs text-muted-foreground">
-                    {serverDetails.disk.used} GB / {serverDetails.disk.total} GB
-                  </p>
-                </div>
+                <Progress value={serverDetails.cpu.utilization} className="h-2" />
+                <p className="text-xs text-muted-foreground">{serverDetails.cpu.cores} cores</p>
               </div>
               
-              <div className="mt-4">
-                <h4 className="text-sm font-medium mb-2 flex items-center">
-                  <ArrowDownUp className="h-4 w-4 mr-1" /> Network Traffic
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-muted p-2 rounded-md">
-                    <p className="text-sm text-muted-foreground">Incoming</p>
-                    <p className="text-lg font-medium">{serverDetails.network.incoming} Mbps</p>
-                  </div>
-                  <div className="bg-muted p-2 rounded-md">
-                    <p className="text-sm text-muted-foreground">Outgoing</p>
-                    <p className="text-lg font-medium">{serverDetails.network.outgoing} Mbps</p>
-                  </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium flex items-center">
+                    <DatabaseIcon className="h-4 w-4 mr-1" /> Memory Usage
+                  </span>
+                  <span className="text-sm">{serverDetails.memory.utilization}%</span>
+                </div>
+                <Progress value={serverDetails.memory.utilization} className="h-2" />
+                <p className="text-xs text-muted-foreground">
+                  {serverDetails.memory.used.toFixed(1)} GB / {serverDetails.memory.total} GB
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium flex items-center">
+                    <HardDrive className="h-4 w-4 mr-1" /> Disk Usage
+                  </span>
+                  <span className="text-sm">{serverDetails.disk.utilization}%</span>
+                </div>
+                <Progress value={serverDetails.disk.utilization} className="h-2" />
+                <p className="text-xs text-muted-foreground">
+                  {serverDetails.disk.used} GB / {serverDetails.disk.total} GB
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-4">
+              <h4 className="text-sm font-medium mb-2 flex items-center">
+                <ArrowDownUp className="h-4 w-4 mr-1" /> Network Traffic
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-muted p-2 rounded-md">
+                  <p className="text-sm text-muted-foreground">Incoming</p>
+                  <p className="text-lg font-medium">{serverDetails.network.incoming} Mbps</p>
+                </div>
+                <div className="bg-muted p-2 rounded-md">
+                  <p className="text-sm text-muted-foreground">Outgoing</p>
+                  <p className="text-lg font-medium">{serverDetails.network.outgoing} Mbps</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            </div>
 
-        <TabsContent value="monitoring" className="space-y-4">
-          <div className="flex justify-between items-center">
+            <div className="mt-6 flex items-center space-x-2 justify-end">
+              {serverDetails.status === 'running' ? (
+                <>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleServerAction('restart')}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Restart
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleServerAction('stop')}
+                  >
+                    <StopCircle className="h-4 w-4 mr-2" />
+                    Stop
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleServerAction('start')}
+                >
+                  <PlayCircle className="h-4 w-4 mr-2" />
+                  Start
+                </Button>
+              )}
+              <Button variant="outline" size="icon">
+                <Power className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Performance Metrics */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Performance Metrics</h3>
             <div className="flex items-center space-x-2">
               <Select value={timeRange} onValueChange={(value: any) => setTimeRange(value)}>
@@ -387,7 +377,7 @@ const VPSMonitor: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="mt-4">
             <CardHeader>
               <CardTitle className="text-base">Memory Usage</CardTitle>
             </CardHeader>
@@ -416,7 +406,7 @@ const VPSMonitor: React.FC = () => {
             </CardContent>
           </Card>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Disk Usage</CardTitle>
@@ -475,66 +465,65 @@ const VPSMonitor: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        <TabsContent value="details">
-          <Card>
-            <CardHeader>
-              <CardTitle>Server Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">Name</TableCell>
-                    <TableCell>{serverDetails.name}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">ID</TableCell>
-                    <TableCell>{serverDetails.id}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Status</TableCell>
-                    <TableCell>{getStatusBadge(serverDetails.status)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">IP Address</TableCell>
-                    <TableCell>{serverDetails.ip}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Operating System</TableCell>
-                    <TableCell>{serverDetails.os}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">CPU</TableCell>
-                    <TableCell>{serverDetails.cpu.cores} cores</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Memory</TableCell>
-                    <TableCell>{serverDetails.memory.total} GB</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Disk</TableCell>
-                    <TableCell>{serverDetails.disk.total} GB</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Location</TableCell>
-                    <TableCell>{serverDetails.location}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Created</TableCell>
-                    <TableCell>{formatDateOutput(serverDetails.created_at)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Hostname</TableCell>
-                    <TableCell>{serverDetails.hostname}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+        
+        {/* Server Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Server Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">Name</TableCell>
+                  <TableCell>{serverDetails.name}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">ID</TableCell>
+                  <TableCell>{serverDetails.id}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Status</TableCell>
+                  <TableCell>{getStatusBadge(serverDetails.status)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">IP Address</TableCell>
+                  <TableCell>{serverDetails.ip}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Operating System</TableCell>
+                  <TableCell>{serverDetails.os}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">CPU</TableCell>
+                  <TableCell>{serverDetails.cpu.cores} cores</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Memory</TableCell>
+                  <TableCell>{serverDetails.memory.total} GB</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Disk</TableCell>
+                  <TableCell>{serverDetails.disk.total} GB</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Location</TableCell>
+                  <TableCell>{serverDetails.location}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Created</TableCell>
+                  <TableCell>{formatDateOutput(serverDetails.created_at)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Hostname</TableCell>
+                  <TableCell>{serverDetails.hostname}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     );
   };
 
@@ -544,7 +533,7 @@ const VPSMonitor: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">VPS Monitor</h1>
           <p className="text-muted-foreground mt-2">
-            Monitor and manage your Hostinger virtual private servers.
+            Monitor and manage your Hostinger virtual private server.
           </p>
         </div>
         
@@ -552,7 +541,7 @@ const VPSMonitor: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <div className="md:col-span-1">
-            <h2 className="text-xl font-semibold mb-4">Your Servers</h2>
+            <h2 className="text-xl font-semibold mb-4">Your Server</h2>
             {renderServersList()}
           </div>
           

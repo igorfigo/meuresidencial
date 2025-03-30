@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -66,34 +65,6 @@ const mockServers: VPSServer[] = [
     os: 'Ubuntu 22.04 LTS',
     location: 'Europe (Helsinki)',
     created_at: '2023-01-15T14:30:00Z'
-  },
-  {
-    id: 'vps-2',
-    name: 'Staging Server',
-    status: 'running',
-    ip: '193.122.124.67',
-    hostname: 'staging.' + HOSTINGER_HOSTNAME,
-    cpu: {
-      cores: 2,
-      utilization: 18
-    },
-    memory: {
-      total: 4,
-      used: 1.7,
-      utilization: 42.5
-    },
-    disk: {
-      total: 80,
-      used: 25,
-      utilization: 31.25
-    },
-    network: {
-      incoming: 1.3,
-      outgoing: 0.8
-    },
-    os: 'Ubuntu 20.04 LTS',
-    location: 'Europe (Helsinki)',
-    created_at: '2023-03-10T09:15:00Z'
   }
 ];
 
