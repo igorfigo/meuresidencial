@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Send, MessageSquare, Whatsapp } from 'lucide-react';
+import { Loader2, Send, MessageSquare, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -100,7 +100,7 @@ const FaleConosco = () => {
                 onClick={openWhatsApp} 
                 className="w-full bg-green-600 hover:bg-green-700 transition-colors"
               >
-                <Whatsapp className="mr-2 h-4 w-4" />
+                <MessageCircle className="mr-2 h-4 w-4" />
                 Contatar via WhatsApp
               </Button>
             </CardFooter>
