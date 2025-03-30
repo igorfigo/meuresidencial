@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Send, MessageSquare, MessageCircle } from 'lucide-react';
+import { Loader2, Send, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -81,54 +81,6 @@ const FaleConosco = () => {
         <p className="text-gray-600 mb-6">
           Entre em contato com nossa equipe de suporte. Responderemos sua mensagem em até 24 horas úteis.
         </p>
-        
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <Card className="w-full md:w-1/2 border-t-4 border-t-green-600 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl">Suporte via WhatsApp</CardTitle>
-              <CardDescription>
-                Fale diretamente com nossa equipe de suporte através do WhatsApp
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-1 pb-4">
-              <p className="text-sm text-gray-600 mb-3">
-                Horário de atendimento: Segunda à Sexta, das 9h às 18h
-              </p>
-            </CardContent>
-            <CardFooter className="pt-0">
-              <Button 
-                onClick={openWhatsApp} 
-                className="w-full bg-green-600 hover:bg-green-700 transition-colors"
-              >
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Contatar via WhatsApp
-              </Button>
-            </CardFooter>
-          </Card>
-
-          <Card className="w-full md:w-1/2 border-t-4 border-t-blue-600 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl">Contato por Email</CardTitle>
-              <CardDescription>
-                Envie-nos um email e responderemos em até 24 horas úteis
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-1 pb-4">
-              <p className="text-sm text-gray-600 mb-3">
-                Envie detalhes do seu contato para agilizar o atendimento
-              </p>
-            </CardContent>
-            <CardFooter className="pt-0">
-              <Button 
-                onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })} 
-                className="w-full bg-blue-600 hover:bg-blue-700 transition-colors"
-              >
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Preencher Formulário
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
         
         <Card id="contact-form" className="border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="pb-3">
@@ -216,33 +168,43 @@ const FaleConosco = () => {
             </form>
           </CardContent>
           
-          <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-end gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg`}>
+          <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-between gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg`}>
             <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className={`${isMobile ? 'w-full' : ''} border-gray-300 hover:bg-gray-100 hover:text-gray-700`}
+              onClick={openWhatsApp}
+              className={`${isMobile ? 'w-full' : ''} bg-green-600 hover:bg-green-700 transition-colors`}
             >
-              Voltar
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Contatar via WhatsApp
             </Button>
             
-            <Button 
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`${isMobile ? 'w-full' : ''} bg-brand-600 hover:bg-brand-700 transition-colors`}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  Enviar Mensagem
-                </>
-              )}
-            </Button>
+            <div className={`flex ${isMobile ? 'flex-col w-full' : ''} gap-3`}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+                className={`${isMobile ? 'w-full' : ''} border-gray-300 hover:bg-gray-100 hover:text-gray-700`}
+              >
+                Voltar
+              </Button>
+              
+              <Button 
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`${isMobile ? 'w-full' : ''} bg-brand-600 hover:bg-brand-700 transition-colors`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Enviar Mensagem
+                  </>
+                )}
+              </Button>
+            </div>
           </CardFooter>
         </Card>
       </div>
