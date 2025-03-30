@@ -37,35 +37,35 @@ export interface VPSServer {
   created_at: string;
 }
 
-// Example data for development/demo
+// Updated realistic data for server
 const mockServers: VPSServer[] = [
   {
     id: 'vps-1',
-    name: 'Production Server',
+    name: 'Servidor Meu Residencial',
     status: 'running',
     ip: '82.25.76.200',
     hostname: HOSTINGER_HOSTNAME,
     cpu: {
-      cores: 4,
-      utilization: 35
+      cores: 2,
+      utilization: 28
     },
     memory: {
-      total: 8,
-      used: 4.3,
-      utilization: 54
-    },
-    disk: {
-      total: 100,
-      used: 45,
+      total: 4,
+      used: 1.8,
       utilization: 45
     },
+    disk: {
+      total: 80,
+      used: 32,
+      utilization: 40
+    },
     network: {
-      incoming: 6.8,
-      outgoing: 3.5
+      incoming: 3.2,
+      outgoing: 1.8
     },
     os: 'Ubuntu 22.04 LTS',
-    location: 'Europe (Helsinki)',
-    created_at: '2023-01-15T14:30:00Z'
+    location: 'Europe (Frankfurt)',
+    created_at: '2024-01-10T10:15:00Z'
   }
 ];
 
@@ -112,7 +112,7 @@ export function useVPSMonitor() {
     enabled: !!selectedServerId && servers.length > 0,
   });
 
-  // Generate some mock time series data for charts
+  // Generate more realistic time series data for charts
   const generateTimeSeriesData = (range: '1h' | '24h' | '7d' | '30d', metricName: string) => {
     const now = new Date();
     const data = [];
@@ -139,26 +139,27 @@ export function useVPSMonitor() {
         break;
     }
     
+    // Use more realistic patterns for a small VPS server
     for (let i = pointCount - 1; i >= 0; i--) {
       const timestamp = new Date(now.getTime() - i * intervalMinutes * 60 * 1000);
       let value;
       
       switch (metricName) {
         case 'cpu':
-          // Simulate CPU usage with daily patterns
-          value = 20 + 30 * Math.sin(i/12) + Math.random() * 15;
+          // Lower baseline for CPU with occasional spikes
+          value = 15 + 10 * Math.sin(i/8) + (Math.random() > 0.9 ? 30 * Math.random() : 0);
           break;
         case 'memory':
-          // Memory tends to be more stable
-          value = 50 + 15 * Math.sin(i/24) + Math.random() * 10;
+          // Memory gradually increasing and decreasing
+          value = 40 + 8 * Math.sin(i/18) + Math.random() * 5;
           break;
         case 'disk':
-          // Disk usage tends to increase slowly
-          value = 30 + i * 0.05 + Math.random() * 2;
+          // Disk usage steady with slight increase
+          value = 38 + i * 0.01 + Math.random() * 1;
           break;
         case 'network':
-          // Network traffic with spikes
-          value = 3 + 2 * Math.sin(i/8) + (Math.random() > 0.9 ? 8 * Math.random() : 0);
+          // Network with daily patterns and occasional spikes
+          value = 1.5 + 1 * Math.sin(i/12) + (Math.random() > 0.95 ? 4 * Math.random() : 0);
           break;
         default:
           value = Math.random() * 100;
@@ -237,3 +238,4 @@ export function useVPSMonitor() {
     startServer
   };
 }
+
