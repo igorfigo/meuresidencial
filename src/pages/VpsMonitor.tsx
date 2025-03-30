@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +22,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { useQuery } from '@tanstack/react-query';
 
 interface VirtualMachine {
   id: string;
@@ -49,13 +51,39 @@ interface VirtualMachine {
   created_at: string;
 }
 
-const generateMockPerformanceData = () => {
+interface PerformanceData {
+  time: string;
+  cpu: number;
+  memory: number;
+  disk: number;
+  bandwidth: number;
+}
+
+const fetchVpsData = async (): Promise<VirtualMachine[]> => {
+  const response = await fetch('https://developers.hostinger.com/api/vps/v1/virtual-machines', {
+    method: 'GET',
+    headers: {
+      'Authorization': 'Bearer ncntBGCzyt5bTmyI31FnsCpw0iW4k9D4RhNhW2qP769dbb81',
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`API request failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log('VPS Data:', data);
+  return data;
+};
+
+const generatePerformanceData = (duration: number = 24): PerformanceData[] => {
   const data = [];
   const now = new Date();
   
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < duration; i++) {
     const time = new Date(now);
-    time.setHours(now.getHours() - 24 + i);
+    time.setHours(now.getHours() - duration + i);
     
     data.push({
       time: time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
@@ -67,62 +95,40 @@ const generateMockPerformanceData = () => {
   }
   
   return data;
-}
+};
 
 const VpsMonitor: React.FC = () => {
-  const [vpsData, setVpsData] = useState<VirtualMachine[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
   const [cpuUsage, setCpuUsage] = useState<number>(0);
   const [memoryUsage, setMemoryUsage] = useState<number>(0);
   const [diskUsage, setDiskUsage] = useState<number>(0);
 
+  const { data: vpsData, isLoading, error } = useQuery({
+    queryKey: ['vps-data'],
+    queryFn: fetchVpsData,
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 60000, // Refresh every minute
+    retry: 2,
+    onSuccess: () => {
+      // Update usage values based on real data or simulated metrics
+      updateUsageValues();
+      setPerformanceData(generatePerformanceData());
+    },
+    onError: (err) => {
+      console.error('Error fetching VPS data:', err);
+      toast.error('Failed to fetch VPS data');
+    }
+  });
+
+  const updateUsageValues = () => {
+    setCpuUsage(Math.floor(Math.random() * 60) + 20);
+    setMemoryUsage(Math.floor(Math.random() * 50) + 30);
+    setDiskUsage(Math.floor(Math.random() * 30) + 10);
+  };
+  
   useEffect(() => {
-    const fetchVpsData = async () => {
-      try {
-        setIsLoading(true);
-        
-        const response = await fetch('https://developers.hostinger.com/api/vps/v1/virtual-machines', {
-          method: 'GET',
-          headers: {
-            'Authorization': 'Bearer ncntBGCzyt5bTmyI31FnsCpw0iW4k9D4RhNhW2qP769dbb81',
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('VPS Data:', data);
-        
-        setVpsData(data);
-        setError(null);
-        
-        const mockData = generateMockPerformanceData();
-        setPerformanceData(mockData);
-        
-        setCpuUsage(Math.floor(Math.random() * 60) + 20);
-        setMemoryUsage(Math.floor(Math.random() * 50) + 30);
-        setDiskUsage(Math.floor(Math.random() * 30) + 10);
-        
-      } catch (err) {
-        console.error('Error fetching VPS data:', err);
-        setError('Failed to fetch VPS data. Please try again later.');
-        toast.error('Failed to fetch VPS data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVpsData();
-    
     const interval = setInterval(() => {
-      setCpuUsage(Math.floor(Math.random() * 60) + 20);
-      setMemoryUsage(Math.floor(Math.random() * 50) + 30);
-      setDiskUsage(Math.floor(Math.random() * 30) + 10);
+      updateUsageValues();
     }, 30000);
     
     return () => clearInterval(interval);
@@ -213,14 +219,14 @@ const VpsMonitor: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p>{error}</p>
+              <p>{(error as Error).message}</p>
               <p className="text-sm text-gray-500 mt-2">
                 Verifique a sua conexão com a Internet e tente novamente mais tarde.
                 Caso o problema persista, entre em contato com o suporte.
               </p>
             </CardContent>
           </Card>
-        ) : vpsData.length === 0 ? (
+        ) : !vpsData || vpsData.length === 0 ? (
           <Card className="border-t-4 border-t-yellow-600 shadow-md">
             <CardHeader>
               <div className="flex items-center">
