@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Send } from 'lucide-react';
+import { Loader2, Send, MessageSquare, Whatsapp } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,6 +65,14 @@ const FaleConosco = () => {
     }
   };
   
+  const openWhatsApp = () => {
+    const whatsappNumber = '5511914420166';
+    const message = `Olá, sou ${user?.nome || 'gestor'} do condomínio ${user?.nomeCondominio || ''} e gostaria de falar com a equipe de suporte.`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    toast.success('Abrindo WhatsApp...');
+  };
+  
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6 max-w-3xl">
@@ -74,7 +82,55 @@ const FaleConosco = () => {
           Entre em contato com nossa equipe de suporte. Responderemos sua mensagem em até 24 horas úteis.
         </p>
         
-        <Card className="border-t-4 border-t-brand-600 shadow-md">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <Card className="w-full md:w-1/2 border-t-4 border-t-green-600 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">Suporte via WhatsApp</CardTitle>
+              <CardDescription>
+                Fale diretamente com nossa equipe de suporte através do WhatsApp
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1 pb-4">
+              <p className="text-sm text-gray-600 mb-3">
+                Horário de atendimento: Segunda à Sexta, das 9h às 18h
+              </p>
+            </CardContent>
+            <CardFooter className="pt-0">
+              <Button 
+                onClick={openWhatsApp} 
+                className="w-full bg-green-600 hover:bg-green-700 transition-colors"
+              >
+                <Whatsapp className="mr-2 h-4 w-4" />
+                Contatar via WhatsApp
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card className="w-full md:w-1/2 border-t-4 border-t-blue-600 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">Contato por Email</CardTitle>
+              <CardDescription>
+                Envie-nos um email e responderemos em até 24 horas úteis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-1 pb-4">
+              <p className="text-sm text-gray-600 mb-3">
+                Envie detalhes do seu contato para agilizar o atendimento
+              </p>
+            </CardContent>
+            <CardFooter className="pt-0">
+              <Button 
+                onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })} 
+                className="w-full bg-blue-600 hover:bg-blue-700 transition-colors"
+              >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Preencher Formulário
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+        
+        <Card id="contact-form" className="border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl text-brand-700">Envie sua mensagem</CardTitle>
             <CardDescription className="text-gray-600">
