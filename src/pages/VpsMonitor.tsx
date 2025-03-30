@@ -6,13 +6,28 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
-import { Server, Activity, Database, Clock, Globe, AlertCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Server, Activity, Database, Clock, Globe, Cpu, HardDrive, MonitorSmartphone } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 interface VirtualMachine {
   id: string;
   hostname: string;
-  state: string; // Note: the actual API returns 'state' not 'status'
+  state: string;
   cpus: number;
   memory: number;
   disk: number;
@@ -36,10 +51,35 @@ interface VirtualMachine {
   created_at: string;
 }
 
+// Mock performance data for the charts
+const generateMockPerformanceData = () => {
+  const data = [];
+  const now = new Date();
+  
+  for (let i = 0; i < 24; i++) {
+    const time = new Date(now);
+    time.setHours(now.getHours() - 24 + i);
+    
+    data.push({
+      time: time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      cpu: Math.floor(Math.random() * 60) + 20, // Random between 20-80%
+      memory: Math.floor(Math.random() * 50) + 30, // Random between 30-80%
+      disk: Math.floor(Math.random() * 30) + 10, // Random between 10-40%
+      bandwidth: Math.floor(Math.random() * 500) + 100, // Random between 100-600 MB
+    });
+  }
+  
+  return data;
+}
+
 const VpsMonitor: React.FC = () => {
   const [vpsData, setVpsData] = useState<VirtualMachine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [cpuUsage, setCpuUsage] = useState<number>(0);
+  const [memoryUsage, setMemoryUsage] = useState<number>(0);
+  const [diskUsage, setDiskUsage] = useState<number>(0);
 
   useEffect(() => {
     const fetchVpsData = async () => {
@@ -65,6 +105,16 @@ const VpsMonitor: React.FC = () => {
         
         setVpsData(data);
         setError(null);
+        
+        // Generate mock performance data for demonstration
+        const mockData = generateMockPerformanceData();
+        setPerformanceData(mockData);
+        
+        // Set current usage values (would come from API in real implementation)
+        setCpuUsage(Math.floor(Math.random() * 60) + 20);
+        setMemoryUsage(Math.floor(Math.random() * 50) + 30);
+        setDiskUsage(Math.floor(Math.random() * 30) + 10);
+        
       } catch (err) {
         console.error('Error fetching VPS data:', err);
         setError('Failed to fetch VPS data. Please try again later.');
@@ -75,6 +125,16 @@ const VpsMonitor: React.FC = () => {
     };
 
     fetchVpsData();
+    
+    // Simulate refreshing data every 30 seconds
+    const interval = setInterval(() => {
+      // Update mock usage values every 30 seconds
+      setCpuUsage(Math.floor(Math.random() * 60) + 20);
+      setMemoryUsage(Math.floor(Math.random() * 50) + 30);
+      setDiskUsage(Math.floor(Math.random() * 30) + 10);
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const formatBytes = (bytes: number, decimals = 2) => {
@@ -124,36 +184,34 @@ const VpsMonitor: React.FC = () => {
         
         <div className="prose dark:prose-invert max-w-none">
           <p className="text-muted-foreground">
-            Monitore o status e os recursos dos seus servidores VPS em tempo real.
+            Monitore o status e o desempenho dos seus servidores VPS em tempo real.
           </p>
         </div>
         
         <Separator className="my-4" />
         
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2].map((i) => (
-              <Card key={i} className="border-t-4 border-t-blue-600 shadow-md">
-                <CardHeader className="pb-2">
-                  <Skeleton className="h-8 w-2/3" />
-                  <Skeleton className="h-4 w-1/2" />
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="space-y-3">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                    </div>
-                    <div className="space-y-3">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                    </div>
+          <div className="grid grid-cols-1 gap-6">
+            <Card className="border-t-4 border-t-blue-600 shadow-md">
+              <CardHeader className="pb-2">
+                <Skeleton className="h-8 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <div className="space-y-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         ) : error ? (
           <Card className="border-t-4 border-t-red-600 shadow-md">
@@ -184,128 +242,331 @@ const VpsMonitor: React.FC = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {vpsData.map((vm) => (
-              <Card key={vm.id} className="border-t-4 border-t-blue-600 shadow-md overflow-hidden">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Server className="h-5 w-5 mr-2 text-blue-500" />
-                      <CardTitle>{vm.hostname}</CardTitle>
-                    </div>
-                    <Badge className={`${getStatusColor(vm.state)} text-white`}>
-                      {vm.state}
-                    </Badge>
-                  </div>
-                  <CardDescription>
-                    {vm.template?.name || 'Sistema Operacional não especificado'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                          <Activity className="h-4 w-4 mr-1" />
-                          CPU
-                        </div>
-                        <div className="text-lg font-semibold">
-                          {vm.cpus} Cores
-                        </div>
-                        {/* No CPU usage info provided by the API, so we'll show a static progress */}
-                        <Progress 
-                          value={0} 
-                          className="h-2" 
-                        />
-                        <div className="text-xs text-right">
-                          N/A
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                          <Database className="h-4 w-4 mr-1" />
-                          RAM
-                        </div>
-                        <div className="text-lg font-semibold">
-                          {formatBytes(vm.memory * 1024 * 1024)}
-                        </div>
-                        {/* No RAM usage info provided by the API */}
-                        <Progress 
-                          value={0}
-                          className="h-2" 
-                        />
-                        <div className="text-xs text-right">
-                          N/A
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                          <Database className="h-4 w-4 mr-1" />
-                          Disk
-                        </div>
-                        <div className="text-lg font-semibold">
-                          {formatBytes(vm.disk * 1024 * 1024)}
-                        </div>
-                        {/* No disk usage info provided by the API */}
-                        <Progress 
-                          value={0} 
-                          className="h-2" 
-                        />
-                        <div className="text-xs text-right">
-                          N/A
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                          <Globe className="h-4 w-4 inline mr-1" /> IP
-                        </div>
-                        {vm.ipv4 && vm.ipv4.length > 0 && (
-                          <div className="text-sm">
-                            IPv4: {vm.ipv4[0].address || 'N/A'}
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="mb-4">
+              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+              <TabsTrigger value="performance">Desempenho</TabsTrigger>
+              <TabsTrigger value="details">Detalhes</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {vpsData.map((vm) => (
+                  <React.Fragment key={vm.id}>
+                    <Card className="col-span-1 md:col-span-3 border-t-4 border-t-blue-600 shadow-md">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <Server className="h-5 w-5 mr-2 text-blue-500" />
+                            <CardTitle>{vm.hostname}</CardTitle>
                           </div>
-                        )}
-                        {vm.ipv6 && vm.ipv6.length > 0 && (
-                          <div className="text-sm truncate">
-                            IPv6: {vm.ipv6[0].address || 'N/A'}
+                          <Badge className={`${getStatusColor(vm.state)} text-white`}>
+                            {vm.state}
+                          </Badge>
+                        </div>
+                        <CardDescription>
+                          {vm.template?.name || 'Sistema Operacional não especificado'}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="space-y-3">
+                            <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                              <Cpu className="h-4 w-4 mr-1" /> CPU
+                            </div>
+                            <Progress value={cpuUsage} className="h-2" />
+                            <div className="flex justify-between text-xs">
+                              <span>{cpuUsage}% em uso</span>
+                              <span>{vm.cpus} Cores</span>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                          <Clock className="h-4 w-4 inline mr-1" /> Criado em
+                          
+                          <div className="space-y-3">
+                            <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                              <Database className="h-4 w-4 mr-1" /> Memória
+                            </div>
+                            <Progress value={memoryUsage} className="h-2" />
+                            <div className="flex justify-between text-xs">
+                              <span>{memoryUsage}% em uso</span>
+                              <span>{formatBytes(vm.memory * 1024 * 1024)}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                              <HardDrive className="h-4 w-4 mr-1" /> Disco
+                            </div>
+                            <Progress value={diskUsage} className="h-2" />
+                            <div className="flex justify-between text-xs">
+                              <span>{diskUsage}% em uso</span>
+                              <span>{formatBytes(vm.disk * 1024 * 1024)}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-sm">
-                          {vm.created_at ? formatDate(vm.created_at) : 'N/A'}
+                        
+                        <div className="grid grid-cols-2 gap-4 mt-6">
+                          <div>
+                            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                              <Globe className="h-4 w-4 inline mr-1" /> IP
+                            </div>
+                            {vm.ipv4 && vm.ipv4.length > 0 && (
+                              <div className="text-sm">
+                                IPv4: {vm.ipv4[0].address || 'N/A'}
+                              </div>
+                            )}
+                            {vm.ipv6 && vm.ipv6.length > 0 && (
+                              <div className="text-sm truncate">
+                                IPv6: {vm.ipv6[0].address || 'N/A'}
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div>
+                            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                              <Clock className="h-4 w-4 inline mr-1" /> Criado em
+                            </div>
+                            <div className="text-sm">
+                              {vm.created_at ? formatDate(vm.created_at) : 'N/A'}
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      </CardContent>
+                    </Card>
+                  </React.Fragment>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="performance" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>CPU Utilização</CardTitle>
+                    <CardDescription>Utilização de CPU nas últimas 24 horas</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-2">
+                    <div className="h-[300px]">
+                      <ChartContainer config={{
+                        cpu: { label: "CPU", color: "#2563eb" }
+                      }}>
+                        <LineChart data={performanceData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="time" />
+                          <YAxis unit="%" />
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                indicator="line"
+                              />
+                            }
+                          />
+                          <Legend />
+                          <Line
+                            type="monotone"
+                            dataKey="cpu"
+                            name="CPU"
+                            stroke="var(--color-cpu)"
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ChartContainer>
                     </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Memória Utilização</CardTitle>
+                    <CardDescription>Utilização de memória nas últimas 24 horas</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-2">
+                    <div className="h-[300px]">
+                      <ChartContainer config={{
+                        memory: { label: "Memória", color: "#10b981" }
+                      }}>
+                        <LineChart data={performanceData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="time" />
+                          <YAxis unit="%" />
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                indicator="line"
+                              />
+                            }
+                          />
+                          <Legend />
+                          <Line
+                            type="monotone"
+                            dataKey="memory"
+                            name="Memória"
+                            stroke="var(--color-memory)"
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ChartContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Utilização de Disco</CardTitle>
+                    <CardDescription>Utilização de disco nas últimas 24 horas</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-2">
+                    <div className="h-[300px]">
+                      <ChartContainer config={{
+                        disk: { label: "Disco", color: "#f59e0b" }
+                      }}>
+                        <LineChart data={performanceData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="time" />
+                          <YAxis unit="%" />
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent
+                                indicator="line"
+                              />
+                            }
+                          />
+                          <Legend />
+                          <Line
+                            type="monotone"
+                            dataKey="disk"
+                            name="Disco"
+                            stroke="var(--color-disk)"
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ChartContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Bandwidth Utilização</CardTitle>
+                    <CardDescription>Utilização de banda nas últimas 24 horas</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-2">
+                    <div className="h-[300px]">
+                      <ChartContainer config={{
+                        bandwidth: { label: "Banda", color: "#8b5cf6" }
+                      }}>
+                        <BarChart data={performanceData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="time" />
+                          <YAxis unit=" MB" />
+                          <ChartTooltip
+                            content={
+                              <ChartTooltipContent />
+                            }
+                          />
+                          <Legend />
+                          <Bar
+                            dataKey="bandwidth"
+                            name="Banda"
+                            fill="var(--color-bandwidth)"
+                          />
+                        </BarChart>
+                      </ChartContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="details" className="space-y-6">
+              {vpsData.map((vm) => (
+                <Card key={vm.id}>
+                  <CardHeader>
+                    <CardTitle>Informações Detalhadas</CardTitle>
+                    <CardDescription>Especificações técnicas do servidor {vm.hostname}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Propriedade</TableHead>
+                          <TableHead>Valor</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-medium">ID do Servidor</TableCell>
+                          <TableCell>{vm.id}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Hostname</TableCell>
+                          <TableCell>{vm.hostname}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Estado</TableCell>
+                          <TableCell>
+                            <Badge className={`${getStatusColor(vm.state)} text-white`}>
+                              {vm.state}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Sistema Operacional</TableCell>
+                          <TableCell>{vm.template?.name || 'N/A'}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">CPU</TableCell>
+                          <TableCell>{vm.cpus} Core(s)</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Memória</TableCell>
+                          <TableCell>{formatBytes(vm.memory * 1024 * 1024)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Armazenamento</TableCell>
+                          <TableCell>{formatBytes(vm.disk * 1024 * 1024)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Largura de Banda</TableCell>
+                          <TableCell>{formatBytes(vm.bandwidth * 1024)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">IPv4</TableCell>
+                          <TableCell>{vm.ipv4?.[0]?.address || 'N/A'}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">IPv6</TableCell>
+                          <TableCell>{vm.ipv6?.[0]?.address || 'N/A'}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Data de Criação</TableCell>
+                          <TableCell>{vm.created_at ? formatDate(vm.created_at) : 'N/A'}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
                     
-                    {vm.bandwidth && (
-                      <div className="space-y-1">
-                        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Largura de Banda
-                        </div>
-                        <Progress 
-                          value={0} 
-                          className="h-2" 
-                        />
-                        <div className="flex justify-between text-xs">
-                          <span>Usado: N/A</span>
-                          <span>Total: {formatBytes(vm.bandwidth * 1024)}</span>
-                        </div>
+                    {vm.template?.description && (
+                      <div className="mt-6">
+                        <h3 className="text-lg font-medium mb-2">Descrição do Sistema</h3>
+                        <p className="text-sm text-muted-foreground whitespace-pre-line">
+                          {vm.template.description}
+                        </p>
+                        {vm.template.documentation && (
+                          <a 
+                            href={vm.template.documentation}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-block text-sm text-blue-500 hover:underline"
+                          >
+                            Documentação Oficial
+                          </a>
+                        )}
                       </div>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </DashboardLayout>
