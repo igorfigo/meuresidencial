@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -69,7 +70,8 @@ const mockServers: VPSServer[] = [
 ];
 
 export function useVPSMonitor() {
-  const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
+  // Since we only have one server, we can set the selected server ID directly
+  const [selectedServerId, setSelectedServerId] = useState<string | null>('vps-1');
   const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
 
   // Fetch all VPS servers
@@ -223,7 +225,7 @@ export function useVPSMonitor() {
     servers,
     isLoadingServers,
     serversError,
-    selectedServerId,
+    selectedServerId, 
     setSelectedServerId,
     serverDetails,
     isLoadingDetails,

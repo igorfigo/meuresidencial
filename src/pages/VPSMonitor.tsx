@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { format } from 'date-fns';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useVPSMonitor } from '@/hooks/use-vps-monitor';
@@ -60,8 +59,6 @@ const VPSMonitor: React.FC = () => {
     servers,
     isLoadingServers,
     serverDetails,
-    selectedServerId,
-    setSelectedServerId,
     timeRange,
     setTimeRange,
     getMetricsData,
@@ -79,17 +76,17 @@ const VPSMonitor: React.FC = () => {
   };
 
   const handleServerAction = async (action: 'start' | 'stop' | 'restart') => {
-    if (!selectedServerId) return;
+    if (!serverDetails) return;
     
     switch (action) {
       case 'start':
-        await startServer(selectedServerId);
+        await startServer(serverDetails.id);
         break;
       case 'stop':
-        await stopServer(selectedServerId);
+        await stopServer(serverDetails.id);
         break;
       case 'restart':
-        await restartServer(selectedServerId);
+        await restartServer(serverDetails.id);
         break;
     }
   };
@@ -131,76 +128,8 @@ const VPSMonitor: React.FC = () => {
     }));
   };
 
-  const renderServersList = () => {
-    if (isLoadingServers) {
-      return Array(1).fill(0).map((_, i) => (
-        <Card key={i} className="mb-4">
-          <CardHeader className="pb-2">
-            <Skeleton className="h-4 w-1/3" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-6 w-16" />
-            </div>
-          </CardContent>
-        </Card>
-      ));
-    }
-
-    if (!servers.length) {
-      return (
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>No Servers Found</AlertTitle>
-          <AlertDescription>
-            No VPS servers were found in your account.
-          </AlertDescription>
-        </Alert>
-      );
-    }
-
-    return servers.map(server => (
-      <Card 
-        key={server.id} 
-        className={`mb-4 cursor-pointer hover:border-primary transition-colors ${selectedServerId === server.id ? 'border-primary' : ''}`}
-        onClick={() => setSelectedServerId(server.id)}
-      >
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center">
-            <Server className="h-4 w-4 mr-2" />
-            {server.name}
-          </CardTitle>
-          <CardDescription>{server.ip}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <div className={`h-2 w-2 rounded-full mr-2 ${getStatusColor(server.status)}`}></div>
-              <span className="text-sm text-muted-foreground">{server.status.charAt(0).toUpperCase() + server.status.slice(1)}</span>
-            </div>
-            <div>
-              <span className="text-xs text-muted-foreground">OS: {server.os}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    ));
-  };
-
   const renderServerDetails = () => {
-    if (!selectedServerId) {
-      return (
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <Server className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p>Select a server from the list to view details</p>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (!serverDetails) {
+    if (isLoadingServers || !servers.length) {
       return (
         <Card>
           <CardContent className="pt-6">
@@ -216,6 +145,18 @@ const VPSMonitor: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      );
+    }
+
+    if (!serverDetails) {
+      return (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>No Server Data</AlertTitle>
+          <AlertDescription>
+            Unable to fetch server information at this time.
+          </AlertDescription>
+        </Alert>
       );
     }
 
@@ -356,7 +297,7 @@ const VPSMonitor: React.FC = () => {
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={formatDataForCharts(getMetricsData(selectedServerId, 'cpu'))}
+                    data={formatDataForCharts(getMetricsData(serverDetails.id, 'cpu'))}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
@@ -385,7 +326,7 @@ const VPSMonitor: React.FC = () => {
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={formatDataForCharts(getMetricsData(selectedServerId, 'memory'))}
+                    data={formatDataForCharts(getMetricsData(serverDetails.id, 'memory'))}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
@@ -415,7 +356,7 @@ const VPSMonitor: React.FC = () => {
                 <div className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={formatDataForCharts(getMetricsData(selectedServerId, 'disk'))}
+                      data={formatDataForCharts(getMetricsData(serverDetails.id, 'disk'))}
                       margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
@@ -444,7 +385,7 @@ const VPSMonitor: React.FC = () => {
                 <div className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={formatDataForCharts(getMetricsData(selectedServerId, 'network'))}
+                      data={formatDataForCharts(getMetricsData(serverDetails.id, 'network'))}
                       margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
@@ -539,15 +480,8 @@ const VPSMonitor: React.FC = () => {
         
         <Separator />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <div className="md:col-span-1">
-            <h2 className="text-xl font-semibold mb-4">Your Server</h2>
-            {renderServersList()}
-          </div>
-          
-          <div className="md:col-span-2 lg:col-span-3">
-            {renderServerDetails()}
-          </div>
+        <div>
+          {renderServerDetails()}
         </div>
       </div>
     </DashboardLayout>
