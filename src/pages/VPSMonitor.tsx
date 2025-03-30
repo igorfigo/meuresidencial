@@ -162,7 +162,6 @@ const VPSMonitor: React.FC = () => {
 
     return (
       <div className="space-y-6">
-        {/* Server Overview */}
         <Card>
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
@@ -269,7 +268,6 @@ const VPSMonitor: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Performance Metrics */}
         <div>
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Performance Metrics</h3>
@@ -408,7 +406,6 @@ const VPSMonitor: React.FC = () => {
           </div>
         </div>
         
-        {/* Server Information */}
         <Card>
           <CardHeader>
             <CardTitle>Server Information</CardTitle>

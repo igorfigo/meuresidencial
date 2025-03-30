@@ -43,25 +43,25 @@ const mockServers: VPSServer[] = [
     id: 'vps-1',
     name: 'Production Server',
     status: 'running',
-    ip: '193.122.123.45',
+    ip: '82.25.76.200',
     hostname: HOSTINGER_HOSTNAME,
     cpu: {
       cores: 4,
-      utilization: 42
+      utilization: 35
     },
     memory: {
       total: 8,
-      used: 5.2,
-      utilization: 65
+      used: 4.3,
+      utilization: 54
     },
     disk: {
       total: 100,
-      used: 32,
-      utilization: 32
+      used: 45,
+      utilization: 45
     },
     network: {
-      incoming: 5.2,
-      outgoing: 2.8
+      incoming: 6.8,
+      outgoing: 3.5
     },
     os: 'Ubuntu 22.04 LTS',
     location: 'Europe (Helsinki)',
