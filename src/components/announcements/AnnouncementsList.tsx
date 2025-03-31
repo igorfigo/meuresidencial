@@ -126,7 +126,13 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.text(contentLines, margin, contentYStart + 30);
+      
+      const textOptions = {
+        align: "justify",
+        lineHeightFactor: 1.5
+      };
+      
+      doc.text(contentLines, margin, contentYStart + 30, textOptions);
       
       doc.setFontSize(12);
       doc.text("Administração do Condomínio", 105, 260, { align: "center" });
