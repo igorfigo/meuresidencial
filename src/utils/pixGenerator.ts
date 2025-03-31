@@ -1,3 +1,4 @@
+
 // Custom CRC16-CCITT-FALSE implementation
 const crc16ccitt = (input: string): string => {
   // Polynomial: 0x1021
@@ -33,8 +34,7 @@ interface PixData {
   keyType: string;
   key: string;
   amount: number;
-  matricula: string; // This will now store the condominium name instead of matricula
-  city: string;
+  matricula: string; // This will store the condominium name instead of matricula
   reference?: string;
 }
 
@@ -119,14 +119,6 @@ export const generatePixString = (data: PixData): string => {
     .substring(0, 25);
     
   payload['59'] = cleanedMatricula;
-
-  // Merchant City (limited to 15 characters)
-  // Enhanced cleaning for city: remove accents and concatenate words
-  const cleanedCity = cleanText(data.city)
-    .replace(/\s+/g, '') // Remove all spaces to concatenate words
-    .substring(0, 15);
-    
-  payload['60'] = cleanedCity;
 
   // Additional information (reference)
   if (data.reference) {

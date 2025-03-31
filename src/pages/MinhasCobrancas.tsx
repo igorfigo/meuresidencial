@@ -375,7 +375,6 @@ const MinhasCobrancas = () => {
       key: pixSettings.chavepix.trim(),
       amount: amount,
       matricula: condominiumDetails.nomecondominio || '',
-      city: condominiumDetails.cidade.trim() || '',
       reference: ""
     };
     
