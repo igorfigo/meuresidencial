@@ -10,7 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, BRLToNumber } from '@/utils/currency';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle, QrCode } from 'lucide-react';
+import { PixPaymentModal } from '@/components/pix/PixPaymentModal';
+import { generatePixString } from '@/utils/pixGenerator';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -34,6 +37,14 @@ interface Charge {
 
 interface PixSettings {
   diavencimento: string;
+  tipochave: string;
+  chavepix: string;
+  jurosaodia: string;
+}
+
+interface Condominium {
+  nomecondominio: string;
+  cidade: string;
 }
 
 const statusColors = {
@@ -112,6 +123,9 @@ function getDueDateFromPixSettings(month: string, year: string, dayOfMonth: stri
 const MinhasCobrancas = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<string>('pending');
+  const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
+  const [showPixModal, setShowPixModal] = useState<boolean>(false);
+  const [pixCode, setPixCode] = useState<string>('');
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
@@ -151,19 +165,45 @@ const MinhasCobrancas = () => {
       try {
         const { data, error } = await supabase
           .from('pix_receipt_settings')
-          .select('diavencimento')
+          .select('diavencimento, tipochave, chavepix, jurosaodia')
           .eq('matricula', matricula)
           .single();
           
         if (error) {
           console.error('Error fetching PIX settings:', error);
-          return { diavencimento: '10' };
+          return { diavencimento: '10', tipochave: '', chavepix: '', jurosaodia: '0.033' };
         }
         
         return data;
       } catch (err) {
         console.error('Error in PIX settings fetch:', err);
-        return { diavencimento: '10' };
+        return { diavencimento: '10', tipochave: '', chavepix: '', jurosaodia: '0.033' };
+      }
+    },
+    enabled: !!matricula
+  });
+
+  const { data: condominiumDetails } = useQuery({
+    queryKey: ['condominium-details', matricula],
+    queryFn: async () => {
+      if (!matricula) return null;
+
+      try {
+        const { data, error } = await supabase
+          .from('condominiums')
+          .select('nomecondominio, cidade')
+          .eq('matricula', matricula)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching condominium details:', error);
+          return null;
+        }
+        
+        return data;
+      } catch (err) {
+        console.error('Error in condominium details fetch:', err);
+        return null;
       }
     },
     enabled: !!matricula
@@ -313,6 +353,31 @@ const MinhasCobrancas = () => {
     return 0;
   });
 
+  const handleGeneratePix = (charge: Charge) => {
+    if (!pixSettings || !condominiumDetails) return;
+    
+    const amount = BRLToNumber(charge.amount);
+    
+    const pixData = {
+      keyType: pixSettings.tipochave || '',
+      key: pixSettings.chavepix || '',
+      amount: amount,
+      receiverName: condominiumDetails.nomecondominio || 'Condomínio',
+      city: condominiumDetails.cidade || '',
+      reference: `Condominio ${charge.unit} ${charge.month}/${charge.year}`
+    };
+    
+    const generatedPixCode = generatePixString(pixData);
+    setPixCode(generatedPixCode);
+    setSelectedCharge(charge);
+    setShowPixModal(true);
+  };
+
+  const closePixModal = () => {
+    setShowPixModal(false);
+    setSelectedCharge(null);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -365,6 +430,9 @@ const MinhasCobrancas = () => {
                         <TableHead>Pagamento</TableHead>
                       )}
                       <TableHead>Status</TableHead>
+                      {activeTab === 'pending' && (
+                        <TableHead className="text-center">Ações</TableHead>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -392,6 +460,21 @@ const MinhasCobrancas = () => {
                             {statusColors[charge.status].label}
                           </Badge>
                         </TableCell>
+                        {activeTab === 'pending' && (
+                          <TableCell className="text-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1"
+                              onClick={() => handleGeneratePix(charge)}
+                              disabled={!pixSettings?.chavepix}
+                              title={pixSettings?.chavepix ? "Gerar código PIX" : "PIX não configurado"}
+                            >
+                              <QrCode className="h-4 w-4" />
+                              Gerar PIX
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -401,6 +484,18 @@ const MinhasCobrancas = () => {
           </CardContent>
         </Card>
       </div>
+
+      {selectedCharge && (
+        <PixPaymentModal
+          isOpen={showPixModal}
+          onClose={closePixModal}
+          pixCode={pixCode}
+          amount={BRLToNumber(selectedCharge.amount)}
+          month={selectedCharge.month}
+          year={selectedCharge.year}
+          receiverName={condominiumDetails?.nomecondominio || 'Condomínio'}
+        />
+      )}
     </DashboardLayout>
   );
 };
