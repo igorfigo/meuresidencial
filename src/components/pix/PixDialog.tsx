@@ -152,10 +152,6 @@ export const PixDialog = ({
                 </div>
               )}
             </div>
-            
-            <div className="text-xs text-gray-600 text-center p-2 bg-blue-50 border border-blue-100 rounded-md w-full">
-              <p>Escaneie o QR Code acima com o aplicativo do seu banco para realizar o pagamento.</p>
-            </div>
           </div>
           
           {/* Copy Code Button */}
@@ -168,17 +164,10 @@ export const PixDialog = ({
               <Copy className="h-4 w-4 mr-2" />
               Copiar código PIX
             </Button>
-            
-            <div className="text-xs text-gray-600 text-center p-2 mt-2">
-              <p>Após copiar o código PIX, cole-o no aplicativo do seu banco para realizar o pagamento.</p>
-            </div>
-          </div>
-          
-          <div className="mt-4 text-sm text-center text-gray-500">
-            <p>Caso tenha dificuldades, entre em contato com a administração do condomínio.</p>
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
+
