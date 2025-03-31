@@ -10,7 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, BRLToNumber } from '@/utils/currency';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle, CreditCard } from 'lucide-react';
+import { PixDialog } from '@/components/pix/PixDialog';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -34,6 +36,12 @@ interface Charge {
 
 interface PixSettings {
   diavencimento: string;
+  tipochave: string;
+  chavepix: string;
+}
+
+interface Condominium {
+  nomecondominio: string;
 }
 
 const statusColors = {
@@ -112,6 +120,8 @@ function getDueDateFromPixSettings(month: string, year: string, dayOfMonth: stri
 const MinhasCobrancas = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState<string>('pending');
+  const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
+  const [isPixDialogOpen, setIsPixDialogOpen] = useState(false);
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
@@ -151,19 +161,45 @@ const MinhasCobrancas = () => {
       try {
         const { data, error } = await supabase
           .from('pix_receipt_settings')
-          .select('diavencimento')
+          .select('diavencimento, tipochave, chavepix')
           .eq('matricula', matricula)
           .single();
           
         if (error) {
           console.error('Error fetching PIX settings:', error);
-          return { diavencimento: '10' };
+          return { diavencimento: '10', tipochave: 'CPF', chavepix: '' };
         }
         
         return data;
       } catch (err) {
         console.error('Error in PIX settings fetch:', err);
-        return { diavencimento: '10' };
+        return { diavencimento: '10', tipochave: 'CPF', chavepix: '' };
+      }
+    },
+    enabled: !!matricula
+  });
+  
+  const { data: condominiumData } = useQuery({
+    queryKey: ['condominium-data', matricula],
+    queryFn: async () => {
+      if (!matricula) return null;
+
+      try {
+        const { data, error } = await supabase
+          .from('condominiums')
+          .select('nomecondominio')
+          .eq('matricula', matricula)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching condominium data:', error);
+          return null;
+        }
+        
+        return data;
+      } catch (err) {
+        console.error('Error in condominium data fetch:', err);
+        return null;
       }
     },
     enabled: !!matricula
@@ -313,6 +349,16 @@ const MinhasCobrancas = () => {
     return 0;
   });
 
+  const handleOpenPixDialog = (charge: Charge) => {
+    setSelectedCharge(charge);
+    setIsPixDialogOpen(true);
+  };
+
+  const handleClosePixDialog = () => {
+    setIsPixDialogOpen(false);
+    setSelectedCharge(null);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -365,6 +411,9 @@ const MinhasCobrancas = () => {
                         <TableHead>Pagamento</TableHead>
                       )}
                       <TableHead>Status</TableHead>
+                      {activeTab === 'pending' && (
+                        <TableHead className="text-right">Ações</TableHead>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -392,6 +441,20 @@ const MinhasCobrancas = () => {
                             {statusColors[charge.status].label}
                           </Badge>
                         </TableCell>
+                        {activeTab === 'pending' && (
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleOpenPixDialog(charge)}
+                              className="h-8 gap-1 text-brand-600"
+                              disabled={!pixSettings?.chavepix}
+                            >
+                              <CreditCard className="h-4 w-4" />
+                              <span>PIX</span>
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -401,6 +464,21 @@ const MinhasCobrancas = () => {
           </CardContent>
         </Card>
       </div>
+
+      {selectedCharge && pixSettings && condominiumData && (
+        <PixDialog
+          isOpen={isPixDialogOpen}
+          onClose={handleClosePixDialog}
+          pixData={{
+            keyType: pixSettings.tipochave as 'CPF' | 'CNPJ' | 'EMAIL' | 'TELEFONE',
+            pixKey: pixSettings.chavepix,
+            amount: BRLToNumber(selectedCharge.amount),
+            condominiumName: condominiumData.nomecondominio || matricula || '',
+          }}
+          month={selectedCharge.month}
+          year={selectedCharge.year}
+        />
+      )}
     </DashboardLayout>
   );
 };
