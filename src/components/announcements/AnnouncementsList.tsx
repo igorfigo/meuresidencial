@@ -85,30 +85,26 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     const announcement = await getAnnouncement(id);
     if (announcement) {
       const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
         compress: false,
-        putOnlyUsedFonts: true,
-        hotfixes: ["px_scaling"]
+        putOnlyUsedFonts: true
       });
       
       const leftMargin = 20;
       const rightMargin = 20;
       const topMargin = 20;
-      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageWidth = 210;
       const contentWidth = pageWidth - leftMargin - rightMargin;
       
       doc.setFillColor(155, 135, 245);
-      doc.rect(0, 0, pageWidth, 40, 'F');
+      doc.rect(0, 0, 210, 40, 'F');
       
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
-      doc.text("COMUNICADO OFICIAL", pageWidth / 2, 20, { align: "center" });
+      doc.text("COMUNICADO OFICIAL", 105, 20, { align: "center" });
       
       doc.setFontSize(12);
-      doc.text("CONDOMÍNIO", pageWidth / 2, 30, { align: "center" });
+      doc.text("CONDOMÍNIO", 105, 30, { align: "center" });
       
       doc.setTextColor(0, 0, 0);
       doc.setFont("helvetica", "normal");
@@ -123,41 +119,43 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const dateText = announcement.created_at 
         ? `Data: ${formatDate(announcement.created_at)}` 
         : `Data: ${formatDate(new Date().toISOString())}`;
-      doc.text(dateText, leftMargin + 5, 65);
+      doc.text(dateText, leftMargin + 10, 65);
       
       const referenceNumber = announcement.id ? 
         `Nº REF: ${announcement.id.substring(0, 8).toUpperCase()}` : 
         `Nº REF: ${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-      doc.text(referenceNumber, leftMargin + 5, 75);
+      doc.text(referenceNumber, leftMargin + 10, 75);
       
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text(announcement.title.toUpperCase(), pageWidth / 2, 100, { align: "center" });
+      doc.text(announcement.title.toUpperCase(), 105, 100, { align: "center" });
       
       doc.setLineWidth(0.5);
-      doc.line(pageWidth / 2 - 20, 105, pageWidth / 2 + 20, 105);
+      doc.line(85, 105, 125, 105);
       
-      const safeContentWidth = contentWidth - 20;
-      const contentLines = doc.splitTextToSize(announcement.content, safeContentWidth);
-      doc.text(contentLines, leftMargin + 5, 120);
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      
+      const contentLines = doc.splitTextToSize(announcement.content, contentWidth - 10);
+      doc.text(contentLines, leftMargin, 120);
       
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
       doc.line(leftMargin, 250, pageWidth - rightMargin, 250);
       
       doc.setFontSize(12);
-      doc.text("Administração do Condomínio", pageWidth / 2, 260, { align: "center" });
+      doc.text("Administração do Condomínio", 105, 260, { align: "center" });
       
       doc.setLineWidth(0.2);
       doc.line(65, 270, 145, 270);
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "italic");
-      doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, pageWidth / 2, 280, { align: "center" });
+      doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 105, 280, { align: "center" });
       
       doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
-      doc.text("www.meuresidencial.com", pageWidth / 2, 287, { align: "center" });
+      doc.text("www.meuresidencial.com", 105, 287, { align: "center" });
       
       const safeTitle = announcement.title
         .replace(/\s+/g, '_')
