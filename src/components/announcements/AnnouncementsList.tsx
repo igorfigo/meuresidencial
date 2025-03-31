@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -95,7 +94,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const margin = 20;
       const contentWidth = pageWidth - (margin * 2);
       
-      // Header with condominium information
       doc.setFillColor(155, 135, 245);
       doc.rect(0, 0, 210, 40, 'F');
       
@@ -112,29 +110,24 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       const contentYStart = 60;
       
-      // Process content to remove any potential icons or special characters
-      const cleanContent = announcement.content.replace(/[^\w\s\.\,\;\:\(\)\-\–\—\'\"]/g, ' ').trim();
+      const cleanContent = announcement.content.replace(/[^\p{L}\p{N}\s\.,;:!?()\-–—'"]/gu, '').trim();
       const contentLines = doc.splitTextToSize(cleanContent, contentWidth - 10);
       
       const contentHeight = 20 + 10 + (contentLines.length * 5) + 15;
       
-      // Content box with title and content
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(1);
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, contentHeight, 3, 3, 'FD');
       
-      // Title inside content box
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
-      // Content text
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       doc.text(contentLines, margin, contentYStart + 30);
       
-      // Footer
       doc.setFontSize(12);
       doc.text("Administração do Condomínio", 105, 260, { align: "center" });
       
