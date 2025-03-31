@@ -13,7 +13,7 @@ interface PixPaymentModalProps {
   amount: number;
   month: string;
   year: string;
-  receiverName?: string; // Make receiverName optional
+  receiverName: string;
 }
 
 export const PixPaymentModal: React.FC<PixPaymentModalProps> = ({
@@ -57,9 +57,7 @@ export const PixPaymentModal: React.FC<PixPaymentModalProps> = ({
           <div className="text-center mb-2">
             <p className="font-medium">Competência: {formattedMonth} de {year}</p>
             <p className="text-2xl font-bold text-brand-600 my-2">{formatCurrency(amount)}</p>
-            {receiverName && (
-              <p className="text-sm text-muted-foreground">Pagamento para: {receiverName}</p>
-            )}
+            <p className="text-sm text-muted-foreground">Pagamento para: {receiverName}</p>
           </div>
           
           <div className="bg-gray-100 p-4 rounded-lg">
