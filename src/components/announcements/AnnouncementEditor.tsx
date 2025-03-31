@@ -104,7 +104,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
       return;
     }
     
-    if (sendEmail || sendWhatsapp) {
+    if (sendEmail) {
       setShowConfirmDialog(true);
     } else {
       await saveAnnouncement();
@@ -123,7 +123,7 @@ const AnnouncementEditor: React.FC<AnnouncementEditorProps> = ({
         content,
         date,
         sent_by_email: sendEmail,
-        sent_by_whatsapp: sendWhatsapp
+        sent_by_whatsapp: false // Always set to false since we removed the option
       });
       
       onOpenChange(false);

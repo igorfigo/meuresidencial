@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -114,7 +115,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
       </CardContent>
       
       <CardFooter className="flex flex-wrap items-center justify-between gap-4 p-6 pt-0">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col">
           <div className="flex items-center space-x-2">
             <Checkbox 
               id="send-email" 
@@ -124,14 +125,10 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
             <Label htmlFor="send-email" className="cursor-pointer">Enviar E-mail aos Moradores</Label>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="send-whatsapp" 
-              checked={sendWhatsapp}
-              onCheckedChange={onSendWhatsappChange}
-            />
-            <Label htmlFor="send-whatsapp" className="cursor-pointer">Enviar Whatsapp aos Moradores</Label>
-          </div>
+          <p className="text-sm text-muted-foreground mt-2 ml-6">
+            Após cadastrar o comunicado, você poderá imprimir uma versão formatada 
+            para fixação em murais ou distribuição física.
+          </p>
         </div>
         
         <div className="flex flex-wrap items-center gap-2">

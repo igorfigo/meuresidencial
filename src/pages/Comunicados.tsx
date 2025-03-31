@@ -29,10 +29,8 @@ const Comunicados: React.FC = () => {
   const { user } = useApp();
   const { markAsViewed } = useNotifications();
   
-  // Check if the user is a resident
   const isResident = user?.isResident === true;
   
-  // Mark announcements as viewed when the page loads for residents
   useEffect(() => {
     if (isResident) {
       markAsViewed('announcements');
@@ -100,7 +98,7 @@ const Comunicados: React.FC = () => {
       return;
     }
     
-    if (sendEmail || sendWhatsapp) {
+    if (sendEmail) {
       setShowConfirmDialog(true);
     } else {
       saveAnnouncement();
@@ -119,7 +117,7 @@ const Comunicados: React.FC = () => {
         content,
         date,
         sent_by_email: sendEmail,
-        sent_by_whatsapp: sendWhatsapp
+        sent_by_whatsapp: false
       };
       
       if (selectedAnnouncement.id) {
@@ -144,7 +142,6 @@ const Comunicados: React.FC = () => {
   
   const handleTitleChange = (value: string) => {
     setTitle(value);
-    // Set the content based on the selected template title
     const templateContent = ANNOUNCEMENT_TEMPLATES[value as keyof typeof ANNOUNCEMENT_TEMPLATES];
     if (templateContent) {
       setContent(templateContent);
