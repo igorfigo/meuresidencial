@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Copy, QrCode, AlertCircle } from 'lucide-react';
+import { Copy, QrCode, AlertCircle, Info } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { generatePixCode, generatePixQRCode } from '@/utils/pixGenerator';
 import { toast } from 'sonner';
+import { formatCurrency, BRLToNumber } from '@/utils/currency';
 
 interface PixDialogProps {
   isOpen: boolean;
@@ -17,13 +18,54 @@ interface PixDialogProps {
   };
   month: string;
   year: string;
+  isOverdue?: boolean;
+  dueDate?: string;
+  interestRate?: string;
 }
 
-export const PixDialog = ({ isOpen, onClose, pixData, month, year }: PixDialogProps) => {
+export const PixDialog = ({ 
+  isOpen, 
+  onClose, 
+  pixData, 
+  month, 
+  year, 
+  isOverdue = false,
+  dueDate = '',
+  interestRate = '0.033'
+}: PixDialogProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  const pixCode = generatePixCode(pixData);
+  // Calculate interest if payment is overdue
+  const calculateTotalWithInterest = () => {
+    if (!isOverdue || !dueDate) return pixData.amount;
+    
+    const dueDateTime = new Date(dueDate);
+    const today = new Date();
+    
+    // Calculate days of delay (minimum 1)
+    const daysDelayed = Math.max(1, Math.floor((today.getTime() - dueDateTime.getTime()) / (1000 * 60 * 60 * 24)));
+    
+    // Convert interest rate string to number (e.g., "0.033" to 0.033)
+    const dailyInterestRate = parseFloat(interestRate) / 100;
+    
+    // Calculate interest amount
+    const interestAmount = pixData.amount * dailyInterestRate * daysDelayed;
+    
+    // Return total with interest
+    return pixData.amount + interestAmount;
+  };
+  
+  const totalAmount = calculateTotalWithInterest();
+  const interestAmount = totalAmount - pixData.amount;
+  
+  // Generate PIX code with the total amount (including interest if applicable)
+  const pixCodeData = {
+    ...pixData,
+    amount: totalAmount
+  };
+  
+  const pixCode = generatePixCode(pixCodeData);
   
   // Generate QR code on component mount
   useEffect(() => {
@@ -67,7 +109,25 @@ export const PixDialog = ({ isOpen, onClose, pixData, month, year }: PixDialogPr
           <DialogDescription className="mt-1">
             <div className="flex flex-col">
               <span className="text-gray-700">Competência: {monthName} de {year}</span>
-              <span className="text-gray-700">Valor: <span className="text-blue-600 font-semibold">R$ {pixData.amount.toFixed(2).replace('.', ',')}</span></span>
+              <span className="text-gray-700">
+                Valor: <span className="text-blue-600 font-semibold">
+                  {formatCurrency(totalAmount)}
+                </span>
+              </span>
+              
+              {isOverdue && interestAmount > 0 && (
+                <div className="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-md p-2">
+                  <div className="flex items-center mb-1 text-amber-700">
+                    <Info className="h-4 w-4 mr-1" />
+                    <span className="font-medium">Pagamento em atraso</span>
+                  </div>
+                  <p className="text-amber-700">
+                    Valor original: {formatCurrency(pixData.amount)}<br />
+                    Juros calculados: {formatCurrency(interestAmount)} 
+                    <span className="text-xs ml-1">({interestRate}% ao dia)</span>
+                  </p>
+                </div>
+              )}
             </div>
           </DialogDescription>
         </DialogHeader>

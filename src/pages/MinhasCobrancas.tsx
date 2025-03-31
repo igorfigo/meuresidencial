@@ -38,6 +38,7 @@ interface PixSettings {
   diavencimento: string;
   tipochave: string;
   chavepix: string;
+  jurosaodia: string;
 }
 
 interface Condominium {
@@ -161,19 +162,19 @@ const MinhasCobrancas = () => {
       try {
         const { data, error } = await supabase
           .from('pix_receipt_settings')
-          .select('diavencimento, tipochave, chavepix')
+          .select('diavencimento, tipochave, chavepix, jurosaodia')
           .eq('matricula', matricula)
           .single();
           
         if (error) {
           console.error('Error fetching PIX settings:', error);
-          return { diavencimento: '10', tipochave: 'CPF', chavepix: '' };
+          return { diavencimento: '10', tipochave: 'CPF', chavepix: '', jurosaodia: '0.033' };
         }
         
         return data;
       } catch (err) {
         console.error('Error in PIX settings fetch:', err);
-        return { diavencimento: '10', tipochave: 'CPF', chavepix: '' };
+        return { diavencimento: '10', tipochave: 'CPF', chavepix: '', jurosaodia: '0.033' };
       }
     },
     enabled: !!matricula
@@ -477,6 +478,9 @@ const MinhasCobrancas = () => {
           }}
           month={selectedCharge.month}
           year={selectedCharge.year}
+          isOverdue={selectedCharge.status === 'overdue'}
+          dueDate={selectedCharge.due_date}
+          interestRate={pixSettings.jurosaodia || '0.033'}
         />
       )}
     </DashboardLayout>
