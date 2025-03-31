@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
-import { Eye, Trash2, Mail, MessageCircleMore } from 'lucide-react';
+import { Eye, Trash2, Mail, MessageCircleMore, Printer } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +34,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { jsPDF } from 'jspdf';
 
 interface AnnouncementsListProps {
   onEdit?: (announcement: Announcement) => void;
@@ -78,6 +79,47 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     if (deleteId) {
       await removeAnnouncement(deleteId);
       setDeleteId(null);
+    }
+  };
+
+  // Generate PDF for printing
+  const handlePrintAnnouncement = async (id: string) => {
+    const announcement = await getAnnouncement(id);
+    if (announcement) {
+      const doc = new jsPDF();
+      
+      // Add the title
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("COMUNICADO", 105, 20, { align: "center" });
+      
+      // Add the date
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      const dateText = announcement.created_at 
+        ? `Data: ${formatDate(announcement.created_at)}` 
+        : `Data: ${formatDate(new Date().toISOString())}`;
+      doc.text(dateText, 20, 35);
+      
+      // Add the title of the announcement
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(announcement.title, 20, 45);
+      
+      // Add the content of the announcement
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      
+      // Split content to fit the page width
+      const splitContent = doc.splitTextToSize(announcement.content, 170);
+      doc.text(splitContent, 20, 55);
+      
+      // Add footer with signature
+      doc.setFontSize(12);
+      doc.text("Administração do Condomínio", 105, 270, { align: "center" });
+      
+      // Save the PDF
+      doc.save(`comunicado_${announcement.title.replace(/\s+/g, '_').toLowerCase()}.pdf`);
     }
   };
 
@@ -175,14 +217,26 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                         <Eye className="h-4 w-4" />
                       </Button>
                       
-                      {!isResident && onEdit && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => announcement.id && handleDeleteClick(announcement.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
+                      {!isResident && (
+                        <>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => announcement.id && handlePrintAnnouncement(announcement.id)}
+                          >
+                            <Printer className="h-4 w-4 text-blue-500" />
+                          </Button>
+                          
+                          {onEdit && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => announcement.id && handleDeleteClick(announcement.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          )}
+                        </>
                       )}
                     </div>
                   </TableCell>
@@ -258,6 +312,20 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                   </div>
                 </div>
               </div>
+              
+              {!isResident && (
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => detailView.id && handlePrintAnnouncement(detailView.id)}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Printer className="h-4 w-4" />
+                    Imprimir
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
