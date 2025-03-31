@@ -91,10 +91,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       });
       
       const pageWidth = doc.internal.pageSize.getWidth();
-      const leftMargin = 20;
-      const rightMargin = 20;
-      const topMargin = 20;
-      const contentWidth = pageWidth - leftMargin - rightMargin;
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
       
       doc.setFillColor(155, 135, 245);
       doc.rect(0, 0, 210, 40, 'F');
@@ -112,20 +110,20 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
-      doc.line(leftMargin, 50, pageWidth - rightMargin, 50);
+      doc.line(margin, 50, pageWidth - margin, 50);
       
       doc.setFillColor(240, 240, 250);
-      doc.rect(leftMargin, 55, contentWidth, 30, 'F');
+      doc.rect(margin, 55, contentWidth, 30, 'F');
       
       const dateText = announcement.created_at 
         ? `Data: ${formatDate(announcement.created_at)}` 
         : `Data: ${formatDate(new Date().toISOString())}`;
-      doc.text(dateText, leftMargin + 10, 65);
+      doc.text(dateText, margin + 10, 65);
       
       const referenceNumber = announcement.id ? 
         `Nº REF: ${announcement.id.substring(0, 8).toUpperCase()}` : 
         `Nº REF: ${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-      doc.text(referenceNumber, leftMargin + 10, 75);
+      doc.text(referenceNumber, margin + 10, 75);
       
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
@@ -137,12 +135,12 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       
-      const contentLines = doc.splitTextToSize(announcement.content, contentWidth - 10);
-      doc.text(contentLines, leftMargin + 5, 120);
+      const contentLines = doc.splitTextToSize(announcement.content, contentWidth);
+      doc.text(contentLines, margin, 120);
       
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
-      doc.line(leftMargin, 250, pageWidth - rightMargin, 250);
+      doc.line(margin, 250, pageWidth - margin, 250);
       
       doc.setFontSize(12);
       doc.text("Administração do Condomínio", 105, 260, { align: "center" });
