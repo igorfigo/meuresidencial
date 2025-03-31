@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import QRCode from 'qrcode.react';
 import { Check, Copy, QrCode, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/utils/currency';
 
@@ -48,6 +48,9 @@ export const PixPaymentModal: React.FC<PixPaymentModalProps> = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">Pagamento via PIX</DialogTitle>
+          <DialogDescription className="text-center">
+            Escaneie o QR code ou copie o código para pagar
+          </DialogDescription>
         </DialogHeader>
         
         <div className="flex flex-col items-center justify-center p-4 space-y-4">

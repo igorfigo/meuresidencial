@@ -29,7 +29,7 @@ interface PixData {
   reference?: string;
 }
 
-// Função para limpar texto removendo acentos e caracteres especiais
+// Function to clean text by removing accents and special characters
 const cleanText = (text: string): string => {
   return text
     .normalize('NFD')
@@ -39,25 +39,25 @@ const cleanText = (text: string): string => {
     .trim();
 };
 
-// Função para formatar valor com 2 casas decimais
+// Function to format amount with 2 decimal places
 const formatAmount = (amount: number): string => {
   return amount.toFixed(2);
 };
 
-// Função para gerar o código PIX copia e cola
+// Function to generate PIX copy and paste code
 export const generatePixString = (data: PixData): string => {
-  // Dados obrigatórios
+  // Required data
   const payload: Record<string, string> = {
-    '00': '01', // Payload Format Indicator (fixo '01')
-    '01': '11', // Point of Initiation Method (11 = QR estático)
+    '00': '01', // Payload Format Indicator (fixed '01')
+    '01': '11', // Point of Initiation Method (11 = static QR)
   };
 
   // Merchant Account Information
   const merchantAccountInfo: Record<string, string> = {
-    '00': 'br.gov.bcb.pix', // GUI (fixo 'br.gov.bcb.pix')
+    '00': 'br.gov.bcb.pix', // GUI (fixed 'br.gov.bcb.pix')
   };
 
-  // Definir o tipo da chave e o valor
+  // Define key type and value
   switch (data.keyType.toLowerCase()) {
     case 'cpf':
       merchantAccountInfo['01'] = '01'; // CPF
@@ -70,26 +70,26 @@ export const generatePixString = (data: PixData): string => {
       break;
     case 'telefone':
     case 'celular':
-      merchantAccountInfo['01'] = '04'; // Telefone
+      merchantAccountInfo['01'] = '04'; // Phone
       break;
     case 'aleatoria':
     case 'evp':
-      merchantAccountInfo['01'] = '05'; // Chave aleatória
+      merchantAccountInfo['01'] = '05'; // Random key
       break;
     default:
-      merchantAccountInfo['01'] = '05'; // Padrão para chave aleatória
+      merchantAccountInfo['01'] = '05'; // Default to random key
   }
 
   merchantAccountInfo['02'] = data.key;
 
-  // Transformar merchant account info em string
+  // Transform merchant account info into string
   const merchantAccountInfoString = Object.entries(merchantAccountInfo)
     .map(([id, value]) => `${id}${value.length.toString().padStart(2, '0')}${value}`)
     .join('');
 
   payload['26'] = `${merchantAccountInfoString.length.toString().padStart(2, '0')}${merchantAccountInfoString}`;
 
-  // Merchant Category Code (fixo '0000')
+  // Merchant Category Code (fixed '0000')
   payload['52'] = '0000';
 
   // Transaction Currency (986 = BRL)
@@ -103,15 +103,15 @@ export const generatePixString = (data: PixData): string => {
   // Country Code (BR)
   payload['58'] = 'BR';
 
-  // Merchant Name (limitado a 25 caracteres)
+  // Merchant Name (limited to 25 characters)
   const cleanedName = cleanText(data.receiverName).substring(0, 25);
   payload['59'] = cleanedName;
 
-  // Merchant City (limitado a 15 caracteres)
+  // Merchant City (limited to 15 characters)
   const cleanedCity = cleanText(data.city).substring(0, 15);
   payload['60'] = cleanedCity;
 
-  // Informações adicionais (referência)
+  // Additional information (reference)
   if (data.reference) {
     const additionalInfo: Record<string, string> = {
       '05': data.reference.substring(0, 50),
@@ -124,17 +124,17 @@ export const generatePixString = (data: PixData): string => {
     payload['62'] = `${additionalInfoString.length.toString().padStart(2, '0')}${additionalInfoString}`;
   }
 
-  // Construir a string do PIX sem o CRC
+  // Build PIX string without CRC
   let pixString = Object.entries(payload)
     .map(([id, value]) => `${id}${value.length.toString().padStart(2, '0')}${value}`)
     .join('');
 
-  // Adicionar o campo de CRC (ainda não calculado)
+  // Add CRC field (not yet calculated)
   pixString += '6304';
 
-  // Calcular o CRC16
+  // Calculate CRC16
   const crc = crc16ccitt(pixString).toString(16).toUpperCase().padStart(4, '0');
 
-  // Retornar a string PIX completa
+  // Return complete PIX string
   return pixString + crc;
 };

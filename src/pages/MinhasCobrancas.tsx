@@ -354,23 +354,37 @@ const MinhasCobrancas = () => {
   });
 
   const handleGeneratePix = (charge: Charge) => {
-    if (!pixSettings || !condominiumDetails) return;
+    if (!pixSettings?.chavepix || !condominiumDetails) {
+      toast.error("Chave PIX não configurada para este condomínio");
+      return;
+    }
     
     const amount = BRLToNumber(charge.amount);
     
+    let keyType = pixSettings.tipochave || '';
+    keyType = keyType.toLowerCase();
+    
     const pixData = {
-      keyType: pixSettings.tipochave || '',
-      key: pixSettings.chavepix || '',
+      keyType: keyType,
+      key: pixSettings.chavepix.trim(),
       amount: amount,
-      receiverName: condominiumDetails.nomecondominio || 'Condomínio',
-      city: condominiumDetails.cidade || '',
+      receiverName: condominiumDetails.nomecondominio.trim() || 'Condomínio',
+      city: condominiumDetails.cidade.trim() || '',
       reference: `Condominio ${charge.unit} ${charge.month}/${charge.year}`
     };
     
-    const generatedPixCode = generatePixString(pixData);
-    setPixCode(generatedPixCode);
-    setSelectedCharge(charge);
-    setShowPixModal(true);
+    console.log("Generating PIX with data:", pixData); // Debugging
+    
+    try {
+      const generatedPixCode = generatePixString(pixData);
+      console.log("Generated PIX code:", generatedPixCode); // Debugging
+      setPixCode(generatedPixCode);
+      setSelectedCharge(charge);
+      setShowPixModal(true);
+    } catch (error) {
+      console.error("Error generating PIX code:", error);
+      toast.error("Erro ao gerar código PIX. Por favor, tente novamente.");
+    }
   };
 
   const closePixModal = () => {
