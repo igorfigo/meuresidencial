@@ -1,23 +1,32 @@
-
-// Custom CRC16 implementation that doesn't rely on Buffer
-const crc16ccitt = (input: string): number => {
+// Custom CRC16-CCITT-FALSE implementation
+const crc16ccitt = (input: string): string => {
+  // Polynomial: 0x1021
   const polynomial = 0x1021;
+  // Initial value: 0xFFFF
   let crc = 0xFFFF;
   
+  // Process each character in the input string
   for (let i = 0; i < input.length; i++) {
+    // Get the character code (byte)
     const c = input.charCodeAt(i);
-    crc ^= (c << 8);
     
+    // Process each bit in the byte
     for (let j = 0; j < 8; j++) {
-      if (crc & 0x8000) {
-        crc = ((crc << 1) & 0xFFFF) ^ polynomial;
-      } else {
-        crc = (crc << 1) & 0xFFFF;
+      const bit = (c >> (7 - j)) & 1;
+      const msb = (crc >> 15) & 1;
+      
+      // Shift CRC left by 1 bit
+      crc = (crc << 1) & 0xFFFF;
+      
+      // If XOR of MSB and current bit is 1, XOR with polynomial
+      if (msb ^ bit) {
+        crc ^= polynomial;
       }
     }
   }
   
-  return crc & 0xFFFF;
+  // Return CRC as uppercase hexadecimal
+  return crc.toString(16).toUpperCase().padStart(4, '0');
 };
 
 interface PixData {
@@ -132,8 +141,8 @@ export const generatePixString = (data: PixData): string => {
   // Add CRC field (not yet calculated)
   pixString += '6304';
 
-  // Calculate CRC16
-  const crc = crc16ccitt(pixString).toString(16).toUpperCase().padStart(4, '0');
+  // Calculate CRC16-CCITT-FALSE
+  const crc = crc16ccitt(pixString);
 
   // Return complete PIX string
   return pixString + crc;
