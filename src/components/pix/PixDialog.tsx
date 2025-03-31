@@ -66,50 +66,52 @@ export const PixDialog = ({ isOpen, onClose, pixData, month, year }: PixDialogPr
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="copy">Copiar e Colar</TabsTrigger>
-            <TabsTrigger value="qrcode">QR Code</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="copy" className="p-4">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-full p-3 bg-gray-100 rounded-md overflow-x-auto text-xs font-mono">
-                {pixCode}
-              </div>
-              
-              <Button 
-                onClick={handleCopyClick} 
-                className="w-full"
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                Copiar código PIX
-              </Button>
-              
-              <p className="text-sm text-muted-foreground text-center">
-                Copie o código acima e cole no aplicativo do seu banco para realizar o pagamento.
-              </p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="qrcode" className="flex flex-col items-center p-4 space-y-4">
-            {qrCodeUrl ? (
+        <div className="w-full">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="copy">Copiar e Colar</TabsTrigger>
+              <TabsTrigger value="qrcode">QR Code</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="copy" className="p-4">
               <div className="flex flex-col items-center space-y-4">
-                <div className="border border-gray-200 p-2 rounded-md">
-                  <img src={qrCodeUrl} alt="QR Code PIX" className="w-64 h-64 object-contain" />
+                <div className="w-full p-3 bg-gray-100 rounded-md overflow-x-auto text-xs font-mono">
+                  {pixCode}
                 </div>
                 
+                <Button 
+                  onClick={handleCopyClick} 
+                  className="w-full"
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copiar código PIX
+                </Button>
+                
                 <p className="text-sm text-muted-foreground text-center">
-                  Escaneie o QR Code acima com o aplicativo do seu banco para realizar o pagamento.
+                  Copie o código acima e cole no aplicativo do seu banco para realizar o pagamento.
                 </p>
               </div>
-            ) : (
-              <div className="flex items-center justify-center h-64 w-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+            
+            <TabsContent value="qrcode" className="flex flex-col items-center p-4 space-y-4">
+              {qrCodeUrl ? (
+                <div className="flex flex-col items-center space-y-4 w-full">
+                  <div className="border border-gray-200 p-2 rounded-md max-w-full">
+                    <img src={qrCodeUrl} alt="QR Code PIX" className="w-64 h-64 max-w-full object-contain" />
+                  </div>
+                  
+                  <p className="text-sm text-muted-foreground text-center">
+                    Escaneie o QR Code acima com o aplicativo do seu banco para realizar o pagamento.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-64 w-full">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </DialogContent>
     </Dialog>
   );
