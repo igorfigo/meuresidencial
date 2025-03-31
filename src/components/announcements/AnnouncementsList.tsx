@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -113,8 +112,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       const cleanContent = announcement.content.replace(/[^\p{L}\p{N}\s\.,;:!?()\-–—'"]/gu, '').trim();
       
-      // Use more of the available width for content
-      const contentPadding = 2; // Reduced padding on each side
+      const contentPadding = 10;
       const effectiveContentWidth = contentWidth - (contentPadding * 2);
       const contentLines = doc.splitTextToSize(cleanContent, effectiveContentWidth);
       
@@ -132,7 +130,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       
-      // Position text with minimal margins inside the content box
       const textX = margin + contentPadding;
       doc.text(contentLines, textX, contentYStart + 30);
       
