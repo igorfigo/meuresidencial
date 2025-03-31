@@ -34,7 +34,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { jsPDF } from 'jspdf';
-import { useApp } from '@/contexts/AppContext';
 
 interface AnnouncementsListProps {
   onEdit?: (announcement: Announcement) => void;
@@ -55,7 +54,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [detailView, setDetailView] = useState<Announcement | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const { user } = useApp();
   
   const formatDate = (dateString: string) => {
     try {
@@ -83,86 +81,105 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     }
   };
 
+  // Generate enhanced PDF for printing
   const handlePrintAnnouncement = async (id: string) => {
     const announcement = await getAnnouncement(id);
     if (announcement) {
       const doc = new jsPDF();
       
-      doc.setFillColor(155, 135, 245);
+      // Add background color at the top
+      doc.setFillColor(155, 135, 245); // Primary Purple from the theme
       doc.rect(0, 0, 210, 40, 'F');
       
+      // Add logo or header image (if available)
+      // For now, we'll use a decorative element
       doc.setDrawColor(255, 255, 255);
       doc.setLineWidth(1);
-      doc.line(50, 38, 160, 38);
+      doc.line(20, 25, 190, 25);
       
+      // Add the main title with white color on purple background
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
       doc.setFont("helvetica", "bold");
-      doc.text("COMUNICADO OFICIAL", 105, 20, { align: "center" });
+      doc.text("COMUNICADO OFICIAL", 105, 15, { align: "center" });
       
-      doc.setFontSize(14);
-      const condominiumName = user?.nomeCondominio || "CONDOMÍNIO";
-      doc.text(condominiumName.toUpperCase(), 105, 32, { align: "center" });
+      // Add condominium name (placeholder - would come from user context in a real app)
+      doc.setFontSize(12);
+      doc.text("CONDOMÍNIO", 105, 30, { align: "center" });
       
+      // Reset colors for the rest of the document
       doc.setTextColor(0, 0, 0);
       
+      // Add a decorative line
       doc.setDrawColor(155, 135, 245);
-      doc.line(50, 60, 160, 60);
+      doc.setLineWidth(0.5);
+      doc.line(20, 50, 190, 50);
       
-      doc.setFillColor(240, 240, 250);
-      doc.rect(50, 70, 110, 25, 'F');
+      // Add information header section
+      doc.setFillColor(240, 240, 250); // Light purple background
+      doc.rect(20, 55, 170, 30, 'F');
       
+      // Add the date
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
       const dateText = announcement.created_at 
         ? `Data: ${formatDate(announcement.created_at)}` 
         : `Data: ${formatDate(new Date().toISOString())}`;
-      doc.setFontSize(12);
-      doc.text(dateText, 60, 85);
+      doc.text(dateText, 30, 65);
       
+      // Add reference number (using ID as reference)
+      const referenceNumber = announcement.id ? 
+        `Nº REF: ${announcement.id.substring(0, 8).toUpperCase()}` : 
+        `Nº REF: ${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+      doc.text(referenceNumber, 30, 75);
+      
+      // Add visual icon/decoration to separate content sections
       doc.setFillColor(155, 135, 245);
-      doc.circle(105, 115, 4, 'F');
+      doc.circle(105, 95, 3, 'F');
       
-      doc.setFontSize(18);
+      // Add document title with improved styling
+      doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text(announcement.title.toUpperCase(), 105, 130, { align: "center" });
+      doc.text(announcement.title.toUpperCase(), 105, 110, { align: "center" });
       
+      // Add a small decorative element
       doc.setLineWidth(0.5);
-      doc.line(65, 135, 145, 135);
+      doc.line(85, 115, 125, 115);
       
-      let formattedContent = announcement.content;
+      // Add the content of the announcement with better formatting
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
       
-      const contentLines = doc.splitTextToSize(formattedContent, 140);
-      doc.text(contentLines, 35, 150);
+      // Split content to fit the page width with better margins
+      const splitContent = doc.splitTextToSize(announcement.content, 150);
+      doc.text(splitContent, 30, 130);
       
-      doc.setFontSize(11);
-      doc.text("Atenciosamente,", 105, 240, { align: "center" });
-      doc.setFont("helvetica", "bold");
-      doc.text("Administração do Condomínio", 105, 250, { align: "center" });
-      
+      // Add decorative footer line
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
-      doc.line(50, 260, 160, 260);
+      doc.line(20, 250, 190, 250);
       
+      // Add signature area
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Administração do Condomínio", 105, 260, { align: "center" });
+      
+      // Add signature line
+      doc.setLineWidth(0.2);
+      doc.line(65, 270, 145, 270);
+      
+      // Add date for the signature
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "italic");
+      doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 105, 280, { align: "center" });
+      
+      // Add document ID at the bottom
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100, 100, 100);
-      doc.text("www.meuresidencial.com", 105, 270, { align: "center" });
+      doc.text(`ID: ${announcement.id || "NOVO COMUNICADO"}`, 105, 287, { align: "center" });
       
-      let iconText = "";
-      
-      if (announcement.sent_by_email) {
-        iconText += "📧 ";
-      }
-      
-      if (announcement.sent_by_whatsapp) {
-        iconText += "💬 ";
-      }
-      
-      if (iconText) {
-        doc.setFontSize(8);
-        doc.setTextColor(130, 130, 130);
-        doc.text(iconText, 35, 270);
-      }
-      
+      // Save the PDF with proper name formatting
       const safeTitle = announcement.title
         .replace(/\s+/g, '_')
         .replace(/[^a-zA-Z0-9_]/g, '')
@@ -171,6 +188,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     }
   };
 
+  // Calculate pagination
   const totalPages = Math.ceil(announcements.length / ITEMS_PER_PAGE);
   const paginatedAnnouncements = announcements.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
