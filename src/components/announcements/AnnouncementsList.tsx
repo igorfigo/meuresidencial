@@ -116,19 +116,18 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       const cleanContent = announcement.content.replace(/[^\p{L}\p{N}\s\.,;:!?()\-–—'"]/gu, '').trim();
       
-      const contentPadding = 0;
       const effectiveContentWidth = contentWidth;
       
       doc.setFontSize(12);
       
       const contentLines = doc.splitTextToSize(cleanContent, effectiveContentWidth);
       
-      const contentHeight = 20 + 10 + (contentLines.length * 5) + 15;
+      const footerY = 250;
       
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(1);
       doc.setFillColor(255, 255, 255);
-      doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, pageHeight - (contentYStart - 5) - 20, 3, 3, 'FD');
+      doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, footerY - (contentYStart - 5), 3, 3, 'FD');
       
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
@@ -141,18 +140,18 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.text(contentLines, textX, contentYStart + 30);
       
       doc.setFontSize(12);
-      doc.text("Administração do Condomínio", 105, 260, { align: "center" });
+      doc.text("Administração do Condomínio", 105, footerY + 10, { align: "center" });
       
       doc.setLineWidth(0.2);
-      doc.line(65, 270, 145, 270);
+      doc.line(65, footerY + 20, 145, footerY + 20);
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "italic");
-      doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 105, 280, { align: "center" });
+      doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 105, footerY + 30, { align: "center" });
       
       doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
-      doc.text("www.meuresidencial.com", 105, 287, { align: "center" });
+      doc.text("www.meuresidencial.com", 105, footerY + 37, { align: "center" });
       
       const safeTitle = announcement.title
         .replace(/\s+/g, '_')
