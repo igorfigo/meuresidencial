@@ -173,8 +173,8 @@ const CadastroChavePix = () => {
         }
         break;
       case 'TELEFONE':
-        if (!/^\d{10,11}$/.test(value)) {
-          toast.error('Telefone deve conter 10 ou 11 dígitos numéricos');
+        if (!/^\d{11}$/.test(value)) {
+          toast.error('Telefone deve conter exatamente 11 dígitos numéricos');
           return false;
         }
         break;
