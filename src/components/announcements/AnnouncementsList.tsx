@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -98,61 +99,66 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const margin = 20;
       const contentWidth = pageWidth - (margin * 2);
       
+      // Header with purple background
       doc.setFillColor(155, 135, 245);
       doc.rect(0, 0, 210, 40, 'F');
       
+      // Header text
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
       doc.text("COMUNICADO OFICIAL", 105, 20, { align: "center" });
       
+      // Condominium name
       doc.setFontSize(12);
       doc.text(user?.nomeCondominio?.toUpperCase() || "CONDOMÍNIO", 105, 30, { align: "center" });
       
+      // Reset text color for content
       doc.setTextColor(0, 0, 0);
       doc.setFont("helvetica", "normal");
       
       const contentYStart = 60;
-      
-      const cleanContent = announcement.content.replace(/[^\p{L}\p{N}\s\.,;:!?()\-–—'"]/gu, '').trim();
-      
-      const effectiveContentWidth = contentWidth;
-      
-      doc.setFontSize(12);
-      
-      const contentLines = doc.splitTextToSize(cleanContent, effectiveContentWidth);
-      
       const footerY = 250;
       
+      // Content box with rounded corners and border
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(1);
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, footerY - (contentYStart - 5), 3, 3, 'FD');
       
+      // Title
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
+      // Content - using full content without cleaning
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
       
       const textX = margin;
+      // Split text into lines respecting the content width
+      const contentLines = doc.splitTextToSize(announcement.content, contentWidth);
       doc.text(contentLines, textX, contentYStart + 30);
       
+      // Footer signature
       doc.setFontSize(12);
       doc.text("Administração do Condomínio", 105, footerY + 10, { align: "center" });
       
+      // Signature line
       doc.setLineWidth(0.2);
       doc.line(65, footerY + 20, 145, footerY + 20);
       
+      // Generation date
       doc.setFontSize(10);
       doc.setFont("helvetica", "italic");
       doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 105, footerY + 30, { align: "center" });
       
+      // Footer website
       doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
       doc.text("www.meuresidencial.com", 105, footerY + 37, { align: "center" });
       
+      // Define safe filename
       const safeTitle = announcement.title
         .replace(/\s+/g, '_')
         .replace(/[^a-zA-Z0-9_]/g, '')
