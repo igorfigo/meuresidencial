@@ -120,6 +120,23 @@ export const generatePixCode = (data: PixData): string => {
 };
 
 export const generatePixQRCode = async (pixCode: string): Promise<string> => {
-  // Generate a URL for a QR code using a public API
-  return `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(pixCode)}`;
+  try {
+    // Use a more reliable QR code generation service with appropriate size and error correction
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(pixCode)}&margin=10&ecc=M`;
+    
+    // For debugging - try to pre-fetch the image to see if it works
+    const checkResponse = await fetch(qrCodeUrl, { method: 'HEAD' });
+    
+    if (!checkResponse.ok) {
+      console.error('QR code API response not OK:', checkResponse.status);
+      // Fallback to Google Charts API if first service fails
+      return `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(pixCode)}&chld=M|4`;
+    }
+    
+    return qrCodeUrl;
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    // Fallback to Google Charts API
+    return `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(pixCode)}&chld=M|4`;
+  }
 };

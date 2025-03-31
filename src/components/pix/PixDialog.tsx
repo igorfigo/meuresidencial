@@ -29,8 +29,13 @@ export const PixDialog = ({ isOpen, onClose, pixData, month, year }: PixDialogPr
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
+      console.log('Generating QR code for PIX code:', pixCode);
       generatePixQRCode(pixCode).then(url => {
+        console.log('QR code URL generated:', url);
         setQrCodeUrl(url);
+        setIsLoading(false);
+      }).catch(error => {
+        console.error('Error generating QR code:', error);
         setIsLoading(false);
       });
     }
@@ -56,7 +61,7 @@ export const PixDialog = ({ isOpen, onClose, pixData, month, year }: PixDialogPr
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="border-b pb-4">
           <DialogTitle className="text-xl font-bold text-blue-600">Pagar via PIX</DialogTitle>
           <DialogDescription className="mt-1">
@@ -68,60 +73,44 @@ export const PixDialog = ({ isOpen, onClose, pixData, month, year }: PixDialogPr
         </DialogHeader>
         
         <div className="pt-4 space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* Copy and Paste Section */}
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center gap-2 font-medium text-gray-800">
-                <Copy className="h-4 w-4 text-blue-600" />
-                <h3>Copiar e Colar</h3>
-              </div>
-              
-              <div className="w-full p-3 bg-white border border-gray-200 rounded-md overflow-x-auto text-xs font-mono h-28">
-                {pixCode}
-              </div>
-              
-              <Button 
-                onClick={handleCopyClick} 
-                variant="default"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2"
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                Copiar código PIX
-              </Button>
-              
-              <div className="text-xs text-gray-600 text-center p-2 bg-blue-50 border border-blue-100 rounded-md">
-                <p>Copie o código acima e cole no aplicativo do seu banco para realizar o pagamento.</p>
-              </div>
+          {/* QR Code Section */}
+          <div className="flex flex-col space-y-3 items-center">
+            <div className="flex items-center gap-2 font-medium text-gray-800">
+              <QrCode className="h-5 w-5 text-blue-600" />
+              <h3>QR Code</h3>
             </div>
             
-            {/* QR Code Section */}
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center gap-2 font-medium text-gray-800">
-                <QrCode className="h-4 w-4 text-blue-600" />
-                <h3>QR Code</h3>
-              </div>
-              
-              <div className="bg-white border border-gray-200 p-3 rounded-md w-full flex justify-center items-center h-28">
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                ) : (
-                  <img src={qrCodeUrl || ''} alt="QR Code PIX" className="h-full object-contain" />
-                )}
-              </div>
-              
-              <Button 
-                variant="outline"
-                className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
-                onClick={() => window.open(qrCodeUrl || '', '_blank')}
-                disabled={!qrCodeUrl || isLoading}
-              >
-                <QrCode className="h-4 w-4 mr-2" />
-                Ampliar QR Code
-              </Button>
-              
-              <div className="text-xs text-gray-600 text-center p-2 bg-blue-50 border border-blue-100 rounded-md">
-                <p>Escaneie o QR Code acima com o aplicativo do seu banco para realizar o pagamento.</p>
-              </div>
+            <div className="bg-white border border-gray-200 p-4 rounded-md w-full flex justify-center items-center h-64">
+              {isLoading ? (
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+              ) : qrCodeUrl ? (
+                <img src={qrCodeUrl} alt="QR Code PIX" className="max-h-full max-w-full object-contain" />
+              ) : (
+                <div className="text-center text-gray-500">
+                  <AlertCircle className="h-10 w-10 mx-auto mb-2" />
+                  <p>Não foi possível gerar o QR Code.</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="text-xs text-gray-600 text-center p-2 bg-blue-50 border border-blue-100 rounded-md w-full">
+              <p>Escaneie o QR Code acima com o aplicativo do seu banco para realizar o pagamento.</p>
+            </div>
+          </div>
+          
+          {/* Copy Code Button */}
+          <div className="flex flex-col mt-6">
+            <Button 
+              onClick={handleCopyClick} 
+              variant="default"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              Copiar código PIX
+            </Button>
+            
+            <div className="text-xs text-gray-600 text-center p-2 mt-2">
+              <p>Após copiar o código PIX, cole-o no aplicativo do seu banco para realizar o pagamento.</p>
             </div>
           </div>
           
