@@ -112,31 +112,18 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setLineWidth(0.5);
       doc.line(margin, 50, pageWidth - margin, 50);
       
-      doc.setFillColor(240, 240, 250);
-      doc.rect(margin, 55, contentWidth, 30, 'F');
-      
-      const dateText = announcement.created_at 
-        ? `Data: ${formatDate(announcement.created_at)}` 
-        : `Data: ${formatDate(new Date().toISOString())}`;
-      doc.text(dateText, margin + 10, 65);
-      
-      const referenceNumber = announcement.id ? 
-        `Nº REF: ${announcement.id.substring(0, 8).toUpperCase()}` : 
-        `Nº REF: ${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-      doc.text(referenceNumber, margin + 10, 75);
-      
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text(announcement.title.toUpperCase(), 105, 100, { align: "center" });
+      doc.text(announcement.title.toUpperCase(), 105, 70, { align: "center" });
       
       doc.setLineWidth(0.5);
-      doc.line(85, 105, 125, 105);
+      doc.line(85, 75, 125, 75);
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       
       const contentLines = doc.splitTextToSize(announcement.content, contentWidth);
-      doc.text(contentLines, margin, 120);
+      doc.text(contentLines, margin, 90);
       
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
