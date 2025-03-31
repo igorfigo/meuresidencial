@@ -118,7 +118,11 @@ export const generatePixString = (data: PixData): string => {
   payload['59'] = cleanedMatricula;
 
   // Merchant City (limited to 15 characters)
-  const cleanedCity = cleanText(data.city).substring(0, 15);
+  // Enhanced cleaning for city: remove accents and concatenate words
+  const cleanedCity = cleanText(data.city)
+    .replace(/\s+/g, '') // Remove all spaces to concatenate words
+    .substring(0, 15);
+    
   payload['60'] = cleanedCity;
 
   // Additional information (reference)
