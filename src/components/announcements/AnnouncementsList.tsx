@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -127,13 +126,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      
-      const textOptions = {
-        align: "justify" as "justify",  // Type assertion to specify the correct literal type
-        lineHeightFactor:.5
-      };
-      
-      doc.text(contentLines, margin, contentYStart + 30, textOptions);
+      doc.text(contentLines, margin, contentYStart + 30);
       
       doc.setFontSize(12);
       doc.text("Administração do Condomínio", 105, 260, { align: "center" });
