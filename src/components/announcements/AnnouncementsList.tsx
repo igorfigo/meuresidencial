@@ -84,12 +84,14 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   const handlePrintAnnouncement = async (id: string) => {
     const announcement = await getAnnouncement(id);
     if (announcement) {
-      const doc = new jsPDF();
+      const doc = new jsPDF({
+        compress: false
+      });
       
       const leftMargin = 20;
       const rightMargin = 20;
       const topMargin = 20;
-      const pageWidth = 210; // A4 width in mm
+      const pageWidth = 210;
       const contentWidth = pageWidth - leftMargin - rightMargin;
       
       doc.setFillColor(155, 135, 245);
@@ -132,8 +134,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
-      const splitContent = doc.splitTextToSize(announcement.content, contentWidth);
-      doc.text(splitContent, leftMargin, 120);
+      const contentLines = doc.splitTextToSize(announcement.content, contentWidth - 5);
+      doc.text(contentLines, leftMargin, 120);
       
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
