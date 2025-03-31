@@ -57,25 +57,32 @@ export const PixDialog = ({ isOpen, onClose, pixData, month, year }: PixDialogPr
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Pagar via PIX</DialogTitle>
-          <DialogDescription>
-            Competência: {monthName} de {year}
-            <br />
-            Valor: R$ {pixData.amount.toFixed(2).replace('.', ',')}
+        <DialogHeader className="pb-4 border-b">
+          <DialogTitle className="text-xl font-bold text-brand-600">Pagar via PIX</DialogTitle>
+          <DialogDescription className="mt-2">
+            <div className="flex flex-col space-y-1">
+              <span className="font-medium">Competência: <span className="font-normal">{monthName} de {year}</span></span>
+              <span className="font-medium">Valor: <span className="font-normal text-brand-600 font-bold">R$ {pixData.amount.toFixed(2).replace('.', ',')}</span></span>
+            </div>
           </DialogDescription>
         </DialogHeader>
         
-        <div className="w-full">
+        <div className="w-full pt-4">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="copy">Copiar e Colar</TabsTrigger>
-              <TabsTrigger value="qrcode">QR Code</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="copy" className="flex items-center gap-2">
+                <Copy className="h-4 w-4" />
+                <span>Copiar e Colar</span>
+              </TabsTrigger>
+              <TabsTrigger value="qrcode" className="flex items-center gap-2">
+                <QrCode className="h-4 w-4" />
+                <span>QR Code</span>
+              </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="copy" className="p-4">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="w-full p-3 bg-gray-100 rounded-md overflow-x-auto text-xs font-mono">
+            <TabsContent value="copy" className="p-4 border rounded-md bg-gray-50">
+              <div className="flex flex-col items-center space-y-6">
+                <div className="w-full p-4 bg-white rounded-md overflow-x-auto text-xs font-mono border shadow-sm">
                   {pixCode}
                 </div>
                 
@@ -87,22 +94,22 @@ export const PixDialog = ({ isOpen, onClose, pixData, month, year }: PixDialogPr
                   Copiar código PIX
                 </Button>
                 
-                <p className="text-sm text-muted-foreground text-center">
-                  Copie o código acima e cole no aplicativo do seu banco para realizar o pagamento.
-                </p>
+                <div className="text-sm text-muted-foreground text-center p-3 bg-blue-50 border border-blue-100 rounded-md w-full">
+                  <p>Copie o código acima e cole no aplicativo do seu banco para realizar o pagamento.</p>
+                </div>
               </div>
             </TabsContent>
             
-            <TabsContent value="qrcode" className="flex flex-col items-center p-4 space-y-4">
+            <TabsContent value="qrcode" className="p-4 border rounded-md bg-gray-50">
               {qrCodeUrl ? (
-                <div className="flex flex-col items-center space-y-4 w-full">
-                  <div className="border border-gray-200 p-2 rounded-md max-w-full">
+                <div className="flex flex-col items-center space-y-6 w-full">
+                  <div className="bg-white border p-4 rounded-md shadow-sm max-w-full flex justify-center">
                     <img src={qrCodeUrl} alt="QR Code PIX" className="w-64 h-64 max-w-full object-contain" />
                   </div>
                   
-                  <p className="text-sm text-muted-foreground text-center">
-                    Escaneie o QR Code acima com o aplicativo do seu banco para realizar o pagamento.
-                  </p>
+                  <div className="text-sm text-muted-foreground text-center p-3 bg-blue-50 border border-blue-100 rounded-md w-full">
+                    <p>Escaneie o QR Code acima com o aplicativo do seu banco para realizar o pagamento.</p>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-64 w-full">
