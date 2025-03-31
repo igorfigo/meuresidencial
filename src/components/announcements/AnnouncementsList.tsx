@@ -173,11 +173,11 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFont("helvetica", "italic");
       doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 105, 280, { align: "center" });
       
-      // Add document ID at the bottom
+      // Add website URL at the bottom instead of document ID
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100, 100, 100);
-      doc.text(`ID: ${announcement.id || "NOVO COMUNICADO"}`, 105, 287, { align: "center" });
+      doc.text("www.meuresidencial.com", 105, 287, { align: "center" });
       
       // Save the PDF with proper name formatting
       const safeTitle = announcement.title
