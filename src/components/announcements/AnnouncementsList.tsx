@@ -116,6 +116,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const contentPadding = 0;
       const effectiveContentWidth = contentWidth;
       
+      doc.setFontSize(10);
+      
       const contentLines = doc.splitTextToSize(cleanContent, effectiveContentWidth);
       
       const contentHeight = 20 + 10 + (contentLines.length * 5) + 15;
