@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
-import { Eye, Trash2, Mail, MessageCircleMore, Printer } from 'lucide-react';
+import { Eye, Trash2, Mail, Printer } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -81,105 +81,79 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     }
   };
 
-  // Generate enhanced PDF for printing
   const handlePrintAnnouncement = async (id: string) => {
     const announcement = await getAnnouncement(id);
     if (announcement) {
       const doc = new jsPDF();
       
-      // Add background color at the top
-      doc.setFillColor(155, 135, 245); // Primary Purple from the theme
+      doc.setFillColor(155, 135, 245);
       doc.rect(0, 0, 210, 40, 'F');
       
-      // Add logo or header image (if available)
-      // For now, we'll use a decorative element
       doc.setDrawColor(255, 255, 255);
       doc.setLineWidth(1);
       doc.line(20, 25, 190, 25);
       
-      // Add the main title with white color on purple background
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
       doc.setFont("helvetica", "bold");
       doc.text("COMUNICADO OFICIAL", 105, 15, { align: "center" });
       
-      // Add condominium name (placeholder - would come from user context in a real app)
       doc.setFontSize(12);
       doc.text("CONDOMÍNIO", 105, 30, { align: "center" });
       
-      // Reset colors for the rest of the document
       doc.setTextColor(0, 0, 0);
       
-      // Add a decorative line
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
       doc.line(20, 50, 190, 50);
       
-      // Add information header section
-      doc.setFillColor(240, 240, 250); // Light purple background
+      doc.setFillColor(240, 240, 250);
       doc.rect(20, 55, 170, 30, 'F');
       
-      // Add the date
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
       const dateText = announcement.created_at 
         ? `Data: ${formatDate(announcement.created_at)}` 
         : `Data: ${formatDate(new Date().toISOString())}`;
       doc.text(dateText, 30, 65);
       
-      // Add reference number (using ID as reference)
       const referenceNumber = announcement.id ? 
         `Nº REF: ${announcement.id.substring(0, 8).toUpperCase()}` : 
         `Nº REF: ${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
       doc.text(referenceNumber, 30, 75);
       
-      // Add visual icon/decoration to separate content sections
       doc.setFillColor(155, 135, 245);
       doc.circle(105, 95, 3, 'F');
       
-      // Add document title with improved styling
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, 110, { align: "center" });
       
-      // Add a small decorative element
       doc.setLineWidth(0.5);
       doc.line(85, 115, 125, 115);
       
-      // Add the content of the announcement with better formatting
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
-      
-      // Split content to fit the page width with better margins
       const splitContent = doc.splitTextToSize(announcement.content, 150);
       doc.text(splitContent, 30, 130);
       
-      // Add decorative footer line
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
       doc.line(20, 250, 190, 250);
       
-      // Add signature area
       doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
+      doc.setFont("helvetica", "normal");
+      
       doc.text("Administração do Condomínio", 105, 260, { align: "center" });
       
-      // Add signature line
       doc.setLineWidth(0.2);
       doc.line(65, 270, 145, 270);
       
-      // Add date for the signature
       doc.setFontSize(10);
       doc.setFont("helvetica", "italic");
       doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 105, 280, { align: "center" });
       
-      // Add website URL at the bottom instead of document ID
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100, 100, 100);
       doc.text("www.meuresidencial.com", 105, 287, { align: "center" });
       
-      // Save the PDF with proper name formatting
       const safeTitle = announcement.title
         .replace(/\s+/g, '_')
         .replace(/[^a-zA-Z0-9_]/g, '')
@@ -188,7 +162,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     }
   };
 
-  // Calculate pagination
   const totalPages = Math.ceil(announcements.length / ITEMS_PER_PAGE);
   const paginatedAnnouncements = announcements.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -244,7 +217,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                   <TableCell className="font-medium">{announcement.title}</TableCell>
                   <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
                   <TableCell className="text-center">
-                    <div className="flex justify-center space-x-2">
+                    <div className="flex justify-center">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -254,19 +227,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                           </TooltipTrigger>
                           <TooltipContent>
                             {announcement.sent_by_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <MessageCircleMore 
-                              className={`h-4 w-4 ${announcement.sent_by_whatsapp ? 'text-green-500' : 'text-gray-300'}`}
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {announcement.sent_by_whatsapp ? "Enviado por WhatsApp" : "Não enviado por WhatsApp"}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -365,14 +325,10 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
               
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Enviado via</h4>
-                <div className="flex space-x-4 mt-1">
+                <div className="flex mt-1">
                   <div className="flex items-center">
                     <Mail className={`h-4 w-4 mr-2 ${detailView.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} />
                     <span>{detailView.sent_by_email ? 'E-mail' : 'Não enviado por e-mail'}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <MessageCircleMore className={`h-4 w-4 mr-2 ${detailView.sent_by_whatsapp ? 'text-green-500' : 'text-gray-300'}`} />
-                    <span>{detailView.sent_by_whatsapp ? 'WhatsApp' : 'Não enviado por WhatsApp'}</span>
                   </div>
                 </div>
               </div>
