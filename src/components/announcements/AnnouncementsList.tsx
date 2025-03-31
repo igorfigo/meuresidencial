@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -94,32 +95,46 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const margin = 20;
       const contentWidth = pageWidth - (margin * 2);
       
-      doc.setTextColor(0, 0, 0);
+      doc.setFillColor(155, 135, 245);
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
       doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
-      doc.text("COMUNICADO OFICIAL", 105, 30, { align: "center" });
+      doc.text("COMUNICADO OFICIAL", 105, 20, { align: "center" });
       
       doc.setFontSize(12);
-      doc.text("CONDOMÍNIO", 105, 40, { align: "center" });
+      doc.text("CONDOMÍNIO", 105, 30, { align: "center" });
+      
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "normal");
       
       const contentYStart = 60;
       
       const cleanContent = announcement.content.replace(/[^\p{L}\p{N}\s\.,;:!?()\-–—'"]/gu, '').trim();
       
-      const contentPadding = 10;
+      // Use more of the available width for content
+      const contentPadding = 2; // Reduced padding on each side
       const effectiveContentWidth = contentWidth - (contentPadding * 2);
       const contentLines = doc.splitTextToSize(cleanContent, effectiveContentWidth);
       
       const contentHeight = 20 + 10 + (contentLines.length * 5) + 15;
       
+      doc.setDrawColor(155, 135, 245);
+      doc.setLineWidth(1);
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, contentHeight, 3, 3, 'FD');
+      
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text(announcement.title.toUpperCase(), 105, contentYStart, { align: "center" });
+      doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       
-      doc.text(contentLines, margin, contentYStart + 20);
+      // Position text with minimal margins inside the content box
+      const textX = margin + contentPadding;
+      doc.text(contentLines, textX, contentYStart + 30);
       
       doc.setFontSize(12);
       doc.text("Administração do Condomínio", 105, 260, { align: "center" });
