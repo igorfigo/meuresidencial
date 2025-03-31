@@ -112,10 +112,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       const cleanContent = announcement.content.replace(/[^\p{L}\p{N}\s\.,;:!?()\-–—'"]/gu, '').trim();
       
-      const textMarginLeft = 5;
-      const textMarginRight = 2.5;
-      
-      const effectiveContentWidth = contentWidth - (textMarginLeft + textMarginRight);
+      const textMargin = 5;
+      const effectiveContentWidth = contentWidth - (textMargin * 1.2);
       const contentLines = doc.splitTextToSize(cleanContent, effectiveContentWidth);
       
       const contentHeight = 20 + 10 + (contentLines.length * 5) + 15;
@@ -132,7 +130,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       
-      const textX = margin + textMarginLeft - 5;
+      const textX = margin;
       doc.text(contentLines, textX, contentYStart + 30);
       
       doc.setFontSize(12);
