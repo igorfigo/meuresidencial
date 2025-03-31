@@ -1,5 +1,24 @@
 
-import { crc16ccitt } from 'crc';
+// Custom CRC16 implementation that doesn't rely on Buffer
+const crc16ccitt = (input: string): number => {
+  const polynomial = 0x1021;
+  let crc = 0xFFFF;
+  
+  for (let i = 0; i < input.length; i++) {
+    const c = input.charCodeAt(i);
+    crc ^= (c << 8);
+    
+    for (let j = 0; j < 8; j++) {
+      if (crc & 0x8000) {
+        crc = ((crc << 1) & 0xFFFF) ^ polynomial;
+      } else {
+        crc = (crc << 1) & 0xFFFF;
+      }
+    }
+  }
+  
+  return crc & 0xFFFF;
+};
 
 interface PixData {
   keyType: string;
