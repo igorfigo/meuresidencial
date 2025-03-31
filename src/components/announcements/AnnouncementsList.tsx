@@ -34,6 +34,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { jsPDF } from 'jspdf';
+import { useApp } from '@/contexts/AppContext';
 
 interface AnnouncementsListProps {
   onEdit?: (announcement: Announcement) => void;
@@ -50,6 +51,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     getAnnouncement,
     removeAnnouncement
   } = useAnnouncements();
+  
+  const { user } = useApp();
   
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [detailView, setDetailView] = useState<Announcement | null>(null);
@@ -104,7 +107,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.text("COMUNICADO OFICIAL", 105, 20, { align: "center" });
       
       doc.setFontSize(12);
-      doc.text("CONDOMÍNIO", 105, 30, { align: "center" });
+      doc.text(user?.nomeCondominio?.toUpperCase() || "CONDOMÍNIO", 105, 30, { align: "center" });
       
       doc.setTextColor(0, 0, 0);
       doc.setFont("helvetica", "normal");
@@ -116,7 +119,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const contentPadding = 0;
       const effectiveContentWidth = contentWidth;
       
-      doc.setFontSize(10);
+      doc.setFontSize(12);
       
       const contentLines = doc.splitTextToSize(cleanContent, effectiveContentWidth);
       
@@ -125,13 +128,13 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(1);
       doc.setFillColor(255, 255, 255);
-      doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, contentHeight, 3, 3, 'FD');
+      doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, pageHeight - (contentYStart - 5) - 20, 3, 3, 'FD');
       
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
-      doc.setFontSize(10);
+      doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
       
       const textX = margin;
