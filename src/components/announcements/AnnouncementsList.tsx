@@ -134,7 +134,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setLineWidth(0.5);
       doc.line(85, 105, 125, 105);
       
-      doc.setFontSize(8);
+      doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       
       const contentLines = doc.splitTextToSize(announcement.content, contentWidth - 10);
