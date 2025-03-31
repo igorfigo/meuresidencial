@@ -88,7 +88,9 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     if (announcement) {
       const doc = new jsPDF();
       const { user } = useApp();
-      const condominiumName = user?.selectedCondominiumName || user?.condominiumName || 'CONDOMÍNIO';
+      
+      // Fix the property names to match the User type
+      const condominiumName = user?.nomeCondominio || 'CONDOMÍNIO';
       
       // Add background color at the top
       doc.setFillColor(155, 135, 245); // Primary Purple from the theme
