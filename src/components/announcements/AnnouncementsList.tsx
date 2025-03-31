@@ -93,78 +93,74 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       doc.setDrawColor(255, 255, 255);
       doc.setLineWidth(1);
-      doc.line(20, 25, 190, 25);
+      doc.line(50, 38, 160, 38);
       
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
       doc.setFont("helvetica", "bold");
-      doc.text("COMUNICADO OFICIAL", 105, 15, { align: "center" });
+      doc.text("COMUNICADO OFICIAL", 105, 20, { align: "center" });
       
       doc.setFontSize(14);
       const condominiumName = user?.nomeCondominio || "CONDOMÍNIO";
-      doc.text(condominiumName.toUpperCase(), 105, 30, { align: "center" });
+      doc.text(condominiumName.toUpperCase(), 105, 32, { align: "center" });
       
       doc.setTextColor(0, 0, 0);
       
       doc.setDrawColor(155, 135, 245);
-      doc.setLineWidth(0.5);
-      doc.line(20, 50, 190, 50);
+      doc.line(50, 60, 160, 60);
       
       doc.setFillColor(240, 240, 250);
-      doc.rect(20, 55, 170, 30, 'F');
+      doc.rect(50, 70, 110, 25, 'F');
       
       const dateText = announcement.created_at 
         ? `Data: ${formatDate(announcement.created_at)}` 
         : `Data: ${formatDate(new Date().toISOString())}`;
-      doc.text(dateText, 30, 70);
+      doc.setFontSize(12);
+      doc.text(dateText, 60, 85);
       
       doc.setFillColor(155, 135, 245);
-      doc.circle(105, 95, 3, 'F');
+      doc.circle(105, 115, 4, 'F');
       
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
-      doc.text(announcement.title.toUpperCase(), 105, 110, { align: "center" });
+      doc.text(announcement.title.toUpperCase(), 105, 130, { align: "center" });
       
       doc.setLineWidth(0.5);
-      doc.line(85, 115, 125, 115);
+      doc.line(65, 135, 145, 135);
       
-      const splitContent = doc.splitTextToSize(announcement.content, 150);
-      doc.text(splitContent, 30, 130);
+      let formattedContent = announcement.content;
       
-      doc.setFontSize(12);
+      const contentLines = doc.splitTextToSize(formattedContent, 140);
+      doc.text(contentLines, 35, 150);
+      
+      doc.setFontSize(11);
+      doc.text("Atenciosamente,", 105, 240, { align: "center" });
       doc.setFont("helvetica", "bold");
-      doc.text("Administração do Condomínio", 105, 240, { align: "center" });
-      
-      doc.setLineWidth(0.2);
-      doc.line(65, 250, 145, 250);
+      doc.text("Administração do Condomínio", 105, 250, { align: "center" });
       
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
-      doc.line(20, 260, 190, 260);
+      doc.line(50, 260, 160, 260);
       
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100, 100, 100);
-      doc.text("www.meuresidencial.com", 105, 280, { align: "center" });
+      doc.text("www.meuresidencial.com", 105, 270, { align: "center" });
       
-      if (announcement.sent_by_email || announcement.sent_by_whatsapp) {
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "italic");
-        let iconText = "Enviado via: ";
-        
-        if (announcement.sent_by_email) {
-          iconText += "E-mail";
-        }
-        
-        if (announcement.sent_by_whatsapp) {
-          if (announcement.sent_by_email) {
-            iconText += " e WhatsApp";
-          } else {
-            iconText += "WhatsApp";
-          }
-        }
-        
-        doc.text(iconText, 30, 270);
+      let iconText = "";
+      
+      if (announcement.sent_by_email) {
+        iconText += "📧 ";
+      }
+      
+      if (announcement.sent_by_whatsapp) {
+        iconText += "💬 ";
+      }
+      
+      if (iconText) {
+        doc.setFontSize(8);
+        doc.setTextColor(130, 130, 130);
+        doc.text(iconText, 35, 270);
       }
       
       const safeTitle = announcement.title
