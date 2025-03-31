@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -15,7 +14,7 @@ import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle, QrCode } from 'luci
 import { PixPaymentModal } from '@/components/pix/PixPaymentModal';
 import { generatePixString } from '@/utils/pixGenerator';
 import { Button } from '@/components/ui/button';
-import { useToast, toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -128,6 +127,7 @@ const MinhasCobrancas = () => {
   const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
   const [showPixModal, setShowPixModal] = useState<boolean>(false);
   const [pixCode, setPixCode] = useState<string>('');
+  const { toast } = useToast();
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
@@ -357,7 +357,11 @@ const MinhasCobrancas = () => {
 
   const handleGeneratePix = (charge: Charge) => {
     if (!pixSettings?.chavepix || !condominiumDetails) {
-      toast.error("Chave PIX não configurada para este condomínio");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Chave PIX não configurada para este condomínio"
+      });
       return;
     }
     
@@ -385,7 +389,11 @@ const MinhasCobrancas = () => {
       setShowPixModal(true);
     } catch (error) {
       console.error("Error generating PIX code:", error);
-      toast.error("Erro ao gerar código PIX. Por favor, tente novamente.");
+      toast({
+        variant: "destructive",
+        title: "Erro ao gerar código PIX",
+        description: "Por favor, tente novamente."
+      });
     }
   };
 
