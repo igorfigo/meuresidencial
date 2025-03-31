@@ -85,7 +85,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     const announcement = await getAnnouncement(id);
     if (announcement) {
       const doc = new jsPDF({
-        compress: false
+        compress: false,
+        putOnlyUsedFonts: true
       });
       
       const leftMargin = 20;
@@ -134,7 +135,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
-      const contentLines = doc.splitTextToSize(announcement.content, contentWidth - 5);
+      
+      const contentLines = doc.splitTextToSize(announcement.content, contentWidth - 10);
       doc.text(contentLines, leftMargin, 120);
       
       doc.setDrawColor(155, 135, 245);
