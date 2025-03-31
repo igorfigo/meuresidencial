@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -86,22 +87,13 @@ export function Sidebar() {
         location.pathname === '/despesas-empresariais') {
       setExpandedSubmenu('Business Management');
     }
-
-    // For managers, always set Financeiro as expanded regardless of current page
-    if (!user?.isAdmin && !user?.isResident) {
-      setExpandedSubmenu('Financeiro');
-    }
-  }, [location.pathname, markAsViewed, user?.isAdmin, user?.isResident]);
+  }, [location.pathname, markAsViewed]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const toggleSubmenu = (label: string) => {
-    // For managers, don't toggle Financeiro submenu to keep it always open
-    if (!user?.isAdmin && !user?.isResident && label === 'Financeiro') {
-      return;
-    }
     setExpandedSubmenu(expandedSubmenu === label ? null : label);
   };
 
@@ -193,9 +185,7 @@ export function Sidebar() {
       }
       
       if (item.submenu) {
-        // For managers, Financeiro is always expanded
-        const isFinanceiro = item.label === 'Financeiro' && !user?.isAdmin && !user?.isResident;
-        const isExpanded = isFinanceiro || expandedSubmenu === item.label;
+        const isExpanded = expandedSubmenu === item.label;
         const isActive = location.pathname === item.path || 
                         (item.submenu && item.submenu.some(subItem => location.pathname === subItem.path));
         
