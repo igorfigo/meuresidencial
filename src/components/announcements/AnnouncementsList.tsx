@@ -98,6 +98,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 20;
       const contentWidth = pageWidth - (margin * 2);
+      const innerMargin = 10; // Internal margin for content box
       
       // Header with purple background
       doc.setFillColor(155, 135, 245);
@@ -131,14 +132,17 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
-      // Content - using full content without cleaning
+      // Content - using full content with inner margins
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
       
-      const textX = margin;
-      // Split text into lines respecting the content width
-      const contentLines = doc.splitTextToSize(announcement.content, contentWidth);
-      doc.text(contentLines, textX, contentYStart + 30);
+      const textX = margin + innerMargin;
+      const textY = contentYStart + 30;
+      const textWidth = contentWidth - (innerMargin * 2);
+      
+      // Split text into lines respecting the content width with inner margins
+      const contentLines = doc.splitTextToSize(announcement.content, textWidth);
+      doc.text(contentLines, textX, textY);
       
       // Footer signature
       doc.setFontSize(12);
