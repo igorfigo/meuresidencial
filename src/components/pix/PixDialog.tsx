@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Copy, QrCode } from 'lucide-react';
+import { Copy, QrCode, AlertCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { generatePixCode, generatePixQRCode } from '@/utils/pixGenerator';
