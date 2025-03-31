@@ -74,6 +74,15 @@ export const generatePixCode = (data: PixData): string => {
       keyTypeId = '111';
   }
   
+  // Process phone number for TELEFONE type - add +55 prefix
+  let pixKey = data.pixKey;
+  if (data.keyType === 'TELEFONE') {
+    // Remove any non-digit characters first
+    const digits = pixKey.replace(/\D/g, '');
+    // Add +55 prefix if not already present
+    pixKey = digits.startsWith('55') ? `+${digits}` : `+55${digits}`;
+  }
+  
   // Build the PIX code according to the structure
   let pixCode = '';
   
@@ -90,7 +99,7 @@ export const generatePixCode = (data: PixData): string => {
   pixCode += keyTypeId;
   
   // PIX key
-  pixCode += data.pixKey;
+  pixCode += pixKey;
   
   // Fixed part and amount
   pixCode += '5204000053039865406';
