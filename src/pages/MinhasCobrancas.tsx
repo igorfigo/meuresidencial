@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -14,6 +15,7 @@ import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle, QrCode } from 'luci
 import { PixPaymentModal } from '@/components/pix/PixPaymentModal';
 import { generatePixString } from '@/utils/pixGenerator';
 import { Button } from '@/components/ui/button';
+import { useToast, toast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
