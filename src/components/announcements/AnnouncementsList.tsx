@@ -111,7 +111,10 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const contentYStart = 60;
       
       const cleanContent = announcement.content.replace(/[^\p{L}\p{N}\s\.,;:!?()\-–—'"]/gu, '').trim();
-      const contentLines = doc.splitTextToSize(cleanContent, contentWidth - 10);
+      
+      const textMargin = 10;
+      const effectiveContentWidth = contentWidth - (textMargin * 2);
+      const contentLines = doc.splitTextToSize(cleanContent, effectiveContentWidth);
       
       const contentHeight = 20 + 10 + (contentLines.length * 5) + 15;
       
@@ -126,7 +129,9 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.text(contentLines, margin, contentYStart + 30);
+      
+      const textX = margin + textMargin;
+      doc.text(contentLines, textX, contentYStart + 30);
       
       doc.setFontSize(12);
       doc.text("Administração do Condomínio", 105, 260, { align: "center" });
