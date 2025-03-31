@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -119,11 +120,22 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setLineWidth(0.5);
       doc.line(85, 75, 125, 75);
       
+      // Create content box with purple border
+      const contentYStart = 85;
+      const contentLines = doc.splitTextToSize(announcement.content, contentWidth - 10); // Subtract 10 to account for padding
+      const contentHeight = contentLines.length * 5 + 15; // Each line is approximately 5 units tall, plus padding
+      
+      // Draw a rectangle with purple border around the content
+      doc.setDrawColor(155, 135, 245); // Purple border color
+      doc.setLineWidth(1);
+      doc.setFillColor(255, 255, 255); // White background
+      doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, contentHeight, 3, 3, 'FD'); // FD = Fill and Draw
+      
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       
-      const contentLines = doc.splitTextToSize(announcement.content, contentWidth);
-      doc.text(contentLines, margin, 90);
+      // Add the content text inside the box with some padding
+      doc.text(contentLines, margin, contentYStart + 5);
       
       doc.setDrawColor(155, 135, 245);
       doc.setLineWidth(0.5);
