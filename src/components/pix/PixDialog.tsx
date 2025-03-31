@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Copy, QrCode, AlertCircle, Info } from 'lucide-react';
+import { Copy, QrCode, AlertCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { generatePixCode, generatePixQRCode } from '@/utils/pixGenerator';
 import { toast } from 'sonner';
-import { formatCurrency } from '@/utils/currency';
 
 interface PixDialogProps {
   isOpen: boolean;
@@ -18,66 +17,13 @@ interface PixDialogProps {
   };
   month: string;
   year: string;
-  isOverdue?: boolean;
-  dueDate?: string;
-  interestRate?: number;
 }
 
-export const PixDialog = ({ 
-  isOpen, 
-  onClose, 
-  pixData, 
-  month, 
-  year, 
-  isOverdue = false,
-  dueDate,
-  interestRate = 0.033 // Default daily interest rate is 0.033% (common in Brazil)
-}: PixDialogProps) => {
+export const PixDialog = ({ isOpen, onClose, pixData, month, year }: PixDialogProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [finalAmount, setFinalAmount] = useState<number>(pixData.amount);
-  const [interestAmount, setInterestAmount] = useState<number>(0);
   
-  // Calculate interest for overdue payment
-  useEffect(() => {
-    if (isOverdue && dueDate) {
-      try {
-        const dueDateTime = new Date(dueDate);
-        const today = new Date();
-        
-        // Calculate days overdue (not counting the due date itself)
-        const millisecondsPerDay = 24 * 60 * 60 * 1000;
-        const daysOverdue = Math.floor((today.getTime() - dueDateTime.getTime()) / millisecondsPerDay);
-        
-        if (daysOverdue > 0) {
-          // Calculate interest: principal * rate * days
-          const interest = pixData.amount * (interestRate / 100) * daysOverdue;
-          setInterestAmount(interest);
-          setFinalAmount(pixData.amount + interest);
-          
-          console.log(`Payment overdue by ${daysOverdue} days. Interest: ${interest.toFixed(2)}`);
-        } else {
-          setFinalAmount(pixData.amount);
-          setInterestAmount(0);
-        }
-      } catch (error) {
-        console.error('Error calculating interest:', error);
-        setFinalAmount(pixData.amount);
-        setInterestAmount(0);
-      }
-    } else {
-      setFinalAmount(pixData.amount);
-      setInterestAmount(0);
-    }
-  }, [isOverdue, dueDate, pixData.amount, interestRate]);
-  
-  // Use the finalAmount (with interest if applicable) for the PIX code
-  const pixCodeData = {
-    ...pixData,
-    amount: finalAmount
-  };
-  
-  const pixCode = generatePixCode(pixCodeData);
+  const pixCode = generatePixCode(pixData);
   
   // Generate QR code on component mount
   useEffect(() => {
@@ -121,25 +67,7 @@ export const PixDialog = ({
           <DialogDescription className="mt-1">
             <div className="flex flex-col">
               <span className="text-gray-700">Competência: {monthName} de {year}</span>
-              <span className="text-gray-700">
-                Valor: <span className="text-blue-600 font-semibold">
-                  {formatCurrency(finalAmount)}
-                </span>
-                {interestAmount > 0 && (
-                  <span className="ml-1 text-xs text-red-600">
-                    (inclui juros de {formatCurrency(interestAmount)})
-                  </span>
-                )}
-              </span>
-              
-              {isOverdue && interestAmount > 0 && (
-                <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md flex items-start text-xs">
-                  <Info size={14} className="text-amber-500 mt-0.5 mr-1.5 flex-shrink-0" />
-                  <span className="text-amber-700">
-                    Esta cobrança está em atraso. O valor inclui juros de {(interestRate).toFixed(3)}% ao dia.
-                  </span>
-                </div>
-              )}
+              <span className="text-gray-700">Valor: <span className="text-blue-600 font-semibold">R$ {pixData.amount.toFixed(2).replace('.', ',')}</span></span>
             </div>
           </DialogDescription>
         </DialogHeader>
