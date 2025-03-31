@@ -1,3 +1,4 @@
+
 // Custom CRC16-CCITT-FALSE implementation
 const crc16ccitt = (input: string): string => {
   // Polynomial: 0x1021
@@ -33,7 +34,7 @@ interface PixData {
   keyType: string;
   key: string;
   amount: number;
-  receiverName: string;
+  receiverName?: string; // Make receiverName optional
   city: string;
   reference?: string;
 }
@@ -112,9 +113,11 @@ export const generatePixString = (data: PixData): string => {
   // Country Code (BR)
   payload['58'] = 'BR';
 
-  // Merchant Name (limited to 25 characters)
-  const cleanedName = cleanText(data.receiverName).substring(0, 25);
-  payload['59'] = cleanedName;
+  // Merchant Name (removed - only include if explicitly provided)
+  if (data.receiverName) {
+    const cleanedName = cleanText(data.receiverName).substring(0, 25);
+    payload['59'] = cleanedName;
+  }
 
   // Merchant City (limited to 15 characters)
   const cleanedCity = cleanText(data.city).substring(0, 15);
