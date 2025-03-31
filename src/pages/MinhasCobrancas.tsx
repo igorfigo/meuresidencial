@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -377,7 +376,7 @@ const MinhasCobrancas = () => {
       amount: amount,
       receiverName: condominiumDetails.nomecondominio.trim() || 'Condomínio',
       city: condominiumDetails.cidade.trim() || '',
-      reference: `Condominio` // Simplified reference without unit and competence date
+      reference: ""
     };
     
     console.log("Generating PIX with data:", pixData); // Debugging
