@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -113,9 +112,10 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       
       const cleanContent = announcement.content.replace(/[^\p{L}\p{N}\s\.,;:!?()\-–—'"]/gu, '').trim();
       
-      // Updated: Using 5 units for all internal margins
-      const textMargin = 5;
-      const effectiveContentWidth = contentWidth - (textMargin * 2);
+      const textMarginLeft = 5;
+      const textMarginRight = 2.5;
+      
+      const effectiveContentWidth = contentWidth - (textMarginLeft + textMarginRight);
       const contentLines = doc.splitTextToSize(cleanContent, effectiveContentWidth);
       
       const contentHeight = 20 + 10 + (contentLines.length * 5) + 15;
@@ -132,8 +132,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       
-      // Updated: Position text with 5 unit margin from the rectangle's left edge
-      const textX = margin + textMargin - 5;
+      const textX = margin + textMarginLeft - 5;
       doc.text(contentLines, textX, contentYStart + 30);
       
       doc.setFontSize(12);
