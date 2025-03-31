@@ -95,7 +95,6 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const margin = 20;
       const contentWidth = pageWidth - (margin * 2);
       
-      // Header with purple background
       doc.setFillColor(155, 135, 245);
       doc.rect(0, 0, 210, 40, 'F');
       
@@ -107,39 +106,40 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFontSize(12);
       doc.text("CONDOMÍNIO", 105, 30, { align: "center" });
       
-      // Title inside a purple border box
-      doc.setFillColor(255, 255, 255);
-      doc.setDrawColor(155, 135, 245);
-      doc.setLineWidth(1);
-      const titleBoxHeight = 30;
-      doc.roundedRect(margin - 5, 50, contentWidth + 10, titleBoxHeight, 3, 3, 'FD');
-      
       doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "normal");
+      
+      doc.setDrawColor(155, 135, 245);
+      doc.setLineWidth(0.5);
+      doc.line(margin, 50, pageWidth - margin, 50);
+      
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text(announcement.title.toUpperCase(), 105, 65, { align: "center" });
+      doc.text(announcement.title.toUpperCase(), 105, 70, { align: "center" });
+      
+      doc.setLineWidth(0.5);
+      doc.line(85, 75, 125, 75);
       
       // Create content box with purple border
-      const contentYStart = 90;
-      
-      // Process content to remove spacing between letters
-      const contentNoSpacing = announcement.content.replace(/\s+/g, '');
-      
-      // Split the text into lines that fit within the content width
-      const contentLines = doc.splitTextToSize(contentNoSpacing, contentWidth - 10);
-      const contentHeight = contentLines.length * 5 + 15; // Each line approx 5 units tall, plus padding
+      const contentYStart = 85;
+      const contentLines = doc.splitTextToSize(announcement.content, contentWidth - 10); // Subtract 10 to account for padding
+      const contentHeight = contentLines.length * 5 + 15; // Each line is approximately 5 units tall, plus padding
       
       // Draw a rectangle with purple border around the content
       doc.setDrawColor(155, 135, 245); // Purple border color
       doc.setLineWidth(1);
       doc.setFillColor(255, 255, 255); // White background
-      doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, contentHeight, 3, 3, 'FD');
+      doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, contentHeight, 3, 3, 'FD'); // FD = Fill and Draw
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       
       // Add the content text inside the box with some padding
       doc.text(contentLines, margin, contentYStart + 5);
+      
+      doc.setDrawColor(155, 135, 245);
+      doc.setLineWidth(0.5);
+      doc.line(margin, 250, pageWidth - margin, 250);
       
       doc.setFontSize(12);
       doc.text("Administração do Condomínio", 105, 260, { align: "center" });
