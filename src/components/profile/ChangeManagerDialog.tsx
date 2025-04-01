@@ -91,31 +91,6 @@ export const ChangeManagerDialog = ({
     return true;
   };
 
-  const checkEmailExists = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('condominiums')
-        .select('matricula')
-        .eq('emaillegal', formData.newEmail)
-        .neq('matricula', matricula);
-      
-      if (error) {
-        throw error;
-      }
-      
-      if (data && data.length > 0) {
-        toast.error('Este e-mail já está sendo utilizado por outro condomínio.');
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Erro ao verificar e-mail:', error);
-      toast.error('Erro ao verificar e-mail. Por favor, tente novamente.');
-      return true;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -132,13 +107,6 @@ export const ChangeManagerDialog = ({
     setIsSubmitting(true);
 
     try {
-      // Check if email already exists in another condominium
-      const emailExists = await checkEmailExists();
-      if (emailExists) {
-        setIsSubmitting(false);
-        return;
-      }
-      
       // Generate a new password for the new manager
       const newPassword = generateRandomPassword();
       
@@ -229,7 +197,7 @@ export const ChangeManagerDialog = ({
           </DialogTitle>
           <DialogDescription>
             {showConfirmation 
-              ? 'O gestor atual será substituído e você será desconectado do sistema.'
+              ? 'Esta ação não pode ser desfeita. O gestor atual será substituído e você será desconectado do sistema.'
               : 'Preencha os dados do novo gestor. Esta ação substituirá imediatamente o gestor atual.'}
           </DialogDescription>
         </DialogHeader>
@@ -239,7 +207,7 @@ export const ChangeManagerDialog = ({
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Atenção!</AlertTitle>
             <AlertDescription>
-              Ao confirmar, o gestor atual será substituído pelo novo gestor 
+              Esta ação é irreversível. Ao confirmar, o gestor atual será substituído pelo novo gestor 
               e você será desconectado do sistema. Uma nova senha será gerada e enviada para o email do novo gestor.
             </AlertDescription>
           </Alert>
