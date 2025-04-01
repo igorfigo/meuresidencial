@@ -555,23 +555,11 @@ export const getBalanceAdjustments = async (matricula: string) => {
   }
 };
 
-// Update the PIX key functions to ensure proper typing
-export interface PixKeyData {
-  id: string;
-  tipochave: string;
-  chavepix: string;
-  diavencimento: string;
-  jurosaodia: string;
-  matricula?: string;
-  created_at: string;
-  updated_at?: string;
-}
-
-// Function to get PIX key data
-export const getPixKey = async (matricula: string): Promise<PixKeyData | null> => {
+// Update the PIX key functions to use the new pix_receipt_settings table
+export const getPixKey = async (matricula: string) => {
   try {
     const { data, error } = await supabase
-      .from('pix_key_meuresidencial')
+      .from('pix_receipt_settings')
       .select('*')
       .eq('matricula', matricula)
       .single();
@@ -581,7 +569,7 @@ export const getPixKey = async (matricula: string): Promise<PixKeyData | null> =
       return null;
     }
     
-    return data as PixKeyData;
+    return data;
   } catch (error) {
     console.error('Error in getPixKey:', error);
     return null;

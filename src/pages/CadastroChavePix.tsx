@@ -31,7 +31,6 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
-import type { PixKeyData } from '@/integrations/supabase/client';
 
 interface PixKeyFormData {
   id?: string;
@@ -39,9 +38,7 @@ interface PixKeyFormData {
   chavepix: string;
   diavencimento: string;
   jurosaodia: string;
-  matricula?: string;
   created_at?: string;
-  updated_at?: string;
 }
 
 interface PixKey {
@@ -50,9 +47,7 @@ interface PixKey {
   chavepix: string;
   diavencimento: string;
   jurosaodia: string;
-  matricula?: string;
   created_at: string;
-  updated_at?: string;
 }
 
 const CadastroChavePix = () => {
@@ -93,15 +88,14 @@ const CadastroChavePix = () => {
       if (error) throw error;
       
       if (data && data.length > 0) {
+        // Map the data to ensure all required fields are present
         const mappedData: PixKey[] = data.map(item => ({
           id: item.id,
           tipochave: item.tipochave,
           chavepix: item.chavepix,
-          diavencimento: item.diavencimento || '10',
+          diavencimento: item.diavencimento || '10', // Default to '10' if diavencimento doesn't exist
           jurosaodia: item.jurosaodia || '0.033',
-          matricula: item.matricula,
-          created_at: item.created_at,
-          updated_at: item.updated_at
+          created_at: item.created_at
         }));
         
         setPixKeys(mappedData);
@@ -124,6 +118,7 @@ const CadastroChavePix = () => {
         return;
       }
       
+      // Validate dia de vencimento
       const diavencimento = parseInt(data.diavencimento);
       if (isNaN(diavencimento) || diavencimento < 1 || diavencimento > 31) {
         toast.error('Dia de vencimento deve ser um número entre 1 e 31');
@@ -142,16 +137,6 @@ const CadastroChavePix = () => {
           .eq('id', selectedPixKey.id);
         
         if (error) throw error;
-        
-        if (selectedPixKey.matricula) {
-          await supabase
-            .from('condominiums')
-            .update({
-              vencimento: data.diavencimento
-            })
-            .eq('matricula', selectedPixKey.matricula);
-        }
-        
         toast.success('Chave PIX atualizada com sucesso');
       } else {
         if (pixKeys.length > 0) {
@@ -159,42 +144,16 @@ const CadastroChavePix = () => {
           return;
         }
         
-        let matricula = '';
-        
-        if (user) {
-          const { data: userData } = await supabase
-            .from('user_roles')
-            .select('matricula')
-            .eq('user_id', user.id)
-            .single();
-            
-          if (userData && userData.matricula) {
-            matricula = userData.matricula;
-          }
-        }
-        
-        const { error, data: newPixKey } = await supabase
+        const { error } = await supabase
           .from('pix_key_meuresidencial')
           .insert({
             tipochave: data.tipochave,
             chavepix: data.chavepix,
             diavencimento: data.diavencimento,
             jurosaodia: data.jurosaodia,
-            matricula: matricula
-          })
-          .select();
+          });
         
         if (error) throw error;
-        
-        if (matricula) {
-          await supabase
-            .from('condominiums')
-            .update({
-              vencimento: data.diavencimento
-            })
-            .eq('matricula', matricula);
-        }
-        
         toast.success('Chave PIX cadastrada com sucesso');
       }
       
@@ -614,3 +573,4 @@ const CadastroChavePix = () => {
 };
 
 export default CadastroChavePix;
+
