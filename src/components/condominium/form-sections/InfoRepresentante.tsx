@@ -11,10 +11,25 @@ interface InfoRepresentanteProps {
 }
 
 export const InfoRepresentante = ({ handleInputChange }: InfoRepresentanteProps) => {
-  const { register } = useFormContext<FormFields>();
+  const { register, setValue } = useFormContext<FormFields>();
+
+  // Handle phone input to only allow numbers and limit to 11 digits
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    
+    // Remove non-numeric characters and limit to 11 digits
+    const numericValue = value.replace(/\D/g, '').slice(0, 11);
+    
+    setValue('telefoneLegal', numericValue);
+    
+    if (handleInputChange) {
+      const newEvent = { ...e, target: { ...e.target, value: numericValue, name: 'telefoneLegal' } };
+      handleInputChange(newEvent as React.ChangeEvent<HTMLInputElement>);
+    }
+  };
 
   return (
-    <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md">
+    <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md mt-6">
       <h2 className="text-xl font-semibold mb-4">Informações Representante Legal</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -24,16 +39,16 @@ export const InfoRepresentante = ({ handleInputChange }: InfoRepresentanteProps)
             id="nomeLegal"
             {...register('nomeLegal')}
             onChange={handleInputChange}
-            placeholder="Nome completo do representante"
+            placeholder="Nome do Representante Legal"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="emailLegal">E-mail</Label>
+          <Label htmlFor="emailLegal">Email</Label>
           <Input
             id="emailLegal"
-            {...register('emailLegal')}
             type="email"
+            {...register('emailLegal')}
             onChange={handleInputChange}
             placeholder="email@exemplo.com"
           />
@@ -44,13 +59,18 @@ export const InfoRepresentante = ({ handleInputChange }: InfoRepresentanteProps)
           <Input
             id="telefoneLegal"
             {...register('telefoneLegal')}
-            onChange={handleInputChange}
-            placeholder="(00) 00000-0000"
+            onChange={handlePhoneChange}
+            placeholder="Somente números"
+            numberOnly
+            maxLength={11}
           />
+          <p className="text-xs text-muted-foreground">
+            Digite apenas números (máximo 11 dígitos)
+          </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="enderecoLegal">Endereço Residencial</Label>
+          <Label htmlFor="enderecoLegal">Endereço</Label>
           <Input
             id="enderecoLegal"
             {...register('enderecoLegal')}

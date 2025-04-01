@@ -40,6 +40,12 @@ const CadastroGestor = () => {
     return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
   };
 
+  const handleMatriculaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow numbers
+    const numericValue = e.target.value.replace(/\D/g, '');
+    setMatriculaSearch(numericValue);
+  };
+
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
@@ -63,8 +69,9 @@ const CadastroGestor = () => {
                   id="matriculaSearch" 
                   placeholder="Digite a matrícula para buscar" 
                   value={matriculaSearch}
-                  onChange={(e) => setMatriculaSearch(e.target.value)}
-                  className="flex-1" 
+                  onChange={handleMatriculaChange}
+                  className="flex-1"
+                  numberOnly 
                 />
                 <Button 
                   type="button" 

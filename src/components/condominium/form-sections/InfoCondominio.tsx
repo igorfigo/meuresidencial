@@ -73,20 +73,43 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
   
   const handleNumeroChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setValue('numero', value);
+    
+    // Only set if the value contains only numbers
+    const numericValue = value.replace(/\D/g, '');
+    setValue('numero', numericValue);
     
     // Update the matricula field if both CEP and numero are present
     const currentCep = watch('cep');
-    if (currentCep && value) {
+    if (currentCep && numericValue) {
       const cleanCep = currentCep.replace(/\D/g, '');
-      const cleanNumero = value.replace(/\D/g, '');
-      if (cleanCep.length > 0 && cleanNumero.length > 0) {
-        setValue('matricula', `${cleanCep}${cleanNumero}`);
+      if (cleanCep.length > 0) {
+        setValue('matricula', `${cleanCep}${numericValue}`);
       }
     }
     
     if (handleInputChange) {
-      handleInputChange(e);
+      const newEvent = { ...e, target: { ...e.target, value: numericValue, name: 'numero' } };
+      handleInputChange(newEvent as React.ChangeEvent<HTMLInputElement>);
+    }
+  };
+
+  // Handle CEP input to only allow numbers
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    
+    // Only set if the value contains only numbers
+    const numericValue = value.replace(/\D/g, '');
+    setValue('cep', numericValue);
+    
+    // Update matricula if both CEP and numero are present
+    const currentNumero = watch('numero');
+    if (numericValue && currentNumero) {
+      setValue('matricula', `${numericValue}${currentNumero}`);
+    }
+    
+    if (handleInputChange) {
+      const newEvent = { ...e, target: { ...e.target, value: numericValue, name: 'cep' } };
+      handleInputChange(newEvent as React.ChangeEvent<HTMLInputElement>);
     }
   };
 
@@ -129,9 +152,11 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
             <Input
               id="cep"
               {...register('cep')}
-              onChange={handleInputChange}
-              placeholder="00000-000"
+              onChange={handleCepChange}
+              placeholder="00000000"
               className="flex-1"
+              numberOnly
+              maxLength={8}
             />
             <Button 
               type="button" 
@@ -171,6 +196,8 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
             {...register('numero')}
             onChange={handleNumeroChange}
             placeholder="Número"
+            numberOnly
+            maxLength={10}
           />
         </div>
         

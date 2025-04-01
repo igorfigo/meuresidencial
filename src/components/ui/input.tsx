@@ -8,10 +8,11 @@ interface InputProps extends React.ComponentPropsWithoutRef<"input"> {
   numberOnly?: boolean;
   isCurrency?: boolean;
   hidePrefix?: boolean; // New prop to control whether to show the R$ prefix
+  maxLength?: number; // Added maxLength prop
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, numberOnly, isCurrency, hidePrefix = false, onChange, value, ...props }, ref) => {
+  ({ className, type, numberOnly, isCurrency, hidePrefix = false, onChange, value, maxLength, ...props }, ref) => {
     // Handle keydown for number-only inputs
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (numberOnly && type !== 'number') {
@@ -54,6 +55,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         onKeyDown={handleKeyDown}
         onChange={handleChange}
         value={value}
+        maxLength={maxLength}
         {...props}
       />
     )
