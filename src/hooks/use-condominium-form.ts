@@ -207,22 +207,17 @@ export const useCondominiumForm = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
+    if (!isExistingRecord) {
+      toast.error('Você precisa primeiro buscar um condomínio para atualizar.');
+      return;
+    }
+
     if (!validateCnpj(data.cnpj)) {
       toast.error('CNPJ inválido. Informe todos os 14 dígitos ou deixe em branco.');
       return;
     }
 
-    if (!isExistingRecord) {
-      if (!data.senha) {
-        toast.error('Senha é obrigatória para novos cadastros.');
-        return;
-      }
-      
-      if (data.senha !== data.confirmarSenha) {
-        toast.error('As senhas não conferem. Por favor, verifique.');
-        return;
-      }
-    } else if (data.senha || data.confirmarSenha) {
+    if (data.senha || data.confirmarSenha) {
       if (data.senha !== data.confirmarSenha) {
         toast.error('As senhas não conferem. Por favor, verifique.');
         return;
@@ -263,20 +258,15 @@ export const useCondominiumForm = () => {
     try {
       const userEmail = user ? user.email : null;
       
-      await saveCondominiumData(formattedData, userEmail);
-      toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
+      await saveCondominiumData(formattedData, userEmail, true);
+      toast.success('Cadastro atualizado com sucesso!');
       
       if (matriculaSearch === data.matricula) {
         await loadChangeLogs(data.matricula);
       }
       
-      if (!isExistingRecord) {
-        form.reset();
-        setIsExistingRecord(false);
-      } else {
-        form.setValue('senha', '');
-        form.setValue('confirmarSenha', '');
-      }
+      form.setValue('senha', '');
+      form.setValue('confirmarSenha', '');
     } catch (error) {
       console.error('Error saving condominium data:', error);
       toast.error('Erro ao salvar dados. Tente novamente mais tarde.');

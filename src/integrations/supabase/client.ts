@@ -28,61 +28,74 @@ export const getCondominiumByMatricula = async (matricula: string) => {
 };
 
 // Function to save condominium data
-export const saveCondominiumData = async (formData: any, userEmail: string | null) => {
-  const { matricula } = formData;
-  
-  // Check if record exists
-  const { data: existingRecord } = await supabase
-    .from('condominiums')
-    .select('*')
-    .eq('matricula', matricula)
-    .single();
-  
-  let result;
-  
-  if (existingRecord) {
-    // If record exists, update it and log changes
-    const { data, error } = await supabase
+export const saveCondominiumData = async (
+  data: Record<string, any>, 
+  userEmail: string | null, 
+  isUpdate: boolean = false
+) => {
+  try {
+    const { matricula } = data;
+    
+    // Get current data to compare changes
+    const { data: existingData } = await supabase
       .from('condominiums')
-      .update(formData)
+      .select('*')
       .eq('matricula', matricula)
-      .select();
+      .single();
     
-    if (error) {
-      console.error('Error updating condominium:', error);
-      throw error;
+    // If this is explicitly an update and we don't find existing data, return error
+    if (isUpdate && !existingData) {
+      throw new Error('Condomínio não encontrado para atualização.');
     }
     
-    // Log changes for each field
-    for (const key in formData) {
-      if (existingRecord[key] !== formData[key] && key !== 'confirmarSenha') {
-        await supabase.from('condominium_change_logs').insert({
-          matricula,
-          campo: key,
-          valor_anterior: existingRecord[key]?.toString() || null,
-          valor_novo: formData[key]?.toString() || null,
-          usuario: userEmail
-        });
+    let result;
+    
+    if (existingData) {
+      // It's an update - exclude matricula from update data
+      const updateData = { ...data };
+      delete updateData.matricula; // Prevent changing matricula
+      
+      result = await supabase
+        .from('condominiums')
+        .update(updateData)
+        .eq('matricula', matricula);
+        
+      // Log changes for each field that was updated
+      const fieldsToLog = [
+        'cnpj', 'cep', 'rua', 'numero', 'complemento', 'bairro', 
+        'cidade', 'estado', 'nomecondominio', 'nomelegal', 'emaillegal',
+        'telefonelegal', 'enderecolegal', 'planocontratado', 'valorplano',
+        'formapagamento', 'vencimento', 'desconto', 'valormensal', 
+        'tipodocumento', 'ativo'
+      ];
+      
+      for (const field of fieldsToLog) {
+        if (existingData[field] !== data[field] && data[field] !== undefined) {
+          await supabase.from('condominium_change_logs').insert({
+            matricula,
+            campo: field,
+            valor_anterior: existingData[field]?.toString() || null,
+            valor_novo: data[field]?.toString() || null,
+            usuario: userEmail
+          });
+        }
       }
+    } else if (!isUpdate) {
+      // Only create a new record if isUpdate is false
+      result = await supabase
+        .from('condominiums')
+        .insert(data);
+    }
+
+    if (result?.error) {
+      throw result.error;
     }
     
-    result = data;
-  } else {
-    // If record doesn't exist, insert it
-    const { data, error } = await supabase
-      .from('condominiums')
-      .insert(formData)
-      .select();
-    
-    if (error) {
-      console.error('Error creating condominium:', error);
-      throw error;
-    }
-    
-    result = data;
+    return true;
+  } catch (error) {
+    console.error('Error saving condominium data:', error);
+    throw error;
   }
-  
-  return result;
 };
 
 // Function to get condominium change logs

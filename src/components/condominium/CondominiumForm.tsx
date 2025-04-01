@@ -59,15 +59,17 @@ export const CondominiumForm = ({
             </Button>
           )}
           
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="bg-brand-600 hover:bg-brand-700"
-            size="lg"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {isSubmitting ? 'Salvando...' : 'Atualizar Cadastro'}
-          </Button>
+          {isExistingRecord && (
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="bg-brand-600 hover:bg-brand-700"
+              size="lg"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isSubmitting ? 'Salvando...' : 'Atualizar Cadastro'}
+            </Button>
+          )}
         </div>
       </form>
     </FormProvider>
