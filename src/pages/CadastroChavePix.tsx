@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -35,6 +36,7 @@ interface PixKeyFormData {
   id?: string;
   tipochave: string;
   chavepix: string;
+  diavencimento: string;
   jurosaodia: string;
   created_at?: string;
 }
@@ -43,6 +45,7 @@ interface PixKey {
   id: string;
   tipochave: string;
   chavepix: string;
+  diavencimento: string;
   jurosaodia: string;
   created_at: string;
 }
@@ -59,6 +62,7 @@ const CadastroChavePix = () => {
     defaultValues: {
       tipochave: 'CPF',
       chavepix: '',
+      diavencimento: '10',
       jurosaodia: '0.033',
     }
   });
@@ -104,12 +108,20 @@ const CadastroChavePix = () => {
         return;
       }
       
+      // Validate dia de vencimento
+      const diavencimento = parseInt(data.diavencimento);
+      if (isNaN(diavencimento) || diavencimento < 1 || diavencimento > 31) {
+        toast.error('Dia de vencimento deve ser um número entre 1 e 31');
+        return;
+      }
+      
       if (isEditing && selectedPixKey?.id) {
         const { error } = await supabase
           .from('pix_key_meuresidencial')
           .update({
             tipochave: data.tipochave,
             chavepix: data.chavepix,
+            diavencimento: data.diavencimento,
             jurosaodia: data.jurosaodia,
           })
           .eq('id', selectedPixKey.id);
@@ -127,6 +139,7 @@ const CadastroChavePix = () => {
           .insert({
             tipochave: data.tipochave,
             chavepix: data.chavepix,
+            diavencimento: data.diavencimento,
             jurosaodia: data.jurosaodia,
           });
         
@@ -140,6 +153,7 @@ const CadastroChavePix = () => {
       form.reset({
         tipochave: 'CPF',
         chavepix: '',
+        diavencimento: '10',
         jurosaodia: '0.033',
       });
     } catch (error) {
@@ -202,6 +216,7 @@ const CadastroChavePix = () => {
     form.reset({
       tipochave: pixKey.tipochave,
       chavepix: pixKey.chavepix,
+      diavencimento: pixKey.diavencimento || '10',
       jurosaodia: pixKey.jurosaodia,
     });
   };
@@ -212,6 +227,7 @@ const CadastroChavePix = () => {
     form.reset({
       tipochave: 'CPF',
       chavepix: '',
+      diavencimento: '10',
       jurosaodia: '0.033',
     });
   };
@@ -350,7 +366,7 @@ const CadastroChavePix = () => {
                       name="tipochave"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tipo da Chave</FormLabel>
+                          <FormLabel required>Tipo da Chave</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
@@ -377,7 +393,7 @@ const CadastroChavePix = () => {
                       name="chavepix"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Chave PIX</FormLabel>
+                          <FormLabel required>Chave PIX</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
@@ -402,10 +418,38 @@ const CadastroChavePix = () => {
                     
                     <FormField
                       control={form.control}
+                      name="diavencimento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel required>Dia de Vencimento</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              min="1"
+                              max="31"
+                              placeholder="10"
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value);
+                                if (!isNaN(value) && value >= 1 && value <= 31) {
+                                  field.onChange(e.target.value);
+                                } else if (e.target.value === '') {
+                                  field.onChange('');
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <p className="text-xs text-gray-500">Informe um número entre 1 e 31</p>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
                       name="jurosaodia"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Juros ao Dia (%)</FormLabel>
+                          <FormLabel required>Juros ao Dia (%)</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
@@ -441,6 +485,11 @@ const CadastroChavePix = () => {
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Chave PIX</h3>
                     <p className="text-base font-medium">{pixKeys[0].chavepix}</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Dia de Vencimento</h3>
+                    <p className="text-base font-medium">{pixKeys[0].diavencimento || '10'}</p>
                   </div>
                   
                   <div>
