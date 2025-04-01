@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
@@ -17,13 +16,11 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   const { register, setValue, watch } = useFormContext<FormFields>();
   const { plans, isLoading: isLoadingPlans, getPlanValue } = usePlans();
   
-  // Watch for changes to planoContratado, desconto, and cnpj
   const planoContratado = watch('planoContratado');
   const desconto = watch('desconto');
   const valorPlano = watch('valorPlano');
   const cnpj = watch('cnpj');
 
-  // Effect to update valorPlano when planoContratado changes
   React.useEffect(() => {
     if (planoContratado) {
       const planValue = getPlanValue(planoContratado);
@@ -31,19 +28,15 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     }
   }, [planoContratado, getPlanValue, setValue]);
 
-  // Effect to calculate valorMensal when valorPlano or desconto changes
   React.useEffect(() => {
-    // Convert values to numbers for calculation
     const planoNumber = BRLToNumber(valorPlano);
     const descontoNumber = BRLToNumber(desconto);
     
-    // Calculate total value ensuring it's not negative
     const valorMensal = `R$ ${formatToBRL(Math.max(0, planoNumber - descontoNumber))}`;
     
     setValue('valorMensal', valorMensal);
   }, [valorPlano, desconto, setValue]);
 
-  // Effect to ensure tipoDocumento is 'recibo' when CNPJ is empty
   React.useEffect(() => {
     if (!cnpj || cnpj.trim() === '') {
       setValue('tipoDocumento', 'recibo');
@@ -57,23 +50,18 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   };
 
   const handleDescontoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get the raw value
     const value = e.target.value.replace(/\D/g, '');
     
-    // Format to currency with R$ prefix and proper Brazilian format (comma as decimal separator)
     const formattedValue = value ? `R$ ${formatToBRL(Number(value) / 100)}` : 'R$ 0,00';
     
     setValue('desconto', formattedValue);
     
-    // Apply the general input change handler for other effects
     if (handleInputChange) {
       handleInputChange(e);
     }
   };
 
-  // Set default value for vencimento to "10" and formaPagamento to "pix"
   React.useEffect(() => {
-    // Only set default values if they're not already set
     if (!watch('vencimento')) {
       setValue('vencimento', '10');
     }
@@ -83,7 +71,6 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
     }
   }, [setValue, watch]);
 
-  // Check if CNPJ is empty to determine if tipoDocumento Select should be disabled
   const isCnpjEmpty = !cnpj || cnpj.trim() === '';
 
   return (
@@ -92,7 +79,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="planoContratado" className="flex items-center">
+          <Label htmlFor="planoContratado" className="flex items-center" required>
             Plano Contratado
           </Label>
           <Select 
@@ -122,7 +109,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="valorPlano">Valor do Plano (R$)</Label>
+          <Label htmlFor="valorPlano" required>Valor do Plano (R$)</Label>
           <Input
             id="valorPlano"
             {...register('valorPlano')}
@@ -132,7 +119,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
+          <Label htmlFor="formaPagamento" required>Forma de Pagamento</Label>
           <Input
             id="formaPagamento"
             value="PIX"
@@ -143,7 +130,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="vencimento">Vencimento</Label>
+          <Label htmlFor="vencimento" required>Vencimento</Label>
           <Input
             id="vencimento"
             value="10"
@@ -165,7 +152,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="valorMensal">Valor Mensal (R$)</Label>
+          <Label htmlFor="valorMensal" required>Valor Mensal (R$)</Label>
           <Input
             id="valorMensal"
             {...register('valorMensal')}
@@ -178,7 +165,7 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="tipoDocumento">Nota Fiscal / Recibo</Label>
+          <Label htmlFor="tipoDocumento" required>Nota Fiscal / Recibo</Label>
           <Select 
             value={watch('tipoDocumento')}
             onValueChange={(value) => setValue('tipoDocumento', value)}

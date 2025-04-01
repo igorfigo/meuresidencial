@@ -108,7 +108,7 @@ export const ChangeManagerDialog = ({
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="newName" className="flex items-center gap-2">
+            <Label htmlFor="newName" className="flex items-center gap-2" required>
               <User className="h-4 w-4" />
               Nome Completo
             </Label>
@@ -123,7 +123,7 @@ export const ChangeManagerDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="newEmail" className="flex items-center gap-2">
+            <Label htmlFor="newEmail" className="flex items-center gap-2" required>
               <Mail className="h-4 w-4" />
               E-mail
             </Label>
@@ -139,7 +139,7 @@ export const ChangeManagerDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="newPhone" className="flex items-center gap-2">
+            <Label htmlFor="newPhone" className="flex items-center gap-2" required>
               <Phone className="h-4 w-4" />
               Número de Telefone
             </Label>
@@ -154,7 +154,7 @@ export const ChangeManagerDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="newAddress" className="flex items-center gap-2">
+            <Label htmlFor="newAddress" className="flex items-center gap-2" required>
               <MapPin className="h-4 w-4" />
               Endereço Residencial
             </Label>

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
@@ -23,7 +22,6 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
   const cep = watch('cep');
   const numero = watch('numero');
   
-  // Effect to update matricula when cep and numero change
   useEffect(() => {
     if (cep && numero) {
       const cleanCep = cep.replace(/\D/g, '');
@@ -77,11 +75,9 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
     
     const { value } = e.target;
     
-    // Only set if the value contains only numbers
     const numericValue = value.replace(/\D/g, '');
     setValue('numero', numericValue);
     
-    // Update the matricula field if both CEP and numero are present
     const currentCep = watch('cep');
     if (currentCep && numericValue) {
       const cleanCep = currentCep.replace(/\D/g, '');
@@ -96,17 +92,14 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
     }
   };
 
-  // Handle CEP input to only allow numbers
   const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isExistingRecord) return; // Prevent editing if it's an existing record
     
     const { value } = e.target;
     
-    // Only set if the value contains only numbers
     const numericValue = value.replace(/\D/g, '');
     setValue('cep', numericValue);
     
-    // Update matricula if both CEP and numero are present
     const currentNumero = watch('numero');
     if (numericValue && currentNumero) {
       setValue('matricula', `${numericValue}${currentNumero}`);
@@ -124,7 +117,7 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="matricula">Matrícula</Label>
+          <Label htmlFor="matricula" required>Matrícula</Label>
           <Input
             id="matricula"
             {...register('matricula')}
@@ -152,7 +145,7 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="cep">CEP</Label>
+          <Label htmlFor="cep" required>CEP</Label>
           <div className="flex space-x-2">
             <Input
               id="cep"
@@ -182,7 +175,7 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="nomeCondominio">Nome do Condomínio</Label>
+          <Label htmlFor="nomeCondominio" required>Nome do Condomínio</Label>
           <Input
             id="nomeCondominio"
             {...register('nomeCondominio')}
@@ -192,7 +185,7 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="rua">Rua</Label>
+          <Label htmlFor="rua" required>Rua</Label>
           <Input
             id="rua"
             {...register('rua')}
@@ -202,7 +195,7 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="numero">Número</Label>
+          <Label htmlFor="numero" required>Número</Label>
           <Input
             id="numero"
             {...register('numero')}
@@ -232,7 +225,7 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="bairro">Bairro</Label>
+          <Label htmlFor="bairro" required>Bairro</Label>
           <Input
             id="bairro"
             {...register('bairro')}
@@ -242,7 +235,7 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="cidade">Cidade</Label>
+          <Label htmlFor="cidade" required>Cidade</Label>
           <Input
             id="cidade"
             {...register('cidade')}
@@ -252,7 +245,7 @@ export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCond
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="estado">Estado</Label>
+          <Label htmlFor="estado" required>Estado</Label>
           <Input
             id="estado"
             {...register('estado')}

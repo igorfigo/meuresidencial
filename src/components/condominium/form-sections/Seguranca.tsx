@@ -20,7 +20,7 @@ export const Seguranca = ({ handleInputChange, isExistingRecord }: SegurancaProp
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="senha">Senha</Label>
+          <Label htmlFor="senha" required={!isExistingRecord}>Senha</Label>
           <Input
             id="senha"
             type="password"
@@ -30,7 +30,7 @@ export const Seguranca = ({ handleInputChange, isExistingRecord }: SegurancaProp
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
+          <Label htmlFor="confirmarSenha" required={!isExistingRecord}>Confirmar Senha</Label>
           <Input
             id="confirmarSenha"
             type="password"

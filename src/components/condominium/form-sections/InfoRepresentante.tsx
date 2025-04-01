@@ -34,7 +34,7 @@ export const InfoRepresentante = ({ handleInputChange }: InfoRepresentanteProps)
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="nomeLegal">Nome Completo</Label>
+          <Label htmlFor="nomeLegal" required>Nome Completo</Label>
           <Input
             id="nomeLegal"
             {...register('nomeLegal')}
@@ -44,7 +44,7 @@ export const InfoRepresentante = ({ handleInputChange }: InfoRepresentanteProps)
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="emailLegal">Email</Label>
+          <Label htmlFor="emailLegal" required>Email</Label>
           <Input
             id="emailLegal"
             type="email"
@@ -55,7 +55,7 @@ export const InfoRepresentante = ({ handleInputChange }: InfoRepresentanteProps)
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="telefoneLegal">Número de Telefone</Label>
+          <Label htmlFor="telefoneLegal" required>Número de Telefone</Label>
           <Input
             id="telefoneLegal"
             {...register('telefoneLegal')}
@@ -70,7 +70,7 @@ export const InfoRepresentante = ({ handleInputChange }: InfoRepresentanteProps)
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="enderecoLegal">Endereço</Label>
+          <Label htmlFor="enderecoLegal" required>Endereço</Label>
           <Input
             id="enderecoLegal"
             {...register('enderecoLegal')}

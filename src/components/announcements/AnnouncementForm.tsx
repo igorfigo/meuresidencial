@@ -86,7 +86,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
     <Card className="w-full border shadow-sm bg-white">
       <CardContent className="p-6 space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="title" className="font-medium">Título</Label>
+          <Label htmlFor="title" className="font-medium" required>Título</Label>
           {isNewAnnouncement ? (
             <Select value={title} onValueChange={onTitleChange}>
               <SelectTrigger className="w-full">
@@ -113,7 +113,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="date" className="font-medium">Data</Label>
+          <Label htmlFor="date" className="font-medium" required>Data</Label>
           <Input
             id="date"
             type="date"
@@ -125,7 +125,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="content" className="font-medium">Conteúdo</Label>
+          <Label htmlFor="content" className="font-medium" required>Conteúdo</Label>
           <div className="text-sm text-muted-foreground mb-1">
             Máximo de 80 caracteres por linha
           </div>

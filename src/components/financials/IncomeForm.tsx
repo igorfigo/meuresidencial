@@ -251,7 +251,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categoria*</FormLabel>
+                    <FormLabel required>Categoria</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
@@ -279,7 +279,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Valor*</FormLabel>
+                    <FormLabel required>Valor</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="0,00"
@@ -302,7 +302,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                   name="reference_month"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mês de Referência*</FormLabel>
+                      <FormLabel required>Mês de Referência</FormLabel>
                       <FormControl>
                         <Input
                           type="month"
@@ -340,7 +340,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                 name="unit"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Unidade*</FormLabel>
+                    <FormLabel required>Unidade</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
