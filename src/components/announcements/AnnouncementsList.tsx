@@ -103,7 +103,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFillColor(155, 135, 245);
       doc.rect(0, 0, 210, 40, 'F');
       
-      // Header text - font size 22
+      // Header text - updated to font size 22
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
@@ -126,18 +126,17 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, footerY - (contentYStart - 5), 3, 3, 'FD');
       
-      // Title - font size 22
+      // Title - updated to font size 22
       doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
-      // Content - font size 14 with increased spacing (2 lines below current position)
+      // Content - updated to font size 14
       doc.setFontSize(14);
       doc.setFont("helvetica", "normal");
       
       const textX = margin + innerMargin;
-      // Increase the starting position of content by adding more space (about 2 lines)
-      const textY = contentYStart + 50; // Increased from 30 to 50 to add more space
+      const textY = contentYStart + 30;
       const textWidth = contentWidth - (innerMargin * 2);
       
       // Split text into lines respecting the content width with inner margins
