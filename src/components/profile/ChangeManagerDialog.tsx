@@ -197,7 +197,7 @@ export const ChangeManagerDialog = ({
           </DialogTitle>
           <DialogDescription>
             {showConfirmation 
-              ? 'Esta ação não pode ser desfeita. O gestor atual será substituído e você será desconectado do sistema.'
+              ? ''
               : 'Preencha os dados do novo gestor. Esta ação substituirá imediatamente o gestor atual.'}
           </DialogDescription>
         </DialogHeader>
@@ -207,8 +207,7 @@ export const ChangeManagerDialog = ({
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Atenção!</AlertTitle>
             <AlertDescription>
-              Esta ação é irreversível. Ao confirmar, o gestor atual será substituído pelo novo gestor 
-              e você será desconectado do sistema. Uma nova senha será gerada e enviada para o email do novo gestor.
+              Uma nova senha será gerada e enviada para o email do novo gestor.
             </AlertDescription>
           </Alert>
         )}
