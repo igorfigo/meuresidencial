@@ -39,7 +39,10 @@ export const CondominiumForm = ({
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <InfoCondominio handleInputChange={handleInputChange} />
+        <InfoCondominio 
+          handleInputChange={handleInputChange}
+          isExistingRecord={isExistingRecord} 
+        />
         <InfoRepresentante handleInputChange={handleInputChange} />
         <PlanoContrato handleInputChange={handleInputChange} />
         <Seguranca 
