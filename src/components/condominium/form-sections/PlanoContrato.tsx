@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
@@ -92,15 +93,14 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="planoContratado" className="flex items-center">
-            Plano Contratado <span className="text-red-500 ml-1">*</span>
+            Plano Contratado
           </Label>
           <Select 
             value={planoContratado}
             onValueChange={handlePlanoChange}
             disabled={isLoadingPlans}
-            required
           >
-            <SelectTrigger id="planoContratado" className={!planoContratado ? "border-red-300" : ""}>
+            <SelectTrigger id="planoContratado">
               <SelectValue placeholder="Selecione o plano" />
             </SelectTrigger>
             <SelectContent>
@@ -119,11 +119,6 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
               </SelectGroup>
             </SelectContent>
           </Select>
-          {!planoContratado && (
-            <p className="text-xs text-red-500">
-              Plano Contratado é obrigatório
-            </p>
-          )}
         </div>
 
         <div className="space-y-2">

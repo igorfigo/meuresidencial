@@ -214,7 +214,19 @@ export const useCondominiumForm = () => {
   };
 
   const validateRequiredFields = (data: FormFields): boolean => {
-    const optionalFields = ['cnpj', 'complemento', 'desconto', 'senha', 'confirmarSenha', 'vencimento'];
+    const optionalFields = [
+      'cnpj', 
+      'complemento', 
+      'desconto', 
+      'senha', 
+      'confirmarSenha', 
+      'vencimento', 
+      'planoContratado', 
+      'valorPlano', 
+      'formaPagamento', 
+      'valorMensal', 
+      'tipoDocumento'
+    ];
     
     for (const [key, value] of Object.entries(data)) {
       if (optionalFields.includes(key)) continue;
