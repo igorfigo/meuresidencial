@@ -56,77 +56,105 @@ const fetchVpsData = async (): Promise<{
   diskUsageHistory: UsageHistoryPoint[];
   bandwidthUsageHistory: BandwidthPoint[];
 }> => {
-  // Call the Supabase Edge Function to get VPS data
-  const { data, error } = await supabase.functions.invoke('getVpsData');
-  
-  if (error) {
-    throw new Error('Failed to fetch VPS data: ' + error.message);
+  try {
+    // Call the Supabase Edge Function to get VPS data
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('Error getting session:', sessionError);
+      throw new Error('Not authenticated');
+    }
+
+    const accessToken = sessionData?.session?.access_token;
+    
+    if (!accessToken) {
+      throw new Error('No access token available');
+    }
+
+    // Call the edge function with proper authorization header
+    const { data, error } = await supabase.functions.invoke('getVpsData', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    
+    if (error) {
+      console.error('Error calling getVpsData function:', error);
+      throw new Error('Failed to fetch VPS data: ' + error.message);
+    }
+
+    if (!data) {
+      throw new Error('No data returned from getVpsData function');
+    }
+
+    const vpsData = data as VpsData;
+    
+    // Simulate a little delay to mimic a real API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Generate historical data for CPU usage
+    const generateTimePoints = (count: number): string[] => {
+      const times: string[] = [];
+      const now = new Date();
+      
+      for (let i = count - 1; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * 15 * 60 * 1000); // 15 minute intervals
+        times.push(format(date, 'HH:mm', { locale: ptBR }));
+      }
+      
+      return times;
+    };
+
+    const timePoints = generateTimePoints(24); // Last 6 hours in 15-minute intervals
+    
+    const cpuUsageHistory: UsageHistoryPoint[] = timePoints.map((time) => ({
+      time,
+      usage: Math.floor(Math.random() * 60) + 5,
+    }));
+    
+    const ramUsageHistory: UsageHistoryPoint[] = timePoints.map((time) => ({
+      time,
+      usage: Math.floor(Math.random() * 40) + 20,
+    }));
+    
+    const diskUsageHistory: UsageHistoryPoint[] = timePoints.map((time) => ({
+      time,
+      usage: Math.floor(Math.random() * 10) + 25,
+    }));
+    
+    // Generate bandwidth data for the last 7 days
+    const generateDates = (count: number): string[] => {
+      const dates: string[] = [];
+      const now = new Date();
+      
+      for (let i = count - 1; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000); // Daily intervals
+        dates.push(format(date, 'dd/MM', { locale: ptBR }));
+      }
+      
+      return dates;
+    };
+
+    const datePoints = generateDates(7);
+    
+    const bandwidthUsageHistory: BandwidthPoint[] = datePoints.map((date) => ({
+      date,
+      download: Math.floor(Math.random() * 10 + 1) * 1024 * 1024 * 1024, // 1-10 GB
+      upload: Math.floor(Math.random() * 5 + 1) * 1024 * 1024 * 1024, // 1-5 GB
+    }));
+
+    return {
+      vpsData,
+      vpsStatus: vpsData.status,
+      cpuUsageHistory,
+      ramUsageHistory,
+      diskUsageHistory,
+      bandwidthUsageHistory,
+    };
+  } catch (error) {
+    console.error('Error in fetchVpsData:', error);
+    throw error;
   }
-
-  const vpsData = data as VpsData;
-  
-  // Simulate a little delay to mimic a real API call
-  await new Promise(resolve => setTimeout(resolve, 500));
-
-  // Generate historical data for CPU usage
-  const generateTimePoints = (count: number): string[] => {
-    const times: string[] = [];
-    const now = new Date();
-    
-    for (let i = count - 1; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 15 * 60 * 1000); // 15 minute intervals
-      times.push(format(date, 'HH:mm', { locale: ptBR }));
-    }
-    
-    return times;
-  };
-
-  const timePoints = generateTimePoints(24); // Last 6 hours in 15-minute intervals
-  
-  const cpuUsageHistory: UsageHistoryPoint[] = timePoints.map((time) => ({
-    time,
-    usage: Math.floor(Math.random() * 60) + 5,
-  }));
-  
-  const ramUsageHistory: UsageHistoryPoint[] = timePoints.map((time) => ({
-    time,
-    usage: Math.floor(Math.random() * 40) + 20,
-  }));
-  
-  const diskUsageHistory: UsageHistoryPoint[] = timePoints.map((time) => ({
-    time,
-    usage: Math.floor(Math.random() * 10) + 25,
-  }));
-  
-  // Generate bandwidth data for the last 7 days
-  const generateDates = (count: number): string[] => {
-    const dates: string[] = [];
-    const now = new Date();
-    
-    for (let i = count - 1; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000); // Daily intervals
-      dates.push(format(date, 'dd/MM', { locale: ptBR }));
-    }
-    
-    return dates;
-  };
-
-  const datePoints = generateDates(7);
-  
-  const bandwidthUsageHistory: BandwidthPoint[] = datePoints.map((date) => ({
-    date,
-    download: Math.floor(Math.random() * 10 + 1) * 1024 * 1024 * 1024, // 1-10 GB
-    upload: Math.floor(Math.random() * 5 + 1) * 1024 * 1024 * 1024, // 1-5 GB
-  }));
-
-  return {
-    vpsData,
-    vpsStatus: vpsData.status,
-    cpuUsageHistory,
-    ramUsageHistory,
-    diskUsageHistory,
-    bandwidthUsageHistory,
-  };
 };
 
 export const useVpsData = () => {

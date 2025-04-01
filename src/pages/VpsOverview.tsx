@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -194,8 +193,8 @@ const VpsOverview: React.FC = () => {
                   <Progress 
                     value={vpsData?.cpu?.usage || 0} 
                     className={cn(
-                      "h-2 mt-2 bg-gray-100",
-                      vpsData?.cpu?.usage && vpsData.cpu.usage > 80 ? "bg-red-500" : "bg-indigo-500"
+                      "h-2 mt-2",
+                      vpsData?.cpu?.usage && vpsData.cpu.usage > 80 ? "bg-red-100" : "bg-gray-100"
                     )}
                   />
                   <p className="text-xs text-muted-foreground mt-2">
@@ -221,8 +220,8 @@ const VpsOverview: React.FC = () => {
                   <Progress 
                     value={vpsData?.memory?.usagePercent || 0} 
                     className={cn(
-                      "h-2 mt-2 bg-gray-100",
-                      vpsData?.memory?.usagePercent && vpsData.memory.usagePercent > 80 ? "bg-red-500" : "bg-green-500"
+                      "h-2 mt-2",
+                      vpsData?.memory?.usagePercent && vpsData.memory.usagePercent > 80 ? "bg-red-100" : "bg-gray-100"
                     )}
                   />
                   <p className="text-xs text-muted-foreground mt-2">
@@ -248,8 +247,8 @@ const VpsOverview: React.FC = () => {
                   <Progress 
                     value={vpsData?.disk?.usagePercent || 0} 
                     className={cn(
-                      "h-2 mt-2 bg-gray-100",
-                      vpsData?.disk?.usagePercent && vpsData.disk.usagePercent > 80 ? "bg-red-500" : "bg-yellow-500"
+                      "h-2 mt-2",
+                      vpsData?.disk?.usagePercent && vpsData.disk.usagePercent > 80 ? "bg-red-100" : "bg-gray-100"
                     )}
                   />
                   <p className="text-xs text-muted-foreground mt-2">
