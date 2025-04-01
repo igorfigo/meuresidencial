@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 interface VpsData {
   hostname: string;
   ipAddress: string;
+  ipv6Address?: string; // Added IPv6 address
   status: string;
   os: string;
   uptime: string;

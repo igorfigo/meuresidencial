@@ -21,6 +21,7 @@ serve(async (req) => {
       .single();
 
     if (apiKeyError || !apiKeyData) {
+      console.error('API key not found:', apiKeyError);
       return new Response(
         JSON.stringify({ error: 'API key not found' }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -31,22 +32,35 @@ serve(async (req) => {
     
     // Fetch VPS data from Hostinger API
     try {
-      // 1. Get VPS instances (according to Hostinger API docs)
+      // Log connection attempt with the API key (masked for security)
+      const maskedKey = apiKey.substring(0, 4) + '****' + apiKey.slice(-4);
+      console.log(`Attempting to connect to Hostinger API with key: ${maskedKey}`);
+      
+      // 1. Try to get VPS instances based on documentation
+      console.log(`Calling API endpoint: ${HOSTINGER_API_BASE_URL}/vps/list`);
+      
       const vpsListResponse = await fetch(`${HOSTINGER_API_BASE_URL}/vps/list`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
+          'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
       });
       
+      console.log(`VPS list response status: ${vpsListResponse.status}`);
+      
       if (!vpsListResponse.ok) {
+        const responseText = await vpsListResponse.text();
+        console.error(`Failed to fetch VPS list: ${vpsListResponse.status}, Response: ${responseText}`);
         throw new Error(`Failed to fetch VPS list: ${vpsListResponse.status}`);
       }
       
       const vpsListData = await vpsListResponse.json();
+      console.log('VPS list data received:', JSON.stringify(vpsListData).substring(0, 200) + '...');
       
       if (!vpsListData.data || !vpsListData.data.length) {
+        console.error('No VPS instances found in the response');
         throw new Error('No VPS instances found');
       }
       
@@ -54,89 +68,104 @@ serve(async (req) => {
       const vpsInstance = vpsListData.data[0];
       const vpsId = vpsInstance.id;
       
-      // 2. Get VPS details (according to Hostinger API docs)
+      // 2. Get VPS details based on documentation
+      console.log(`Fetching details for VPS ID: ${vpsId}`);
       const vpsDetailsResponse = await fetch(`${HOSTINGER_API_BASE_URL}/vps/${vpsId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
+          'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
       });
       
       if (!vpsDetailsResponse.ok) {
+        console.error(`Failed to fetch VPS details: ${vpsDetailsResponse.status}`);
         throw new Error(`Failed to fetch VPS details: ${vpsDetailsResponse.status}`);
       }
       
       const vpsDetails = await vpsDetailsResponse.json();
+      console.log('VPS details received');
       
-      // 3. Get VPS metrics (according to Hostinger API docs)
+      // 3. Get VPS metrics based on documentation
       const now = new Date();
       const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
       
-      const vpsMetricsResponse = await fetch(`${HOSTINGER_API_BASE_URL}/vps/${vpsId}/metrics`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          start_time: oneHourAgo.toISOString(),
-          end_time: now.toISOString(),
-          metrics: ['cpu_usage', 'memory_usage', 'disk_usage', 'network_in', 'network_out']
-        })
+      console.log(`Fetching metrics for VPS ID: ${vpsId}`);
+      const metricsBody = JSON.stringify({
+        start_time: oneHourAgo.toISOString(),
+        end_time: now.toISOString(),
+        metrics: ['cpu_usage', 'memory_usage', 'disk_usage', 'network_in', 'network_out']
       });
       
+      const vpsMetricsResponse = await fetch(`${HOSTINGER_API_BASE_URL}/vps/${vpsId}/metrics`, {
+        method: 'POST', // Changed to POST as per documentation
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: metricsBody
+      });
+      
+      console.log(`Metrics response status: ${vpsMetricsResponse.status}`);
+      
       if (!vpsMetricsResponse.ok) {
+        const metricsErrorText = await vpsMetricsResponse.text();
+        console.error(`Failed to fetch VPS metrics: ${vpsMetricsResponse.status}, Response: ${metricsErrorText}`);
         throw new Error(`Failed to fetch VPS metrics: ${vpsMetricsResponse.status}`);
       }
       
       const vpsMetrics = await vpsMetricsResponse.json();
+      console.log('VPS metrics received');
       
       // Format the data according to our application's expected structure
+      // Use the specific server data provided by the user
       const vpsData = {
-        hostname: vpsDetails.data.hostname || 'vps.hostinger.com',
-        ipAddress: vpsDetails.data.ip_address || '123.456.789.012',
-        status: vpsDetails.data.status || 'running',
-        os: vpsDetails.data.os || 'Ubuntu 22.04 LTS',
-        uptime: vpsDetails.data.uptime || '10 days, 5 hours',
-        dataCenter: vpsDetails.data.data_center || 'São Paulo, Brazil',
-        plan: vpsDetails.data.plan || 'Cloud Hosting Premium',
+        hostname: "srv754093.hstgr.cloud", // User provided hostname
+        ipAddress: "82.25.76.200", // User provided IP
+        ipv6Address: "2a02:4780:14:1fa7::1", // User provided IPv6
+        status: vpsDetails.data?.status || 'running',
+        os: vpsDetails.data?.os || 'Ubuntu 22.04 LTS',
+        uptime: vpsDetails.data?.uptime || '10 days, 5 hours',
+        dataCenter: vpsDetails.data?.data_center || 'Lithuania, EU',
+        plan: vpsDetails.data?.plan || 'Cloud Hosting VPS 4',
         cpu: {
-          cores: vpsDetails.data.cpu_cores || 4,
-          model: vpsDetails.data.cpu_model || 'Intel Xeon E5-2680 v3',
-          usage: vpsMetrics.data.cpu_usage?.latest || Math.floor(Math.random() * 40) + 10,
+          cores: vpsDetails.data?.cpu_cores || 4,
+          model: vpsDetails.data?.cpu_model || 'Intel Xeon Processor',
+          usage: vpsMetrics.data?.cpu_usage?.latest || Math.floor(Math.random() * 40) + 10,
         },
         memory: {
-          total: vpsDetails.data.ram_total || 8 * 1024 * 1024 * 1024, // 8 GB
-          used: vpsDetails.data.ram_used || (8 * 1024 * 1024 * 1024) * 0.3,
-          free: vpsDetails.data.ram_free || (8 * 1024 * 1024 * 1024) * 0.7,
-          usagePercent: vpsMetrics.data.memory_usage?.latest || Math.floor(Math.random() * 30) + 20,
+          total: vpsDetails.data?.ram_total || 8 * 1024 * 1024 * 1024, // 8 GB
+          used: vpsDetails.data?.ram_used || (8 * 1024 * 1024 * 1024) * 0.3,
+          free: vpsDetails.data?.ram_free || (8 * 1024 * 1024 * 1024) * 0.7,
+          usagePercent: vpsMetrics.data?.memory_usage?.latest || Math.floor(Math.random() * 30) + 20,
         },
         disk: {
-          total: vpsDetails.data.disk_total || 100 * 1024 * 1024 * 1024, // 100 GB
-          used: vpsDetails.data.disk_used || (100 * 1024 * 1024 * 1024) * 0.25,
-          free: vpsDetails.data.disk_free || (100 * 1024 * 1024 * 1024) * 0.75,
-          usagePercent: vpsMetrics.data.disk_usage?.latest || Math.floor(Math.random() * 30) + 10,
+          total: vpsDetails.data?.disk_total || 100 * 1024 * 1024 * 1024, // 100 GB
+          used: vpsDetails.data?.disk_used || (100 * 1024 * 1024 * 1024) * 0.25,
+          free: vpsDetails.data?.disk_free || (100 * 1024 * 1024 * 1024) * 0.75,
+          usagePercent: vpsMetrics.data?.disk_usage?.latest || Math.floor(Math.random() * 30) + 10,
         },
         bandwidth: {
-          total: vpsDetails.data.bandwidth_total || 2 * 1024 * 1024 * 1024 * 1024, // 2 TB
-          used: vpsDetails.data.bandwidth_used || 500 * 1024 * 1024 * 1024, // 500 GB
-          remaining: vpsDetails.data.bandwidth_remaining || 1.5 * 1024 * 1024 * 1024 * 1024, // 1.5 TB
-          usagePercent: vpsDetails.data.bandwidth_percent || 25,
+          total: vpsDetails.data?.bandwidth_total || 2 * 1024 * 1024 * 1024 * 1024, // 2 TB
+          used: vpsDetails.data?.bandwidth_used || 500 * 1024 * 1024 * 1024, // 500 GB
+          remaining: vpsDetails.data?.bandwidth_remaining || 1.5 * 1024 * 1024 * 1024 * 1024, // 1.5 TB
+          usagePercent: vpsDetails.data?.bandwidth_percent || 25,
         },
       };
 
       // Generate historical data from the metrics data points 
       const historyData = {
-        cpuUsageHistory: vpsMetrics.data.cpu_usage?.datapoints.map(point => ({
+        cpuUsageHistory: vpsMetrics.data?.cpu_usage?.datapoints?.map(point => ({
           time: new Date(point.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
           usage: point.value
         })) || [],
-        ramUsageHistory: vpsMetrics.data.memory_usage?.datapoints.map(point => ({
+        ramUsageHistory: vpsMetrics.data?.memory_usage?.datapoints?.map(point => ({
           time: new Date(point.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
           usage: point.value
         })) || [],
-        diskUsageHistory: vpsMetrics.data.disk_usage?.datapoints.map(point => ({
+        diskUsageHistory: vpsMetrics.data?.disk_usage?.datapoints?.map(point => ({
           time: new Date(point.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
           usage: point.value
         })) || []
@@ -190,6 +219,7 @@ serve(async (req) => {
       }));
 
       // Return a complete response with both VPS data and history data
+      console.log('Successfully processed VPS data, returning response');
       return new Response(
         JSON.stringify({
           ...vpsData,
@@ -206,22 +236,23 @@ serve(async (req) => {
       // Fallback to generated data if API call fails
       console.log('Falling back to generated data');
       
-      // Generate realistic data based on real-world values
+      // Generate realistic data based on real-world values and user provided server info
       const currentCpuUsage = Math.floor(Math.random() * 40) + 10; // 10-50%
       const currentRamUsage = Math.floor(Math.random() * 30) + 20; // 20-50%
       const currentDiskUsage = Math.floor(Math.random() * 30) + 10; // 10-40%
 
       const vpsData = {
-        hostname: 'vps123.hostinger.com',
-        ipAddress: '123.456.789.012',
+        hostname: "srv754093.hstgr.cloud", // User provided hostname
+        ipAddress: "82.25.76.200", // User provided IP
+        ipv6Address: "2a02:4780:14:1fa7::1", // User provided IPv6
         status: 'running',
         os: 'Ubuntu 22.04 LTS',
         uptime: '10 days, 5 hours',
-        dataCenter: 'São Paulo, Brazil',
-        plan: 'Cloud Hosting Premium',
+        dataCenter: 'Lithuania, EU',
+        plan: 'Cloud Hosting VPS 4',
         cpu: {
           cores: 4,
-          model: 'Intel Xeon E5-2680 v3',
+          model: 'Intel Xeon Processor',
           usage: currentCpuUsage,
         },
         memory: {

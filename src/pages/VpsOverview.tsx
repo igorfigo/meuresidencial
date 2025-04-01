@@ -427,7 +427,7 @@ const VpsOverview: React.FC = () => {
                       <p className="text-sm font-medium text-muted-foreground">
                         Hostname
                       </p>
-                      <p className="text-base">{vpsData?.hostname || 'vps.example.com'}</p>
+                      <p className="text-base">{vpsData?.hostname || 'srv754093.hstgr.cloud'}</p>
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-muted-foreground">
@@ -445,19 +445,25 @@ const VpsOverview: React.FC = () => {
                       <p className="text-sm font-medium text-muted-foreground">
                         IP Público
                       </p>
-                      <p className="text-base">{vpsData?.ipAddress || '0.0.0.0'}</p>
+                      <p className="text-base">{vpsData?.ipAddress || '82.25.76.200'}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        IPv6
+                      </p>
+                      <p className="text-base">{vpsData?.ipv6Address || '2a02:4780:14:1fa7::1'}</p>
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-muted-foreground">
                         Data Center
                       </p>
-                      <p className="text-base">{vpsData?.dataCenter || 'São Paulo, BR'}</p>
+                      <p className="text-base">{vpsData?.dataCenter || 'Lithuania, EU'}</p>
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-muted-foreground">
                         Plano
                       </p>
-                      <p className="text-base">{vpsData?.plan || 'Cloud Hosting Premium'}</p>
+                      <p className="text-base">{vpsData?.plan || 'Cloud Hosting VPS 4'}</p>
                     </div>
                   </div>
                 </CardContent>
