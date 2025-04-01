@@ -1,18 +1,15 @@
 
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Building, Save, Search, History } from 'lucide-react';
-import { toast } from 'sonner';
+import { Building, History } from 'lucide-react';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { useCondominiumForm } from '@/hooks/use-condominium-form';
 import { CondominiumForm } from '@/components/condominium/CondominiumForm';
+import { SearchMatricula } from '@/components/condominium/SearchMatricula';
 
 const CadastroGestor = () => {
   const {
@@ -23,7 +20,6 @@ const CadastroGestor = () => {
     setMatriculaSearch,
     isExistingRecord,
     changeLogs,
-    isLoadingLogs,
     currentPage,
     totalPages,
     handleInputChange,
@@ -40,12 +36,6 @@ const CadastroGestor = () => {
     return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
   };
 
-  const handleMatriculaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow numbers
-    const numericValue = e.target.value.replace(/\D/g, '');
-    setMatriculaSearch(numericValue);
-  };
-
   return (
     <DashboardLayout>
       <div className="animate-fade-in">
@@ -60,35 +50,12 @@ const CadastroGestor = () => {
           <Separator className="mt-4" />
         </header>
 
-        <Card className="mb-6 p-4 border-t-4 border-t-brand-600 shadow-md">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <Label htmlFor="matriculaSearch">Buscar por Matrícula</Label>
-              <div className="flex space-x-2 mt-1">
-                <Input 
-                  id="matriculaSearch" 
-                  placeholder="Digite a matrícula para buscar" 
-                  value={matriculaSearch}
-                  onChange={handleMatriculaChange}
-                  className="flex-1"
-                  numberOnly 
-                />
-                <Button 
-                  type="button" 
-                  onClick={handleMatriculaSearch} 
-                  disabled={isSearching} 
-                  className="bg-brand-600 hover:bg-brand-700">
-                  {isSearching ? "Buscando..." : (
-                    <>
-                      <Search className="h-4 w-4 mr-2" />
-                      Buscar
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Card>
+        <SearchMatricula 
+          matriculaSearch={matriculaSearch}
+          onMatriculaChange={setMatriculaSearch}
+          onSearch={handleMatriculaSearch}
+          isSearching={isSearching}
+        />
 
         <CondominiumForm 
           form={form}

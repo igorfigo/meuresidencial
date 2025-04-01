@@ -66,7 +66,7 @@ export const CondominiumForm = ({
             size="lg"
           >
             <Save className="h-4 w-4 mr-2" />
-            {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Cadastro' : 'Salvar Cadastro')}
+            {isSubmitting ? 'Salvando...' : 'Atualizar Cadastro'}
           </Button>
         </div>
       </form>
