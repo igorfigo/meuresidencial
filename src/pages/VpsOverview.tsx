@@ -127,7 +127,7 @@ const VpsOverview: React.FC = () => {
         <Separator className="my-4" />
         
         {isUsingFallback && (
-          <Alert variant="warning" className="bg-amber-50 border-amber-200 mb-4">
+          <Alert className="bg-amber-50 border-amber-200 mb-4">
             <Info className="h-4 w-4 text-amber-600" />
             <AlertTitle className="text-amber-800">Usando dados de fallback</AlertTitle>
             <AlertDescription className="text-amber-700">

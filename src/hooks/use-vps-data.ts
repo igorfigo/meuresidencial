@@ -56,18 +56,8 @@ interface BandwidthPoint {
 
 const fetchVpsData = async (): Promise<VpsData> => {
   try {
-    // Since this is an admin-only function, we'll check local storage for admin status
-    const userString = localStorage.getItem('user');
-    if (!userString) {
-      throw new Error('Usuário não autenticado');
-    }
-
-    const user = JSON.parse(userString);
-    if (!user.isAdmin) {
-      throw new Error('Acesso restrito a administradores');
-    }
-
-    // Call the edge function directly
+    // Call the edge function to get the VPS data
+    // No need to check for admin status anymore, we'll handle fallback logic in the edge function
     const { data, error } = await supabase.functions.invoke('getVpsData');
     
     if (error) {
