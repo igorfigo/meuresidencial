@@ -877,6 +877,7 @@ export type Database = {
         Row: {
           chavepix: string
           created_at: string
+          diavencimento: string
           id: string
           jurosaodia: string | null
           tipochave: string
@@ -884,6 +885,7 @@ export type Database = {
         Insert: {
           chavepix: string
           created_at?: string
+          diavencimento?: string
           id?: string
           jurosaodia?: string | null
           tipochave: string
@@ -891,6 +893,7 @@ export type Database = {
         Update: {
           chavepix?: string
           created_at?: string
+          diavencimento?: string
           id?: string
           jurosaodia?: string | null
           tipochave?: string
