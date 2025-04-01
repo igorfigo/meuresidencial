@@ -39,10 +39,7 @@ export const CondominiumForm = ({
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <InfoCondominio 
-          handleInputChange={handleInputChange} 
-          isExistingRecord={isExistingRecord}
-        />
+        <InfoCondominio handleInputChange={handleInputChange} />
         <InfoRepresentante handleInputChange={handleInputChange} />
         <PlanoContrato handleInputChange={handleInputChange} />
         <Seguranca 
@@ -62,17 +59,15 @@ export const CondominiumForm = ({
             </Button>
           )}
           
-          {isExistingRecord && (
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="bg-brand-600 hover:bg-brand-700"
-              size="lg"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {isSubmitting ? 'Salvando...' : 'Atualizar Cadastro'}
-            </Button>
-          )}
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="bg-brand-600 hover:bg-brand-700"
+            size="lg"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Cadastro' : 'Salvar Cadastro')}
+          </Button>
         </div>
       </form>
     </FormProvider>
