@@ -58,35 +58,27 @@ const fetchVpsData = async (): Promise<{
   bandwidthUsageHistory: BandwidthPoint[];
 }> => {
   try {
-    // Try to get a session token for authentication
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError) {
-      console.error('Error getting session:', sessionError);
-      throw new Error('Authentication error');
+    // Since this is an admin-only function, we'll check local storage for admin status
+    const userString = localStorage.getItem('user');
+    if (!userString) {
+      throw new Error('Usuário não autenticado');
     }
 
-    const accessToken = sessionData?.session?.access_token;
-    
-    // We need an access token to fetch real data
-    if (!accessToken) {
-      throw new Error('No access token available');
+    const user = JSON.parse(userString);
+    if (!user.isAdmin) {
+      throw new Error('Acesso restrito a administradores');
     }
 
-    // Call the edge function with proper authorization header
-    const { data, error } = await supabase.functions.invoke('getVpsData', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    // Call the edge function directly
+    const { data, error } = await supabase.functions.invoke('getVpsData');
     
     if (error) {
       console.error('Error calling getVpsData function:', error);
-      throw new Error('Failed to fetch VPS data: ' + error.message);
+      throw new Error(`Falha ao buscar dados do VPS: ${error.message}`);
     }
 
     if (!data) {
-      throw new Error('No data returned from getVpsData function');
+      throw new Error('Nenhum dado retornado da função getVpsData');
     }
 
     const vpsData = data as VpsData;
