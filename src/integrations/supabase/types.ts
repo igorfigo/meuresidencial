@@ -435,7 +435,6 @@ export type Database = {
           updated_at: string | null
           valormensal: string | null
           valorplano: string | null
-          vencimento: string | null
           welcome_email_sent: boolean | null
         }
         Insert: {
@@ -465,7 +464,6 @@ export type Database = {
           updated_at?: string | null
           valormensal?: string | null
           valorplano?: string | null
-          vencimento?: string | null
           welcome_email_sent?: boolean | null
         }
         Update: {
@@ -495,7 +493,6 @@ export type Database = {
           updated_at?: string | null
           valormensal?: string | null
           valorplano?: string | null
-          vencimento?: string | null
           welcome_email_sent?: boolean | null
         }
         Relationships: []
