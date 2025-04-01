@@ -103,9 +103,9 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFillColor(155, 135, 245);
       doc.rect(0, 0, 210, 40, 'F');
       
-      // Header text - updated to font size 30
+      // Header text - updated to font size 22
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(30);
+      doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
       doc.text("COMUNICADO OFICIAL", 105, 20, { align: "center" });
       
@@ -126,13 +126,13 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, footerY - (contentYStart - 5), 3, 3, 'FD');
       
-      // Title - updated to font size 30
-      doc.setFontSize(30);
+      // Title - updated to font size 22
+      doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
-      // Content - updated to font size 16
-      doc.setFontSize(16);
+      // Content - updated to font size 14
+      doc.setFontSize(14);
       doc.setFont("helvetica", "normal");
       
       const textX = margin + innerMargin;
