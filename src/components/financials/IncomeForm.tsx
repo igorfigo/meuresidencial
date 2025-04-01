@@ -1,289 +1,366 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { CalendarIcon, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { supabase } from '@/integrations/supabase/client';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { z } from 'zod';
 import { useApp } from '@/contexts/AppContext';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { cn } from '@/lib/utils';
-import { formatToBRL, BRLToNumber } from '@/utils/currency';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { FinancialIncome } from '@/hooks/use-finances';
+import { formatCurrencyInput } from '@/utils/currency';
+import { toast } from 'sonner';
 
-const incomeFormSchema = z.object({
-  amount: z.string().min(1, 'Valor é obrigatório'),
-  reference_month: z.string().min(1, 'Mês de referência é obrigatório'),
-  category: z.string().min(1, 'Categoria é obrigatória'),
-  unit: z.string().optional(),
+const incomeCategories = [
+  { value: 'taxa_condominio', label: 'Taxa de Condomínio' },
+  { value: 'reserva_area_comum', label: 'Reserva Área Comum' },
+  { value: 'taxa_extra', label: 'Taxa Extra' },
+  { value: 'outros', label: 'Outros' }
+];
+
+const incomeSchema = z.object({
+  category: z.string().min(1, { message: 'Categoria é obrigatória' }),
+  amount: z.string().min(1, { message: 'Valor é obrigatório' }),
+  reference_month: z.string().min(1, { message: 'Mês de referência é obrigatório' }),
   payment_date: z.string().optional(),
-  observations: z.string().optional(),
+  unit: z.string().min(1, { message: 'Unidade é obrigatória' }),
+  observations: z.string().optional()
 });
 
-type IncomeFormValues = z.infer<typeof incomeFormSchema>;
-
 interface IncomeFormProps {
-  onSubmit: (data: any) => void;
-  initialValues?: any;
-  isLoading?: boolean;
+  onSubmit: (data: FinancialIncome) => Promise<void>;
+  initialData?: FinancialIncome;
 }
 
-type UnitOption = {
-  value: string;
-  label: string;
-};
-
-export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, initialValues, isLoading }) => {
+export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   const { user } = useApp();
-  const matricula = user?.selectedCondominium || user?.matricula || '';
-  const [units, setUnits] = useState<UnitOption[]>([]);
-  const [openCalendar, setOpenCalendar] = useState(false);
-  const [openUnitCombobox, setOpenUnitCombobox] = useState(false);
+  const [units, setUnits] = useState<{ value: string; label: string; }[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
+  const [lastBalanceAdjustmentDate, setLastBalanceAdjustmentDate] = useState<string | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
   
-  const form = useForm<IncomeFormValues>({
-    resolver: zodResolver(incomeFormSchema),
-    defaultValues: {
-      amount: initialValues?.amount || '',
-      reference_month: initialValues?.reference_month || format(new Date(), 'yyyy-MM'),
-      category: initialValues?.category || '',
-      unit: initialValues?.unit || '',
-      payment_date: initialValues?.payment_date || '',
-      observations: initialValues?.observations || '',
-    },
+  const form = useForm<z.infer<typeof incomeSchema>>({
+    resolver: zodResolver(incomeSchema),
+    defaultValues: initialData || {
+      category: '',
+      amount: '',
+      reference_month: '',
+      payment_date: '',
+      unit: '',
+      observations: ''
+    }
   });
 
-  // Fetch units from residents table
   useEffect(() => {
     const fetchUnits = async () => {
-      if (!matricula) return;
+      if (!user?.selectedCondominium) return;
       
       try {
         const { data, error } = await supabase
           .from('residents')
           .select('unidade')
-          .eq('matricula', matricula)
+          .eq('matricula', user.selectedCondominium)
           .order('unidade');
         
         if (error) throw error;
         
         const uniqueUnits = [...new Set(data.map(item => item.unidade))];
-        const formattedUnits: UnitOption[] = uniqueUnits.map(unit => ({
-          value: unit,
-          label: unit,
-        }));
-        
-        setUnits(formattedUnits);
+        setUnits(uniqueUnits.map(unit => ({ value: unit, label: unit })));
       } catch (error) {
         console.error('Error fetching units:', error);
       }
     };
     
-    fetchUnits();
-  }, [matricula]);
-
-  const handleSubmit = (data: IncomeFormValues) => {
-    // Format amount to store in the database
-    const formattedData = {
-      ...data,
-      amount: data.amount.startsWith('R$') ? data.amount : `R$ ${formatToBRL(parseFloat(data.amount.replace(/[^\d,.-]/g, '').replace(',', '.')))}`
+    const fetchLastBalanceAdjustmentDate = async () => {
+      if (!user?.selectedCondominium) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('balance_adjustments')
+          .select('adjustment_date')
+          .eq('matricula', user.selectedCondominium)
+          .order('adjustment_date', { ascending: false })
+          .limit(1);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          // Format as YYYY-MM-DD for comparison with HTML input date format
+          const adjustmentDate = new Date(data[0].adjustment_date);
+          const formattedDate = adjustmentDate.toISOString().split('T')[0];
+          setLastBalanceAdjustmentDate(formattedDate);
+        }
+      } catch (error) {
+        console.error('Error fetching last balance adjustment date:', error);
+      }
     };
     
-    onSubmit({
-      ...formattedData,
-      matricula,
-    });
-  };
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d]/g, '');
-    if (value) {
-      const numeric = parseInt(value, 10) / 100;
-      form.setValue('amount', `R$ ${formatToBRL(numeric)}`);
-    } else {
-      form.setValue('amount', '');
+    fetchUnits();
+    fetchLastBalanceAdjustmentDate();
+  }, [user?.selectedCondominium]);
+  
+  const checkDuplicateIncome = async (values: z.infer<typeof incomeSchema>) => {
+    if (!user?.selectedCondominium || values.category !== 'taxa_condominio') {
+      return false; // Only check for duplicates with "Taxa de Condomínio" category
+    }
+    
+    setIsCheckingDuplicate(true);
+    try {
+      const { data, error } = await supabase
+        .from('financial_incomes')
+        .select('id')
+        .eq('matricula', user.selectedCondominium)
+        .eq('category', 'taxa_condominio')
+        .eq('unit', values.unit)
+        .eq('reference_month', values.reference_month);
+        
+      if (error) throw error;
+      
+      const filteredData = initialData?.id 
+        ? data.filter(item => item.id !== initialData.id) 
+        : data;
+        
+      return filteredData.length > 0;
+    } catch (error) {
+      console.error('Error checking duplicate income:', error);
+      return false;
+    } finally {
+      setIsCheckingDuplicate(false);
     }
   };
-
+  
+  const validatePaymentDate = (paymentDate: string | undefined): boolean => {
+    if (!paymentDate || !lastBalanceAdjustmentDate) return true;
+    
+    // Create date objects for comparison (ignoring time)
+    const paymentDateObj = new Date(paymentDate);
+    const adjustmentDateObj = new Date(lastBalanceAdjustmentDate);
+    
+    // Set both times to midnight to ensure we're only comparing dates
+    paymentDateObj.setHours(0, 0, 0, 0);
+    adjustmentDateObj.setHours(0, 0, 0, 0);
+    
+    // Compare the two dates
+    return paymentDateObj >= adjustmentDateObj;
+  };
+  
+  const handleSubmit = async (values: z.infer<typeof incomeSchema>) => {
+    if (!user?.selectedCondominium) return;
+    
+    setDateError(null);
+    
+    // Check if payment date is provided and valid
+    if (values.payment_date) {
+      const isValidDate = validatePaymentDate(values.payment_date);
+      
+      if (!isValidDate) {
+        // Fix: Create proper date object but avoid timezone issues by adding 
+        // the time segment when parsing the date
+        const adjustmentDate = new Date(lastBalanceAdjustmentDate! + 'T00:00:00');
+        // Format the date correctly
+        const day = adjustmentDate.getDate();
+        const month = adjustmentDate.getMonth() + 1;
+        const year = adjustmentDate.getFullYear();
+        const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+        
+        setDateError(`A data de recebimento não pode ser anterior à data do último ajuste de saldo (${formattedDate})`);
+        return;
+      }
+    }
+    
+    setIsSubmitting(true);
+    try {
+      if (values.category === 'taxa_condominio') {
+        const isDuplicate = await checkDuplicateIncome(values);
+        
+        if (isDuplicate) {
+          toast.error('Já existe uma Taxa de Condomínio cadastrada para esta unidade e mês de referência');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
+      await onSubmit({
+        ...values,
+        matricula: user.selectedCondominium,
+        category: values.category,
+        amount: values.amount, 
+        reference_month: values.reference_month,
+        payment_date: values.payment_date,
+        id: initialData?.id
+      });
+      
+      if (!initialData) {
+        form.reset({
+          category: '',
+          amount: '',
+          reference_month: '',
+          payment_date: '',
+          unit: '',
+          observations: ''
+        });
+        setDateError(null);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Valor</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="R$ 0,00" 
-                    {...field} 
-                    onChange={handleAmountChange} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="reference_month"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mês de Referência</FormLabel>
-                <FormControl>
-                  <Input
-                    type="month"
-                    {...field}
-                    placeholder="YYYY-MM"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Categoria</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Categoria da receita"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="unit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unidade (opcional)</FormLabel>
-                <FormControl>
-                  <Popover open={openUnitCombobox} onOpenChange={setOpenUnitCombobox}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={openUnitCombobox}
-                        className="w-full justify-between"
-                      >
-                        {field.value
-                          ? units.find((unit) => unit.value === field.value)?.label
-                          : "Selecione uma unidade..."}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="Buscar unidade..." />
-                        <CommandEmpty>Nenhuma unidade encontrada.</CommandEmpty>
-                        <CommandGroup>
-                          {units.map((unit) => (
-                            <CommandItem
-                              key={unit.value}
-                              value={unit.value}
-                              onSelect={(currentValue) => {
-                                field.onChange(currentValue);
-                                setOpenUnitCombobox(false);
-                              }}
-                            >
-                              {unit.label}
-                              <Check
-                                className={cn(
-                                  "ml-auto h-4 w-4",
-                                  field.value === unit.value ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="payment_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Data de Pagamento (opcional)</FormLabel>
-                <FormControl>
-                  <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? (
-                          format(new Date(field.value), "dd/MM/yyyy", { locale: ptBR })
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) => {
-                          field.onChange(date ? format(date, 'yyyy-MM-dd') : '');
-                          setOpenCalendar(false);
-                        }}
-                        initialFocus
+    <Card className="border-t-4 border-t-brand-600 shadow-md">
+      <CardHeader>
+        <CardTitle>{initialData ? 'Editar Receita' : 'Nova Receita'}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoria*</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {incomeCategories.map(category => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Valor*</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="0,00"
+                      isCurrency
+                      onChange={(e) => {
+                        const formattedValue = formatCurrencyInput(e.target.value.replace(/\D/g, ''));
+                        field.onChange(formattedValue);
+                      }}
+                      value={field.value ? `R$ ${field.value}` : ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="reference_month"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mês de Referência*</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="month"
+                        {...field}
                       />
-                    </PopoverContent>
-                  </Popover>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <FormField
-          control={form.control}
-          name="observations"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Observações (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Observações sobre a receita"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Salvando..." : "Salvar Receita"}
-        </Button>
-      </form>
-    </Form>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="payment_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data de Recebimento</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    {dateError && <p className="text-xs text-destructive mt-1">{dateError}</p>}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="unit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unidade*</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma unidade" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {units.map(unit => (
+                        <SelectItem key={unit.value} value={unit.value}>
+                          {unit.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="observations"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observações</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Observações sobre esta receita"
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="flex justify-end pt-4">
+              <Button type="submit" disabled={isSubmitting || isCheckingDuplicate || !!dateError}>
+                {isSubmitting ? 'Salvando...' : isCheckingDuplicate ? 'Verificando...' : initialData ? 'Atualizar' : 'Adicionar'}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };

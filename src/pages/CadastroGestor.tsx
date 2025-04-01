@@ -6,11 +6,13 @@ import { toast } from 'sonner';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { SearchMatricula } from '@/components/condominium/SearchMatricula';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { useCondominiumForm } from '@/hooks/use-condominium-form';
 import { CondominiumForm } from '@/components/condominium/CondominiumForm';
-import { Card } from '@/components/ui/card';
 
 const CadastroGestor = () => {
   const {
@@ -30,8 +32,7 @@ const CadastroGestor = () => {
     getCurrentItems,
     handlePageChange,
     getPageNumbers,
-    toggleAtivoStatus,
-    resetForm
+    toggleAtivoStatus
   } = useCondominiumForm();
 
   const formatDate = (isoDate: string) => {
@@ -39,9 +40,10 @@ const CadastroGestor = () => {
     return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
   };
 
-  const handleCreateNew = () => {
-    resetForm();
-    toast.info("Formulário limpo para novo cadastro");
+  const handleMatriculaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow numbers
+    const numericValue = e.target.value.replace(/\D/g, '');
+    setMatriculaSearch(numericValue);
   };
 
   return (
@@ -58,17 +60,39 @@ const CadastroGestor = () => {
           <Separator className="mt-4" />
         </header>
 
-        <SearchMatricula 
-          matriculaSearch={matriculaSearch}
-          onSearch={handleMatriculaSearch} 
-          isSearching={isSearching}
-          onMatriculaChange={setMatriculaSearch}
-        />
+        <Card className="mb-6 p-4 border-t-4 border-t-brand-600 shadow-md">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <Label htmlFor="matriculaSearch">Buscar por Matrícula</Label>
+              <div className="flex space-x-2 mt-1">
+                <Input 
+                  id="matriculaSearch" 
+                  placeholder="Digite a matrícula para buscar" 
+                  value={matriculaSearch}
+                  onChange={handleMatriculaChange}
+                  className="flex-1"
+                  numberOnly 
+                />
+                <Button 
+                  type="button" 
+                  onClick={handleMatriculaSearch} 
+                  disabled={isSearching} 
+                  className="bg-brand-600 hover:bg-brand-700">
+                  {isSearching ? "Buscando..." : (
+                    <>
+                      <Search className="h-4 w-4 mr-2" />
+                      Buscar
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
 
         <CondominiumForm 
           form={form}
           onSubmit={onSubmit}
-          onCreateNew={handleCreateNew}
           isSubmitting={isSubmitting}
           isExistingRecord={isExistingRecord}
           handleInputChange={handleInputChange}

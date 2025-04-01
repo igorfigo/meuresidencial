@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { getCondominiumByMatricula, saveCondominiumData, getCondominiumChangeLogs, checkCondominiumExists } from '@/integrations/supabase/client';
+import { getCondominiumByMatricula, saveCondominiumData, getCondominiumChangeLogs } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 
@@ -56,35 +55,33 @@ export const useCondominiumForm = () => {
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const defaultValues = {
-    matricula: '',
-    cnpj: '',
-    cep: '',
-    rua: '',
-    numero: '',
-    complemento: '',
-    bairro: '',
-    cidade: '',
-    estado: '',
-    nomeCondominio: '',
-    nomeLegal: '',
-    emailLegal: '',
-    telefoneLegal: '',
-    enderecoLegal: '',
-    planoContratado: 'STANDARD',
-    valorPlano: '',
-    formaPagamento: 'pix',
-    vencimento: '',
-    desconto: '',
-    valorMensal: '',
-    tipoDocumento: 'recibo',
-    senha: '',
-    confirmarSenha: '',
-    ativo: true
-  };
-
   const form = useForm<FormFields>({
-    defaultValues
+    defaultValues: {
+      matricula: '',
+      cnpj: '',
+      cep: '',
+      rua: '',
+      numero: '',
+      complemento: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      nomeCondominio: '',
+      nomeLegal: '',
+      emailLegal: '',
+      telefoneLegal: '',
+      enderecoLegal: '',
+      planoContratado: 'STANDARD',
+      valorPlano: '',
+      formaPagamento: 'pix',
+      vencimento: '',
+      desconto: '',
+      valorMensal: '',
+      tipoDocumento: 'recibo',
+      senha: '',
+      confirmarSenha: '',
+      ativo: true
+    }
   });
 
   useEffect(() => {
@@ -96,14 +93,6 @@ export const useCondominiumForm = () => {
 
     return () => subscription.unsubscribe();
   }, [form.watch]);
-
-  const resetForm = () => {
-    form.reset(defaultValues);
-    setIsExistingRecord(false);
-    setChangeLogs([]);
-    setFilteredChangeLogs([]);
-    setMatriculaSearch('');
-  };
 
   const calculateValorMensal = () => {
     const valorPlano = BRLToNumber(form.getValues('valorPlano') || '0');
@@ -125,10 +114,6 @@ export const useCondominiumForm = () => {
       if (name !== 'valorMensal') {
         calculateValorMensal();
       }
-    } else if (name === 'cep' || name === 'numero') {
-      // Allow only numeric values for CEP and numero
-      const numericValue = value.replace(/\D/g, '');
-      form.setValue(name as keyof FormFields, numericValue);
     } else {
       form.setValue(name as keyof FormFields, value);
     }
@@ -199,7 +184,7 @@ export const useCondominiumForm = () => {
         toast.success('Dados encontrados com sucesso!');
       } else {
         toast.error('Nenhum registro encontrado para esta matrícula.');
-        form.reset(defaultValues);
+        form.reset();
         setIsExistingRecord(false);
         setFilteredChangeLogs([]);
       }
@@ -227,7 +212,6 @@ export const useCondominiumForm = () => {
       return;
     }
 
-    // For new registrations, validate password match and check for existing records
     if (!isExistingRecord) {
       if (!data.senha) {
         toast.error('Senha é obrigatória para novos cadastros.');
@@ -238,32 +222,7 @@ export const useCondominiumForm = () => {
         toast.error('As senhas não conferem. Por favor, verifique.');
         return;
       }
-
-      // Check if matricula, CNPJ or email already exists before saving
-      try {
-        const existsResult = await checkCondominiumExists(data.matricula, data.cnpj, data.emailLegal);
-        
-        if (existsResult.matriculaExists) {
-          toast.error('Esta matrícula já está cadastrada. Por favor, utilize outra.');
-          return;
-        }
-        
-        if (data.cnpj && existsResult.cnpjExists) {
-          toast.error('Este CNPJ já está cadastrado. Por favor, verifique.');
-          return;
-        }
-        
-        if (existsResult.emailExists) {
-          toast.error('Este e-mail já está cadastrado para outro condomínio. Por favor, utilize outro.');
-          return;
-        }
-      } catch (error) {
-        console.error('Error checking existing data:', error);
-        toast.error('Erro ao verificar dados existentes. Tente novamente.');
-        return;
-      }
     } else if (data.senha || data.confirmarSenha) {
-      // For existing records, only validate password match if they are provided
       if (data.senha !== data.confirmarSenha) {
         toast.error('As senhas não conferem. Por favor, verifique.');
         return;
@@ -295,7 +254,6 @@ export const useCondominiumForm = () => {
       ativo: data.ativo
     };
 
-    // Include password fields only if they are provided
     if (data.senha && data.confirmarSenha) {
       formattedData.senha = data.senha;
       formattedData.confirmarsenha = data.confirmarSenha;
@@ -305,27 +263,20 @@ export const useCondominiumForm = () => {
     try {
       const userEmail = user ? user.email : null;
       
-      // Pass the isExistingRecord flag to the saveCondominiumData function
-      // to determine whether this is an update or a new record
-      await saveCondominiumData(formattedData, userEmail, isExistingRecord);
-      
+      await saveCondominiumData(formattedData, userEmail);
       toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
       
-      if (isExistingRecord && matriculaSearch === data.matricula) {
-        // Reload change logs after updating an existing record
+      if (matriculaSearch === data.matricula) {
         await loadChangeLogs(data.matricula);
       }
       
       if (!isExistingRecord) {
-        // After a successful save of a new record, set it as an existing record
-        setIsExistingRecord(true);
-        setMatriculaSearch(data.matricula);
+        form.reset();
+        setIsExistingRecord(false);
+      } else {
+        form.setValue('senha', '');
+        form.setValue('confirmarSenha', '');
       }
-      
-      // Always clear password fields after save
-      form.setValue('senha', '');
-      form.setValue('confirmarSenha', '');
-      
     } catch (error) {
       console.error('Error saving condominium data:', error);
       toast.error('Erro ao salvar dados. Tente novamente mais tarde.');
@@ -385,8 +336,7 @@ export const useCondominiumForm = () => {
     getCurrentItems,
     handlePageChange,
     getPageNumbers,
-    toggleAtivoStatus,
-    resetForm
+    toggleAtivoStatus
   };
 };
 

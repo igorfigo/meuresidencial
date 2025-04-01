@@ -63,7 +63,6 @@ export const InfoRepresentante = ({ handleInputChange }: InfoRepresentanteProps)
             placeholder="Somente números"
             numberOnly
             maxLength={11}
-            inputMode="numeric"
           />
           <p className="text-xs text-muted-foreground">
             Digite apenas números (máximo 11 dígitos)

@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { FormProvider, useWatch } from 'react-hook-form';
-import { Save, UserPlus } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InfoCondominio } from './form-sections/InfoCondominio';
 import { InfoRepresentante } from './form-sections/InfoRepresentante';
@@ -12,7 +12,6 @@ import type { FormFields } from '@/hooks/use-condominium-form';
 interface CondominiumFormProps {
   form: any;
   onSubmit: (data: FormFields) => void;
-  onCreateNew: () => void;
   isSubmitting: boolean;
   isExistingRecord: boolean;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -22,7 +21,6 @@ interface CondominiumFormProps {
 export const CondominiumForm = ({
   form,
   onSubmit,
-  onCreateNew,
   isSubmitting,
   isExistingRecord,
   handleInputChange,
@@ -51,25 +49,14 @@ export const CondominiumForm = ({
         
         <div className="flex justify-end gap-4">
           {isExistingRecord && (
-            <>
-              <Button 
-                type="button" 
-                onClick={toggleAtivoStatus}
-                variant={ativo ? "destructive" : "default"}
-                className={ativo ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
-              >
-                {ativo ? 'Desativar Usuário' : 'Ativar Usuário'}
-              </Button>
-              
-              <Button 
-                type="button" 
-                onClick={onCreateNew}
-                className="bg-brand-600 hover:bg-brand-700"
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Novo Cadastro
-              </Button>
-            </>
+            <Button 
+              type="button" 
+              onClick={toggleAtivoStatus}
+              variant={ativo ? "destructive" : "default"}
+              className={ativo ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
+            >
+              {ativo ? 'Desativar Usuário' : 'Ativar Usuário'}
+            </Button>
           )}
           
           <Button 
