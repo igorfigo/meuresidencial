@@ -80,28 +80,6 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   // Check if CNPJ is empty to determine if tipoDocumento Select should be disabled
   const isCnpjEmpty = !cnpj || cnpj.trim() === '';
 
-  const handleJurosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow numbers and decimal point
-    const value = e.target.value.replace(/[^\d.,]/g, '');
-    // Replace comma with dot for decimal handling
-    const normalizedValue = value.replace(/,/g, '.');
-    
-    // Ensure only one decimal point
-    const parts = normalizedValue.split('.');
-    let formattedValue = parts[0] || '';
-    
-    if (parts.length > 1) {
-      formattedValue += '.' + parts[1];
-    }
-    
-    setValue('jurosaodia', formattedValue);
-    
-    // Apply the general input change handler for other effects
-    if (handleInputChange) {
-      handleInputChange(e);
-    }
-  };
-
   return (
     <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md">
       <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
@@ -196,20 +174,6 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
           />
           <p className="text-xs text-muted-foreground">
             Valor do plano menos o desconto.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="jurosaodia">Juros ao Dia (%)</Label>
-          <Input
-            id="jurosaodia"
-            {...register('jurosaodia')}
-            onChange={handleJurosChange}
-            placeholder="0.033"
-            numberOnly
-          />
-          <p className="text-xs text-muted-foreground">
-            Exemplo: 0.033 para uma taxa de 0,033% ao dia
           </p>
         </div>
         

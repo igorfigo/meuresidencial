@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -219,20 +220,6 @@ const CadastroChavePix = () => {
     });
   };
   
-  const handleJurosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d.,]/g, '');
-    const normalizedValue = value.replace(/,/g, '.');
-    
-    const parts = normalizedValue.split('.');
-    let formattedValue = parts[0] || '';
-    
-    if (parts.length > 1) {
-      formattedValue += '.' + parts[1];
-    }
-    
-    form.setValue('jurosaodia', formattedValue);
-  };
-  
   const getChavePixMaxLength = (tipoChave: string): number => {
     switch (tipoChave) {
       case 'CPF':
@@ -417,10 +404,6 @@ const CadastroChavePix = () => {
                             <Input
                               {...field}
                               placeholder="0.033"
-                              onChange={(e) => {
-                                handleJurosChange(e);
-                              }}
-                              numberOnly
                             />
                           </FormControl>
                           <p className="text-xs text-gray-500">Exemplo: 0.033 para uma taxa de 0,033% ao dia</p>
