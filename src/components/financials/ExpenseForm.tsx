@@ -56,6 +56,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
     expenseData: FinancialExpense;
     attachments?: File[];
   } | null>(null);
+  const currentDate = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
   
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
@@ -114,6 +115,19 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
     
     setDateError(null);
     
+    // Check that payment date is not after today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const paymentDate = new Date(values.payment_date);
+    paymentDate.setHours(0, 0, 0, 0);
+    
+    if (paymentDate > today) {
+      setDateError('A data de pagamento não pode ser posterior à data atual');
+      return;
+    }
+    
+    // Also validate against last balance adjustment date
     if (values.payment_date) {
       const isValidDate = validatePaymentDate(values.payment_date);
       
@@ -337,6 +351,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                         <Input
                           type="date"
                           {...field}
+                          max={currentDate}
                         />
                       </FormControl>
                       {dateError && <p className="text-xs text-destructive mt-1">{dateError}</p>}

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,6 +55,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   const [dateError, setDateError] = useState<string | null>(null);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [pendingSubmitData, setPendingSubmitData] = useState<z.infer<typeof incomeSchema> | null>(null);
+  const currentDate = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
   
   const form = useForm<z.infer<typeof incomeSchema>>({
     resolver: zodResolver(incomeSchema),
@@ -167,6 +169,19 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     setDateError(null);
     
     if (values.payment_date) {
+      // Check that payment date is not after today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const paymentDate = new Date(values.payment_date);
+      paymentDate.setHours(0, 0, 0, 0);
+      
+      if (paymentDate > today) {
+        setDateError('A data de recebimento não pode ser posterior à data atual');
+        return;
+      }
+      
+      // Also validate against last balance adjustment date
       const isValidDate = validatePaymentDate(values.payment_date);
       
       if (!isValidDate) {
@@ -310,6 +325,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                           type="date"
                           {...field}
                           value={field.value || ''}
+                          max={currentDate}
                         />
                       </FormControl>
                       {dateError && <p className="text-xs text-destructive mt-1">{dateError}</p>}
