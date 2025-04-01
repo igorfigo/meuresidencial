@@ -59,6 +59,29 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   onCopy,
   onCancel
 }) => {
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
+    
+    // Process the text to enforce 80 characters per line
+    const lines = text.split('\n');
+    const processedLines = lines.map(line => {
+      if (line.length <= 80) return line;
+      
+      // Split long lines into multiple lines of 80 characters
+      const chunks = [];
+      for (let i = 0; i < line.length; i += 80) {
+        chunks.push(line.substring(i, i + 80));
+      }
+      return chunks.join('\n');
+    });
+    
+    // Update the textarea value with the processed text
+    e.target.value = processedLines.join('\n');
+    
+    // Call the original handler
+    onContentChange(e);
+  };
+
   return (
     <Card className="w-full border shadow-sm bg-white">
       <CardContent className="p-6 space-y-6">
@@ -103,12 +126,15 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         
         <div className="space-y-2">
           <Label htmlFor="content" className="font-medium">Conteúdo</Label>
+          <div className="text-sm text-muted-foreground mb-1">
+            Máximo de 80 caracteres por linha
+          </div>
           <Textarea
             id="content"
             value={content}
-            onChange={onContentChange}
+            onChange={handleContentChange}
             placeholder="Conteúdo do comunicado"
-            className="h-[320px] resize-none w-full"
+            className="h-[320px] resize-none w-full font-mono"
           />
           {formErrors.content && <p className="text-sm text-red-500">{formErrors.content}</p>}
         </div>
