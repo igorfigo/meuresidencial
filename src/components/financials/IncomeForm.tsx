@@ -36,7 +36,7 @@ const incomeSchema = z.object({
   category: z.string().min(1, { message: 'Categoria é obrigatória' }),
   amount: z.string().min(1, { message: 'Valor é obrigatório' }),
   reference_month: z.string().min(1, { message: 'Mês de referência é obrigatório' }),
-  payment_date: z.string().optional(),
+  payment_date: z.string().min(1, { message: 'Data de recebimento é obrigatória' }),
   unit: z.string().min(1, { message: 'Unidade é obrigatória' }),
   observations: z.string().optional()
 });
@@ -319,7 +319,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                   name="payment_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data de Recebimento</FormLabel>
+                      <FormLabel required>Data de Recebimento</FormLabel>
                       <FormControl>
                         <Input
                           type="date"
