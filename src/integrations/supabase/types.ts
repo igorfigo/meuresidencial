@@ -873,7 +873,7 @@ export type Database = {
           },
         ]
       }
-      pix_key_meuresidencial: {
+      pix_keys: {
         Row: {
           chavepix: string
           created_at: string

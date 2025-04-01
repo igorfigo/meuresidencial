@@ -77,7 +77,7 @@ const CadastroChavePix = () => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('pix_key_meuresidencial')
+        .from('pix_keys')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -106,7 +106,7 @@ const CadastroChavePix = () => {
       
       if (isEditing && selectedPixKey?.id) {
         const { error } = await supabase
-          .from('pix_key_meuresidencial')
+          .from('pix_keys')
           .update({
             tipochave: data.tipochave,
             chavepix: data.chavepix,
@@ -123,7 +123,7 @@ const CadastroChavePix = () => {
         }
         
         const { error } = await supabase
-          .from('pix_key_meuresidencial')
+          .from('pix_keys')
           .insert({
             tipochave: data.tipochave,
             chavepix: data.chavepix,
@@ -181,7 +181,7 @@ const CadastroChavePix = () => {
   const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('pix_key_meuresidencial')
+        .from('pix_keys')
         .delete()
         .eq('id', id);
       
@@ -504,7 +504,7 @@ const CadastroChavePix = () => {
           {!isLoading && pixKeys.length > 0 && !isEditing && (
             <CardFooter className="bg-gray-50 border-t border-gray-100">
               <p className="text-sm text-gray-500">
-                Última atualização: {new Date(pixKeys[0]?.created_at || new Date()).toLocaleDateString('pt-BR')}
+                Última atualização: {new Date(pixKeys[0]?.updated_at || pixKeys[0]?.created_at || new Date()).toLocaleDateString('pt-BR')}
               </p>
             </CardFooter>
           )}
