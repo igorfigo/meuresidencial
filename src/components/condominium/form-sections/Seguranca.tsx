@@ -4,7 +4,6 @@ import { useFormContext } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import type { FormFields } from '@/hooks/use-condominium-form';
 
 interface SegurancaProps {
@@ -13,8 +12,7 @@ interface SegurancaProps {
 }
 
 export const Seguranca = ({ handleInputChange, isExistingRecord }: SegurancaProps) => {
-  const { register, watch, setValue } = useFormContext<FormFields>();
-  const ativo = watch('ativo');
+  const { register } = useFormContext<FormFields>();
   
   return (
     <Card className="form-section p-6 border-t-4 border-t-brand-600 shadow-md">
@@ -38,21 +36,6 @@ export const Seguranca = ({ handleInputChange, isExistingRecord }: SegurancaProp
             type="password"
             {...register('confirmarSenha')}
             placeholder="Confirmar Senha"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="ativo">Ativo</Label>
-          <Switch 
-            id="ativo" 
-            checked={ativo} 
-            onCheckedChange={(checked) => {
-              setValue('ativo', checked);
-              if (handleInputChange) {
-                const newEvent = { target: { checked: checked, name: 'ativo' } } as any;
-                handleInputChange(newEvent as React.ChangeEvent<HTMLInputElement>);
-              }
-            }}
           />
         </div>
       </div>
