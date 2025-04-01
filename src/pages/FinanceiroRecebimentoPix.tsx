@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -31,9 +32,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useApp } from '@/contexts/AppContext';
 import { getPixKey, savePixKey, deletePixKey } from '@/integrations/supabase/client';
+import type { PixKeyData } from '@/integrations/supabase/client';
 
 interface PixKeyFormData {
-  matricula: string;
+  matricula?: string;
   tipochave: string;
   chavepix: string;
   diavencimento: string;
@@ -77,16 +79,18 @@ const FinanceiroRecebimentoPix = () => {
       const data = await getPixKey(user.selectedCondominium);
       
       if (data) {
-        setPixKey(data);
-        form.reset({
-          matricula: data.matricula,
+        const formattedData: PixKeyFormData = {
+          matricula: user.selectedCondominium,
           tipochave: data.tipochave,
           chavepix: data.chavepix,
           diavencimento: data.diavencimento || '10',
           jurosaodia: data.jurosaodia || '0.033',
           created_at: data.created_at,
-          updated_at: data.updated_at,
-        });
+          updated_at: data.updated_at
+        };
+        
+        setPixKey(formattedData);
+        form.reset(formattedData);
       } else {
         setPixKey(null);
       }

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
+import type { PixKeyData } from '@/integrations/supabase/client';
 
 interface PixKeyFormData {
   id?: string;
@@ -37,7 +39,9 @@ interface PixKeyFormData {
   chavepix: string;
   diavencimento: string;
   jurosaodia: string;
+  matricula?: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 interface PixKey {
@@ -46,7 +50,9 @@ interface PixKey {
   chavepix: string;
   diavencimento: string;
   jurosaodia: string;
+  matricula?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 const CadastroChavePix = () => {
@@ -93,7 +99,9 @@ const CadastroChavePix = () => {
           chavepix: item.chavepix,
           diavencimento: item.diavencimento || '10',
           jurosaodia: item.jurosaodia || '0.033',
-          created_at: item.created_at
+          matricula: item.matricula,
+          created_at: item.created_at,
+          updated_at: item.updated_at
         }));
         
         setPixKeys(mappedData);
@@ -135,19 +143,13 @@ const CadastroChavePix = () => {
         
         if (error) throw error;
         
-        const { data: pixKeyData } = await supabase
-          .from('pix_key_meuresidencial')
-          .select('*')
-          .eq('id', selectedPixKey.id)
-          .single();
-          
-        if (pixKeyData && pixKeyData.matricula) {
+        if (selectedPixKey.matricula) {
           await supabase
             .from('condominiums')
             .update({
               vencimento: data.diavencimento
             })
-            .eq('matricula', pixKeyData.matricula);
+            .eq('matricula', selectedPixKey.matricula);
         }
         
         toast.success('Chave PIX atualizada com sucesso');
@@ -159,7 +161,7 @@ const CadastroChavePix = () => {
         
         let matricula = '';
         
-        if (user && user.email) {
+        if (user) {
           const { data: userData } = await supabase
             .from('user_roles')
             .select('matricula')

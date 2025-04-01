@@ -8,7 +8,8 @@ import {
   checkMatriculaExists,
   checkCnpjExists,
   checkEmailLegalExists,
-  getPixKey
+  getPixKey,
+  supabase
 } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
@@ -373,14 +374,16 @@ export const useCondominiumForm = () => {
       
       await saveCondominiumData(formattedData, userEmail);
       
-      const pixKeyData = await getPixKey(data.matricula);
-      if (pixKeyData) {
-        await supabase
-          .from('pix_key_meuresidencial')
-          .update({
-            diavencimento: data.vencimento
-          })
-          .eq('id', pixKeyData.id);
+      if (data.vencimento) {
+        const pixKeyData = await getPixKey(data.matricula);
+        if (pixKeyData) {
+          await supabase
+            .from('pix_key_meuresidencial')
+            .update({
+              diavencimento: data.vencimento
+            })
+            .eq('id', pixKeyData.id);
+        }
       }
       
       toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
