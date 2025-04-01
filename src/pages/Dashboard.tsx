@@ -326,6 +326,8 @@ const Dashboard = () => {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
       
+      console.log("Payment preferences - Invoice:", invoiceCount, "Bank Slip:", bankSlipCount);
+      
       setStatsDetails({
         activeManagers: activeCount || 0,
         inactiveManagers: inactiveCount || 0,
