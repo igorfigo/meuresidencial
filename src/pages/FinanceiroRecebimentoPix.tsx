@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -61,7 +60,6 @@ const FinanceiroRecebimentoPix = () => {
   const watchTipoChave = form.watch('tipochave');
   
   useEffect(() => {
-    // Reset the chavepix field when tipochave changes
     form.setValue('chavepix', '');
   }, [watchTipoChave, form]);
   
@@ -104,13 +102,11 @@ const FinanceiroRecebimentoPix = () => {
     if (!user?.selectedCondominium) return;
     
     try {
-      // Validate PIX key based on type
       const isValid = validatePixKey(data.tipochave, data.chavepix);
       if (!isValid) {
         return;
       }
       
-      // Ensure matricula is set to the current condominium
       data.matricula = user.selectedCondominium;
       
       await savePixKey(data);
@@ -322,7 +318,7 @@ const FinanceiroRecebimentoPix = () => {
                       name="tipochave"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tipo da Chave</FormLabel>
+                          <FormLabel required>Tipo da Chave</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
@@ -349,7 +345,7 @@ const FinanceiroRecebimentoPix = () => {
                       name="chavepix"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Chave PIX</FormLabel>
+                          <FormLabel required>Chave PIX</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
@@ -359,9 +355,7 @@ const FinanceiroRecebimentoPix = () => {
                               numberOnly={['CPF', 'CNPJ', 'TELEFONE'].includes(watchTipoChave)}
                               onChange={(e) => {
                                 if (['CPF', 'CNPJ', 'TELEFONE'].includes(watchTipoChave)) {
-                                  // Only allow numbers for these types
                                   const value = e.target.value.replace(/\D/g, '');
-                                  // Limit the length based on type
                                   const maxLength = getChavePixMaxLength(watchTipoChave);
                                   field.onChange(value.slice(0, maxLength));
                                 } else {
@@ -380,7 +374,7 @@ const FinanceiroRecebimentoPix = () => {
                       name="diavencimento"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Dia de Vencimento</FormLabel>
+                          <FormLabel required>Dia de Vencimento</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
@@ -400,7 +394,7 @@ const FinanceiroRecebimentoPix = () => {
                       name="jurosaodia"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Juros ao Dia (%)</FormLabel>
+                          <FormLabel required>Juros ao Dia (%)</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
