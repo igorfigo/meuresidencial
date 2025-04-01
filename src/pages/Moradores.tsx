@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useResidents } from '@/hooks/use-residents';
 import { ResidentForm } from '@/components/resident/ResidentForm';
@@ -9,7 +9,6 @@ import { Plus } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
 
 const Moradores = () => {
   const { 
@@ -28,48 +27,6 @@ const Moradores = () => {
   
   const [showForm, setShowForm] = useState(false);
   const [residentToDelete, setResidentToDelete] = useState<string | null>(null);
-
-  // Function to setup database constraints
-  const setupDatabaseConstraints = async () => {
-    try {
-      // First setup the SQL execution function
-      const setupResponse = await fetch('/api/setup-execute-sql-function', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!setupResponse.ok) {
-        const errorData = await setupResponse.json();
-        console.error("Error setting up SQL function:", errorData);
-        return;
-      }
-
-      // Then update the resident constraints
-      const updateResponse = await fetch('/api/update-resident-constraints', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!updateResponse.ok) {
-        const errorData = await updateResponse.json();
-        console.error("Error updating resident constraints:", errorData);
-        return;
-      }
-
-      console.log("Database constraints updated successfully");
-    } catch (error) {
-      console.error("Error setting up database constraints:", error);
-    }
-  };
-
-  // Run once on component mount
-  useEffect(() => {
-    setupDatabaseConstraints();
-  }, []);
 
   const handleNewResident = () => {
     resetForm();
