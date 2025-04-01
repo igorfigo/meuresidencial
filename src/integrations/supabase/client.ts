@@ -27,6 +27,58 @@ export const getCondominiumByMatricula = async (matricula: string) => {
   return data;
 };
 
+// Function to check if matricula already exists
+export const checkMatriculaExists = async (matricula: string): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from('condominiums')
+    .select('matricula')
+    .eq('matricula', matricula)
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error checking matricula existence:', error);
+    return false;
+  }
+  
+  return data !== null;
+};
+
+// Function to check if CNPJ already exists
+export const checkCnpjExists = async (cnpj: string): Promise<boolean> => {
+  if (!cnpj || cnpj.trim() === '') return false;
+  
+  const { data, error } = await supabase
+    .from('condominiums')
+    .select('cnpj')
+    .eq('cnpj', cnpj)
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error checking CNPJ existence:', error);
+    return false;
+  }
+  
+  return data !== null;
+};
+
+// Function to check if legal representative email already exists
+export const checkEmailLegalExists = async (email: string): Promise<boolean> => {
+  if (!email || email.trim() === '') return false;
+  
+  const { data, error } = await supabase
+    .from('condominiums')
+    .select('emaillegal')
+    .eq('emaillegal', email)
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error checking legal email existence:', error);
+    return false;
+  }
+  
+  return data !== null;
+};
+
 // Function to save condominium data
 export const saveCondominiumData = async (formData: any, userEmail: string | null) => {
   const { matricula } = formData;

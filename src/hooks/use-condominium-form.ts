@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { getCondominiumByMatricula, saveCondominiumData, getCondominiumChangeLogs } from '@/integrations/supabase/client';
+import { 
+  getCondominiumByMatricula, 
+  saveCondominiumData, 
+  getCondominiumChangeLogs,
+  checkMatriculaExists,
+  checkCnpjExists,
+  checkEmailLegalExists
+} from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 
@@ -213,6 +220,28 @@ export const useCondominiumForm = () => {
     }
 
     if (!isExistingRecord) {
+      const matriculaExists = await checkMatriculaExists(data.matricula);
+      if (matriculaExists) {
+        toast.error('Matrícula já cadastrada. Por favor, use outra matrícula.');
+        return;
+      }
+
+      if (data.cnpj && data.cnpj.trim() !== '') {
+        const cnpjExists = await checkCnpjExists(data.cnpj);
+        if (cnpjExists) {
+          toast.error('CNPJ já cadastrado. Por favor, verifique os dados.');
+          return;
+        }
+      }
+
+      if (data.emailLegal && data.emailLegal.trim() !== '') {
+        const emailExists = await checkEmailLegalExists(data.emailLegal);
+        if (emailExists) {
+          toast.error('E-mail do representante legal já cadastrado. Por favor, use outro email.');
+          return;
+        }
+      }
+
       if (!data.senha) {
         toast.error('Senha é obrigatória para novos cadastros.');
         return;
