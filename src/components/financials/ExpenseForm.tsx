@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { FinancialExpense, useFinances } from '@/hooks/use-finances';
 import { formatCurrencyInput } from '@/utils/currency';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
 
 const expenseCategories = [
   { value: 'energia', label: 'Energia' },
@@ -261,7 +262,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categoria*</FormLabel>
+                    <FormLabel required>Categoria</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
@@ -289,7 +290,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Valor*</FormLabel>
+                    <FormLabel required>Valor</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="0,00"
@@ -311,7 +312,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                 name="reference_month"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mês de Referência*</FormLabel>
+                    <FormLabel required>Mês de Referência</FormLabel>
                     <FormControl>
                       <Input
                         type="month"
@@ -329,7 +330,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                   name="due_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data de Vencimento*</FormLabel>
+                      <FormLabel required>Data de Vencimento</FormLabel>
                       <FormControl>
                         <Input
                           type="date"
@@ -346,7 +347,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                   name="payment_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data de Pagamento*</FormLabel>
+                      <FormLabel required>Data de Pagamento</FormLabel>
                       <FormControl>
                         <Input
                           type="date"
