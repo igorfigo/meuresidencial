@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -104,14 +103,14 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFillColor(155, 135, 245);
       doc.rect(0, 0, 210, 40, 'F');
       
-      // Header text
+      // Header text - updated to font size 30
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
+      doc.setFontSize(30);
       doc.setFont("helvetica", "bold");
       doc.text("COMUNICADO OFICIAL", 105, 20, { align: "center" });
       
       // Condominium name
-      doc.setFontSize(12);
+      doc.setFontSize(14);
       doc.text(user?.nomeCondominio?.toUpperCase() || "CONDOMÍNIO", 105, 30, { align: "center" });
       
       // Reset text color for content
@@ -127,13 +126,13 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, footerY - (contentYStart - 5), 3, 3, 'FD');
       
-      // Title
-      doc.setFontSize(16);
+      // Title - updated to font size 30
+      doc.setFontSize(30);
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
-      // Content - using full content with inner margins
-      doc.setFontSize(12);
+      // Content - updated to font size 16
+      doc.setFontSize(16);
       doc.setFont("helvetica", "normal");
       
       const textX = margin + innerMargin;
@@ -145,7 +144,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.text(contentLines, textX, textY);
       
       // Footer signature
-      doc.setFontSize(12);
+      doc.setFontSize(14);
       doc.text("Administração do Condomínio", 105, footerY + 10, { align: "center" });
       
       // Signature line
