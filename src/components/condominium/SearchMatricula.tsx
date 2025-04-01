@@ -19,13 +19,6 @@ export const SearchMatricula = ({
   onSearch,
   isSearching
 }: SearchMatriculaProps) => {
-  // Handle matricula input to only allow numbers
-  const handleMatriculaInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const numericValue = e.target.value.replace(/\D/g, '');
-    onMatriculaChange(numericValue);
-  };
-  
-  // Handle matricula key press to prevent non-numeric input
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Allow only numeric input
     const isNumber = /^[0-9]$/i.test(e.key);
@@ -33,6 +26,11 @@ export const SearchMatricula = ({
     
     if (!isNumber && !isControlKey) {
       e.preventDefault();
+    }
+
+    // Submit search when pressing Enter
+    if (e.key === 'Enter') {
+      onSearch();
     }
   };
 
@@ -46,11 +44,10 @@ export const SearchMatricula = ({
               id="matriculaSearch" 
               placeholder="Digite a matrícula para buscar" 
               value={matriculaSearch}
-              onChange={handleMatriculaInputChange}
+              onChange={(e) => onMatriculaChange(e.target.value.replace(/\D/g, ''))}
               onKeyDown={handleKeyPress}
               className="flex-1"
               inputMode="numeric"
-              numberOnly
             />
             <Button 
               type="button" 

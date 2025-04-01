@@ -56,33 +56,35 @@ export const useCondominiumForm = () => {
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
+  const defaultValues = {
+    matricula: '',
+    cnpj: '',
+    cep: '',
+    rua: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    nomeCondominio: '',
+    nomeLegal: '',
+    emailLegal: '',
+    telefoneLegal: '',
+    enderecoLegal: '',
+    planoContratado: 'STANDARD',
+    valorPlano: '',
+    formaPagamento: 'pix',
+    vencimento: '',
+    desconto: '',
+    valorMensal: '',
+    tipoDocumento: 'recibo',
+    senha: '',
+    confirmarSenha: '',
+    ativo: true
+  };
+
   const form = useForm<FormFields>({
-    defaultValues: {
-      matricula: '',
-      cnpj: '',
-      cep: '',
-      rua: '',
-      numero: '',
-      complemento: '',
-      bairro: '',
-      cidade: '',
-      estado: '',
-      nomeCondominio: '',
-      nomeLegal: '',
-      emailLegal: '',
-      telefoneLegal: '',
-      enderecoLegal: '',
-      planoContratado: 'STANDARD',
-      valorPlano: '',
-      formaPagamento: 'pix',
-      vencimento: '',
-      desconto: '',
-      valorMensal: '',
-      tipoDocumento: 'recibo',
-      senha: '',
-      confirmarSenha: '',
-      ativo: true
-    }
+    defaultValues
   });
 
   useEffect(() => {
@@ -94,6 +96,14 @@ export const useCondominiumForm = () => {
 
     return () => subscription.unsubscribe();
   }, [form.watch]);
+
+  const resetForm = () => {
+    form.reset(defaultValues);
+    setIsExistingRecord(false);
+    setChangeLogs([]);
+    setFilteredChangeLogs([]);
+    setMatriculaSearch('');
+  };
 
   const calculateValorMensal = () => {
     const valorPlano = BRLToNumber(form.getValues('valorPlano') || '0');
@@ -115,6 +125,10 @@ export const useCondominiumForm = () => {
       if (name !== 'valorMensal') {
         calculateValorMensal();
       }
+    } else if (name === 'cep' || name === 'numero') {
+      // Allow only numeric values for CEP and numero
+      const numericValue = value.replace(/\D/g, '');
+      form.setValue(name as keyof FormFields, numericValue);
     } else {
       form.setValue(name as keyof FormFields, value);
     }
@@ -185,7 +199,7 @@ export const useCondominiumForm = () => {
         toast.success('Dados encontrados com sucesso!');
       } else {
         toast.error('Nenhum registro encontrado para esta matrícula.');
-        form.reset();
+        form.reset(defaultValues);
         setIsExistingRecord(false);
         setFilteredChangeLogs([]);
       }
@@ -296,8 +310,12 @@ export const useCondominiumForm = () => {
       }
       
       if (!isExistingRecord) {
-        form.reset();
-        setIsExistingRecord(false);
+        // After a successful save of a new record, set it as an existing record
+        setIsExistingRecord(true);
+        form.setValue('senha', '');
+        form.setValue('confirmarSenha', '');
+        // Update matriculaSearch to new matricula
+        setMatriculaSearch(data.matricula);
       } else {
         form.setValue('senha', '');
         form.setValue('confirmarSenha', '');
@@ -361,7 +379,8 @@ export const useCondominiumForm = () => {
     getCurrentItems,
     handlePageChange,
     getPageNumbers,
-    toggleAtivoStatus
+    toggleAtivoStatus,
+    resetForm
   };
 };
 
