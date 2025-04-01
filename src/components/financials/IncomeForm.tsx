@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,8 +9,18 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from '@/integrations/supabase/client';
-import { FinancialIncome } from '@/hooks/use-finances';
+import { FinancialIncome, useFinances } from '@/hooks/use-finances';
 import { formatCurrencyInput } from '@/utils/currency';
 import { toast } from 'sonner';
 
@@ -38,11 +47,13 @@ interface IncomeFormProps {
 
 export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   const { user } = useApp();
+  const { checkDuplicateIncome } = useFinances();
   const [units, setUnits] = useState<{ value: string; label: string; }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
   const [lastBalanceAdjustmentDate, setLastBalanceAdjustmentDate] = useState<string | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
+  const [pendingSubmitData, setPendingSubmitData] = useState<z.infer<typeof incomeSchema> | null>(null);
   
   const form = useForm<z.infer<typeof incomeSchema>>({
     resolver: zodResolver(incomeSchema),
@@ -104,36 +115,6 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     fetchLastBalanceAdjustmentDate();
   }, [user?.selectedCondominium]);
   
-  const checkDuplicateIncome = async (values: z.infer<typeof incomeSchema>) => {
-    if (!user?.selectedCondominium || values.category !== 'taxa_condominio') {
-      return false; // Only check for duplicates with "Taxa de Condomínio" category
-    }
-    
-    setIsCheckingDuplicate(true);
-    try {
-      const { data, error } = await supabase
-        .from('financial_incomes')
-        .select('id')
-        .eq('matricula', user.selectedCondominium)
-        .eq('category', 'taxa_condominio')
-        .eq('unit', values.unit)
-        .eq('reference_month', values.reference_month);
-        
-      if (error) throw error;
-      
-      const filteredData = initialData?.id 
-        ? data.filter(item => item.id !== initialData.id) 
-        : data;
-        
-      return filteredData.length > 0;
-    } catch (error) {
-      console.error('Error checking duplicate income:', error);
-      return false;
-    } finally {
-      setIsCheckingDuplicate(false);
-    }
-  };
-  
   const validatePaymentDate = (paymentDate: string | undefined): boolean => {
     if (!paymentDate || !lastBalanceAdjustmentDate) return true;
     
@@ -147,6 +128,34 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     
     // Compare the two dates
     return paymentDateObj >= adjustmentDateObj;
+  };
+  
+  const proceedWithSubmit = async () => {
+    if (!user?.selectedCondominium || !pendingSubmitData) return;
+    
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        ...pendingSubmitData,
+        matricula: user.selectedCondominium,
+        id: initialData?.id
+      });
+      
+      if (!initialData) {
+        form.reset({
+          category: '',
+          amount: '',
+          reference_month: '',
+          payment_date: '',
+          unit: '',
+          observations: ''
+        });
+        setDateError(null);
+      }
+    } finally {
+      setIsSubmitting(false);
+      setPendingSubmitData(null);
+    }
   };
   
   const handleSubmit = async (values: z.infer<typeof incomeSchema>) => {
@@ -173,25 +182,23 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
       }
     }
     
+    // Check for duplicate entries
+    const duplicateIncome = checkDuplicateIncome(values.category, values.reference_month, values.unit);
+    
+    // If it's an edit and the ID matches, it's not a duplicate
+    const isEditingSameIncome = initialData?.id && duplicateIncome?.id === initialData.id;
+    
+    if (duplicateIncome && !isEditingSameIncome) {
+      setPendingSubmitData(values);
+      setShowDuplicateDialog(true);
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
-      if (values.category === 'taxa_condominio') {
-        const isDuplicate = await checkDuplicateIncome(values);
-        
-        if (isDuplicate) {
-          toast.error('Já existe uma Taxa de Condomínio cadastrada para esta unidade e mês de referência');
-          setIsSubmitting(false);
-          return;
-        }
-      }
-      
       await onSubmit({
         ...values,
         matricula: user.selectedCondominium,
-        category: values.category,
-        amount: values.amount, 
-        reference_month: values.reference_month,
-        payment_date: values.payment_date,
         id: initialData?.id
       });
       
@@ -212,76 +219,37 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   };
   
   return (
-    <Card className="border-t-4 border-t-brand-600 shadow-md">
-      <CardHeader>
-        <CardTitle>{initialData ? 'Editar Receita' : 'Nova Receita'}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Categoria*</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma categoria" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {incomeCategories.map(category => (
-                        <SelectItem key={category.value} value={category.value}>
-                          {category.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Valor*</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="0,00"
-                      isCurrency
-                      onChange={(e) => {
-                        const formattedValue = formatCurrencyInput(e.target.value.replace(/\D/g, ''));
-                        field.onChange(formattedValue);
-                      }}
-                      value={field.value ? `R$ ${field.value}` : ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <>
+      <Card className="border-t-4 border-t-green-500 shadow-md">
+        <CardHeader>
+          <CardTitle>{initialData ? 'Editar Receita' : 'Nova Receita'}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="reference_month"
+                name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mês de Referência*</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="month"
-                        {...field}
-                      />
-                    </FormControl>
+                    <FormLabel>Categoria*</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {incomeCategories.map(category => (
+                          <SelectItem key={category.value} value={category.value}>
+                            {category.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -289,78 +257,135 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
               
               <FormField
                 control={form.control}
-                name="payment_date"
+                name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data de Recebimento</FormLabel>
+                    <FormLabel>Valor*</FormLabel>
                     <FormControl>
                       <Input
-                        type="date"
-                        {...field}
-                        value={field.value || ''}
+                        placeholder="0,00"
+                        isCurrency
+                        onChange={(e) => {
+                          const formattedValue = formatCurrencyInput(e.target.value.replace(/\D/g, ''));
+                          field.onChange(formattedValue);
+                        }}
+                        value={field.value ? `R$ ${field.value}` : ''}
                       />
                     </FormControl>
-                    {dateError && <p className="text-xs text-destructive mt-1">{dateError}</p>}
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="unit"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Unidade*</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="reference_month"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mês de Referência*</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="month"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="payment_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Recebimento</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      {dateError && <p className="text-xs text-destructive mt-1">{dateError}</p>}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unidade*</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma unidade" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {units.map(unit => (
+                          <SelectItem key={unit.value} value={unit.value}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="observations"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Observações</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma unidade" />
-                      </SelectTrigger>
+                      <Textarea
+                        placeholder="Observações sobre esta receita"
+                        {...field}
+                        value={field.value || ''}
+                      />
                     </FormControl>
-                    <SelectContent>
-                      {units.map(unit => (
-                        <SelectItem key={unit.value} value={unit.value}>
-                          {unit.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="observations"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Observações sobre esta receita"
-                      {...field}
-                      value={field.value || ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isSubmitting || isCheckingDuplicate || !!dateError}>
-                {isSubmitting ? 'Salvando...' : isCheckingDuplicate ? 'Verificando...' : initialData ? 'Atualizar' : 'Adicionar'}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex justify-end pt-4">
+                <Button type="submit" variant="income" disabled={isSubmitting || !!dateError}>
+                  {isSubmitting ? 'Salvando...' : initialData ? 'Atualizar' : 'Adicionar'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+      
+      <AlertDialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Receita Duplicada</AlertDialogTitle>
+            <AlertDialogDescription>
+              Já existe uma receita cadastrada para esta categoria, mês de referência e unidade. 
+              Deseja continuar mesmo assim?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingSubmitData(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={proceedWithSubmit}>Continuar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };

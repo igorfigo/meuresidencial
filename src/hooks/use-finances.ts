@@ -325,6 +325,16 @@ export const useFinances = () => {
     }
   };
 
+  const checkDuplicateIncome = (category: string, reference_month: string, unit?: string): FinancialIncome | undefined => {
+    if (!unit) return undefined;
+    
+    return incomes.find(income => 
+      income.category === category && 
+      income.reference_month === reference_month &&
+      income.unit === unit
+    );
+  };
+  
   const checkDuplicateExpense = (category: string, reference_month: string): FinancialExpense | undefined => {
     return expenses.find(expense => 
       expense.category === category && 
@@ -347,6 +357,7 @@ export const useFinances = () => {
     updateBalance,
     refreshData: fetchFinancialData,
     calculateAndUpdateBalance,
-    checkDuplicateExpense
+    checkDuplicateExpense,
+    checkDuplicateIncome
   };
 };
