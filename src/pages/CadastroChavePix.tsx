@@ -88,8 +88,14 @@ const CadastroChavePix = () => {
       if (error) throw error;
       
       if (data) {
-        setPixKeys(data);
-        setMaxKeysReached(data.length > 0 && !isEditing);
+        // Map the data to include diavencimento with a default value if it doesn't exist
+        const mappedData: PixKey[] = data.map(item => ({
+          ...item,
+          diavencimento: item.diavencimento || '10', // Default to '10' if diavencimento doesn't exist
+        }));
+        
+        setPixKeys(mappedData);
+        setMaxKeysReached(mappedData.length > 0 && !isEditing);
       } else {
         setPixKeys([]);
       }
