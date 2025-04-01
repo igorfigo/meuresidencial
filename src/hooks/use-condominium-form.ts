@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -228,7 +229,13 @@ export const useCondominiumForm = () => {
       
       // Check if the field is empty
       if (typeof value === 'string' && (!value || value.trim() === '')) {
+        // Special handling for existing records - don't require password fields
+        if (isExistingRecord && (key === 'senha' || key === 'confirmarSenha')) {
+          continue;
+        }
+        
         toast.error(`O campo ${getFieldDisplayName(key)} é obrigatório.`);
+        console.log(`Field ${key} is empty with value: "${value}"`);
         return false;
       }
     }
@@ -269,6 +276,9 @@ export const useCondominiumForm = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
+    // Debug vencimento field
+    console.log('Vencimento value:', data.vencimento);
+    
     // Validate required fields
     if (!validateRequiredFields(data)) {
       return;
