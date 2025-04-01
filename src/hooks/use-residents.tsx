@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -108,7 +109,11 @@ export const useResidents = () => {
         throw error;
       }
       
-      return data as Resident[];
+      // Make sure to cast and ensure the 'active' property exists
+      return (data as any[]).map(item => ({
+        ...item,
+        active: item.active !== undefined ? item.active : true
+      })) as Resident[];
     },
     enabled: !!matricula
   });
@@ -213,7 +218,7 @@ export const useResidents = () => {
       }
       
       // Fixed: Ensure the values submitted match the required field structure
-      const resident: Resident = {
+      const resident: Omit<Resident, 'id' | 'created_at' | 'updated_at'> = {
         matricula: values.matricula,
         nome_completo: values.nome_completo,
         cpf: values.cpf,
@@ -238,7 +243,11 @@ export const useResidents = () => {
         }
       }
       
-      return data?.[0] as Resident;
+      // Make sure the returned data has the 'active' property
+      return {
+        ...(data?.[0] || {}),
+        active: data?.[0]?.active !== undefined ? data[0].active : true
+      } as Resident;
     },
     onSuccess: () => {
       toast.success("Morador cadastrado com sucesso!");
@@ -263,8 +272,9 @@ export const useResidents = () => {
       
       const { id, ...updateData } = values;
       
-      // Fixed: Ensure required fields are properly typed
-      const resident: Omit<Resident, 'id'> = {
+      // Ensure required fields are properly typed and include the active status
+      // Use the current active status from the editingResident
+      const resident = {
         matricula: updateData.matricula,
         nome_completo: updateData.nome_completo,
         cpf: updateData.cpf,
@@ -272,7 +282,7 @@ export const useResidents = () => {
         email: updateData.email,
         unidade: updateData.unidade,
         valor_condominio: updateData.valor_condominio,
-        active: true
+        active: editingResident?.active !== undefined ? editingResident.active : true
       };
       
       const { data, error } = await supabase
@@ -290,7 +300,11 @@ export const useResidents = () => {
         }
       }
       
-      return data?.[0] as Resident;
+      // Make sure the returned data has the 'active' property
+      return {
+        ...(data?.[0] || {}),
+        active: data?.[0]?.active !== undefined ? data[0].active : true
+      } as Resident;
     },
     onSuccess: () => {
       toast.success("Morador atualizado com sucesso!");
@@ -340,7 +354,11 @@ export const useResidents = () => {
         throw error;
       }
       
-      return data?.[0] as Resident;
+      // Make sure the returned data has the 'active' property
+      return {
+        ...(data?.[0] || {}),
+        active: data?.[0]?.active !== undefined ? data[0].active : active
+      } as Resident;
     },
     onSuccess: (data) => {
       const statusText = data.active ? "ativado" : "desativado";
