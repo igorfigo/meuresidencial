@@ -67,13 +67,10 @@ const fetchVpsData = async (): Promise<{
     }
 
     const accessToken = sessionData?.session?.access_token;
-    const anonKey = supabase.supabaseKey;
     
-    // If we don't have an access token, we'll use a mock response
-    // This allows the page to show demo data even when not authenticated
+    // We need an access token to fetch real data
     if (!accessToken) {
-      console.log('No authenticated session, using demo data');
-      return generateMockData();
+      throw new Error('No access token available');
     }
 
     // Call the edge function with proper authorization header
@@ -114,63 +111,6 @@ const fetchVpsData = async (): Promise<{
     console.error('Error in fetchVpsData:', error);
     throw error;
   }
-};
-
-// Generate mock data for the VPS when not authenticated
-const generateMockData = () => {
-  // Generate some realistic mock data
-  const currentCpuUsage = Math.floor(Math.random() * 40) + 10; // 10-50%
-  const currentRamUsage = Math.floor(Math.random() * 30) + 20; // 20-50%
-  const currentDiskUsage = Math.floor(Math.random() * 30) + 10; // 10-40%
-  
-  const vpsData: VpsData = {
-    hostname: 'vps123.hostinger.com',
-    ipAddress: '123.456.789.012',
-    status: 'running',
-    os: 'Ubuntu 22.04 LTS',
-    uptime: '10 days, 5 hours',
-    dataCenter: 'São Paulo, Brazil',
-    plan: 'Cloud Hosting Premium',
-    cpu: {
-      cores: 4,
-      model: 'Intel Xeon E5-2680 v3',
-      usage: currentCpuUsage,
-    },
-    memory: {
-      total: 8 * 1024 * 1024 * 1024, // 8 GB
-      used: (8 * 1024 * 1024 * 1024) * (currentRamUsage / 100),
-      free: (8 * 1024 * 1024 * 1024) * (1 - currentRamUsage / 100),
-      usagePercent: currentRamUsage,
-    },
-    disk: {
-      total: 100 * 1024 * 1024 * 1024, // 100 GB
-      used: (100 * 1024 * 1024 * 1024) * (currentDiskUsage / 100),
-      free: (100 * 1024 * 1024 * 1024) * (1 - currentDiskUsage / 100),
-      usagePercent: currentDiskUsage,
-    },
-    bandwidth: {
-      total: 2 * 1024 * 1024 * 1024 * 1024, // 2 TB
-      used: 500 * 1024 * 1024 * 1024, // 500 GB
-      remaining: 1.5 * 1024 * 1024 * 1024 * 1024, // 1.5 TB
-      usagePercent: 25,
-    },
-  };
-
-  const { 
-    cpuUsageHistory, 
-    ramUsageHistory, 
-    diskUsageHistory, 
-    bandwidthUsageHistory 
-  } = generateHistoricalData();
-
-  return {
-    vpsData,
-    vpsStatus: vpsData.status,
-    cpuUsageHistory,
-    ramUsageHistory,
-    diskUsageHistory,
-    bandwidthUsageHistory,
-  };
 };
 
 // Extract historical data generation to a separate function
@@ -241,10 +181,12 @@ export const useVpsData = () => {
     refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
     staleTime: 1000 * 60 * 4, // Consider data stale after 4 minutes
     retry: 1,
-    onError: (error) => {
-      toast.error('Erro ao carregar dados do VPS');
-      console.error('Error fetching VPS data:', error);
-    },
+    meta: {
+      onError: (error: Error) => {
+        toast.error('Erro ao carregar dados do VPS');
+        console.error('Error fetching VPS data:', error);
+      }
+    }
   });
 
   const formattedLastUpdated = data 
