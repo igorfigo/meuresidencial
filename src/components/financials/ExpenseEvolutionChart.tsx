@@ -57,8 +57,8 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
         const uniqueCategories = [...new Set(data.map(item => item.category))];
         
         const formattedCategories: ExpenseCategory[] = uniqueCategories.map(category => ({
-          category,
-          label: categoryLabels[category] || category
+          category: category as string,
+          label: categoryLabels[category as string] || category
         }));
 
         setCategories(formattedCategories);
