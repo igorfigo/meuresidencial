@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -232,6 +231,12 @@ export const useCondominiumForm = () => {
         toast.error(`O campo ${getFieldDisplayName(key)} é obrigatório.`);
         return false;
       }
+    }
+    
+    // Additional specific validation for planoContratado since it's a required field
+    if (!data.planoContratado || data.planoContratado.trim() === '') {
+      toast.error('O campo Plano Contratado é obrigatório.');
+      return false;
     }
     
     return true;
