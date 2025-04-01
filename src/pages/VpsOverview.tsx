@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
   Card, 
@@ -40,6 +40,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 const formatBytes = (bytes: number, decimals = 2) => {
   if (bytes === 0) return '0 Bytes';
@@ -192,8 +193,10 @@ const VpsOverview: React.FC = () => {
                   </div>
                   <Progress 
                     value={vpsData?.cpu?.usage || 0} 
-                    className="h-2 mt-2 bg-gray-100"
-                    indicatorClassName={`${vpsData?.cpu?.usage > 80 ? 'bg-red-500' : 'bg-indigo-500'}`}
+                    className={cn(
+                      "h-2 mt-2 bg-gray-100",
+                      vpsData?.cpu?.usage && vpsData.cpu.usage > 80 ? "bg-red-500" : "bg-indigo-500"
+                    )}
                   />
                   <p className="text-xs text-muted-foreground mt-2">
                     Modelo: {vpsData?.cpu?.model || 'Intel Xeon'}
@@ -217,8 +220,10 @@ const VpsOverview: React.FC = () => {
                   </div>
                   <Progress 
                     value={vpsData?.memory?.usagePercent || 0} 
-                    className="h-2 mt-2 bg-gray-100"
-                    indicatorClassName={`${vpsData?.memory?.usagePercent > 80 ? 'bg-red-500' : 'bg-green-500'}`}
+                    className={cn(
+                      "h-2 mt-2 bg-gray-100",
+                      vpsData?.memory?.usagePercent && vpsData.memory.usagePercent > 80 ? "bg-red-500" : "bg-green-500"
+                    )}
                   />
                   <p className="text-xs text-muted-foreground mt-2">
                     Usada: {formatBytes(vpsData?.memory?.used || 0)} de {formatBytes(vpsData?.memory?.total || 0)}
@@ -242,8 +247,10 @@ const VpsOverview: React.FC = () => {
                   </div>
                   <Progress 
                     value={vpsData?.disk?.usagePercent || 0} 
-                    className="h-2 mt-2 bg-gray-100"
-                    indicatorClassName={`${vpsData?.disk?.usagePercent > 80 ? 'bg-red-500' : 'bg-yellow-500'}`}
+                    className={cn(
+                      "h-2 mt-2 bg-gray-100",
+                      vpsData?.disk?.usagePercent && vpsData.disk.usagePercent > 80 ? "bg-red-500" : "bg-yellow-500"
+                    )}
                   />
                   <p className="text-xs text-muted-foreground mt-2">
                     Usada: {formatBytes(vpsData?.disk?.used || 0)} de {formatBytes(vpsData?.disk?.total || 0)}

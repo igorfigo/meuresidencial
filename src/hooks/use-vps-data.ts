@@ -56,63 +56,17 @@ const fetchVpsData = async (): Promise<{
   diskUsageHistory: UsageHistoryPoint[];
   bandwidthUsageHistory: BandwidthPoint[];
 }> => {
-  // First, get the API key from our database
-  const { data: apiKeyData, error: apiKeyError } = await supabase
-    .from('api_keys')
-    .select('api_key')
-    .eq('service_name', 'hostinger')
-    .single();
-
-  if (apiKeyError) {
-    throw new Error('Failed to get API key: ' + apiKeyError.message);
+  // Call the Supabase Edge Function to get VPS data
+  const { data, error } = await supabase.functions.invoke('getVpsData');
+  
+  if (error) {
+    throw new Error('Failed to fetch VPS data: ' + error.message);
   }
 
-  const apiKey = apiKeyData.api_key;
-
-  // For now, we're mocking the data as we don't have the real Hostinger API endpoint
-  // In a real implementation, you would make an actual fetch call to the Hostinger API
+  const vpsData = data as VpsData;
   
   // Simulate a little delay to mimic a real API call
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  // Generate mock data
-  const currentCpuUsage = Math.floor(Math.random() * 40) + 10; // 10-50%
-  const currentRamUsage = Math.floor(Math.random() * 30) + 20; // 20-50%
-  const currentDiskUsage = Math.floor(Math.random() * 30) + 10; // 10-40%
-
-  // Mock VPS data
-  const vpsData: VpsData = {
-    hostname: 'vps123.hostinger.com',
-    ipAddress: '123.456.789.012',
-    status: 'running',
-    os: 'Ubuntu 22.04 LTS',
-    uptime: '10 days, 5 hours',
-    dataCenter: 'São Paulo, Brazil',
-    plan: 'Cloud Hosting Premium',
-    cpu: {
-      cores: 4,
-      model: 'Intel Xeon E5-2680 v3',
-      usage: currentCpuUsage,
-    },
-    memory: {
-      total: 8 * 1024 * 1024 * 1024, // 8 GB
-      used: (8 * 1024 * 1024 * 1024) * (currentRamUsage / 100),
-      free: (8 * 1024 * 1024 * 1024) * (1 - currentRamUsage / 100),
-      usagePercent: currentRamUsage,
-    },
-    disk: {
-      total: 100 * 1024 * 1024 * 1024, // 100 GB
-      used: (100 * 1024 * 1024 * 1024) * (currentDiskUsage / 100),
-      free: (100 * 1024 * 1024 * 1024) * (1 - currentDiskUsage / 100),
-      usagePercent: currentDiskUsage,
-    },
-    bandwidth: {
-      total: 2 * 1024 * 1024 * 1024 * 1024, // 2 TB
-      used: 500 * 1024 * 1024 * 1024, // 500 GB
-      remaining: 1.5 * 1024 * 1024 * 1024 * 1024, // 1.5 TB
-      usagePercent: 25,
-    },
-  };
+  await new Promise(resolve => setTimeout(resolve, 500));
 
   // Generate historical data for CPU usage
   const generateTimePoints = (count: number): string[] => {
