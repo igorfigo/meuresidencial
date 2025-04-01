@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -176,7 +177,7 @@ export const useCondominiumForm = () => {
           planoContratado: data.planocontratado || 'STANDARD',
           valorPlano: data.valorplano ? `R$ ${formatToBRL(Number(data.valorplano))}` : 'R$ 0,00',
           formaPagamento: data.formapagamento || 'pix',
-          vencimento: data.vencimento || '',
+          vencimento: '', // This is no longer in the database, so we use an empty string
           desconto: data.desconto ? `R$ ${formatToBRL(Number(data.desconto))}` : 'R$ 0,00',
           valorMensal: data.valormensal ? `R$ ${formatToBRL(Number(data.valormensal))}` : 'R$ 0,00',
           tipoDocumento: data.tipodocumento || 'recibo',
@@ -346,7 +347,7 @@ export const useCondominiumForm = () => {
       planocontratado: data.planoContratado,
       valorplano: BRLToNumber(data.valorPlano).toString(),
       formapagamento: data.formaPagamento,
-      vencimento: data.vencimento,
+      // Removed vencimento from the formattedData since it's no longer in the database
       desconto: BRLToNumber(data.desconto).toString(),
       valormensal: BRLToNumber(data.valorMensal).toString(),
       tipodocumento: data.tipoDocumento,
