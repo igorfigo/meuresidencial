@@ -10,6 +10,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { SearchMatricula } from '@/components/condominium/SearchMatricula';
 import { useCondominiumForm } from '@/hooks/use-condominium-form';
 import { CondominiumForm } from '@/components/condominium/CondominiumForm';
+import { Card } from '@/components/ui/card';
 
 const CadastroGestor = () => {
   const {
@@ -59,7 +60,7 @@ const CadastroGestor = () => {
 
         <SearchMatricula 
           matriculaSearch={matriculaSearch}
-          onMatriculaSearch={handleMatriculaSearch} 
+          onSearch={handleMatriculaSearch} 
           isSearching={isSearching}
           onMatriculaChange={setMatriculaSearch}
         />
