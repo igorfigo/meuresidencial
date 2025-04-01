@@ -19,6 +19,23 @@ export const SearchMatricula = ({
   onSearch,
   isSearching
 }: SearchMatriculaProps) => {
+  // Handle matricula input to only allow numbers
+  const handleMatriculaInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numericValue = e.target.value.replace(/\D/g, '');
+    onMatriculaChange(numericValue);
+  };
+  
+  // Handle matricula key press to prevent non-numeric input
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow only numeric input
+    const isNumber = /^[0-9]$/i.test(e.key);
+    const isControlKey = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key);
+    
+    if (!isNumber && !isControlKey) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <Card className="mb-6 p-4">
       <div className="flex flex-col md:flex-row gap-4">
@@ -29,9 +46,11 @@ export const SearchMatricula = ({
               id="matriculaSearch" 
               placeholder="Digite a matrícula para buscar" 
               value={matriculaSearch}
-              onChange={(e) => onMatriculaChange(e.target.value)}
+              onChange={handleMatriculaInputChange}
+              onKeyDown={handleKeyPress}
               className="flex-1"
-              numberOnly 
+              inputMode="numeric"
+              numberOnly
             />
             <Button 
               type="button" 

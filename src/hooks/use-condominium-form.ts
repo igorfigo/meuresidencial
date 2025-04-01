@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { getCondominiumByMatricula, saveCondominiumData, getCondominiumChangeLogs } from '@/integrations/supabase/client';
+import { getCondominiumByMatricula, saveCondominiumData, getCondominiumChangeLogs, checkCondominiumExists } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 
@@ -220,6 +221,30 @@ export const useCondominiumForm = () => {
       
       if (data.senha !== data.confirmarSenha) {
         toast.error('As senhas não conferem. Por favor, verifique.');
+        return;
+      }
+
+      // Check if matricula, CNPJ or email already exists before saving
+      try {
+        const existsResult = await checkCondominiumExists(data.matricula, data.cnpj, data.emailLegal);
+        
+        if (existsResult.matriculaExists) {
+          toast.error('Esta matrícula já está cadastrada. Por favor, utilize outra.');
+          return;
+        }
+        
+        if (data.cnpj && existsResult.cnpjExists) {
+          toast.error('Este CNPJ já está cadastrado. Por favor, verifique.');
+          return;
+        }
+        
+        if (existsResult.emailExists) {
+          toast.error('Este e-mail já está cadastrado para outro condomínio. Por favor, utilize outro.');
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking existing data:', error);
+        toast.error('Erro ao verificar dados existentes. Tente novamente.');
         return;
       }
     } else if (data.senha || data.confirmarSenha) {
