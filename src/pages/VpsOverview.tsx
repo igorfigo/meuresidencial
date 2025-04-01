@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -31,7 +32,8 @@ import {
   ClockIcon, 
   Globe,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Info
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -40,6 +42,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formatBytes = (bytes: number, decimals = 2) => {
   if (bytes === 0) return '0 Bytes';
@@ -63,6 +66,7 @@ const VpsOverview: React.FC = () => {
     bandwidthUsageHistory,
     isLoading, 
     isError, 
+    isUsingFallback,
     lastUpdated,
     refetch
   } = useVpsData();
@@ -121,6 +125,16 @@ const VpsOverview: React.FC = () => {
         </div>
         
         <Separator className="my-4" />
+        
+        {isUsingFallback && (
+          <Alert variant="warning" className="bg-amber-50 border-amber-200 mb-4">
+            <Info className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-800">Usando dados de fallback</AlertTitle>
+            <AlertDescription className="text-amber-700">
+              Não foi possível conectar à API da Hostinger. Exibindo dados simulados para demonstração.
+            </AlertDescription>
+          </Alert>
+        )}
         
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

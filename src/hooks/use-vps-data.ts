@@ -36,6 +36,11 @@ interface VpsData {
     remaining: number;
     usagePercent: number;
   };
+  cpuUsageHistory: UsageHistoryPoint[];
+  ramUsageHistory: UsageHistoryPoint[];
+  diskUsageHistory: UsageHistoryPoint[];
+  bandwidthUsageHistory: BandwidthPoint[];
+  _fallback?: boolean;
 }
 
 interface UsageHistoryPoint {
@@ -49,14 +54,7 @@ interface BandwidthPoint {
   upload: number;
 }
 
-const fetchVpsData = async (): Promise<{
-  vpsData: VpsData;
-  vpsStatus: string;
-  cpuUsageHistory: UsageHistoryPoint[];
-  ramUsageHistory: UsageHistoryPoint[];
-  diskUsageHistory: UsageHistoryPoint[];
-  bandwidthUsageHistory: BandwidthPoint[];
-}> => {
+const fetchVpsData = async (): Promise<VpsData> => {
   try {
     // Since this is an admin-only function, we'll check local storage for admin status
     const userString = localStorage.getItem('user');
@@ -81,89 +79,12 @@ const fetchVpsData = async (): Promise<{
       throw new Error('Nenhum dado retornado da função getVpsData');
     }
 
-    const vpsData = data as VpsData;
-    
-    // Generate historical data
-    const { 
-      cpuUsageHistory, 
-      ramUsageHistory, 
-      diskUsageHistory, 
-      bandwidthUsageHistory 
-    } = generateHistoricalData();
-
-    return {
-      vpsData,
-      vpsStatus: vpsData.status,
-      cpuUsageHistory,
-      ramUsageHistory,
-      diskUsageHistory,
-      bandwidthUsageHistory,
-    };
+    // The data should already have the correct format from the edge function
+    return data as VpsData;
   } catch (error) {
     console.error('Error in fetchVpsData:', error);
     throw error;
   }
-};
-
-// Extract historical data generation to a separate function
-const generateHistoricalData = () => {
-  // Generate time points for the charts
-  const generateTimePoints = (count: number): string[] => {
-    const times: string[] = [];
-    const now = new Date();
-    
-    for (let i = count - 1; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 15 * 60 * 1000); // 15 minute intervals
-      times.push(format(date, 'HH:mm', { locale: ptBR }));
-    }
-    
-    return times;
-  };
-
-  const timePoints = generateTimePoints(24); // Last 6 hours in 15-minute intervals
-  
-  const cpuUsageHistory: UsageHistoryPoint[] = timePoints.map((time) => ({
-    time,
-    usage: Math.floor(Math.random() * 60) + 5,
-  }));
-  
-  const ramUsageHistory: UsageHistoryPoint[] = timePoints.map((time) => ({
-    time,
-    usage: Math.floor(Math.random() * 40) + 20,
-  }));
-  
-  const diskUsageHistory: UsageHistoryPoint[] = timePoints.map((time) => ({
-    time,
-    usage: Math.floor(Math.random() * 10) + 25,
-  }));
-  
-  // Generate bandwidth data for the last 7 days
-  const generateDates = (count: number): string[] => {
-    const dates: string[] = [];
-    const now = new Date();
-    
-    for (let i = count - 1; i >= 0; i--) {
-      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000); // Daily intervals
-      dates.push(format(date, 'dd/MM', { locale: ptBR }));
-    }
-    
-    return dates;
-  };
-
-  const datePoints = generateDates(7);
-  
-  const bandwidthUsageHistory: BandwidthPoint[] = datePoints.map((date) => ({
-    date,
-    download: Math.floor(Math.random() * 10 + 1) * 1024 * 1024 * 1024, // 1-10 GB
-    upload: Math.floor(Math.random() * 5 + 1) * 1024 * 1024 * 1024, // 1-5 GB
-  }));
-
-  return {
-    cpuUsageHistory,
-    ramUsageHistory,
-    diskUsageHistory,
-    bandwidthUsageHistory
-  };
 };
 
 export const useVpsData = () => {
@@ -185,15 +106,19 @@ export const useVpsData = () => {
     ? format(new Date(), 'dd/MM/yyyy HH:mm:ss', { locale: ptBR })
     : 'N/A';
 
+  // Check if we're using fallback data
+  const isUsingFallback = data?._fallback === true;
+
   return {
-    vpsData: data?.vpsData,
-    vpsStatus: data?.vpsStatus || 'unknown',
+    vpsData: data,
+    vpsStatus: data?.status || 'unknown',
     cpuUsageHistory: data?.cpuUsageHistory || [],
     ramUsageHistory: data?.ramUsageHistory || [],
     diskUsageHistory: data?.diskUsageHistory || [],
     bandwidthUsageHistory: data?.bandwidthUsageHistory || [],
     isLoading,
     isError,
+    isUsingFallback,
     lastUpdated: formattedLastUpdated,
     refetch,
   };
