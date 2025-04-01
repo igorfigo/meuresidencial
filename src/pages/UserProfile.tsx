@@ -4,6 +4,7 @@ import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { PasswordChangeSection } from '@/components/minha-assinatura/PasswordChangeSection';
 import { toast } from 'sonner';
 import { ProfileCondominiumInfo } from '@/components/profile/ProfileCondominiumInfo';
