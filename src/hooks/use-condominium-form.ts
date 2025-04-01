@@ -227,6 +227,7 @@ export const useCondominiumForm = () => {
       return;
     }
 
+    // For new registrations, validate password match and check for existing records
     if (!isExistingRecord) {
       if (!data.senha) {
         toast.error('Senha é obrigatória para novos cadastros.');
@@ -262,6 +263,7 @@ export const useCondominiumForm = () => {
         return;
       }
     } else if (data.senha || data.confirmarSenha) {
+      // For existing records, only validate password match if they are provided
       if (data.senha !== data.confirmarSenha) {
         toast.error('As senhas não conferem. Por favor, verifique.');
         return;
@@ -293,6 +295,7 @@ export const useCondominiumForm = () => {
       ativo: data.ativo
     };
 
+    // Include password fields only if they are provided
     if (data.senha && data.confirmarSenha) {
       formattedData.senha = data.senha;
       formattedData.confirmarsenha = data.confirmarSenha;
@@ -302,24 +305,27 @@ export const useCondominiumForm = () => {
     try {
       const userEmail = user ? user.email : null;
       
-      await saveCondominiumData(formattedData, userEmail);
+      // Pass the isExistingRecord flag to the saveCondominiumData function
+      // to determine whether this is an update or a new record
+      await saveCondominiumData(formattedData, userEmail, isExistingRecord);
+      
       toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
       
-      if (matriculaSearch === data.matricula) {
+      if (isExistingRecord && matriculaSearch === data.matricula) {
+        // Reload change logs after updating an existing record
         await loadChangeLogs(data.matricula);
       }
       
       if (!isExistingRecord) {
         // After a successful save of a new record, set it as an existing record
         setIsExistingRecord(true);
-        form.setValue('senha', '');
-        form.setValue('confirmarSenha', '');
-        // Update matriculaSearch to new matricula
         setMatriculaSearch(data.matricula);
-      } else {
-        form.setValue('senha', '');
-        form.setValue('confirmarSenha', '');
       }
+      
+      // Always clear password fields after save
+      form.setValue('senha', '');
+      form.setValue('confirmarSenha', '');
+      
     } catch (error) {
       console.error('Error saving condominium data:', error);
       toast.error('Erro ao salvar dados. Tente novamente mais tarde.');
