@@ -131,7 +131,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
-      // Content - updated to font size 14
+      // Content - set to font size 14
       doc.setFontSize(14);
       doc.setFont("helvetica", "normal");
       
