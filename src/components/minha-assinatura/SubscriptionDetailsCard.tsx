@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,13 +15,15 @@ interface SubscriptionDetailsCardProps {
   user: { matricula: string; email: string };
   formatCurrencyDisplay: (value: string | null | undefined) => string;
   getCurrentPlanDetails: () => { name: string; value: string };
+  pixDueDate?: string;
 }
 
 export const SubscriptionDetailsCard = ({ 
   condominiumData, 
   user, 
   formatCurrencyDisplay,
-  getCurrentPlanDetails
+  getCurrentPlanDetails,
+  pixDueDate
 }: SubscriptionDetailsCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [localCondominiumData, setLocalCondominiumData] = useState(condominiumData);
@@ -79,6 +80,8 @@ export const SubscriptionDetailsCard = ({
   
   const planDetails = getCurrentPlanDetails();
 
+  const dueDate = pixDueDate || localCondominiumData.vencimento || '';
+
   return (
     <Card className="border-t-4 border-t-brand-600 shadow-md p-6 mb-6">
       <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
@@ -118,7 +121,7 @@ export const SubscriptionDetailsCard = ({
           <Label htmlFor="vencimento">Vencimento</Label>
           <Input
             id="vencimento"
-            value={localCondominiumData.vencimento || ''}
+            value={dueDate}
             readOnly
             className="bg-gray-100"
           />

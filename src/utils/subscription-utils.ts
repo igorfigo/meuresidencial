@@ -20,3 +20,14 @@ export const getCurrentPlanDetails = (condominiumData: any, plans: any[]) => {
     value: plan ? plan.valor : formatCurrencyDisplay(condominiumData.valorplano)
   };
 };
+
+export const getDueDateFromPix = async () => {
+  try {
+    const { data, error } = await fetch('https://api.example.com/pix');
+    if (error) throw error;
+    return data?.diavencimento || '10';
+  } catch (error) {
+    console.error('Error fetching PIX due date:', error);
+    return '10';
+  }
+};

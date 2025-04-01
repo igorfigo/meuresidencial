@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -15,6 +14,7 @@ const MinhaAssinatura = () => {
   
   const [isLoading, setIsLoading] = useState(false);
   const [condominiumData, setCondominiumData] = useState<any>(null);
+  const [pixDueDate, setPixDueDate] = useState<string>('');
   
   const fetchCondominiumData = async (matricula: string) => {
     setIsLoading(true);
@@ -30,6 +30,21 @@ const MinhaAssinatura = () => {
       }
       
       setCondominiumData(data);
+      
+      // Fetch PIX key information
+      const { data: pixData, error: pixError } = await supabase
+        .from('pix_key_meuresidencial')
+        .select('diavencimento')
+        .single();
+        
+      if (pixError && pixError.code !== 'PGRST116') {
+        console.error('Error fetching PIX data:', pixError);
+      }
+      
+      if (pixData) {
+        setPixDueDate(pixData.diavencimento);
+      }
+      
     } catch (error) {
       console.error('Error fetching condominium data:', error);
       toast.error('Erro ao carregar dados do condomínio');
@@ -111,6 +126,7 @@ const MinhaAssinatura = () => {
             user={{ matricula: user.matricula, email: user.email }}
             formatCurrencyDisplay={formatCurrencyDisplay}
             getCurrentPlanDetails={getPlanDetails}
+            pixDueDate={pixDueDate}
           />
         )}
       </div>
