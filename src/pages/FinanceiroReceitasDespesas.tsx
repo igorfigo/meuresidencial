@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -230,8 +231,18 @@ const FinanceiroReceitasDespesas = () => {
         
         <Tabs defaultValue="income" value={activeTab} onValueChange={setActiveTab} className="mb-8">
           <TabsList className="grid w-full md:w-[400px] grid-cols-2">
-            <TabsTrigger value="income">Receitas</TabsTrigger>
-            <TabsTrigger value="expense">Despesas</TabsTrigger>
+            <TabsTrigger 
+              value="income" 
+              className="text-sm md:text-base font-medium data-[state=active]:bg-green-500 data-[state=active]:text-white"
+            >
+              Receitas
+            </TabsTrigger>
+            <TabsTrigger 
+              value="expense" 
+              className="text-sm md:text-base font-medium data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+            >
+              Despesas
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="income" className="mt-6">
