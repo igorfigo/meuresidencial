@@ -1,5 +1,6 @@
 
 import { formatToBRL } from '@/utils/currency';
+import { supabase } from '@/integrations/supabase/client';
 
 export const formatCurrencyDisplay = (value: string | null | undefined): string => {
   if (!value) return 'R$ 0,00';
@@ -21,9 +22,14 @@ export const getCurrentPlanDetails = (condominiumData: any, plans: any[]) => {
   };
 };
 
-export const getDueDateFromPix = async () => {
+export const getDueDateFromPix = async (): Promise<string> => {
   try {
-    const { data, error } = await fetch('https://api.example.com/pix');
+    // Use supabase instead of fetch for consistency with the rest of the app
+    const { data, error } = await supabase
+      .from('pix_key_meuresidencial')
+      .select('diavencimento')
+      .single();
+      
     if (error) throw error;
     return data?.diavencimento || '10';
   } catch (error) {
