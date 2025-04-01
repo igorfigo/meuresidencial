@@ -91,6 +91,31 @@ export const ChangeManagerDialog = ({
     return true;
   };
 
+  const checkEmailExists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('condominiums')
+        .select('matricula')
+        .eq('emaillegal', formData.newEmail)
+        .neq('matricula', matricula);
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data && data.length > 0) {
+        toast.error('Este e-mail já está sendo utilizado por outro condomínio.');
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Erro ao verificar e-mail:', error);
+      toast.error('Erro ao verificar e-mail. Por favor, tente novamente.');
+      return true;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -107,6 +132,13 @@ export const ChangeManagerDialog = ({
     setIsSubmitting(true);
 
     try {
+      // Check if email already exists in another condominium
+      const emailExists = await checkEmailExists();
+      if (emailExists) {
+        setIsSubmitting(false);
+        return;
+      }
+      
       // Generate a new password for the new manager
       const newPassword = generateRandomPassword();
       
