@@ -37,7 +37,6 @@ interface PixKeyFormData {
   chavepix: string;
   jurosaodia: string;
   created_at?: string;
-  updated_at?: string;
 }
 
 interface PixKey {
@@ -46,7 +45,6 @@ interface PixKey {
   chavepix: string;
   jurosaodia: string;
   created_at: string;
-  updated_at?: string;
 }
 
 const CadastroChavePix = () => {
@@ -113,7 +111,6 @@ const CadastroChavePix = () => {
             tipochave: data.tipochave,
             chavepix: data.chavepix,
             jurosaodia: data.jurosaodia,
-            updated_at: new Date().toISOString()
           })
           .eq('id', selectedPixKey.id);
         
