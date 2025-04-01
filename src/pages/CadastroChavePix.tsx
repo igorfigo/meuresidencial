@@ -87,11 +87,15 @@ const CadastroChavePix = () => {
       
       if (error) throw error;
       
-      if (data) {
-        // Map the data to include diavencimento with a default value if it doesn't exist
+      if (data && data.length > 0) {
+        // Map the data to ensure all required fields are present
         const mappedData: PixKey[] = data.map(item => ({
-          ...item,
+          id: item.id,
+          tipochave: item.tipochave,
+          chavepix: item.chavepix,
           diavencimento: item.diavencimento || '10', // Default to '10' if diavencimento doesn't exist
+          jurosaodia: item.jurosaodia || '0.033',
+          created_at: item.created_at
         }));
         
         setPixKeys(mappedData);
@@ -460,7 +464,6 @@ const CadastroChavePix = () => {
                             <Input
                               {...field}
                               placeholder="0.033"
-                              numberOnly
                               onChange={(e) => handleJurosChange(e, field)}
                             />
                           </FormControl>
@@ -570,3 +573,4 @@ const CadastroChavePix = () => {
 };
 
 export default CadastroChavePix;
+
