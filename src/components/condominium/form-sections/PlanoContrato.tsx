@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
@@ -73,9 +72,15 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
 
   // Set default value for vencimento to "10" and formaPagamento to "pix"
   React.useEffect(() => {
-    setValue('vencimento', '10');
-    setValue('formaPagamento', 'pix');
-  }, [setValue]);
+    // Only set default values if they're not already set
+    if (!watch('vencimento')) {
+      setValue('vencimento', '10');
+    }
+    
+    if (!watch('formaPagamento')) {
+      setValue('formaPagamento', 'pix');
+    }
+  }, [setValue, watch]);
 
   // Check if CNPJ is empty to determine if tipoDocumento Select should be disabled
   const isCnpjEmpty = !cnpj || cnpj.trim() === '';

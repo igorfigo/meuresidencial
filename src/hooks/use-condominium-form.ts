@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -215,21 +214,14 @@ export const useCondominiumForm = () => {
   };
 
   const validateRequiredFields = (data: FormFields): boolean => {
-    // Fields that are NOT required (can be empty)
-    // CNPJ, Complemento, Desconto, Senha, Confirmar Senha
-    const optionalFields = ['cnpj', 'complemento', 'desconto', 'senha', 'confirmarSenha'];
+    const optionalFields = ['cnpj', 'complemento', 'desconto', 'senha', 'confirmarSenha', 'vencimento'];
     
-    // Check all other fields (required fields)
     for (const [key, value] of Object.entries(data)) {
-      // Skip optional fields
       if (optionalFields.includes(key)) continue;
       
-      // Skip fields that are not strings or have special handling
       if (key === 'ativo') continue;
       
-      // Check if the field is empty
       if (typeof value === 'string' && (!value || value.trim() === '')) {
-        // Special handling for existing records - don't require password fields
         if (isExistingRecord && (key === 'senha' || key === 'confirmarSenha')) {
           continue;
         }
@@ -240,7 +232,6 @@ export const useCondominiumForm = () => {
       }
     }
     
-    // Additional specific validation for planoContratado since it's a required field
     if (!data.planoContratado || data.planoContratado.trim() === '') {
       toast.error('O campo Plano Contratado é obrigatório.');
       return false;
@@ -249,7 +240,6 @@ export const useCondominiumForm = () => {
     return true;
   };
   
-  // Helper function to get user-friendly field names for error messages
   const getFieldDisplayName = (fieldName: string): string => {
     const fieldNames: Record<string, string> = {
       matricula: 'Matrícula',
@@ -276,15 +266,12 @@ export const useCondominiumForm = () => {
   };
 
   const onSubmit = async (data: FormFields) => {
-    // Debug vencimento field
     console.log('Vencimento value:', data.vencimento);
     
-    // Validate required fields
     if (!validateRequiredFields(data)) {
       return;
     }
     
-    // Validate CNPJ (if provided)
     if (!validateCnpj(data.cnpj)) {
       toast.error('CNPJ inválido. Informe todos os 14 dígitos ou deixe em branco.');
       return;
