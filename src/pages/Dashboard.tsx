@@ -301,12 +301,12 @@ const Dashboard = () => {
       
       if (invoiceError) throw invoiceError;
       
-      const { count: bankSlipCount, error: bankSlipError } = await supabase
+      const { count: receiptCount, error: receiptError } = await supabase
         .from('condominiums')
         .select('*', { count: 'exact', head: true })
-        .eq('tipodocumento', 'boleto');
+        .eq('tipodocumento', 'recibo');
       
-      if (bankSlipError) throw bankSlipError;
+      if (receiptError) throw receiptError;
       
       const { data: regionData, error: regionError } = await supabase
         .from('condominiums')
@@ -326,13 +326,13 @@ const Dashboard = () => {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
       
-      console.log("Payment preferences - Invoice:", invoiceCount, "Bank Slip:", bankSlipCount);
+      console.log("Payment preferences - Invoice:", invoiceCount, "Receipt:", receiptCount);
       
       setStatsDetails({
         activeManagers: activeCount || 0,
         inactiveManagers: inactiveCount || 0,
         invoicePreference: invoiceCount || 0,
-        bankSlipPreference: bankSlipCount || 0,
+        bankSlipPreference: receiptCount || 0,
         regionData: topRegions
       });
     } catch (error) {
@@ -456,7 +456,7 @@ const Dashboard = () => {
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
-                <span className="text-sm text-muted-foreground">Boleto</span>
+                <span className="text-sm text-muted-foreground">Recibo</span>
                 <div className="text-xl font-bold">{statsDetails.bankSlipPreference}</div>
               </div>
               <div className="text-center">
