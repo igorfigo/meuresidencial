@@ -13,9 +13,10 @@ import type { FormFields } from '@/hooks/use-condominium-form';
 
 interface InfoCondominioProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isExistingRecord: boolean;
 }
 
-export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
+export const InfoCondominio = ({ handleInputChange, isExistingRecord }: InfoCondominioProps) => {
   const { register, watch, setValue } = useFormContext<FormFields>();
   const [isLoadingCep, setIsLoadingCep] = React.useState(false);
   
@@ -154,19 +155,26 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
               {...register('cep')}
               onChange={handleCepChange}
               placeholder="00000000"
-              className="flex-1"
+              className={`flex-1 ${isExistingRecord ? 'bg-gray-100' : ''}`}
               numberOnly
               maxLength={8}
+              readOnly={isExistingRecord}
+              disabled={isExistingRecord}
             />
             <Button 
               type="button" 
               onClick={handleCepSearch}
-              disabled={isLoadingCep}
+              disabled={isLoadingCep || isExistingRecord}
               className="bg-brand-600 hover:bg-brand-700"
             >
               {isLoadingCep ? "Buscando..." : <Search className="h-4 w-4" />}
             </Button>
           </div>
+          {isExistingRecord && (
+            <p className="text-xs text-amber-600">
+              Este campo não pode ser editado após buscar uma matrícula.
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -198,7 +206,15 @@ export const InfoCondominio = ({ handleInputChange }: InfoCondominioProps) => {
             placeholder="Número"
             numberOnly
             maxLength={10}
+            className={isExistingRecord ? 'bg-gray-100' : ''}
+            readOnly={isExistingRecord}
+            disabled={isExistingRecord}
           />
+          {isExistingRecord && (
+            <p className="text-xs text-amber-600">
+              Este campo não pode ser editado após buscar uma matrícula.
+            </p>
+          )}
         </div>
         
         <div className="space-y-2">
