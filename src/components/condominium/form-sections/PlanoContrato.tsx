@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -6,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePlans } from '@/hooks/use-plans';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
+import { getDueDateFromPix } from '@/utils/subscription-utils';
 import type { FormFields } from '@/hooks/use-condominium-form';
 
 interface PlanoContratoProps {
@@ -15,11 +17,32 @@ interface PlanoContratoProps {
 export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   const { register, setValue, watch } = useFormContext<FormFields>();
   const { plans, isLoading: isLoadingPlans, getPlanValue } = usePlans();
+  const [dueDateFromPix, setDueDateFromPix] = useState<string>('10');
+  const [isLoadingDueDate, setIsLoadingDueDate] = useState<boolean>(false);
   
   const planoContratado = watch('planoContratado');
   const desconto = watch('desconto');
   const valorPlano = watch('valorPlano');
   const cnpj = watch('cnpj');
+
+  // Fetch PIX due date when component mounts
+  useEffect(() => {
+    const fetchDueDate = async () => {
+      setIsLoadingDueDate(true);
+      try {
+        const dueDate = await getDueDateFromPix();
+        setDueDateFromPix(dueDate);
+        // Update form value with fetched due date
+        setValue('vencimento', dueDate);
+      } catch (error) {
+        console.error('Error fetching PIX due date:', error);
+      } finally {
+        setIsLoadingDueDate(false);
+      }
+    };
+    
+    fetchDueDate();
+  }, [setValue]);
 
   React.useEffect(() => {
     if (planoContratado) {
@@ -62,10 +85,6 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
   };
 
   React.useEffect(() => {
-    if (!watch('vencimento')) {
-      setValue('vencimento', '10');
-    }
-    
     if (!watch('formaPagamento')) {
       setValue('formaPagamento', 'pix');
     }
@@ -133,11 +152,14 @@ export const PlanoContrato = ({ handleInputChange }: PlanoContratoProps) => {
           <Label htmlFor="vencimento" required>Vencimento</Label>
           <Input
             id="vencimento"
-            value="10"
+            value={isLoadingDueDate ? "Carregando..." : dueDateFromPix}
             readOnly
             className="bg-gray-100"
           />
-          <input type="hidden" {...register('vencimento')} value="10" />
+          <input type="hidden" {...register('vencimento')} value={dueDateFromPix} />
+          <p className="text-xs text-muted-foreground">
+            Dia de vencimento configurado nas configurações de PIX
+          </p>
         </div>
         
         <div className="space-y-2">
