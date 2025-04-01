@@ -86,7 +86,7 @@ export const ResidentForm = ({
               name="nome_completo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome Completo *</FormLabel>
+                  <FormLabel required>Nome Completo</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Nome completo do morador" />
                   </FormControl>
@@ -100,7 +100,7 @@ export const ResidentForm = ({
               name="cpf"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>CPF *</FormLabel>
+                  <FormLabel required>CPF</FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
@@ -119,7 +119,7 @@ export const ResidentForm = ({
               name="telefone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Telefone *</FormLabel>
+                  <FormLabel required>Telefone</FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
@@ -138,7 +138,7 @@ export const ResidentForm = ({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>E-mail *</FormLabel>
+                  <FormLabel required>E-mail</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="E-mail do morador" type="email" />
                   </FormControl>
@@ -152,7 +152,7 @@ export const ResidentForm = ({
               name="unidade"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Unidade (Número do Apto) *</FormLabel>
+                  <FormLabel required>Unidade (Número do Apto)</FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
@@ -170,7 +170,7 @@ export const ResidentForm = ({
               name="valor_condominio"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Valor do Condomínio *</FormLabel>
+                  <FormLabel required>Valor do Condomínio</FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
