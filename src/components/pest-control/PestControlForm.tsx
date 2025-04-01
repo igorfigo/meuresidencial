@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -98,7 +99,7 @@ export const PestControlForm: React.FC<PestControlFormProps> = ({
             name="empresa"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Empresa</FormLabel>
+                <FormLabel required>Empresa</FormLabel>
                 <FormControl>
                   <Input placeholder="Nome da empresa" {...field} />
                 </FormControl>
@@ -112,7 +113,7 @@ export const PestControlForm: React.FC<PestControlFormProps> = ({
             name="data"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data</FormLabel>
+                <FormLabel required>Data</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
@@ -127,7 +128,7 @@ export const PestControlForm: React.FC<PestControlFormProps> = ({
           name="finalidade"
           render={() => (
             <FormItem>
-              <FormLabel>Finalidade</FormLabel>
+              <FormLabel required>Finalidade</FormLabel>
               <div className="grid grid-cols-3 gap-4">
                 {finalidadeOptions.map(option => (
                   <FormField
