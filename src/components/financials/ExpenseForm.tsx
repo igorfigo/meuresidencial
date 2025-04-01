@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -234,7 +235,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
   
   return (
     <>
-      <Card>
+      <Card className="border-t-4 border-t-blue-500">
         <CardHeader>
           <CardTitle>{initialData ? 'Editar Despesa' : 'Nova Despesa'}</CardTitle>
         </CardHeader>
