@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -100,7 +99,7 @@ export const useResidents = () => {
         .from('residents')
         .select('*')
         .eq('matricula', matricula)
-        .order('unidade', { ascending: true }); // Changed from nome_completo to unidade
+        .order('unidade', { ascending: true });
       
       if (error) {
         console.error("Error fetching residents:", error);
@@ -197,6 +196,60 @@ export const useResidents = () => {
     return data.length > 0;
   };
 
+  // Helper function to check for duplicate email in the SAME condominium
+  const checkDuplicateEmail = async (email: string, residentId?: string): Promise<boolean> => {
+    // Skip check if no email or matricula
+    if (!email || !matricula) return false;
+
+    let query = supabase
+      .from('residents')
+      .select('id')
+      .eq('matricula', matricula)
+      .eq('email', email);
+
+    // If we're editing an existing resident, exclude it from the check
+    if (residentId) {
+      query = query.neq('id', residentId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error checking duplicate email:", error);
+      return false;
+    }
+
+    // Return true if there's at least one resident with the same email in this matricula
+    return data.length > 0;
+  };
+
+  // Helper function to check for duplicate CPF in the same condominium
+  const checkDuplicateCPF = async (cpf: string, residentId?: string): Promise<boolean> => {
+    // Skip check if no cpf or matricula
+    if (!cpf || !matricula) return false;
+
+    let query = supabase
+      .from('residents')
+      .select('id')
+      .eq('matricula', matricula)
+      .eq('cpf', cpf);
+
+    // If we're editing an existing resident, exclude it from the check
+    if (residentId) {
+      query = query.neq('id', residentId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error checking duplicate CPF:", error);
+      return false;
+    }
+
+    // Return true if there's at least one resident with the same CPF in this matricula
+    return data.length > 0;
+  };
+
   // Mutation to create a new resident
   const createMutation = useMutation({
     mutationFn: async (values: ResidentFormValues) => {
@@ -210,6 +263,18 @@ export const useResidents = () => {
       const isDuplicateUnit = await checkDuplicateUnit(values.unidade);
       if (isDuplicateUnit) {
         throw new Error('Unidade já cadastrada para este condomínio');
+      }
+      
+      // Check for duplicate email within the same condominium
+      const isDuplicateEmail = await checkDuplicateEmail(values.email);
+      if (isDuplicateEmail) {
+        throw new Error('E-mail já cadastrado para este condomínio');
+      }
+
+      // Check for duplicate CPF within the same condominium
+      const isDuplicateCPF = await checkDuplicateCPF(values.cpf);
+      if (isDuplicateCPF) {
+        throw new Error('CPF já cadastrado para este condomínio');
       }
       
       // Fixed: Ensure the values submitted match the required field structure
@@ -229,12 +294,8 @@ export const useResidents = () => {
         .select();
       
       if (error) {
-        if (error.code === '23505' && error.message.includes('unique_cpf_per_condominium')) {
-          throw new Error('CPF já cadastrado para este condomínio');
-        } else {
-          console.error("Error creating resident:", error);
-          throw error;
-        }
+        console.error("Error creating resident:", error);
+        throw error;
       }
       
       return data?.[0] as Resident;
@@ -260,6 +321,18 @@ export const useResidents = () => {
         throw new Error('Unidade já cadastrada para este condomínio');
       }
       
+      // Check for duplicate email within the same condominium
+      const isDuplicateEmail = await checkDuplicateEmail(values.email, values.id);
+      if (isDuplicateEmail) {
+        throw new Error('E-mail já cadastrado para este condomínio');
+      }
+
+      // Check for duplicate CPF within the same condominium
+      const isDuplicateCPF = await checkDuplicateCPF(values.cpf, values.id);
+      if (isDuplicateCPF) {
+        throw new Error('CPF já cadastrado para este condomínio');
+      }
+      
       const { id, ...updateData } = values;
       
       // Fixed: Ensure required fields are properly typed
@@ -280,12 +353,8 @@ export const useResidents = () => {
         .select();
       
       if (error) {
-        if (error.code === '23505' && error.message.includes('unique_cpf_per_condominium')) {
-          throw new Error('CPF já cadastrado para este condomínio');
-        } else {
-          console.error("Error updating resident:", error);
-          throw error;
-        }
+        console.error("Error updating resident:", error);
+        throw error;
       }
       
       return data?.[0] as Resident;
