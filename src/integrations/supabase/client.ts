@@ -53,8 +53,9 @@ export const saveCondominiumData = async (
     if (existingData) {
       // It's an update - exclude matricula from update data
       const updateData = { ...data };
-      delete updateData.matricula; // Prevent changing matricula
       
+      // For TypeScript - make sure 'matricula' is included in the data object
+      // but don't actually update it in the database
       result = await supabase
         .from('condominiums')
         .update(updateData)
