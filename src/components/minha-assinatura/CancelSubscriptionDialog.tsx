@@ -41,6 +41,17 @@ export const CancelSubscriptionDialog = ({ condominiumMatricula, userEmail }: Ca
         usuario: userEmail
       });
       
+      // Deactivate all residents for this condominium
+      const { error: residentsError } = await supabase
+        .from('residents')
+        .update({ active: false })
+        .eq('matricula', condominiumMatricula);
+        
+      if (residentsError) {
+        console.error('Error deactivating residents:', residentsError);
+        // We don't throw here to allow the subscription cancellation to complete
+      }
+      
       toast.success('Sua assinatura foi cancelada com sucesso');
       
       // Delay logout to allow the success toast to be visible
@@ -70,7 +81,7 @@ export const CancelSubscriptionDialog = ({ condominiumMatricula, userEmail }: Ca
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmação de Cancelamento</AlertDialogTitle>
             <AlertDialogDescription>
-              Você tem certeza que deseja cancelar sua assinatura? Essa ação desativará sua conta e você será desconectado do sistema.
+              Você tem certeza que deseja cancelar sua assinatura? Essa ação desativará sua conta e de todos moradores.
               <p className="mt-2 font-medium text-destructive">
                 Essa operação não poderá ser desfeita. Para reativar sua conta, será necessário entrar em contato com o administrador do sistema.
               </p>
