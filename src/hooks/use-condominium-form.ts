@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -213,7 +214,62 @@ export const useCondominiumForm = () => {
     return cnpjDigits.length === 14;
   };
 
+  const validateRequiredFields = (data: FormFields): boolean => {
+    // Fields that are NOT required (can be empty)
+    // CNPJ, Complemento, Desconto, Senha, Confirmar Senha
+    const optionalFields = ['cnpj', 'complemento', 'desconto', 'senha', 'confirmarSenha'];
+    
+    // Check all other fields (required fields)
+    for (const [key, value] of Object.entries(data)) {
+      // Skip optional fields
+      if (optionalFields.includes(key)) continue;
+      
+      // Skip fields that are not strings or have special handling
+      if (key === 'ativo') continue;
+      
+      // Check if the field is empty
+      if (typeof value === 'string' && (!value || value.trim() === '')) {
+        toast.error(`O campo ${getFieldDisplayName(key)} é obrigatório.`);
+        return false;
+      }
+    }
+    
+    return true;
+  };
+  
+  // Helper function to get user-friendly field names for error messages
+  const getFieldDisplayName = (fieldName: string): string => {
+    const fieldNames: Record<string, string> = {
+      matricula: 'Matrícula',
+      cep: 'CEP',
+      rua: 'Rua',
+      numero: 'Número',
+      bairro: 'Bairro',
+      cidade: 'Cidade',
+      estado: 'Estado',
+      nomeCondominio: 'Nome do Condomínio',
+      nomeLegal: 'Nome do Representante Legal',
+      emailLegal: 'Email do Representante Legal',
+      telefoneLegal: 'Telefone do Representante Legal',
+      enderecoLegal: 'Endereço do Representante Legal',
+      planoContratado: 'Plano Contratado',
+      valorPlano: 'Valor do Plano',
+      formaPagamento: 'Forma de Pagamento',
+      vencimento: 'Vencimento',
+      valorMensal: 'Valor Mensal',
+      tipoDocumento: 'Tipo de Documento'
+    };
+    
+    return fieldNames[fieldName] || fieldName;
+  };
+
   const onSubmit = async (data: FormFields) => {
+    // Validate required fields
+    if (!validateRequiredFields(data)) {
+      return;
+    }
+    
+    // Validate CNPJ (if provided)
     if (!validateCnpj(data.cnpj)) {
       toast.error('CNPJ inválido. Informe todos os 14 dígitos ou deixe em branco.');
       return;
