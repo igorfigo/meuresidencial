@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -263,6 +262,16 @@ const CadastroChavePix = () => {
     }
   };
   
+  const handleJurosChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      return;
+    }
+    
+    field.onChange(value);
+  };
+  
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
@@ -404,6 +413,8 @@ const CadastroChavePix = () => {
                             <Input
                               {...field}
                               placeholder="0.033"
+                              numberOnly
+                              onChange={(e) => handleJurosChange(e, field)}
                             />
                           </FormControl>
                           <p className="text-xs text-gray-500">Exemplo: 0.033 para uma taxa de 0,033% ao dia</p>
