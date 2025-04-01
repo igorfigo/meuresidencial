@@ -113,6 +113,31 @@ export const useCommonAreas = () => {
     }
   };
 
+  // Check if common area name already exists
+  const checkDuplicateName = async (name: string, id?: string): Promise<boolean> => {
+    if (!matricula) return false;
+    
+    let query = supabase
+      .from('common_areas')
+      .select('id, name')
+      .eq('matricula', matricula)
+      .ilike('name', name);
+    
+    // If editing, exclude the current area from duplicate check
+    if (id) {
+      query = query.neq('id', id);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error checking duplicate name:', error);
+      return false;
+    }
+    
+    return data.length > 0;
+  };
+
   // Submit form to create or update a common area
   const onSubmit = async (data: CommonAreaFormValues) => {
     if (!matricula) {
@@ -123,6 +148,14 @@ export const useCommonAreas = () => {
     setIsSubmitting(true);
     
     try {
+      // Check for duplicate name
+      const isDuplicate = await checkDuplicateName(data.name, data.id);
+      if (isDuplicate) {
+        toast.error('Já existe uma área comum com este nome no condomínio');
+        setIsSubmitting(false);
+        return;
+      }
+
       if (data.id) {
         // Update existing common area
         const { error } = await supabase
