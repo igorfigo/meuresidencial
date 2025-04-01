@@ -1045,6 +1045,7 @@ export type Database = {
       }
       residents: {
         Row: {
+          active: boolean
           cpf: string
           created_at: string
           email: string | null
@@ -1058,6 +1059,7 @@ export type Database = {
           valor_condominio: string | null
         }
         Insert: {
+          active?: boolean
           cpf: string
           created_at?: string
           email?: string | null
@@ -1071,6 +1073,7 @@ export type Database = {
           valor_condominio?: string | null
         }
         Update: {
+          active?: boolean
           cpf?: string
           created_at?: string
           email?: string | null

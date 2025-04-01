@@ -19,8 +19,10 @@ const Moradores = () => {
     resetForm, 
     onSubmit, 
     deleteResident, 
+    toggleResidentActive,
     isSubmitting, 
     isDeleting,
+    isTogglingActive,
     refetch,
     planLimitError
   } = useResidents();
@@ -57,6 +59,10 @@ const Moradores = () => {
       deleteResident(residentToDelete);
       setResidentToDelete(null);
     }
+  };
+
+  const handleToggleActive = (id: string, active: boolean) => {
+    toggleResidentActive(id, active);
   };
 
   return (
@@ -106,7 +112,9 @@ const Moradores = () => {
                   residents={residents || []}
                   onEdit={handleEditResident}
                   onDelete={handleDeleteClick}
+                  onToggleActive={handleToggleActive}
                   isDeleting={isDeleting}
+                  isTogglingActive={isTogglingActive}
                 />
               )}
             </div>

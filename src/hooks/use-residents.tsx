@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +36,7 @@ export interface Resident {
   valor_condominio: string;
   created_at?: string;
   updated_at?: string;
+  active: boolean;
 }
 
 export const useResidents = () => {
@@ -220,7 +220,8 @@ export const useResidents = () => {
         telefone: values.telefone,
         email: values.email,
         unidade: values.unidade,
-        valor_condominio: values.valor_condominio
+        valor_condominio: values.valor_condominio,
+        active: true
       };
       
       const { data, error } = await supabase
@@ -270,7 +271,8 @@ export const useResidents = () => {
         telefone: updateData.telefone,
         email: updateData.email,
         unidade: updateData.unidade,
-        valor_condominio: updateData.valor_condominio
+        valor_condominio: updateData.valor_condominio,
+        active: true
       };
       
       const { data, error } = await supabase
@@ -324,6 +326,32 @@ export const useResidents = () => {
     }
   });
 
+  // Mutation to toggle resident active status
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ id, active }: { id: string, active: boolean }) => {
+      const { data, error } = await supabase
+        .from('residents')
+        .update({ active })
+        .eq('id', id)
+        .select();
+      
+      if (error) {
+        console.error("Error toggling resident active status:", error);
+        throw error;
+      }
+      
+      return data?.[0] as Resident;
+    },
+    onSuccess: (data) => {
+      const statusText = data.active ? "ativado" : "desativado";
+      toast.success(`Morador ${statusText} com sucesso!`);
+      queryClient.invalidateQueries({ queryKey: ['residents', matricula] });
+    },
+    onError: () => {
+      toast.error("Erro ao alterar status do morador");
+    }
+  });
+
   // Handle form submission
   const onSubmit = (values: ResidentFormValues) => {
     if (editingResident) {
@@ -343,8 +371,10 @@ export const useResidents = () => {
     resetForm,
     onSubmit,
     deleteResident: deleteMutation.mutate,
+    toggleResidentActive: (id: string, active: boolean) => toggleActiveMutation.mutate({ id, active }),
     isSubmitting: createMutation.isPending || updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
+    isTogglingActive: toggleActiveMutation.isPending,
     refetch,
     planLimitError
   };

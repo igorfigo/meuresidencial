@@ -9,22 +9,27 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, UserCheck, UserX } from 'lucide-react';
 import { Resident } from '@/hooks/use-residents';
 import { Card } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 
 interface ResidentsListProps {
   residents: Resident[];
   onEdit: (resident: Resident) => void;
   onDelete: (id: string) => void;
+  onToggleActive: (id: string, active: boolean) => void;
   isDeleting: boolean;
+  isTogglingActive: boolean;
 }
 
 export const ResidentsList = ({
   residents,
   onEdit,
   onDelete,
-  isDeleting
+  onToggleActive,
+  isDeleting,
+  isTogglingActive
 }: ResidentsListProps) => {
   return (
     <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
@@ -37,25 +42,39 @@ export const ResidentsList = ({
             <TableHead className="text-center">Telefone</TableHead>
             <TableHead className="text-center">E-mail</TableHead>
             <TableHead className="text-center">Valor Condomínio</TableHead>
+            <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {residents.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
+              <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
                 Nenhum morador cadastrado
               </TableCell>
             </TableRow>
           ) : (
             residents.map((resident) => (
-              <TableRow key={resident.id}>
+              <TableRow key={resident.id} className={!resident.active ? "bg-gray-100" : ""}>
                 <TableCell className="font-medium">{resident.nome_completo}</TableCell>
                 <TableCell className="text-center">{resident.cpf}</TableCell>
                 <TableCell className="text-center">{resident.unidade}</TableCell>
                 <TableCell className="text-center">{resident.telefone || '-'}</TableCell>
                 <TableCell className="text-center">{resident.email || '-'}</TableCell>
                 <TableCell className="text-center">{resident.valor_condominio || '-'}</TableCell>
+                <TableCell className="text-center">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Switch
+                      checked={resident.active}
+                      onCheckedChange={(checked) => resident.id && onToggleActive(resident.id, checked)}
+                      disabled={isTogglingActive}
+                      aria-label={resident.active ? "Ativo" : "Inativo"}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {resident.active ? "Ativo" : "Inativo"}
+                    </span>
+                  </div>
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
                     <Button
