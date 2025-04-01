@@ -559,7 +559,7 @@ export const getBalanceAdjustments = async (matricula: string) => {
 export const getPixKey = async (matricula: string) => {
   try {
     const { data, error } = await supabase
-      .from('pix_receipt_settings')
+      .from('pix_key_meuresidencial')
       .select('*')
       .eq('matricula', matricula)
       .single();

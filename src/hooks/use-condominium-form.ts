@@ -7,7 +7,8 @@ import {
   getCondominiumChangeLogs,
   checkMatriculaExists,
   checkCnpjExists,
-  checkEmailLegalExists
+  checkEmailLegalExists,
+  getPixKey
 } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
@@ -157,6 +158,14 @@ export const useCondominiumForm = () => {
     setIsSearching(true);
     try {
       const data = await getCondominiumByMatricula(matriculaSearch);
+      
+      const pixKeyData = await getPixKey(matriculaSearch);
+      let dueDate = '';
+      
+      if (pixKeyData && pixKeyData.diavencimento) {
+        dueDate = pixKeyData.diavencimento;
+      }
+      
       if (data) {
         const formattedData = {
           matricula: data.matricula,
@@ -176,7 +185,7 @@ export const useCondominiumForm = () => {
           planoContratado: data.planocontratado || 'STANDARD',
           valorPlano: data.valorplano ? `R$ ${formatToBRL(Number(data.valorplano))}` : 'R$ 0,00',
           formaPagamento: data.formapagamento || 'pix',
-          vencimento: data.vencimento || '',
+          vencimento: dueDate || data.vencimento || '',
           desconto: data.desconto ? `R$ ${formatToBRL(Number(data.desconto))}` : 'R$ 0,00',
           valorMensal: data.valormensal ? `R$ ${formatToBRL(Number(data.valormensal))}` : 'R$ 0,00',
           tipoDocumento: data.tipodocumento || 'recibo',
@@ -363,6 +372,17 @@ export const useCondominiumForm = () => {
       const userEmail = user ? user.email : null;
       
       await saveCondominiumData(formattedData, userEmail);
+      
+      const pixKeyData = await getPixKey(data.matricula);
+      if (pixKeyData) {
+        await supabase
+          .from('pix_key_meuresidencial')
+          .update({
+            diavencimento: data.vencimento
+          })
+          .eq('id', pixKeyData.id);
+      }
+      
       toast.success(isExistingRecord ? 'Cadastro atualizado com sucesso!' : 'Cadastro realizado com sucesso!');
       
       if (matriculaSearch === data.matricula) {

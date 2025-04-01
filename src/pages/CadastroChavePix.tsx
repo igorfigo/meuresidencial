@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -88,12 +87,11 @@ const CadastroChavePix = () => {
       if (error) throw error;
       
       if (data && data.length > 0) {
-        // Map the data to ensure all required fields are present
         const mappedData: PixKey[] = data.map(item => ({
           id: item.id,
           tipochave: item.tipochave,
           chavepix: item.chavepix,
-          diavencimento: item.diavencimento || '10', // Default to '10' if diavencimento doesn't exist
+          diavencimento: item.diavencimento || '10',
           jurosaodia: item.jurosaodia || '0.033',
           created_at: item.created_at
         }));
@@ -118,7 +116,6 @@ const CadastroChavePix = () => {
         return;
       }
       
-      // Validate dia de vencimento
       const diavencimento = parseInt(data.diavencimento);
       if (isNaN(diavencimento) || diavencimento < 1 || diavencimento > 31) {
         toast.error('Dia de vencimento deve ser um número entre 1 e 31');
@@ -137,6 +134,22 @@ const CadastroChavePix = () => {
           .eq('id', selectedPixKey.id);
         
         if (error) throw error;
+        
+        const { data: pixKeyData } = await supabase
+          .from('pix_key_meuresidencial')
+          .select('*')
+          .eq('id', selectedPixKey.id)
+          .single();
+          
+        if (pixKeyData && pixKeyData.matricula) {
+          await supabase
+            .from('condominiums')
+            .update({
+              vencimento: data.diavencimento
+            })
+            .eq('matricula', pixKeyData.matricula);
+        }
+        
         toast.success('Chave PIX atualizada com sucesso');
       } else {
         if (pixKeys.length > 0) {
@@ -144,16 +157,42 @@ const CadastroChavePix = () => {
           return;
         }
         
-        const { error } = await supabase
+        let matricula = '';
+        
+        if (user && user.email) {
+          const { data: userData } = await supabase
+            .from('user_roles')
+            .select('matricula')
+            .eq('user_id', user.id)
+            .single();
+            
+          if (userData && userData.matricula) {
+            matricula = userData.matricula;
+          }
+        }
+        
+        const { error, data: newPixKey } = await supabase
           .from('pix_key_meuresidencial')
           .insert({
             tipochave: data.tipochave,
             chavepix: data.chavepix,
             diavencimento: data.diavencimento,
             jurosaodia: data.jurosaodia,
-          });
+            matricula: matricula
+          })
+          .select();
         
         if (error) throw error;
+        
+        if (matricula) {
+          await supabase
+            .from('condominiums')
+            .update({
+              vencimento: data.diavencimento
+            })
+            .eq('matricula', matricula);
+        }
+        
         toast.success('Chave PIX cadastrada com sucesso');
       }
       
@@ -573,4 +612,3 @@ const CadastroChavePix = () => {
 };
 
 export default CadastroChavePix;
-
