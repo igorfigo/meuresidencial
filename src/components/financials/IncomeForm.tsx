@@ -101,7 +101,6 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
         if (error) throw error;
         
         if (data && data.length > 0) {
-          // Format as YYYY-MM-DD for comparison with HTML input date format
           const adjustmentDate = new Date(data[0].adjustment_date);
           const formattedDate = adjustmentDate.toISOString().split('T')[0];
           setLastBalanceAdjustmentDate(formattedDate);
@@ -118,15 +117,12 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   const validatePaymentDate = (paymentDate: string | undefined): boolean => {
     if (!paymentDate || !lastBalanceAdjustmentDate) return true;
     
-    // Create date objects for comparison (ignoring time)
     const paymentDateObj = new Date(paymentDate);
     const adjustmentDateObj = new Date(lastBalanceAdjustmentDate);
     
-    // Set both times to midnight to ensure we're only comparing dates
     paymentDateObj.setHours(0, 0, 0, 0);
     adjustmentDateObj.setHours(0, 0, 0, 0);
     
-    // Compare the two dates
     return paymentDateObj >= adjustmentDateObj;
   };
   
@@ -135,11 +131,18 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     
     setIsSubmitting(true);
     try {
-      await onSubmit({
-        ...pendingSubmitData,
+      const incomeData: FinancialIncome = {
         matricula: user.selectedCondominium,
+        category: pendingSubmitData.category,
+        amount: pendingSubmitData.amount,
+        reference_month: pendingSubmitData.reference_month,
+        payment_date: pendingSubmitData.payment_date,
+        unit: pendingSubmitData.unit,
+        observations: pendingSubmitData.observations,
         id: initialData?.id
-      });
+      };
+      
+      await onSubmit(incomeData);
       
       if (!initialData) {
         form.reset({
@@ -163,15 +166,11 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     
     setDateError(null);
     
-    // Check if payment date is provided and valid
     if (values.payment_date) {
       const isValidDate = validatePaymentDate(values.payment_date);
       
       if (!isValidDate) {
-        // Fix: Create proper date object but avoid timezone issues by adding 
-        // the time segment when parsing the date
         const adjustmentDate = new Date(lastBalanceAdjustmentDate! + 'T00:00:00');
-        // Format the date correctly
         const day = adjustmentDate.getDate();
         const month = adjustmentDate.getMonth() + 1;
         const year = adjustmentDate.getFullYear();
@@ -182,10 +181,8 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
       }
     }
     
-    // Check for duplicate entries
     const duplicateIncome = checkDuplicateIncome(values.category, values.reference_month, values.unit);
     
-    // If it's an edit and the ID matches, it's not a duplicate
     const isEditingSameIncome = initialData?.id && duplicateIncome?.id === initialData.id;
     
     if (duplicateIncome && !isEditingSameIncome) {
@@ -196,11 +193,18 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     
     setIsSubmitting(true);
     try {
-      await onSubmit({
-        ...values,
+      const incomeData: FinancialIncome = {
         matricula: user.selectedCondominium,
+        category: values.category,
+        amount: values.amount,
+        reference_month: values.reference_month,
+        payment_date: values.payment_date,
+        unit: values.unit,
+        observations: values.observations,
         id: initialData?.id
-      });
+      };
+      
+      await onSubmit(incomeData);
       
       if (!initialData) {
         form.reset({
