@@ -87,7 +87,7 @@ export default function VagaGaragem() {
                     <TableHead className="text-center">Morador</TableHead>
                     <TableHead className="text-center">Unidade</TableHead>
                     <TableHead className="text-center">Descrição</TableHead>
-                    <TableHead>Contato</TableHead>
+                    <TableHead className="text-center">Contato</TableHead>
                     <TableHead className="text-center">Disponibilidade</TableHead>
                     <TableHead className="text-center">Data de Cadastro</TableHead>
                   </TableRow>
@@ -104,8 +104,8 @@ export default function VagaGaragem() {
                       <TableCell className="text-center">
                         {listing.description || "Sem descrição"}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col space-y-1">
+                      <TableCell className="text-center">
+                        <div className="flex flex-col items-center space-y-1">
                           {listing.residents?.telefone && (
                             <div className="flex items-center text-sm">
                               <Phone className="mr-2 h-3 w-3" />
