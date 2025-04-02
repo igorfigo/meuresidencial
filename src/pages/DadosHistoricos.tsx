@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Send, History } from 'lucide-react';
+import { Loader2, Send, History, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +22,7 @@ const DadosHistoricos = () => {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastSubmission, setLastSubmission] = useState<Date | null>(null);
   
   // Check if user is a manager (not admin and not resident)
   if (user?.isAdmin || user?.isResident) {
@@ -48,6 +49,35 @@ const DadosHistoricos = () => {
     );
   }
   
+  // Get existing requests when component mounts
+  useEffect(() => {
+    const checkExistingRequests = async () => {
+      if (!user?.matricula) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('historical_data_requests')
+          .select('created_at')
+          .eq('matricula', user.matricula)
+          .order('created_at', { ascending: false })
+          .limit(1);
+          
+        if (error) {
+          console.error('Erro ao verificar solicitações anteriores:', error);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          setLastSubmission(new Date(data[0].created_at));
+        }
+      } catch (error) {
+        console.error('Erro ao verificar solicitações:', error);
+      }
+    };
+    
+    checkExistingRequests();
+  }, [user?.matricula]);
+  
   const handleTypeChange = (type: 'inclusao' | 'download') => {
     setFormData(prev => ({ ...prev, type }));
   };
@@ -63,7 +93,7 @@ const DadosHistoricos = () => {
         return;
       }
       
-      // Inserção direta na tabela sem usar funções que acessam user_roles
+      // Inserção direta na tabela
       const { error } = await supabase
         .from('historical_data_requests')
         .insert({
@@ -76,10 +106,20 @@ const DadosHistoricos = () => {
       
       if (error) {
         console.error('Erro detalhado:', error);
-        throw error;
+        
+        // Fornece mensagens de erro mais específicas com base no tipo de erro
+        if (error.code === '23505') { // Violação de chave única
+          toast.error('Você já possui uma solicitação similar em processamento.');
+        } else if (error.code === '42501') { // Violação de permissão
+          toast.error('Você não tem permissão para realizar esta ação.');
+        } else {
+          toast.error(`Erro ao enviar solicitação: ${error.message}`);
+        }
+        return;
       }
       
       toast.success('Solicitação enviada com sucesso! Responderemos em até 24 horas úteis.');
+      setLastSubmission(new Date());
       setFormData({ type: 'inclusao' });
     } catch (error) {
       console.error('Erro ao enviar solicitação:', error);
@@ -100,6 +140,23 @@ const DadosHistoricos = () => {
         
         {/* PIX Payment Section */}
         {user?.matricula && <HistoricalDataPixSection matricula={user.matricula} />}
+        
+        {lastSubmission && (
+          <Card className="border-t-4 border-t-green-500 shadow-md mb-6">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-4">
+                <Info className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="font-medium text-lg mb-2">Solicitação em Andamento</h3>
+                  <p className="text-gray-600">
+                    Você já tem uma solicitação enviada em {lastSubmission.toLocaleDateString('pt-BR')}. 
+                    Nossa equipe irá analisar e entrar em contato em breve.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
         <Card className="border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="pb-3">
