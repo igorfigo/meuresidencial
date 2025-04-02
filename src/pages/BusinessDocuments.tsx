@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Files, Trash2, Upload, X, File } from 'lucide-react';
+import { Files, Trash2, Upload, X, File, Plus, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -131,34 +131,56 @@ const BusinessDocuments = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-4">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Documentos Empresariais</h1>
-            <p className="text-muted-foreground">Gerencie os documentos relacionados à empresa</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+          <div className="w-full">
+            <h1 className="text-3xl font-bold tracking-tight">Documentos Empresariais</h1>
+            <p className="text-muted-foreground mt-1">
+              Gerencie os documentos relacionados à empresa
+            </p>
+            <Separator className="mt-4 w-full" />
           </div>
-          <Button onClick={openAddDialog}>Adicionar Documento</Button>
+          <div className="flex mt-4 md:mt-0 space-x-2">
+            <Button onClick={openAddDialog}>
+              <Plus className="mr-2 h-4 w-4" />
+              Adicionar Documento
+            </Button>
+          </div>
         </div>
 
-        <Card className="border-t-4 border-t-brand-500">
-          <CardHeader>
-            <CardTitle>Documentos</CardTitle>
-            <CardDescription>Lista de documentos empresariais</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center p-6">
-                <div className="text-center">
-                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                  <p>Carregando documentos...</p>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <div className="h-32 bg-gray-100 dark:bg-gray-800"></div>
+                <div className="pt-4 p-6 space-y-2">
+                  <div className="h-5 bg-gray-100 dark:bg-gray-800 rounded w-2/3"></div>
+                  <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-full"></div>
                 </div>
-              </div>
-            ) : documents.length === 0 ? (
-              <Alert className="bg-muted">
-                <AlertDescription>
-                  Nenhum documento empresarial encontrado. Clique em "Adicionar Documento" para começar.
-                </AlertDescription>
-              </Alert>
-            ) : (
+                <div className="h-12 bg-gray-50 dark:bg-gray-900"></div>
+              </Card>
+            ))}
+          </div>
+        ) : documents.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center border-t-4 border-t-brand-500 rounded-md bg-white dark:bg-gray-900 p-6">
+            <div className="rounded-full bg-muted p-3 mb-4">
+              <Files className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold">Nenhum documento empresarial encontrado</h3>
+            <p className="text-muted-foreground mt-2 mb-4 max-w-md">
+              Você ainda não possui documentos cadastrados. Vamos registrar seu primeiro documento agora?
+            </p>
+            <Button onClick={openAddDialog}>
+              <Plus className="mr-2 h-4 w-4" />
+              Adicionar Documento
+            </Button>
+          </div>
+        ) : (
+          <Card className="border-t-4 border-t-brand-500">
+            <CardHeader>
+              <CardTitle>Documentos</CardTitle>
+              <CardDescription>Lista de documentos empresariais</CardDescription>
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -199,9 +221,9 @@ const BusinessDocuments = () => {
                   ))}
                 </TableBody>
               </Table>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Add Document Dialog */}

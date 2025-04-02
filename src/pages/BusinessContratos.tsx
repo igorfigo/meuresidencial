@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X, Download, FileEdit, Trash } from 'lucide-react';
+import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X, Download, FileEdit, Trash, Briefcase } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -528,7 +527,7 @@ const BusinessContratos = () => {
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center border-t-4 border-t-brand-500 rounded-md bg-white dark:bg-gray-900 p-6">
             <div className="rounded-full bg-muted p-3 mb-4">
-              <FileText className="h-6 w-6 text-muted-foreground" />
+              <Briefcase className="h-6 w-6 text-muted-foreground" />
             </div>
             <h3 className="text-lg font-semibold">Nenhum contrato encontrado</h3>
             <p className="text-muted-foreground mt-2 mb-4 max-w-md">
