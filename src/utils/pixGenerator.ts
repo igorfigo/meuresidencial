@@ -6,6 +6,8 @@ interface PixData {
   pixKey: string;
   amount: number;
   condominiumName: string;
+  matricula: string;
+  isHistorical?: boolean;
 }
 
 // Function to normalize text by removing accents and concatenating words
@@ -48,8 +50,15 @@ export const generatePixCode = (data: PixData): string => {
   // Normalize the condominium name
   const normalizedCondominiumName = normalizeText(data.condominiumName);
   
-  // Format amount with 2 decimal places and no separators
-  const formattedAmount = data.amount.toFixed(2);
+  // Default format amount with 2 decimal places and no separators
+  let formattedAmount = data.amount.toFixed(2);
+  let finalDescription = normalizedCondominiumName;
+  
+  // Handle special case for historical data requests
+  if (data.isHistorical) {
+    formattedAmount = "249.00"; // Fixed amount for historical data
+    finalDescription = `${data.matricula}HIST249.00`; // Special format for historical data
+  }
   
   // Determine PIX key type IDs based on the key type
   let merchantKeyTypeId = '';
@@ -105,9 +114,18 @@ export const generatePixCode = (data: PixData): string => {
   pixCode += '5204000053039865406';
   pixCode += formattedAmount;
   
-  // Fixed part and condominium name
-  pixCode += '5802BR5901N6001C62100506';
-  pixCode += normalizedCondominiumName;
+  // Fixed part for historical data description
+  if (data.isHistorical) {
+    pixCode += '5802BR5901N6001C62';
+    // Get character count for description
+    const descriptionLength = finalDescription.length;
+    pixCode += descriptionLength.toString().padStart(2, '0');
+    pixCode += finalDescription;
+  } else {
+    // Regular case - use condominium name
+    pixCode += '5802BR5901N6001C62100506';
+    pixCode += finalDescription;
+  }
   
   // Fixed part for CRC
   pixCode += '6304';

@@ -15,12 +15,16 @@ interface PixDialogProps {
     pixKey: string;
     amount: number;
     condominiumName: string;
+    matricula: string;
+    isHistorical?: boolean;
   };
-  month: string;
-  year: string;
+  month?: string;
+  year?: string;
   isOverdue?: boolean;
   dueDate?: string;
   interestRate?: string;
+  title?: string;
+  description?: string;
 }
 
 export const PixDialog = ({ 
@@ -31,7 +35,9 @@ export const PixDialog = ({
   year, 
   isOverdue = false,
   dueDate = '',
-  interestRate = '0.033'
+  interestRate = '0.033',
+  title = 'Pagar via PIX',
+  description
 }: PixDialogProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,16 +105,21 @@ export const PixDialog = ({
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ];
   
-  const monthName = monthNames[parseInt(month) - 1];
+  const monthName = month ? monthNames[parseInt(month) - 1] : '';
   
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="border-b pb-4">
-          <DialogTitle className="text-xl font-bold text-blue-600">Pagar via PIX</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-blue-600">{title}</DialogTitle>
           <DialogDescription className="mt-1">
             <div className="flex flex-col">
-              <span className="text-gray-700">Competência: {monthName} de {year}</span>
+              {month && year && (
+                <span className="text-gray-700">Competência: {monthName} de {year}</span>
+              )}
+              {description && (
+                <span className="text-gray-700">{description}</span>
+              )}
               <span className="text-gray-700">
                 Valor: <span className="text-blue-600 font-semibold">
                   {formatCurrency(totalAmount)}
