@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -362,8 +363,8 @@ export const CadastroPlanos = () => {
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in">
-        <header className="mb-6">
+      <div className="animate-fade-in space-y-6">
+        <header className="mb-4">
           <div className="flex items-center">
             <Package className="h-6 w-6 mr-2 text-brand-600" />
             <h1 className="text-3xl font-bold">Cadastro Planos</h1>
@@ -375,81 +376,10 @@ export const CadastroPlanos = () => {
         </header>
 
         <div className="flex flex-col gap-6">
-          <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <h2 className="text-xl font-semibold mb-4">{isExistingRecord ? 'Editar Plano' : 'Novo Plano'}</h2>
-              
-              <div className="space-y-2">
-                <Label htmlFor="codigo">Código</Label>
-                <Input
-                  id="codigo"
-                  placeholder="Código (Ex: BASIC, PREMIUM)"
-                  {...form.register('codigo', { required: true })}
-                  readOnly={isExistingRecord}
-                  className={isExistingRecord ? 'bg-gray-100' : ''}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome do Plano</Label>
-                <Input
-                  id="nome"
-                  placeholder="Nome do plano"
-                  {...form.register('nome', { required: true })}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="descricao">Descrição</Label>
-                <Textarea
-                  id="descricao"
-                  placeholder="Descrição do plano"
-                  {...form.register('descricao')}
-                  rows={3}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="valor">Valor (R$)</Label>
-                <Input
-                  id="valor"
-                  placeholder="000,00"
-                  {...form.register('valor', { required: true })}
-                  onChange={handleInputChange}
-                />
-                <p className="text-xs text-muted-foreground">Digite apenas os números no formato 0,00</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="max_moradores">Máximo de Moradores</Label>
-                <Input
-                  id="max_moradores"
-                  type="number"
-                  min="1"
-                  placeholder="50"
-                  {...form.register('max_moradores', { 
-                    required: true,
-                    valueAsNumber: true,
-                    min: 1
-                  })}
-                />
-                <p className="text-xs text-muted-foreground">Número máximo de moradores permitidos para este plano</p>
-              </div>
-              
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full bg-brand-600 hover:bg-brand-700"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Plano' : 'Salvar Plano')}
-              </Button>
-            </form>
-          </Card>
-          
-          <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Planos Cadastrados</h2>
-            <ScrollArea className="h-80">
+          {/* Table of existing plans first */}
+          <Card className="p-4 border-t-4 border-t-brand-600 shadow-md">
+            <h2 className="text-xl font-semibold mb-3">Planos Cadastrados</h2>
+            <ScrollArea className="h-64 rounded-md">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -457,7 +387,7 @@ export const CadastroPlanos = () => {
                     <TableHead>Nome</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Máx. Moradores</TableHead>
-                    <TableHead>Ações</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -474,13 +404,14 @@ export const CadastroPlanos = () => {
                         <TableCell>{plan.nome}</TableCell>
                         <TableCell>{formatCurrency(plan.valor)}</TableCell>
                         <TableCell>{plan.max_moradores || 50}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-1">
                             <Button 
                               variant="outline" 
                               size="icon" 
                               onClick={() => handleEditPlan(plan)}
-                              className="h-8 w-8"
+                              className="h-7 w-7"
+                              title="Editar"
                             >
                               <FileEdit className="h-4 w-4 text-blue-500" />
                             </Button>
@@ -488,7 +419,8 @@ export const CadastroPlanos = () => {
                               variant="outline"
                               size="icon"
                               onClick={() => handleViewLogs(plan.codigo)}
-                              className="h-8 w-8"
+                              className="h-7 w-7"
+                              title="Histórico"
                             >
                               <Eye className="h-4 w-4 text-gray-500" />
                             </Button>
@@ -496,7 +428,8 @@ export const CadastroPlanos = () => {
                               variant="outline" 
                               size="icon" 
                               onClick={() => handleDeletePlan(plan.codigo)}
-                              className="h-8 w-8"
+                              className="h-7 w-7"
+                              title="Excluir"
                             >
                               <Trash className="h-4 w-4 text-red-500" />
                             </Button>
@@ -508,6 +441,80 @@ export const CadastroPlanos = () => {
                 </TableBody>
               </Table>
             </ScrollArea>
+          </Card>
+          
+          {/* Form for creating/editing plans second */}
+          <Card className="p-4 border-t-4 border-t-brand-600 shadow-md">
+            <h2 className="text-xl font-semibold mb-3">{isExistingRecord ? 'Editar Plano' : 'Novo Plano'}</h2>
+            
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="codigo" required>Código</Label>
+                  <Input
+                    id="codigo"
+                    placeholder="Código (Ex: BASIC, PREMIUM)"
+                    {...form.register('codigo', { required: true })}
+                    readOnly={isExistingRecord}
+                    className={isExistingRecord ? 'bg-gray-100' : ''}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="nome" required>Nome do Plano</Label>
+                  <Input
+                    id="nome"
+                    placeholder="Nome do plano"
+                    {...form.register('nome', { required: true })}
+                  />
+                </div>
+                
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="descricao">Descrição</Label>
+                  <Textarea
+                    id="descricao"
+                    placeholder="Descrição do plano"
+                    {...form.register('descricao')}
+                    rows={2}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="valor" required>Valor (R$)</Label>
+                  <Input
+                    id="valor"
+                    placeholder="000,00"
+                    {...form.register('valor', { required: true })}
+                    onChange={handleInputChange}
+                  />
+                  <p className="text-xs text-muted-foreground">Digite apenas os números no formato 0,00</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="max_moradores" required>Máximo de Moradores</Label>
+                  <Input
+                    id="max_moradores"
+                    type="number"
+                    min="1"
+                    placeholder="50"
+                    {...form.register('max_moradores', { 
+                      required: true,
+                      valueAsNumber: true,
+                      min: 1
+                    })}
+                  />
+                </div>
+              </div>
+              
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full md:w-auto bg-brand-600 hover:bg-brand-700"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Plano' : 'Salvar Plano')}
+              </Button>
+            </form>
           </Card>
         </div>
         
