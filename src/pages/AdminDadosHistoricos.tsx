@@ -38,6 +38,7 @@ import { useApp } from '@/contexts/AppContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
+// Define the interface for historical data requests
 interface HistoricalDataRequest {
   id: string;
   matricula: string;
@@ -50,6 +51,7 @@ interface HistoricalDataRequest {
   payment_status: 'pending' | 'completed' | 'canceled';
   status: 'new' | 'in_progress' | 'completed' | 'canceled';
   created_at: string;
+  updated_at: string;
 }
 
 const AdminDadosHistoricos = () => {
@@ -74,7 +76,7 @@ const AdminDadosHistoricos = () => {
     queryKey: ['historical-data-requests'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('historical_data_requests')
+        .from('historical_data_requests' as any)
         .select('*')
         .order('created_at', { ascending: false });
         
@@ -126,7 +128,7 @@ const AdminDadosHistoricos = () => {
   const updateRequestStatus = async (id: string, status: 'new' | 'in_progress' | 'completed' | 'canceled') => {
     try {
       const { error } = await supabase
-        .from('historical_data_requests')
+        .from('historical_data_requests' as any)
         .update({ status })
         .eq('id', id);
         
@@ -144,7 +146,7 @@ const AdminDadosHistoricos = () => {
   const updatePaymentStatus = async (id: string, payment_status: 'pending' | 'completed' | 'canceled') => {
     try {
       const { error } = await supabase
-        .from('historical_data_requests')
+        .from('historical_data_requests' as any)
         .update({ payment_status })
         .eq('id', id);
         

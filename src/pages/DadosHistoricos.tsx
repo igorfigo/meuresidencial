@@ -74,9 +74,9 @@ const DadosHistoricos = () => {
     try {
       setIsSubmitting(true);
       
-      // Insert into the database instead of sending an email
+      // Insert into the database with type assertion
       const { error } = await supabase
-        .from('historical_data_requests')
+        .from('historical_data_requests' as any)
         .insert({
           matricula: user?.matricula,
           condominium_name: user?.nomeCondominio,
