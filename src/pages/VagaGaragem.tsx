@@ -121,7 +121,10 @@ export default function VagaGaragem() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={listing.is_available ? "success" : "secondary"}>
+                        <Badge 
+                          variant={listing.is_available ? "default" : "secondary"}
+                          className={listing.is_available ? "bg-green-500 hover:bg-green-600" : ""}
+                        >
                           {listing.is_available ? "Disponível" : "Indisponível"}
                         </Badge>
                       </TableCell>
