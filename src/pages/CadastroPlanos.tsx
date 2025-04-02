@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -384,9 +383,9 @@ export const CadastroPlanos = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Código</TableHead>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Máx. Moradores</TableHead>
+                    <TableHead className="text-center">Nome</TableHead>
+                    <TableHead className="text-center">Valor</TableHead>
+                    <TableHead className="text-center">Máx. Moradores</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -401,9 +400,9 @@ export const CadastroPlanos = () => {
                     plans.map((plan) => (
                       <TableRow key={plan.codigo}>
                         <TableCell className="font-medium">{plan.codigo}</TableCell>
-                        <TableCell>{plan.nome}</TableCell>
-                        <TableCell>{formatCurrency(plan.valor)}</TableCell>
-                        <TableCell>{plan.max_moradores || 50}</TableCell>
+                        <TableCell className="text-center">{plan.nome}</TableCell>
+                        <TableCell className="text-center">{formatCurrency(plan.valor)}</TableCell>
+                        <TableCell className="text-center">{plan.max_moradores || 50}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end space-x-1">
                             <Button 
