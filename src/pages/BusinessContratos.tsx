@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X, Download, FileEdit, Trash } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -364,7 +363,6 @@ const BusinessContratos = () => {
             <p className="text-muted-foreground mt-1">
               Gerencie todos os contratos da empresa
             </p>
-            <Separator className="mt-4 w-full" />
           </div>
           
           <div className="flex mt-4 md:mt-0 space-x-2">
@@ -483,6 +481,8 @@ const BusinessContratos = () => {
           </div>
         </div>
 
+        <Separator className="mt-4 w-full mb-6" />
+
         <div className="mb-8 flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -524,7 +524,9 @@ const BusinessContratos = () => {
             ))}
           </div>
         ) : filteredContracts?.length ? (
-          renderListView()
+          <div className="bg-white border-t-4 border-t-brand-500 rounded-md overflow-hidden">
+            {renderListView()}
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center border-t-4 border-t-brand-500 rounded-md bg-white dark:bg-gray-900 p-6">
             <div className="rounded-full bg-muted p-3 mb-4">
