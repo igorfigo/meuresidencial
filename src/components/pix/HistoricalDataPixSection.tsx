@@ -129,7 +129,7 @@ export const HistoricalDataPixSection = ({ matricula }: HistoricalDataPixSection
             {isLoading ? (
               <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
             ) : qrCodeUrl ? (
-              <img src={qrCodeUrl} alt="QR Code PIX" className="h-36 w-36 object-contain" />
+              <img src={qrCodeUrl} alt="QR Code PIX" className="h-32 w-32 object-contain" />
             ) : (
               <div className="text-center text-gray-500">
                 <AlertCircle className="h-10 w-10 mx-auto mb-2" />
@@ -151,7 +151,7 @@ export const HistoricalDataPixSection = ({ matricula }: HistoricalDataPixSection
             <div className="bg-amber-50 p-3 rounded-md border border-amber-200">
               <p className="text-sm text-amber-700 flex items-start gap-2">
                 <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span><strong>Importante:</strong> Somente após o pagamento enviar sua solicitação de Dados Históricos.</span>
+                <span><strong>Importante:</strong> Somente após o pagamento, preencher e enviar a solicitação abaixo.</span>
               </p>
             </div>
           </div>
