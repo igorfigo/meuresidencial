@@ -402,7 +402,7 @@ const MinhasCobrancas = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-center">Competência</TableHead>
+                      <TableHead className="text-left">Competência</TableHead>
                       <TableHead className="text-center">Unidade</TableHead>
                       <TableHead className="text-center">Valor</TableHead>
                       {activeTab === 'pending' && (
@@ -420,7 +420,7 @@ const MinhasCobrancas = () => {
                   <TableBody>
                     {sortedCharges.map((charge) => (
                       <TableRow key={charge.id}>
-                        <TableCell className="font-medium text-center">
+                        <TableCell className="font-medium text-left">
                           {formatMonthYear(charge.month, charge.year)}
                         </TableCell>
                         <TableCell className="text-center">{charge.unit}</TableCell>
