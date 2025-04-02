@@ -402,40 +402,40 @@ const MinhasCobrancas = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Competência</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Valor</TableHead>
+                      <TableHead className="text-center">Competência</TableHead>
+                      <TableHead className="text-center">Unidade</TableHead>
+                      <TableHead className="text-center">Valor</TableHead>
                       {activeTab === 'pending' && (
-                        <TableHead>Vencimento</TableHead>
+                        <TableHead className="text-center">Vencimento</TableHead>
                       )}
                       {activeTab === 'paid' && (
-                        <TableHead>Pagamento</TableHead>
+                        <TableHead className="text-center">Pagamento</TableHead>
                       )}
-                      <TableHead>Status</TableHead>
+                      <TableHead className="text-center">Status</TableHead>
                       {activeTab === 'pending' && (
-                        <TableHead className="text-right">Ações</TableHead>
+                        <TableHead className="text-center">Ações</TableHead>
                       )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sortedCharges.map((charge) => (
                       <TableRow key={charge.id}>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-medium text-center">
                           {formatMonthYear(charge.month, charge.year)}
                         </TableCell>
-                        <TableCell>{charge.unit}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">{charge.unit}</TableCell>
+                        <TableCell className="text-center">
                           {formatCurrency(BRLToNumber(charge.amount))}
                         </TableCell>
                         {activeTab === 'pending' && (
-                          <TableCell>{formatDate(charge.due_date)}</TableCell>
+                          <TableCell className="text-center">{formatDate(charge.due_date)}</TableCell>
                         )}
                         {activeTab === 'paid' && (
-                          <TableCell>{formatDate(charge.payment_date)}</TableCell>
+                          <TableCell className="text-center">{formatDate(charge.payment_date)}</TableCell>
                         )}
-                        <TableCell>
+                        <TableCell className="text-center">
                           <Badge 
-                            className={`flex items-center ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
+                            className={`flex items-center justify-center mx-auto ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
                             variant="outline"
                           >
                             {statusColors[charge.status].icon}
@@ -443,12 +443,12 @@ const MinhasCobrancas = () => {
                           </Badge>
                         </TableCell>
                         {activeTab === 'pending' && (
-                          <TableCell className="text-right">
+                          <TableCell className="text-center">
                             <Button 
                               variant="ghost" 
                               size="sm"
                               onClick={() => handleOpenPixDialog(charge)}
-                              className="h-8 gap-1 text-brand-600"
+                              className="h-8 gap-1 text-brand-600 mx-auto"
                               disabled={!pixSettings?.chavepix}
                             >
                               <CreditCard className="h-4 w-4" />
