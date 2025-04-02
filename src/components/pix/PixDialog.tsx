@@ -15,6 +15,7 @@ interface PixDialogProps {
     pixKey: string;
     amount: number;
     condominiumName: string;
+    matricula: string;
   };
   month: string;
   year: string;

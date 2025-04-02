@@ -475,6 +475,7 @@ const MinhasCobrancas = () => {
             pixKey: pixSettings.chavepix,
             amount: BRLToNumber(selectedCharge.amount),
             condominiumName: condominiumData.nomecondominio || matricula || '',
+            matricula: matricula || '',
           }}
           month={selectedCharge.month}
           year={selectedCharge.year}

@@ -13,6 +13,7 @@ import { Loader2, Send, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
+import { HistoricalDataPixSection } from '@/components/pix/HistoricalDataPixSection';
 
 const DadosHistoricos = () => {
   const { user } = useApp();
@@ -106,12 +107,15 @@ const DadosHistoricos = () => {
           Solicite a inclusão ou download de dados históricos para o seu condomínio. Responderemos sua solicitação com uma cotação em até 24 horas úteis.
         </p>
         
+        {/* PIX Payment Section */}
+        {user?.matricula && <HistoricalDataPixSection matricula={user.matricula} />}
+        
         <Card className="border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl text-brand-700">Envie sua solicitação</CardTitle>
             <CardDescription className="text-gray-600">
               Utilize este formulário para solicitar inclusão ou download de dados históricos do seu condomínio.
-              Responderemos com uma cotação em até 24 horas úteis.
+              Após análise da solicitação, nossa equipe entrará em contato em até 24 horas úteis.
             </CardDescription>
           </CardHeader>
           

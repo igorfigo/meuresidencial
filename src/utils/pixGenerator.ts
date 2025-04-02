@@ -6,6 +6,8 @@ interface PixData {
   pixKey: string;
   amount: number;
   condominiumName: string;
+  matricula: string;
+  isHistorical?: boolean;
 }
 
 // Function to normalize text by removing accents and concatenating words
@@ -45,11 +47,11 @@ export const generateCRC16 = (payload: string): string => {
 };
 
 export const generatePixCode = (data: PixData): string => {
-  // Normalize the condominium name
-  const normalizedCondominiumName = normalizeText(data.condominiumName);
+  // For historical data, use 249.00 as fixed amount
+  const amount = data.isHistorical ? 249.00 : data.amount;
   
   // Format amount with 2 decimal places and no separators
-  const formattedAmount = data.amount.toFixed(2);
+  const formattedAmount = amount.toFixed(2);
   
   // Determine PIX key type IDs based on the key type
   let merchantKeyTypeId = '';
@@ -105,9 +107,24 @@ export const generatePixCode = (data: PixData): string => {
   pixCode += '5204000053039865406';
   pixCode += formattedAmount;
   
-  // Fixed part and condominium name
-  pixCode += '5802BR5901N6001C62100506';
-  pixCode += normalizedCondominiumName;
+  // Fixed part
+  pixCode += '5802BR5901N6001C62';
+  
+  // Add field length as 2 digits
+  let description = '';
+  
+  // For historical data, format is "matricula+HIST249.00"
+  if (data.isHistorical) {
+    description = `${data.matricula}HIST249.00`;
+  } else {
+    // For regular payments, use the condominium name
+    description = normalizeText(data.condominiumName);
+  }
+  
+  // Add description with size prefix (05 = field ID)
+  pixCode += '05';
+  pixCode += description.length.toString().padStart(2, '0');
+  pixCode += description;
   
   // Fixed part for CRC
   pixCode += '6304';
