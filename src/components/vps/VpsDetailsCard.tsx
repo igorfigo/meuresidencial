@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Cpu, HardDrive, Network, Memory } from 'lucide-react';
+import { Cpu, HardDrive, Network, Ram } from 'lucide-react';
 import { VpsStatusBadge } from './VpsStatusBadge';
 import { format } from 'date-fns';
 
@@ -98,7 +98,7 @@ export function VpsDetailsCard({
             
             <div>
               <div className="flex items-center mb-1">
-                <Memory className="h-4 w-4 mr-1 text-purple-500" />
+                <Ram className="h-4 w-4 mr-1 text-purple-500" />
                 <h4 className="text-sm font-medium">Memory</h4>
               </div>
               <div className="flex justify-between mb-1">
