@@ -429,19 +429,21 @@ const Dashboard = () => {
         <Card className="card-hover border-t-4 border-t-blue-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Status dos Gestores</CardTitle>
-            <div className="flex space-x-2">
-              <UserCheck className="h-4 w-4 text-green-600" />
-              <UserX className="h-4 w-4 text-red-600" />
-            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
-                <span className="text-sm text-muted-foreground">Ativos</span>
+                <span className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+                  <UserCheck className="h-4 w-4 text-green-600" /> 
+                  Ativos
+                </span>
                 <div className="text-xl font-bold">{statsDetails.activeManagers}</div>
               </div>
               <div className="text-center">
-                <span className="text-sm text-muted-foreground">Inativos</span>
+                <span className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+                  <UserX className="h-4 w-4 text-red-600" /> 
+                  Inativos
+                </span>
                 <div className="text-xl font-bold">{statsDetails.inactiveManagers}</div>
               </div>
             </div>
