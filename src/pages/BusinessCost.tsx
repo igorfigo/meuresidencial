@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, Receipt, Trash, Eye } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -129,7 +128,7 @@ const BusinessCost = () => {
             <p className="text-muted-foreground mt-1">
               Gerencie todas as despesas da empresa
             </p>
-            <Separator className="mt-4 w-full" />
+            <Separator className="mt-4 w-full mb-6" />
           </div>
           
           <div className="flex mt-4 md:mt-0 space-x-2">
@@ -230,7 +229,7 @@ const BusinessCost = () => {
             ))}
           </div>
         ) : filteredExpenses?.length ? (
-          <div className="overflow-x-auto border-t-4 border-t-brand-500 rounded-md">
+          <div className="overflow-x-auto border-t-4 border-t-brand-500 rounded-md bg-white">
             <Table>
               <TableHeader>
                 <TableRow>
