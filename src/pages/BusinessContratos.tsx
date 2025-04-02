@@ -276,7 +276,7 @@ const BusinessContratos = () => {
   ];
 
   const renderListView = () => (
-    <div className="overflow-x-auto border-t-4 border-t-brand-500 rounded-md">
+    <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>

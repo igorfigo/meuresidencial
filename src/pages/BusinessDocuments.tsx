@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Files, Trash2, Upload, X, File } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -53,7 +52,6 @@ const BusinessDocuments = () => {
       const result = await createDocument.mutateAsync(newDocument);
       closeAddDialog();
       
-      // If a file was selected, upload it after creating the document
       if (selectedFile && result.id) {
         await uploadAttachment(result.id, selectedFile);
       }
@@ -89,7 +87,6 @@ const BusinessDocuments = () => {
   const handleUploadAttachment = async () => {
     if (selectedDocument && selectedFile) {
       await uploadAttachment(selectedDocument.id, selectedFile);
-      // Refresh attachments list
       const docAttachments = await getDocumentAttachments(selectedDocument.id);
       setAttachments(docAttachments);
       setSelectedFile(null);
@@ -99,7 +96,6 @@ const BusinessDocuments = () => {
   const handleDeleteAttachment = async (attachmentId: string, filePath: string) => {
     if (window.confirm('Tem certeza que deseja excluir este anexo?')) {
       await deleteAttachment(attachmentId, filePath);
-      // Refresh attachments list
       if (selectedDocument) {
         const docAttachments = await getDocumentAttachments(selectedDocument.id);
         setAttachments(docAttachments);
@@ -113,7 +109,6 @@ const BusinessDocuments = () => {
       
       if (error) throw error;
       
-      // Create a download link
       const url = URL.createObjectURL(data);
       const a = document.createElement('a');
       a.href = url;
@@ -139,12 +134,10 @@ const BusinessDocuments = () => {
           <Button onClick={openAddDialog}>Adicionar Documento</Button>
         </div>
 
+        <Separator className="mt-4 w-full mb-6" />
+
         <Card className="border-t-4 border-t-brand-500">
-          <CardHeader>
-            <CardTitle>Documentos</CardTitle>
-            <CardDescription>Lista de documentos empresariais</CardDescription>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {isLoading ? (
               <div className="flex justify-center p-6">
                 <div className="text-center">
@@ -204,7 +197,6 @@ const BusinessDocuments = () => {
         </Card>
       </div>
 
-      {/* Add Document Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -269,7 +261,6 @@ const BusinessDocuments = () => {
         </DialogContent>
       </Dialog>
 
-      {/* View/Manage Attachments Dialog */}
       <Dialog open={!!selectedDocument} onOpenChange={(open) => !open && closeAttachmentsDialog()}>
         {selectedDocument && (
           <DialogContent className="sm:max-w-xl">
