@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Files, Trash2, Upload, X, File } from 'lucide-react';
+import { Eye, File, FileText, Trash2, Upload, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -156,37 +157,48 @@ const BusinessDocuments = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Título</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Data de Criação</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                    <TableHead className="text-center">Data</TableHead>
+                    <TableHead className="text-center">Data de Criação</TableHead>
+                    <TableHead className="text-center">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {documents.map((doc) => (
                     <TableRow key={doc.id}>
                       <TableCell className="font-medium">{doc.title}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         {format(new Date(doc.date), 'dd/MM/yyyy', { locale: ptBR })}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         {format(parseISO(doc.created_at), 'dd/MM/yyyy', { locale: ptBR })}
                       </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewAttachments(doc)}
-                        >
-                          <Files className="h-4 w-4 mr-1" />
-                          Anexos
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteDocument(doc.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewAttachments(doc)}
+                            className="h-8 w-8"
+                          >
+                            <Eye className="h-4 w-4 text-gray-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewAttachments(doc)}
+                            className="h-8 w-8"
+                          >
+                            <FileText className="h-4 w-4 text-gray-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleDeleteDocument(doc.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
