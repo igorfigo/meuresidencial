@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Copy, QrCode, AlertCircle, Info } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -15,6 +14,7 @@ interface PixDialogProps {
     pixKey: string;
     amount: number;
     condominiumName: string;
+    matricula?: string;
   };
   month: string;
   year: string;
@@ -36,38 +36,32 @@ export const PixDialog = ({
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Calculate interest if payment is overdue
   const calculateTotalWithInterest = () => {
     if (!isOverdue || !dueDate) return pixData.amount;
     
     const dueDateTime = new Date(dueDate);
     const today = new Date();
     
-    // Calculate days of delay (minimum 1)
     const daysDelayed = Math.max(1, Math.floor((today.getTime() - dueDateTime.getTime()) / (1000 * 60 * 60 * 24)));
     
-    // Convert interest rate string to number (e.g., "0.033" to 0.033)
     const dailyInterestRate = parseFloat(interestRate) / 100;
     
-    // Calculate interest amount
     const interestAmount = pixData.amount * dailyInterestRate * daysDelayed;
     
-    // Return total with interest
     return pixData.amount + interestAmount;
   };
   
   const totalAmount = calculateTotalWithInterest();
   const interestAmount = totalAmount - pixData.amount;
   
-  // Generate PIX code with the total amount (including interest if applicable)
   const pixCodeData = {
     ...pixData,
-    amount: totalAmount
+    amount: totalAmount,
+    matricula: pixData.matricula || ''
   };
   
   const pixCode = generatePixCode(pixCodeData);
   
-  // Generate QR code on component mount
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
@@ -93,7 +87,6 @@ export const PixDialog = ({
       });
   };
   
-  // Get month name
   const monthNames = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
@@ -133,7 +126,6 @@ export const PixDialog = ({
         </DialogHeader>
         
         <div className="pt-4 space-y-4">
-          {/* QR Code Section */}
           <div className="flex flex-col space-y-3 items-center">
             <div className="flex items-center gap-2 font-medium text-gray-800">
               <QrCode className="h-5 w-5 text-blue-600" />
@@ -154,7 +146,6 @@ export const PixDialog = ({
             </div>
           </div>
           
-          {/* Copy Code Button */}
           <div className="flex flex-col mt-6">
             <Button 
               onClick={handleCopyClick} 
