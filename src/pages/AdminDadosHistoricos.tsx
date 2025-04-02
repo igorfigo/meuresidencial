@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -86,7 +85,7 @@ const AdminDadosHistoricos = () => {
         return [];
       }
       
-      return data as HistoricalDataRequest[];
+      return (data as unknown) as HistoricalDataRequest[];
     }
   });
   

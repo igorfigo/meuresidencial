@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -74,8 +73,19 @@ const DadosHistoricos = () => {
     try {
       setIsSubmitting(true);
       
+      // Add some console logging to help debug
+      console.log('Submitting request with data:', {
+        matricula: user?.matricula,
+        condominium_name: user?.nomeCondominio,
+        manager_name: user?.nome,
+        manager_email: user?.email,
+        request_type: formData.request_type,
+        subject: formData.subject,
+        message: formData.message
+      });
+      
       // Insert into the database with type assertion
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('historical_data_requests' as any)
         .insert({
           matricula: user?.matricula,
@@ -87,10 +97,15 @@ const DadosHistoricos = () => {
           message: formData.message,
           payment_status: 'pending',
           status: 'new'
-        });
+        })
+        .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
       
+      console.log('Request successfully submitted:', data);
       toast.success('Solicitação cadastrada com sucesso! Em breve entraremos em contato.');
       setFormData({ subject: '', message: '', request_type: 'inclusao' });
     } catch (error) {
