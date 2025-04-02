@@ -205,7 +205,7 @@ const SugestaoReclamacao = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="subject" className="font-medium">Assunto *</Label>
+                  <Label htmlFor="subject" className="font-medium" required>Assunto</Label>
                   <Input 
                     id="subject" 
                     name="subject" 
@@ -218,7 +218,7 @@ const SugestaoReclamacao = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="message" className="font-medium">Mensagem *</Label>
+                  <Label htmlFor="message" className="font-medium" required>Mensagem</Label>
                   <Textarea 
                     id="message" 
                     name="message" 
