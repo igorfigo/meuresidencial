@@ -36,8 +36,7 @@ import {
   BarChart3,
   PieChart,
   History,
-  Files,
-  Server
+  Files
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -77,8 +76,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const isBusinessPath = location.pathname.includes('/business-management') || 
                          location.pathname.includes('/contratos') || 
                          location.pathname.includes('/business-documents') ||
-                         location.pathname.includes('/despesas-empresariais') ||
-                         location.pathname.includes('/vps-dashboard');
+                         location.pathname.includes('/despesas-empresariais');
 
   useEffect(() => {
     if (isFinanceiroPath && !user?.isAdmin) {
@@ -127,7 +125,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
         { name: 'Business Documents', icon: <Files className="h-5 w-5 text-blue-500" />, path: '/business-documents' },
         { name: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" />, path: '/despesas-empresariais' },
-        { name: 'VPS', icon: <Server className="h-5 w-5 text-blue-500" />, path: '/vps-dashboard' },
       ]
     },
   ];
