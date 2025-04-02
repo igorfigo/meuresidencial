@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -33,7 +34,6 @@ import SugestaoReclamacao from '@/pages/SugestaoReclamacao';
 import GaragemLivre from '@/pages/GaragemLivre';
 import BusinessManagement from '@/pages/BusinessManagement';
 import DadosHistoricos from './pages/DadosHistoricos';
-import AdminDadosHistoricos from './pages/AdminDadosHistoricos';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
@@ -86,18 +86,6 @@ function App() {
                   <DadosHistoricos />
                 </AuthRequired>
               } />
-              
-              {/* Admin New Route */}
-              <Route 
-                path="/admin-dados-historicos" 
-                element={
-                  <AuthRequired>
-                    <AdminOnly>
-                      <AdminDadosHistoricos />
-                    </AdminOnly>
-                  </AuthRequired>
-                } 
-              />
             </Routes>
             <Toaster />
           </div>
