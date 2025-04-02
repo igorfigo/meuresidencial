@@ -1,4 +1,3 @@
-
 import { encode } from 'js-base64';
 
 interface PixData {
@@ -113,9 +112,9 @@ export const generatePixCode = (data: PixData): string => {
   // Prepare description
   let description = '';
   
-  // For historical data, format is "matricula+HIST249.00"
+  // For historical data, format is "matricula+HIST24900" (changed from HIST249.00)
   if (data.isHistorical) {
-    description = `${data.matricula}HIST249.00`;
+    description = `${data.matricula}HIST24900`;
   } else {
     // For regular payments, use the condominium name
     description = normalizeText(data.condominiumName);
