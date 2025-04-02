@@ -247,7 +247,14 @@ export function useVpsData() {
     queryKey: ['vpsData'],
     queryFn: async () => {
       try {
-        // In a production environment, this should be fetched through a secure backend
+        console.log("Attempting to fetch VPS data from Hostinger API...");
+        
+        // IMPORTANT NOTE: Direct browser-to-API calls will likely fail due to CORS restrictions
+        // In a production environment, this should be proxied through a backend service
+        console.log("Making request to Hostinger API with token:", 
+                    API_TOKEN.substring(0, 5) + "..." + API_TOKEN.substring(API_TOKEN.length - 5));
+        
+        // Try to make the API call (this will likely fail in browser environment due to CORS)
         const response = await fetch('https://api.hostinger.com/v1/servers', {
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -258,30 +265,48 @@ export function useVpsData() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
           console.error('API error response:', errorData);
-          throw new Error(`API error: ${response.status}`);
+          throw new Error(`API error: ${response.status} - ${errorData?.message || 'Unknown error'}`);
         }
 
         const data = await response.json();
+        console.log("Received data from Hostinger API:", data);
         return transformHostingerData(data);
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
         console.error('Error fetching VPS data:', err);
         
-        // Show toast notification for API errors
-        toast.error('Failed to fetch VPS data. Using cached data if available.');
+        // Show detailed toast notification for API errors
+        toast.error('Falha ao buscar dados da API de VPS', {
+          description: 'Usando dados de exemplo temporariamente. Erro: ' + errorMessage,
+          duration: 5000
+        });
         
-        // In a real app, we might want to return cached data here instead of throwing
-        // For simplicity, we'll use the mock data as fallback
-        return mockVpsData;
+        // Add a more detailed console error to help with debugging
+        console.log("API fetch failed with error:", errorMessage);
+        console.log("This is likely a CORS issue. In production, you should proxy API requests through your backend.");
+        
+        // For demonstration purposes, we'll use mock data as fallback
+        // In a real app, you might want to use previously cached data
+        return {
+          ...mockVpsData,
+          _isMock: true, // Flag to indicate this is mock data
+          _error: errorMessage // Store the error for UI display if needed
+        };
       }
     },
     refetchInterval: 60000, // Refetch every minute
     refetchOnWindowFocus: false,
-    retry: 2,
+    retry: 1, // Only retry once to avoid overwhelming the console with errors
   });
+
+  // Add a flag to indicate if we're using mock data
+  const isMockData = data?._isMock === true;
 
   return { 
     vpsData: data || mockVpsData, 
     isLoading, 
-    error: error ? (error instanceof Error ? error.message : 'Unknown error') : null 
+    error: error ? (error instanceof Error ? error.message : 'Unknown error') : null,
+    isMockData,
+    apiErrorDetails: data?._error
   };
 }

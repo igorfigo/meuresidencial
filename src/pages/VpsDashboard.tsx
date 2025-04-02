@@ -1,18 +1,18 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useVpsData } from '@/hooks/use-vps-data';
 import { Separator } from '@/components/ui/separator';
-import { Server, HardDrive, Cpu, Activity } from 'lucide-react';
+import { Server, HardDrive, Cpu, Activity, AlertTriangle } from 'lucide-react';
 import VpsStatusCard from '@/components/vps/VpsStatusCard';
 import VpsResourcesCard from '@/components/vps/VpsResourcesCard';
 import VpsServerList from '@/components/vps/VpsServerList';
 import VpsDetailsCard from '@/components/vps/VpsDetailsCard';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const VpsDashboard: React.FC = () => {
-  const { vpsData, isLoading, error } = useVpsData();
+  const { vpsData, isLoading, error, isMockData, apiErrorDetails } = useVpsData();
 
   return (
     <DashboardLayout>
@@ -26,6 +26,23 @@ const VpsDashboard: React.FC = () => {
             Painel de controle para monitoramento e gerenciamento de servidores VPS.
           </p>
         </div>
+        
+        {isMockData && (
+          <Alert variant="warning" className="bg-yellow-50 border-yellow-200">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800">Dados de exemplo</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              Exibindo dados simulados. Não foi possível conectar à API da Hostinger.
+              {apiErrorDetails && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer font-medium">Detalhes do erro</summary>
+                  <p className="mt-1 text-sm">{apiErrorDetails}</p>
+                  <p className="mt-1 text-sm">As requisições diretas do navegador para APIs externas geralmente são bloqueadas por CORS. Em produção, você deve criar um proxy no backend para estas chamadas.</p>
+                </details>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
         
         <Separator className="my-4" />
         
