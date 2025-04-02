@@ -50,7 +50,7 @@ export const PixDialog = ({
     // Calculate days of delay (minimum 1)
     const daysDelayed = Math.max(1, Math.floor((today.getTime() - dueDateTime.getTime()) / (1000 * 60 * 60 * 24)));
     
-    // Convert interest rate string to number (e.g., "0.033" to 0.00033 - as 0.033% daily)
+    // Convert interest rate string to number (e.g., "0.033" to 0.033)
     const dailyInterestRate = parseFloat(interestRate) / 100;
     
     // Calculate interest amount
@@ -113,7 +113,7 @@ export const PixDialog = ({
           <DialogTitle className="text-xl font-bold text-blue-600">
             {isHistorical ? 'Pagamento para Dados Históricos' : 'Pagar via PIX'}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="mt-1">
             <div className="flex flex-col">
               {!isHistorical && (
                 <span className="text-gray-700">Competência: {monthName} de {year}</span>
