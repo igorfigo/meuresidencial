@@ -14,7 +14,6 @@ import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { HistoricalDataPixSection } from '@/components/pix/HistoricalDataPixSection';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const DadosHistoricos = () => {
   const { user } = useApp();
@@ -74,37 +73,30 @@ const DadosHistoricos = () => {
     try {
       setIsSubmitting(true);
       
-      // Use the Edge Function instead of RPC
-      const { data, error } = await supabase.functions.invoke('historical-data-request', {
-        body: {
+      const typeText = formData.type === 'inclusao' ? 'Solicitação de Inclusão de Históricos' : 'Solicitação de Download de Históricos';
+      
+      // Insert into the database instead of sending an email
+      const { error } = await supabase
+        .from('historical_data_requests')
+        .insert({
           matricula: user?.matricula,
-          type: formData.type,
-          subject: formData.subject,
-          message: formData.message
-        }
-      });
+          condominium_name: user?.nomeCondominio,
+          manager_name: user?.nome,
+          manager_email: user?.email,
+          request_type: formData.type,
+          subject: `${typeText} - ${formData.subject}`,
+          message: formData.message,
+          payment_status: 'pending',
+          status: 'new'
+        });
       
       if (error) throw error;
       
-      // Send email notification
-      const typeText = formData.type === 'inclusao' ? 'Solicitação de Inclusão de Históricos' : 'Solicitação de Download de Históricos';
-      
-      await supabase.functions.invoke('send-contact-email', {
-        body: {
-          name: user?.nome || 'Nome não informado',
-          email: user?.email || 'Email não informado',
-          matricula: user?.matricula || 'N/A',
-          nomeCondominio: user?.nomeCondominio || 'N/A',
-          subject: `[${typeText}] ${formData.subject}`,
-          message: formData.message
-        }
-      });
-      
-      toast.success('Solicitação enviada com sucesso! Responderemos em até 24 horas úteis.');
+      toast.success('Solicitação cadastrada com sucesso! Em breve entraremos em contato.');
       setFormData({ subject: '', message: '', type: 'inclusao' });
     } catch (error) {
-      console.error('Erro ao enviar solicitação:', error);
-      toast.error('Erro ao enviar solicitação. Por favor, tente novamente.');
+      console.error('Erro ao cadastrar solicitação:', error);
+      toast.error('Erro ao cadastrar solicitação. Por favor, tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -135,20 +127,24 @@ const DadosHistoricos = () => {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="type" className="font-medium">Tipo de Solicitação</Label>
-                  <RadioGroup 
-                    className="flex flex-col sm:flex-row gap-3 mt-2" 
-                    defaultValue={formData.type}
-                    onValueChange={(value) => handleTypeChange(value as 'inclusao' | 'download')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="inclusao" id="inclusao" />
-                      <Label htmlFor="inclusao" className="cursor-pointer">Inclusão de Históricos</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="download" id="download" />
-                      <Label htmlFor="download" className="cursor-pointer">Download de Históricos</Label>
-                    </div>
-                  </RadioGroup>
+                  <div className="flex space-x-4 mt-2">
+                    <Button
+                      type="button"
+                      variant={formData.type === 'inclusao' ? 'default' : 'outline'}
+                      className={formData.type === 'inclusao' ? 'bg-brand-600 hover:bg-brand-700' : ''}
+                      onClick={() => handleTypeChange('inclusao')}
+                    >
+                      Inclusão de Históricos
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={formData.type === 'download' ? 'default' : 'outline'}
+                      className={formData.type === 'download' ? 'bg-brand-600 hover:bg-brand-700' : ''}
+                      onClick={() => handleTypeChange('download')}
+                    >
+                      Download de Históricos
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
