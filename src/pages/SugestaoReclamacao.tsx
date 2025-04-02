@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -235,15 +234,6 @@ const SugestaoReclamacao = () => {
           </CardContent>
           
           <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-end gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg`}>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className={`${isMobile ? 'w-full' : ''} border-gray-300 hover:bg-gray-100 hover:text-gray-700`}
-            >
-              Voltar
-            </Button>
-            
             <Button 
               onClick={handleSubmit}
               disabled={isSubmitting}
