@@ -63,18 +63,21 @@ const DadosHistoricos = () => {
         return;
       }
       
-      // Use a type assertion to tell TypeScript about the table
-      const { error } = await (supabase
-        .from('historical_data_requests' as any)
+      // Inserção direta na tabela sem usar funções que acessam user_roles
+      const { error } = await supabase
+        .from('historical_data_requests')
         .insert({
           matricula: user.matricula || '',
           condominium_name: user.nomeCondominio || 'Nome não informado',
           manager_name: user.nome || 'Nome não informado',
           manager_email: user.email || 'Email não informado',
           request_type: formData.type,
-        }));
+        });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado:', error);
+        throw error;
+      }
       
       toast.success('Solicitação enviada com sucesso! Responderemos em até 24 horas úteis.');
       setFormData({ type: 'inclusao' });
