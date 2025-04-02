@@ -55,21 +55,34 @@ const DadosHistoricos = () => {
     try {
       setIsSubmitting(true);
       
-      // Using type assertion to avoid TypeScript errors
-      const { data, error } = await supabase
-        .from('historical_data_requests' as any)
-        .insert([{
-          matricula: user.matricula,
-          request_type: requestType
-        }])
-        .select();
+      // Create the request data object
+      const requestData = {
+        matricula: user.matricula,
+        request_type: requestType,
+        status: 'pending'
+      };
       
-      if (error) throw error;
+      // Make the request with explicit type casting to avoid TypeScript errors
+      const { error } = await supabase
+        .from('historical_data_requests')
+        .insert([requestData]);
+      
+      if (error) {
+        console.error('Error submitting request:', error);
+        
+        // Provide more specific error messages based on the error type
+        if (error.code === '42501') {
+          toast.error('Sem permissão para enviar solicitação. Entre em contato com o suporte.');
+        } else {
+          toast.error(`Erro ao enviar solicitação: ${error.message}`);
+        }
+        return;
+      }
       
       toast.success('Solicitação enviada com sucesso!');
     } catch (error) {
-      console.error('Error submitting request:', error);
-      toast.error('Erro ao enviar solicitação');
+      console.error('Error in request submission:', error);
+      toast.error('Erro ao enviar solicitação. Tente novamente mais tarde.');
     } finally {
       setIsSubmitting(false);
     }
@@ -146,12 +159,12 @@ const DadosHistoricos = () => {
             <div className="flex items-start space-x-4">
               <Info className="h-6 w-6 text-blue-500 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-medium text-lg mb-2">Dados Históricos</h3>
+                <h3 className="font-medium text-lg mb-2">Como proceder após a solicitação</h3>
                 <p className="text-gray-600 mb-2">
-                  Após o envio da solicitação, nossa equipe entrará em contato com você para orientar sobre os próximos passos.
+                  Após realizar o pagamento e enviar a solicitação, nossa equipe entrará em contato no prazo de até 24 horas úteis para informar os próximos passos.
                 </p>
                 <p className="text-gray-600">
-                  Dependendo do volume de dados e da complexidade, o processamento pode levar até 48 horas úteis.
+                  Você receberá orientações por e-mail sobre como fornecer ou receber os dados históricos, de acordo com o tipo de solicitação.
                 </p>
               </div>
             </div>
