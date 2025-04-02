@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -58,7 +57,6 @@ export const ReservationsCalendar: React.FC = () => {
   const [reservationToDelete, setReservationToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Different user roles
   const isManager = user && !user.isAdmin && !user.isResident;
   const isResident = user && user.isResident;
   
@@ -68,7 +66,6 @@ export const ReservationsCalendar: React.FC = () => {
     }
     
     try {
-      // First get all common areas for this condominium
       const { data: commonAreas, error: areaError } = await supabase
         .from('common_areas')
         .select('id')
@@ -85,8 +82,7 @@ export const ReservationsCalendar: React.FC = () => {
       
       const areaIds = commonAreas.map(area => area.id);
       
-      // Then get all reservations for these areas
-      const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      const currentDate = new Date().toISOString().split('T')[0];
       
       const { data, error } = await supabase
         .from('common_area_reservations')
@@ -111,7 +107,6 @@ export const ReservationsCalendar: React.FC = () => {
     }
   };
   
-  // Use React Query to manage the data fetching and caching
   const { data: reservations = [], isLoading, refetch } = useQuery({
     queryKey: ['reservations', matricula],
     queryFn: fetchReservations,
@@ -122,19 +117,15 @@ export const ReservationsCalendar: React.FC = () => {
     setReservationToDelete(id);
   };
 
-  // Check if user can delete a specific reservation
   const canDeleteReservation = (reservation: Reservation) => {
     if (isManager) {
-      // Managers can delete any reservation
       return true;
     } else if (isResident && user?.residentId) {
-      // Residents can only delete their own reservations
       return reservation.resident_id === user.residentId;
     }
     return false;
   };
 
-  // Check if the reservation belongs to the logged-in resident
   const isUserReservation = (reservation: Reservation) => {
     return isResident && user?.residentId === reservation.resident_id;
   };
@@ -155,7 +146,6 @@ export const ReservationsCalendar: React.FC = () => {
       
       toast.success('Reserva removida com sucesso');
       
-      // Refresh the data
       queryClient.invalidateQueries({ queryKey: ['reservations', matricula] });
       
     } catch (error: any) {
@@ -192,30 +182,30 @@ export const ReservationsCalendar: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Área</TableHead>
-                {!isResident && <TableHead>Unidade</TableHead>}
-                {isResident && <TableHead>Reserva</TableHead>}
-                <TableHead className="w-[100px]">Ações</TableHead>
+                <TableHead className="text-center">Data</TableHead>
+                <TableHead className="text-center">Área</TableHead>
+                {!isResident && <TableHead className="text-center">Unidade</TableHead>}
+                {isResident && <TableHead className="text-center">Reserva</TableHead>}
+                <TableHead className="text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {reservations.map((reservation) => (
                 <TableRow key={reservation.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium text-center">
                     {format(parseISO(reservation.reservation_date), "dd/MM/yyyy", { locale: ptBR })}
                   </TableCell>
-                  <TableCell>{reservation.common_area.name}</TableCell>
+                  <TableCell className="text-center">{reservation.common_area.name}</TableCell>
                   {!isResident && (
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-muted-foreground">
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1 text-muted-foreground">
                         <Home className="h-3 w-3" />
                         {reservation.residents.unidade}
                       </div>
                     </TableCell>
                   )}
                   {isResident && (
-                    <TableCell>
+                    <TableCell className="text-center">
                       <Badge 
                         variant={isUserReservation(reservation) ? "default" : "outline"}
                         className={isUserReservation(reservation) ? "bg-brand-600" : ""}
@@ -224,12 +214,12 @@ export const ReservationsCalendar: React.FC = () => {
                       </Badge>
                     </TableCell>
                   )}
-                  <TableCell>
+                  <TableCell className="text-center">
                     {canDeleteReservation(reservation) && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
+                        className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600 mx-auto"
                         onClick={() => handleDeleteClick(reservation.id)}
                         title="Remover reserva"
                       >
