@@ -764,33 +764,6 @@ export type Database = {
           },
         ]
       }
-      historical_data_requests: {
-        Row: {
-          created_at: string
-          id: string
-          matricula: string
-          request_type: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          matricula: string
-          request_type: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          matricula?: string
-          request_type?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       news_items: {
         Row: {
           created_at: string
@@ -1156,10 +1129,6 @@ export type Database = {
     }
     Functions: {
       get_auth_user_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_user_matricula: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
