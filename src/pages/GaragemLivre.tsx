@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CarIcon, PlusCircleIcon, TrashIcon } from 'lucide-react';
+import { CarIcon, PlusCircleIcon, Trash2Icon } from 'lucide-react';
 import { useGarageListings } from '@/hooks/use-garage-listings';
 import { useApp } from '@/contexts/AppContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -77,7 +76,6 @@ const GaragemLivre = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Minhas Vagas Section */}
           <Card className="border-t-4 border-t-brand-600">
             <CardHeader>
               <CardTitle>Minhas Vagas Cadastradas</CardTitle>
@@ -117,7 +115,7 @@ const GaragemLivre = () => {
                             size="sm"
                             onClick={() => handleDeleteListing(listing.id)}
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            <Trash2Icon className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
@@ -135,7 +133,6 @@ const GaragemLivre = () => {
             </CardContent>
           </Card>
           
-          {/* Vagas Disponíveis Section */}
           <Card className="border-t-4 border-t-brand-600">
             <CardHeader>
               <CardTitle>Vagas Disponíveis no Condomínio</CardTitle>
