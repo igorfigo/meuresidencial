@@ -1,368 +1,254 @@
 
 import React, { useState } from 'react';
-import { 
-  Eye, 
-  Pencil, 
-  Trash, 
-  Calendar, 
-  Users, 
-  Clock,
-  CalendarPlus,
-  DollarSign 
-} from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { Edit, Trash2, CalendarCheck, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { CommonAreaReservationDialog } from './CommonAreaReservationDialog';
-import { formatCurrency, BRLToNumber } from '@/utils/currency';
+import { Badge } from '@/components/ui/badge';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useQueryClient } from '@tanstack/react-query';
+import { useApp } from '@/contexts/AppContext';
 
-interface CommonArea {
-  id: string;
-  name: string;
-  description?: string;
-  capacity?: number | null;
-  rules?: string;
-  opening_time?: string;
-  closing_time?: string;
-  weekdays?: string[];
-  valor?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Reservation {
-  id: string;
-  common_area_id: string;
-  resident_id: string;
-  reservation_date: string;
-  start_time: string;
-  end_time: string;
-  status: string;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-  residents: {
-    nome_completo: string;
-    unidade: string;
-  };
-}
-
-interface CommonAreasListProps {
-  commonAreas: CommonArea[];
-  onEdit?: (area: CommonArea) => void;
-  onDelete?: (id: string) => void;
-  isDeleting: boolean;
-  fetchReservations: (id: string) => Promise<any[]>;
-  viewOnly?: boolean;
-  onCreateReservation?: (commonAreaId: string) => void;
-  showReservationButton?: boolean;
-}
-
-export const CommonAreasList: React.FC<CommonAreasListProps> = ({
+export const CommonAreasList = ({
   commonAreas,
   onEdit,
   onDelete,
   isDeleting,
   fetchReservations,
-  viewOnly = false,
-  onCreateReservation,
-  showReservationButton = false
+  viewOnly,
+  showReservationButton
 }) => {
-  const [selectedArea, setSelectedArea] = useState<CommonArea | null>(null);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isReservationOpen, setIsReservationOpen] = useState(false);
-  
-  const handleViewReservations = async (area: CommonArea) => {
-    setSelectedArea(area);
-    setLoading(true);
+  const [openAreaId, setOpenAreaId] = useState(null);
+  const [openSheetId, setOpenSheetId] = useState(null);
+  const [areaReservations, setAreaReservations] = useState([]);
+  const [isLoadingReservations, setIsLoadingReservations] = useState(false);
+  const [isReservationDialogOpen, setIsReservationDialogOpen] = useState(false);
+  const [selectedAreaId, setSelectedAreaId] = useState(null);
+  const queryClient = useQueryClient();
+  const { user } = useApp();
+  const matricula = user?.selectedCondominium || user?.matricula || '';
+
+  const handleReservationsClick = async (areaId) => {
+    setIsLoadingReservations(true);
+    setOpenSheetId(areaId);
     
     try {
-      const data = await fetchReservations(area.id);
-      setReservations(data as Reservation[]);
-      setIsDetailsOpen(true);
+      const reservations = await fetchReservations(areaId);
+      setAreaReservations(reservations);
     } catch (error) {
       console.error('Error fetching reservations:', error);
+      setAreaReservations([]);
     } finally {
-      setLoading(false);
+      setIsLoadingReservations(false);
     }
   };
 
-  const handleReservationClick = (area: CommonArea) => {
-    setSelectedArea(area);
-    setIsReservationOpen(true);
-  };
-
-  const formatWeekdays = (weekdays?: string[]) => {
-    if (!weekdays || weekdays.length === 0) return 'Nenhum';
-    if (weekdays.length === 7) return 'Todos os dias';
-    
-    const orderedWeekdays = new Map([
-      ['Segunda', 1],
-      ['Terça', 2],
-      ['Quarta', 3],
-      ['Quinta', 4],
-      ['Sexta', 5],
-      ['Sábado', 6],
-      ['Domingo', 7]
-    ]);
-    
-    return [...weekdays]
-      .sort((a, b) => (orderedWeekdays.get(a) || 0) - (orderedWeekdays.get(b) || 0))
-      .join(', ');
-  };
-  
-  const formatHours = (opening?: string, closing?: string) => {
-    if (!opening && !closing) return 'Não definido';
-    if (opening && closing) return `${opening} às ${closing}`;
-    if (opening) return `A partir de ${opening}`;
-    if (closing) return `Até ${closing}`;
-    return 'Não definido';
-  };
-
-  const getValueDisplay = (valor?: string) => {
-    if (!valor) return 'Grátis';
-    
-    // Try to detect if it's already formatted with R$
-    if (valor.includes('R$')) {
-      return valor.trim();
+  const handleReservationComplete = () => {
+    // Refresh the reservations list for the current area
+    if (openSheetId) {
+      handleReservationsClick(openSheetId);
     }
     
-    // Otherwise, format it
-    const numValue = parseFloat(valor.replace(',', '.'));
-    return isNaN(numValue) ? 'Grátis' : formatCurrency(numValue);
+    // Also refresh the global reservations calendar
+    queryClient.invalidateQueries({ queryKey: ['reservations', matricula] });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      case 'cancelled':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
-    }
-  };
-  
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return 'Aprovado';
-      case 'rejected':
-        return 'Rejeitado';
-      case 'cancelled':
-        return 'Cancelado';
-      default:
-        return 'Pendente';
-    }
+  const openReservationDialog = (areaId) => {
+    setSelectedAreaId(areaId);
+    setIsReservationDialogOpen(true);
   };
 
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-    } catch (e) {
-      return dateStr;
-    }
-  };
+  if (!commonAreas || commonAreas.length === 0) {
+    return (
+      <div className="p-6 text-center text-muted-foreground">
+        {viewOnly ? 'Não há áreas comuns disponíveis.' : 'Nenhuma área comum cadastrada.'}
+      </div>
+    );
+  }
 
   return (
-    <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead className="text-center">Capacidade</TableHead>
-            <TableHead className="hidden md:table-cell text-center">Disponibilidade</TableHead>
-            <TableHead className="hidden md:table-cell text-center">Horário</TableHead>
-            <TableHead className="text-center">Valor</TableHead>
-            <TableHead className="text-center">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {commonAreas.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                Nenhuma área comum cadastrada
-              </TableCell>
-            </TableRow>
-          ) : (
-            commonAreas.map((area) => (
-              <TableRow key={area.id}>
-                <TableCell className="font-medium">{area.name}</TableCell>
-                <TableCell className="text-center">{area.capacity || 'Não definido'}</TableCell>
-                <TableCell className="hidden md:table-cell text-center">
-                  {formatWeekdays(area.weekdays)}
-                </TableCell>
-                <TableCell className="hidden md:table-cell text-center">
-                  {formatHours(area.opening_time, area.closing_time)}
-                </TableCell>
-                <TableCell className="text-center">
-                  {getValueDisplay(area.valor)}
-                </TableCell>
-                <TableCell className="text-center">
-                  <div className="flex justify-center gap-2">
+    <div className="divide-y">
+      <Accordion type="single" collapsible value={openAreaId} onValueChange={setOpenAreaId}>
+        {commonAreas.map((area) => (
+          <AccordionItem key={area.id} value={area.id} className="border-b">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4">
+              <AccordionTrigger className="hover:no-underline py-0">
+                <div className="text-left">
+                  <h3 className="text-lg font-medium">{area.name}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-1">
+                    {area.description}
+                  </p>
+                </div>
+              </AccordionTrigger>
+              
+              <div className="flex space-x-2 mt-4 sm:mt-0">
+                {/* View reservations button */}
+                <Sheet>
+                  <SheetTrigger asChild>
                     <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
-                      onClick={() => handleViewReservations(area)}
-                      title="Ver reservas"
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center"
+                      onClick={() => handleReservationsClick(area.id)}
                     >
-                      <Eye className="h-4 w-4" />
+                      <CalendarCheck className="h-4 w-4 mr-2" />
+                      Reservas
                     </Button>
-                    
-                    {showReservationButton && (
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-green-500 hover:bg-green-50 hover:text-green-600"
-                        onClick={() => handleReservationClick(area)}
-                        title="Reservar"
-                      >
-                        <CalendarPlus className="h-4 w-4" />
-                      </Button>
-                    )}
-                    
-                    {!viewOnly && (
-                      <>
-                        {onEdit && (
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                            onClick={() => onEdit(area)}
-                            title="Editar"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {onDelete && (
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
-                            onClick={() => onDelete(area.id)}
-                            disabled={isDeleting}
-                            title="Excluir"
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{selectedArea?.name}</DialogTitle>
-            <DialogDescription>
-              Informações para esta área comum
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="mt-4">
-            <Card className="border-t-4 border-t-brand-600">
-              <CardHeader>
-                <CardTitle className="text-lg">Detalhes da Área</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {selectedArea?.description && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500">Descrição:</h4>
-                    <p className="text-sm">{selectedArea.description}</p>
-                  </div>
+                  </SheetTrigger>
+                  <SheetContent className="sm:max-w-md overflow-y-auto">
+                    <SheetHeader>
+                      <SheetTitle>Reservas - {area.name}</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-6">
+                      {isLoadingReservations ? (
+                        <div className="py-10 text-center text-muted-foreground">
+                          Carregando reservas...
+                        </div>
+                      ) : areaReservations.length === 0 ? (
+                        <div className="py-10 text-center text-muted-foreground">
+                          Não há reservas para esta área.
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {areaReservations.map((reservation) => (
+                            <div
+                              key={reservation.id}
+                              className="border rounded-md p-3 text-sm space-y-1"
+                            >
+                              <div className="flex justify-between">
+                                <span className="font-medium">
+                                  {format(parseISO(reservation.reservation_date), "dd/MM/yyyy", { locale: ptBR })}
+                                </span>
+                                <Badge variant="outline">
+                                  {reservation.residents.unidade}
+                                </Badge>
+                              </div>
+                              <div className="text-muted-foreground">
+                                {reservation.residents.nome_completo}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+                
+                {/* Reservation button for residents */}
+                {showReservationButton && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="flex items-center bg-brand-600 hover:bg-brand-700"
+                    onClick={() => openReservationDialog(area.id)}
+                  >
+                    <CalendarCheck className="h-4 w-4 mr-2" />
+                    Reservar
+                  </Button>
                 )}
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {selectedArea?.capacity ? `${selectedArea.capacity} pessoas` : 'Capacidade não definida'}
-                    </span>
+                {/* Edit button for managers */}
+                {onEdit && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-blue-600 hover:text-blue-800"
+                    onClick={() => onEdit(area)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
+                
+                {/* Delete button for managers */}
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-600 hover:text-red-800"
+                    onClick={() => onDelete(area.id)}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+  
+            <AccordionContent className="px-6 pb-4">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Descrição</h4>
+                  <p className="text-sm text-muted-foreground">{area.description}</p>
+                </div>
+  
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-1">Capacidade</h4>
+                    <p className="text-sm text-muted-foreground">{area.capacity} pessoas</p>
                   </div>
-                  
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {formatHours(selectedArea?.opening_time, selectedArea?.closing_time)}
-                    </span>
+  
+                  <div>
+                    <h4 className="text-sm font-medium mb-1">Horário de Funcionamento</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {area.opening_time} - {area.closing_time}
+                    </p>
                   </div>
-                  
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {formatWeekdays(selectedArea?.weekdays)}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1.5">
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {selectedArea?.valor ? getValueDisplay(selectedArea.valor) : 'Grátis'}
-                    </span>
+  
+                  <div>
+                    <h4 className="text-sm font-medium mb-1">
+                      {area.valor && parseFloat(area.valor) > 0 ? 'Valor da Reserva' : 'Reserva'}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      {area.valor && parseFloat(area.valor) > 0 
+                        ? `R$ ${area.valor}` 
+                        : 'Gratuita'}
+                    </p>
                   </div>
                 </div>
-                
-                {selectedArea?.rules && (
-                  <div className="pt-2">
-                    <h4 className="text-sm font-medium text-gray-500">Regras:</h4>
-                    <p className="text-sm whitespace-pre-line">{selectedArea.rules}</p>
+  
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Dias de Funcionamento</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {area.weekdays?.map((day) => (
+                      <Badge key={day} variant="outline">
+                        {day}
+                      </Badge>
+                    ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </DialogContent>
-      </Dialog>
+                </div>
+  
+                <Separator />
+  
+                <div>
+                  <div className="flex items-center mb-1">
+                    <Info className="h-4 w-4 mr-1 text-amber-500" />
+                    <h4 className="text-sm font-medium">Regras de Utilização</h4>
+                  </div>
+                  <div className="text-sm text-muted-foreground whitespace-pre-line">
+                    {area.rules}
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
 
       {/* Reservation Dialog */}
-      {selectedArea && (
-        <CommonAreaReservationDialog
-          open={isReservationOpen}
-          setOpen={setIsReservationOpen}
-          commonAreaId={selectedArea.id}
-          onReservationComplete={() => {
-            setIsReservationOpen(false);
-            // Refresh reservations if the details dialog is open
-            if (isDetailsOpen && selectedArea) {
-              handleViewReservations(selectedArea);
-            }
-          }}
-        />
-      )}
-    </>
+      <CommonAreaReservationDialog
+        open={isReservationDialogOpen}
+        setOpen={setIsReservationDialogOpen}
+        commonAreaId={selectedAreaId}
+        onReservationComplete={handleReservationComplete}
+      />
+    </div>
   );
 };

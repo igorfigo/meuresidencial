@@ -6,6 +6,7 @@ import { ptBR } from 'date-fns/locale';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +39,8 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
 }) => {
   const { user } = useApp();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const matricula = user?.selectedCondominium || user?.matricula || '';
   const residentId = user?.residentId;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [date, setDate] = React.useState<Date | undefined>(new Date())
@@ -66,6 +69,9 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         });
 
       if (error) throw error;
+
+      // Invalidate the reservations query to refresh the data
+      await queryClient.invalidateQueries({ queryKey: ['reservations', matricula] });
 
       toast({
         title: 'Reserva criada com sucesso!',
