@@ -342,35 +342,37 @@ const GerenciarAvisos = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Título</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
+                      <TableHead className="text-center">Data</TableHead>
+                      <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {newsItems.map((item) => (
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.title}</TableCell>
-                        <TableCell>{formatDate(item.created_at)}</TableCell>
-                        <TableCell className="text-right space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleEdit(item)}
-                            disabled={isEditing}
-                          >
-                            <Edit size={16} />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            disabled={isEditing || isDeleting}
-                            onClick={() => {
-                              setCurrentItem(item);
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 size={16} />
-                          </Button>
+                        <TableCell className="text-center">{formatDate(item.created_at)}</TableCell>
+                        <TableCell className="text-center space-x-2">
+                          <div className="flex justify-center space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleEdit(item)}
+                              disabled={isEditing}
+                            >
+                              <Edit size={16} />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              disabled={isEditing || isDeleting}
+                              onClick={() => {
+                                setCurrentItem(item);
+                                setDeleteDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
