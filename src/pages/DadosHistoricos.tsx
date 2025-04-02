@@ -63,15 +63,16 @@ const DadosHistoricos = () => {
         return;
       }
       
-      const { error } = await supabase
-        .from('historical_data_requests')
+      // Use a type assertion to tell TypeScript about the table
+      const { error } = await (supabase
+        .from('historical_data_requests' as any)
         .insert({
           matricula: user.matricula || '',
           condominium_name: user.nomeCondominio || 'Nome não informado',
           manager_name: user.nome || 'Nome não informado',
           manager_email: user.email || 'Email não informado',
           request_type: formData.type,
-        });
+        }));
       
       if (error) throw error;
       
