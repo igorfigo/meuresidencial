@@ -19,28 +19,25 @@ export const normalizeText = (text: string): string => {
   return normalized.replace(/\s+/g, '');
 };
 
-// Generate CRC16 checksum for PIX code
+// Generate CRC16 checksum for PIX code - Fixed calculation method
 export const generateCRC16 = (payload: string): string => {
-  // CRC16 implementation
+  // Fixed CRC16 implementation based on the CCITT standard (the same as used in resident profile)
   const polynomial = 0x1021;
   let crc = 0xFFFF;
   
-  // Process each character in the payload
   for (let i = 0; i < payload.length; i++) {
-    crc ^= payload.charCodeAt(i) << 8;
+    const c = payload.charCodeAt(i);
+    crc ^= (c << 8);
     
     for (let j = 0; j < 8; j++) {
-      if ((crc & 0x8000) !== 0) {
-        crc = (crc << 1) ^ polynomial;
+      if (crc & 0x8000) {
+        crc = ((crc << 1) ^ polynomial) & 0xFFFF;
       } else {
-        crc <<= 1;
+        crc = (crc << 1) & 0xFFFF;
       }
     }
   }
   
-  crc &= 0xFFFF; // Ensure it's a 16-bit value
-  
-  // Convert to hexadecimal and pad with zeros if needed
   return crc.toString(16).toUpperCase().padStart(4, '0');
 };
 
