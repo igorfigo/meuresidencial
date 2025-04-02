@@ -1,4 +1,3 @@
-
 import {
   Home,
   LayoutDashboard,
@@ -81,7 +80,6 @@ export function Sidebar() {
       markAsViewed('documents');
     }
 
-    // Check if we're on a business management page and expand the menu
     if (location.pathname === '/business-management' || 
         location.pathname === '/contratos' || 
         location.pathname === '/despesas-empresariais') {
@@ -136,6 +134,7 @@ export function Sidebar() {
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/dedetizacoes', label: 'Dedetizações', icon: <Bug className="h-5 w-5" /> },
     { path: '/dados-historicos', label: 'Dados Históricos', icon: <History className="h-5 w-5" /> },
+    { path: '/vaga-garagem', label: 'Vaga Garagem', icon: <Car className="h-5 w-5" /> },
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/contato', label: 'Fale Conosco', icon: <Mail className="h-5 w-5" /> },
   ];

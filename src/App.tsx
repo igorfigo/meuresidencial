@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -34,6 +33,7 @@ import SugestaoReclamacao from '@/pages/SugestaoReclamacao';
 import GaragemLivre from '@/pages/GaragemLivre';
 import BusinessManagement from '@/pages/BusinessManagement';
 import DadosHistoricos from './pages/DadosHistoricos';
+import VagaGaragem from './pages/VagaGaragem';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
@@ -84,6 +84,11 @@ function App() {
               <Route path="/dados-historicos" element={
                 <AuthRequired>
                   <DadosHistoricos />
+                </AuthRequired>
+              } />
+              <Route path="/vaga-garagem" element={
+                <AuthRequired>
+                  <React.lazy(() => import('./pages/VagaGaragem')) />
                 </AuthRequired>
               } />
             </Routes>
