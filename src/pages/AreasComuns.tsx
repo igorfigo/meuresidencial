@@ -19,9 +19,11 @@ import {
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
 import { useApp } from '@/contexts/AppContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 const AreasComuns = () => {
   const { user } = useApp();
+  const queryClient = useQueryClient();
   const { 
     form, 
     commonAreas, 
@@ -77,6 +79,8 @@ const AreasComuns = () => {
   const handleReservationComplete = () => {
     // This function will be called after a successful reservation
     console.log("Reservation completed, refreshing calendar data");
+    // Invalidate and refetch reservations data
+    queryClient.invalidateQueries({ queryKey: ['reservations'] });
   };
 
   return (

@@ -78,6 +78,7 @@ interface CommonAreasListProps {
   viewOnly?: boolean;
   onCreateReservation?: (commonAreaId: string) => void;
   showReservationButton?: boolean;
+  onReservationComplete?: () => void;
 }
 
 export const CommonAreasList: React.FC<CommonAreasListProps> = ({
@@ -88,7 +89,8 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
   fetchReservations,
   viewOnly = false,
   onCreateReservation,
-  showReservationButton = false
+  showReservationButton = false,
+  onReservationComplete
 }) => {
   const [selectedArea, setSelectedArea] = useState<CommonArea | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -359,6 +361,10 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
             // Refresh reservations if the details dialog is open
             if (isDetailsOpen && selectedArea) {
               handleViewReservations(selectedArea);
+            }
+            // Call the parent's onReservationComplete if provided
+            if (onReservationComplete) {
+              onReservationComplete();
             }
           }}
         />

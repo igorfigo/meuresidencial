@@ -112,7 +112,7 @@ export const ReservationsCalendar: React.FC = () => {
   };
   
   // Use React Query to manage the data fetching and caching
-  const { data: reservations = [], isLoading } = useQuery({
+  const { data: reservations = [], isLoading, refetch } = useQuery({
     queryKey: ['reservations', matricula],
     queryFn: fetchReservations,
     enabled: !!matricula,
