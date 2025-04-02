@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Save, Package, Search, History, Trash } from 'lucide-react';
+import { Save, Package, Eye, History, Trash, FileEdit } from 'lucide-react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { supabase } from '@/integrations/supabase/client';
@@ -482,24 +481,27 @@ export const CadastroPlanos = () => {
                             <div className="flex space-x-2">
                               <Button 
                                 variant="outline" 
-                                size="sm" 
+                                size="icon" 
                                 onClick={() => handleEditPlan(plan)}
+                                className="h-8 w-8"
                               >
-                                Editar
+                                <FileEdit className="h-4 w-4 text-blue-500" />
                               </Button>
                               <Button
                                 variant="outline"
-                                size="sm"
+                                size="icon"
                                 onClick={() => handleViewLogs(plan.codigo)}
+                                className="h-8 w-8"
                               >
-                                <Search className="h-4 w-4" />
+                                <Eye className="h-4 w-4 text-gray-500" />
                               </Button>
                               <Button 
-                                variant="destructive" 
-                                size="sm" 
+                                variant="outline" 
+                                size="icon" 
                                 onClick={() => handleDeletePlan(plan.codigo)}
+                                className="h-8 w-8"
                               >
-                                <Trash className="h-4 w-4" />
+                                <Trash className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>
                           </TableCell>
