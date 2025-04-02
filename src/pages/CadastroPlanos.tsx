@@ -375,7 +375,6 @@ export const CadastroPlanos = () => {
         </header>
 
         <div className="flex flex-col gap-6">
-          {/* Table of existing plans first */}
           <Card className="p-4 border-t-4 border-t-brand-600 shadow-md">
             <h2 className="text-xl font-semibold mb-3">Planos Cadastrados</h2>
             <ScrollArea className="h-64 rounded-md">
@@ -386,7 +385,7 @@ export const CadastroPlanos = () => {
                     <TableHead className="text-center">Nome</TableHead>
                     <TableHead className="text-center">Valor</TableHead>
                     <TableHead className="text-center">Máx. Moradores</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                    <TableHead className="text-center">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -403,8 +402,8 @@ export const CadastroPlanos = () => {
                         <TableCell className="text-center">{plan.nome}</TableCell>
                         <TableCell className="text-center">{formatCurrency(plan.valor)}</TableCell>
                         <TableCell className="text-center">{plan.max_moradores || 50}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end space-x-1">
+                        <TableCell className="text-center">
+                          <div className="flex justify-center space-x-1">
                             <Button 
                               variant="outline" 
                               size="icon" 
@@ -442,7 +441,6 @@ export const CadastroPlanos = () => {
             </ScrollArea>
           </Card>
           
-          {/* Form for creating/editing plans second */}
           <Card className="p-4 border-t-4 border-t-brand-600 shadow-md">
             <h2 className="text-xl font-semibold mb-3">{isExistingRecord ? 'Editar Plano' : 'Novo Plano'}</h2>
             
