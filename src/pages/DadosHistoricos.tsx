@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -75,28 +74,24 @@ const DadosHistoricos = () => {
       
       const typeText = formData.type === 'inclusao' ? 'Solicitação de Inclusão de Históricos' : 'Solicitação de Download de Históricos';
       
-      // Insert into the database instead of sending an email
-      const { error } = await supabase
-        .from('historical_data_requests')
-        .insert({
-          matricula: user?.matricula,
-          condominium_name: user?.nomeCondominio,
-          manager_name: user?.nome,
-          manager_email: user?.email,
-          request_type: formData.type,
-          subject: `${typeText} - ${formData.subject}`,
-          message: formData.message,
-          payment_status: 'pending',
-          status: 'new'
-        });
+      const { error } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          name: user?.nome || 'Nome não informado',
+          email: user?.email || 'Email não informado',
+          matricula: user?.matricula || 'N/A',
+          nomeCondominio: user?.nomeCondominio || 'N/A',
+          subject: `[${typeText}] ${formData.subject}`,
+          message: formData.message
+        }
+      });
       
       if (error) throw error;
       
-      toast.success('Solicitação cadastrada com sucesso! Em breve entraremos em contato.');
+      toast.success('Solicitação enviada com sucesso! Responderemos em até 24 horas úteis.');
       setFormData({ subject: '', message: '', type: 'inclusao' });
     } catch (error) {
-      console.error('Erro ao cadastrar solicitação:', error);
-      toast.error('Erro ao cadastrar solicitação. Por favor, tente novamente.');
+      console.error('Erro ao enviar solicitação:', error);
+      toast.error('Erro ao enviar solicitação. Por favor, tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
