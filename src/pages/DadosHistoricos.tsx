@@ -1,12 +1,10 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, Send, History } from 'lucide-react';
 import { toast } from 'sonner';
@@ -20,8 +18,6 @@ const DadosHistoricos = () => {
   const isMobile = useIsMobile();
   
   const [formData, setFormData] = useState({
-    subject: '',
-    message: '',
     type: 'inclusao' // Default to 'inclusao', could be 'download'
   });
   
@@ -52,11 +48,6 @@ const DadosHistoricos = () => {
     );
   }
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
   const handleTypeChange = (type: 'inclusao' | 'download') => {
     setFormData(prev => ({ ...prev, type }));
   };
@@ -64,31 +55,28 @@ const DadosHistoricos = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.subject.trim() || !formData.message.trim()) {
-      toast.error('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
-    
     try {
       setIsSubmitting(true);
       
-      const typeText = formData.type === 'inclusao' ? 'Solicitação de Inclusão de Históricos' : 'Solicitação de Download de Históricos';
+      if (!user) {
+        toast.error('Usuário não autenticado. Por favor, faça login novamente.');
+        return;
+      }
       
-      const { error } = await supabase.functions.invoke('send-contact-email', {
-        body: {
-          name: user?.nome || 'Nome não informado',
-          email: user?.email || 'Email não informado',
-          matricula: user?.matricula || 'N/A',
-          nomeCondominio: user?.nomeCondominio || 'N/A',
-          subject: `[${typeText}] ${formData.subject}`,
-          message: formData.message
-        }
-      });
+      const { error } = await supabase
+        .from('historical_data_requests')
+        .insert({
+          matricula: user.matricula || '',
+          condominium_name: user.nomeCondominio || 'Nome não informado',
+          manager_name: user.nome || 'Nome não informado',
+          manager_email: user.email || 'Email não informado',
+          request_type: formData.type,
+        });
       
       if (error) throw error;
       
       toast.success('Solicitação enviada com sucesso! Responderemos em até 24 horas úteis.');
-      setFormData({ subject: '', message: '', type: 'inclusao' });
+      setFormData({ type: 'inclusao' });
     } catch (error) {
       console.error('Erro ao enviar solicitação:', error);
       toast.error('Erro ao enviar solicitação. Por favor, tente novamente.');
@@ -121,7 +109,7 @@ const DadosHistoricos = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="type" className="font-medium">Tipo de Solicitação</Label>
+                  <h3 className="font-medium mb-2">Tipo de Solicitação</h3>
                   <div className="flex space-x-4 mt-2">
                     <Button
                       type="button"
@@ -144,75 +132,34 @@ const DadosHistoricos = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="nome" className="font-medium">Nome</Label>
-                    <Input 
-                      id="nome" 
-                      value={user?.nome || 'Não informado'} 
-                      disabled 
-                      className="bg-gray-50"
-                    />
+                    <h3 className="font-medium">Nome</h3>
+                    <div className="p-2 bg-gray-50 border border-gray-200 rounded-md">
+                      {user?.nome || 'Não informado'}
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="font-medium">Email</Label>
-                    <Input 
-                      id="email" 
-                      value={user?.email || 'Não informado'} 
-                      disabled 
-                      className="bg-gray-50"
-                    />
+                    <h3 className="font-medium">Email</h3>
+                    <div className="p-2 bg-gray-50 border border-gray-200 rounded-md">
+                      {user?.email || 'Não informado'}
+                    </div>
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="matricula" className="font-medium">Matrícula</Label>
-                    <Input 
-                      id="matricula" 
-                      value={user?.matricula || 'N/A'} 
-                      disabled 
-                      className="bg-gray-50"
-                    />
+                    <h3 className="font-medium">Matrícula</h3>
+                    <div className="p-2 bg-gray-50 border border-gray-200 rounded-md">
+                      {user?.matricula || 'N/A'}
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="condominio" className="font-medium">Condomínio</Label>
-                    <Input 
-                      id="condominio" 
-                      value={user?.nomeCondominio || 'N/A'} 
-                      disabled 
-                      className="bg-gray-50"
-                    />
+                    <h3 className="font-medium">Condomínio</h3>
+                    <div className="p-2 bg-gray-50 border border-gray-200 rounded-md">
+                      {user?.nomeCondominio || 'N/A'}
+                    </div>
                   </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="subject" className="font-medium" required>Assunto</Label>
-                  <Input 
-                    id="subject" 
-                    name="subject" 
-                    value={formData.subject} 
-                    onChange={handleChange} 
-                    placeholder="Digite o assunto da solicitação" 
-                    required 
-                    className="border-gray-300 focus:border-brand-500 focus:ring-brand-500"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="message" className="font-medium" required>Mensagem</Label>
-                  <Textarea 
-                    id="message" 
-                    name="message" 
-                    value={formData.message} 
-                    onChange={handleChange} 
-                    placeholder={formData.type === 'inclusao' 
-                      ? "Descreva os dados históricos que deseja incluir no sistema..." 
-                      : "Descreva os dados históricos que deseja baixar do sistema..."} 
-                    rows={6} 
-                    required 
-                    className="border-gray-300 focus:border-brand-500 focus:ring-brand-500 resize-none"
-                  />
                 </div>
               </div>
             </form>
