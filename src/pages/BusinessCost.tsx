@@ -128,7 +128,6 @@ const BusinessCost = () => {
             <p className="text-muted-foreground mt-1">
               Gerencie todas as despesas da empresa
             </p>
-            <Separator className="mt-4 w-full mb-6" />
           </div>
           
           <div className="flex mt-4 md:mt-0 space-x-2">
@@ -187,6 +186,8 @@ const BusinessCost = () => {
             </Dialog>
           </div>
         </div>
+
+        <Separator className="w-full mb-8" />
 
         <div className="mb-8 flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
