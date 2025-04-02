@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -40,13 +39,11 @@ export const HistoricalDataPixSection = ({ matricula }: HistoricalDataPixSection
     }
   });
   
-  // Generate PIX code when settings are loaded
   useEffect(() => {
     if (pixSettings && matricula) {
       setIsLoading(true);
       
       try {
-        // Map database key type to our enum
         let keyType: 'CPF' | 'CNPJ' | 'EMAIL' | 'TELEFONE';
         switch(pixSettings.tipochave) {
           case 'CPF': keyType = 'CPF'; break;
@@ -56,11 +53,10 @@ export const HistoricalDataPixSection = ({ matricula }: HistoricalDataPixSection
           default: keyType = 'CPF';
         }
         
-        // Generate the PIX code
         const code = generatePixCode({
           keyType,
           pixKey: pixSettings.chavepix,
-          amount: 249.00, // Fixed amount for historical data
+          amount: 249.00,
           condominiumName: 'Dados Históricos',
           matricula,
           isHistorical: true
@@ -68,7 +64,6 @@ export const HistoricalDataPixSection = ({ matricula }: HistoricalDataPixSection
         
         setPixCode(code);
         
-        // Generate QR code from the PIX code
         generatePixQRCode(code).then(url => {
           setQrCodeUrl(url);
           setIsLoading(false);
@@ -95,7 +90,6 @@ export const HistoricalDataPixSection = ({ matricula }: HistoricalDataPixSection
       });
   };
   
-  // If no PIX settings found, show message
   if (!pixSettings && !isLoading) {
     return (
       <Card className="border-t-4 border-t-amber-500 shadow-md mb-6">
@@ -158,18 +152,6 @@ export const HistoricalDataPixSection = ({ matricula }: HistoricalDataPixSection
           </div>
           
           <div className="flex flex-col space-y-4">
-            <h3 className="font-medium text-gray-700">Instruções:</h3>
-            <ol className="list-decimal list-inside space-y-2 text-gray-600">
-              <li>Abra o aplicativo do seu banco</li>
-              <li>Escolha a opção "PIX" ou "Pagar com PIX"</li>
-              <li>Escaneie o QR code ao lado ou use a opção "Pix Copia e Cola"</li>
-              <li>Confirme os dados e valor do pagamento</li>
-              <li>Após o pagamento, nossa equipe processará sua solicitação</li>
-            </ol>
-            
-            <Separator className="my-2" />
-            
-            <h3 className="font-medium text-gray-700">PIX Copia e Cola:</h3>
             <Button 
               onClick={handleCopyClick} 
               variant="outline"
@@ -181,7 +163,7 @@ export const HistoricalDataPixSection = ({ matricula }: HistoricalDataPixSection
             
             <div className="bg-amber-50 p-3 rounded-md border border-amber-200 mt-4">
               <p className="text-sm text-amber-700">
-                <strong>Importante:</strong> Após o pagamento, responderemos sua solicitação em até 24 horas úteis.
+                <strong>Importante:</strong> Somente após o pagamento enviar sua solicitação de Dados Históricos.
               </p>
             </div>
           </div>
