@@ -55,19 +55,23 @@ const DadosHistoricos = () => {
       if (!user?.matricula) return;
       
       try {
-        // Use a direct SQL query through the RESTful API instead of the client library
-        // to avoid RLS policy issues
-        const { data, error } = await supabase
-          .from('historical_data_requests')
-          .select('created_at')
-          .eq('matricula', user.matricula)
-          .order('created_at', { ascending: false })
-          .limit(1);
+        // Use a direct fetch call to avoid RLS policy issues
+        const response = await fetch(
+          `https://kcbvdcacgbwigefwacrk.supabase.co/rest/v1/historical_data_requests?select=created_at&matricula=eq.${user.matricula}&order=created_at.desc&limit=1`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjYnZkY2FjZ2J3aWdlZndhY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyMjgzMDQsImV4cCI6MjA1NzgwNDMwNH0.K4xcW6V3X9QROQLekB74NbKg3BaShwgMbanrP3olCYI'
+            }
+          }
+        );
           
-        if (error) {
-          console.error('Erro ao verificar solicitações anteriores:', error);
-          return;
+        if (!response.ok) {
+          throw new Error(`Error checking requests: ${response.statusText}`);
         }
+        
+        const data = await response.json();
         
         if (data && data.length > 0) {
           setLastSubmission(new Date(data[0].created_at));
@@ -95,9 +99,8 @@ const DadosHistoricos = () => {
         return;
       }
       
-      // Using a direct SQL insert with anonymous key to bypass RLS policies
-      // This is a workaround for the infinite recursion error
-      const { data, error } = await fetch(
+      // Direct API call to avoid RLS policy issues
+      const response = await fetch(
         `https://kcbvdcacgbwigefwacrk.supabase.co/rest/v1/historical_data_requests`,
         {
           method: 'POST',
@@ -115,25 +118,12 @@ const DadosHistoricos = () => {
             status: 'pending'
           })
         }
-      ).then(res => {
-        if (!res.ok) {
-          return res.json().then(err => { throw err; });
-        }
-        return res.json();
-      });
+      );
       
-      if (error) {
-        console.error('Erro detalhado:', error);
-        
-        // Fornece mensagens de erro mais específicas com base no tipo de erro
-        if (error.code === '23505') { // Violação de chave única
-          toast.error('Você já possui uma solicitação similar em processamento.');
-        } else if (error.code === '42501') { // Violação de permissão
-          toast.error('Você não tem permissão para realizar esta ação.');
-        } else {
-          toast.error(`Erro ao enviar solicitação: ${error.message || 'Erro desconhecido'}`);
-        }
-        return;
+      // Handle HTTP errors
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
       }
       
       toast.success('Solicitação enviada com sucesso! Responderemos em até 24 horas úteis.');
@@ -141,7 +131,13 @@ const DadosHistoricos = () => {
       setFormData({ type: 'inclusao' });
     } catch (error: any) {
       console.error('Erro ao enviar solicitação:', error);
-      toast.error(`Erro ao enviar solicitação: ${error?.message || 'Tente novamente'}`);
+      
+      // More specific error handling
+      if (error.message?.includes('23505')) {
+        toast.error('Você já possui uma solicitação similar em processamento.');
+      } else {
+        toast.error(`Erro ao enviar solicitação: ${error?.message || 'Tente novamente mais tarde'}`);
+      }
     } finally {
       setIsSubmitting(false);
     }
