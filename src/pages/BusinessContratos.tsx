@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Trash2, Eye, Pencil, Paperclip, X, Download, FileEdit, Trash } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -276,7 +277,7 @@ const BusinessContratos = () => {
   ];
 
   const renderListView = () => (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto border-t-4 border-t-brand-500 rounded-md">
       <Table>
         <TableHeader>
           <TableRow>
@@ -525,7 +526,7 @@ const BusinessContratos = () => {
         ) : filteredContracts?.length ? (
           renderListView()
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="flex flex-col items-center justify-center py-12 text-center border-t-4 border-t-brand-500 rounded-md bg-white dark:bg-gray-900 p-6">
             <div className="rounded-full bg-muted p-3 mb-4">
               <FileText className="h-6 w-6 text-muted-foreground" />
             </div>

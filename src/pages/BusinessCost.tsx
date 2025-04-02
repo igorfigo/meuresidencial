@@ -230,7 +230,7 @@ const BusinessCost = () => {
             ))}
           </div>
         ) : filteredExpenses?.length ? (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto border-t-4 border-t-brand-500 rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -297,7 +297,7 @@ const BusinessCost = () => {
             </Table>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="flex flex-col items-center justify-center py-12 text-center border-t-4 border-t-brand-500 rounded-md bg-white dark:bg-gray-900 p-6">
             <div className="rounded-full bg-muted p-3 mb-4">
               <Receipt className="h-6 w-6 text-muted-foreground" />
             </div>

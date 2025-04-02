@@ -139,7 +139,7 @@ const BusinessDocuments = () => {
           <Button onClick={openAddDialog}>Adicionar Documento</Button>
         </div>
 
-        <Card>
+        <Card className="border-t-4 border-t-brand-500">
           <CardHeader>
             <CardTitle>Documentos</CardTitle>
             <CardDescription>Lista de documentos empresariais</CardDescription>
