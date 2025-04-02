@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, History, Info, Download, FileUp } from 'lucide-react';
+import { Loader2, History, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,65 +20,6 @@ const DadosHistoricos = () => {
   const isMobile = useIsMobile();
   const [requestType, setRequestType] = useState<'download' | 'inclusion'>('download');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previousRequests, setPreviousRequests] = useState<any[]>([]);
-  const [loadingRequests, setLoadingRequests] = useState(true);
-  
-  // Load previous requests
-  useEffect(() => {
-    if (user?.matricula && !user.isAdmin && !user.isResident) {
-      fetchPreviousRequests();
-    }
-  }, [user]);
-  
-  const fetchPreviousRequests = async () => {
-    if (!user?.matricula) return;
-    
-    try {
-      setLoadingRequests(true);
-      const { data, error } = await supabase
-        .from('historical_data_requests')
-        .select('*')
-        .eq('matricula', user.matricula)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setPreviousRequests(data || []);
-    } catch (error) {
-      console.error('Error fetching previous requests:', error);
-      toast.error('Erro ao carregar solicitações anteriores');
-    } finally {
-      setLoadingRequests(false);
-    }
-  };
-  
-  const handleSubmitRequest = async () => {
-    if (!user?.matricula) {
-      toast.error('Erro: Matrícula não encontrada');
-      return;
-    }
-    
-    try {
-      setIsSubmitting(true);
-      
-      const { data, error } = await supabase
-        .from('historical_data_requests')
-        .insert([{
-          matricula: user.matricula,
-          request_type: requestType
-        }])
-        .select();
-      
-      if (error) throw error;
-      
-      toast.success('Solicitação enviada com sucesso!');
-      fetchPreviousRequests();
-    } catch (error) {
-      console.error('Error submitting request:', error);
-      toast.error('Erro ao enviar solicitação');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
   
   // Check if user is a manager (not admin and not resident)
   if (user?.isAdmin || user?.isResident) {
@@ -104,6 +45,35 @@ const DadosHistoricos = () => {
       </DashboardLayout>
     );
   }
+  
+  const handleSubmitRequest = async () => {
+    if (!user?.matricula) {
+      toast.error('Erro: Matrícula não encontrada');
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      // Using type assertion to avoid TypeScript errors
+      const { data, error } = await supabase
+        .from('historical_data_requests' as any)
+        .insert([{
+          matricula: user.matricula,
+          request_type: requestType
+        }])
+        .select();
+      
+      if (error) throw error;
+      
+      toast.success('Solicitação enviada com sucesso!');
+    } catch (error) {
+      console.error('Error submitting request:', error);
+      toast.error('Erro ao enviar solicitação');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   return (
     <DashboardLayout>
@@ -135,7 +105,7 @@ const DadosHistoricos = () => {
                 <RadioGroupItem value="download" id="option-download" />
                 <div className="space-y-1">
                   <Label htmlFor="option-download" className="font-medium flex items-center">
-                    <Download className="mr-2 h-4 w-4 text-blue-500" />
+                    <History className="mr-2 h-4 w-4 text-blue-500" />
                     Download de dados
                   </Label>
                   <p className="text-sm text-gray-500">
@@ -148,7 +118,7 @@ const DadosHistoricos = () => {
                 <RadioGroupItem value="inclusion" id="option-inclusion" />
                 <div className="space-y-1">
                   <Label htmlFor="option-inclusion" className="font-medium flex items-center">
-                    <FileUp className="mr-2 h-4 w-4 text-green-500" />
+                    <History className="mr-2 h-4 w-4 text-green-500" />
                     Inclusão de dados
                   </Label>
                   <p className="text-sm text-gray-500">
@@ -170,59 +140,21 @@ const DadosHistoricos = () => {
           </CardFooter>
         </Card>
         
-        {/* Previous Requests */}
+        {/* Information Card */}
         <Card className="border shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg">Solicitações Anteriores</CardTitle>
-            <CardDescription>
-              Histórico das suas solicitações de dados
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loadingRequests ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+          <CardContent className="pt-6">
+            <div className="flex items-start space-x-4">
+              <Info className="h-6 w-6 text-blue-500 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="font-medium text-lg mb-2">Dados Históricos</h3>
+                <p className="text-gray-600 mb-2">
+                  Após o envio da solicitação, nossa equipe entrará em contato com você para orientar sobre os próximos passos.
+                </p>
+                <p className="text-gray-600">
+                  Dependendo do volume de dados e da complexidade, o processamento pode levar até 48 horas úteis.
+                </p>
               </div>
-            ) : previousRequests.length === 0 ? (
-              <div className="text-center py-4 text-gray-500">
-                <p>Você ainda não possui solicitações anteriores</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {previousRequests.map((request) => (
-                  <div key={request.id} className="border p-4 rounded-md">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium flex items-center">
-                          {request.request_type === 'download' ? (
-                            <Download className="mr-2 h-4 w-4 text-blue-500" />
-                          ) : (
-                            <FileUp className="mr-2 h-4 w-4 text-green-500" />
-                          )}
-                          {request.request_type === 'download' ? 'Download de dados' : 'Inclusão de dados'}
-                        </h4>
-                        <p className="text-sm text-gray-500">
-                          {new Date(request.created_at).toLocaleDateString('pt-BR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                      <span className={`text-xs font-medium py-1 px-2 rounded-full 
-                        ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                          request.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`
-                      }>
-                        {request.status === 'pending' ? 'Pendente' : 
-                         request.status === 'completed' ? 'Concluído' : 'Em processamento'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            </div>
           </CardContent>
           <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-end gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg`}>
             <Button
