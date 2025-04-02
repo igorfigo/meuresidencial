@@ -1,3 +1,4 @@
+
 import { encode } from 'js-base64';
 
 interface PixData {
@@ -5,7 +6,6 @@ interface PixData {
   pixKey: string;
   amount: number;
   condominiumName: string;
-  matricula: string;
 }
 
 // Function to normalize text by removing accents and concatenating words
@@ -19,29 +19,35 @@ export const normalizeText = (text: string): string => {
   return normalized.replace(/\s+/g, '');
 };
 
-// Generate CRC16 checksum for PIX code - Fixed calculation method
+// Generate CRC16 checksum for PIX code
 export const generateCRC16 = (payload: string): string => {
-  // Fixed CRC16 implementation based on the CCITT standard (the same as used in resident profile)
+  // CRC16 implementation
   const polynomial = 0x1021;
   let crc = 0xFFFF;
   
+  // Process each character in the payload
   for (let i = 0; i < payload.length; i++) {
-    const c = payload.charCodeAt(i);
-    crc ^= (c << 8);
+    crc ^= payload.charCodeAt(i) << 8;
     
     for (let j = 0; j < 8; j++) {
-      if (crc & 0x8000) {
-        crc = ((crc << 1) ^ polynomial) & 0xFFFF;
+      if ((crc & 0x8000) !== 0) {
+        crc = (crc << 1) ^ polynomial;
       } else {
-        crc = (crc << 1) & 0xFFFF;
+        crc <<= 1;
       }
     }
   }
   
+  crc &= 0xFFFF; // Ensure it's a 16-bit value
+  
+  // Convert to hexadecimal and pad with zeros if needed
   return crc.toString(16).toUpperCase().padStart(4, '0');
 };
 
 export const generatePixCode = (data: PixData): string => {
+  // Normalize the condominium name
+  const normalizedCondominiumName = normalizeText(data.condominiumName);
+  
   // Format amount with 2 decimal places and no separators
   const formattedAmount = data.amount.toFixed(2);
   
@@ -77,39 +83,31 @@ export const generatePixCode = (data: PixData): string => {
     pixKey = digits.startsWith('55') ? `+${digits}` : `+55${digits}`;
   }
   
-  // Build the PIX code according to the updated structure
+  // Build the PIX code according to the structure
   let pixCode = '';
   
-  // Fixed start (unchanged)
+  // Fixed start
   pixCode += '0002012';
   
-  // Merchant key type (unchanged)
+  // Merchant key type
   pixCode += merchantKeyTypeId;
   
-  // Fixed part (unchanged)
+  // Fixed part
   pixCode += '0014BR.GOV.BCB.PIX0';
   
-  // Key type (unchanged)
+  // Key type
   pixCode += keyTypeId;
   
-  // PIX key (unchanged)
+  // PIX key
   pixCode += pixKey;
   
-  // Fixed part and amount (unchanged)
+  // Fixed part and amount
   pixCode += '5204000053039865406';
   pixCode += formattedAmount;
   
-  // Fixed part for receiver info
-  pixCode += '5802BR5901N6001C62';
-  
-  // Count characters for the dynamic part - storing data for the "05" size part
-  const countPart = pixCode.length;
-  
-  // Fixed "05" part
-  pixCode += '05';
-  
-  // Concatenate matricula+HIST+amount as per the new requirements
-  pixCode += `${data.matricula}HIST${formattedAmount.replace('.', '')}`;
+  // Fixed part and condominium name
+  pixCode += '5802BR5901N6001C62100506';
+  pixCode += normalizedCondominiumName;
   
   // Fixed part for CRC
   pixCode += '6304';

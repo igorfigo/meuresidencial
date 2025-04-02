@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -12,7 +13,6 @@ import { Loader2, Send, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
-import { HistoricalDataPixSection } from '@/components/historical-data/HistoricalDataPixSection';
 
 const DadosHistoricos = () => {
   const { user } = useApp();
@@ -105,10 +105,6 @@ const DadosHistoricos = () => {
         <p className="text-gray-600 mb-6">
           Solicite a inclusão ou download de dados históricos para o seu condomínio. Responderemos sua solicitação com uma cotação em até 24 horas úteis.
         </p>
-        
-        <div className="mb-6">
-          <HistoricalDataPixSection amount={249.00} />
-        </div>
         
         <Card className="border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="pb-3">
