@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { DayPicker } from 'react-day-picker';
 import { ptBR } from 'date-fns/locale';
@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CommonAreaReservationDialogProps {
   open: boolean;
@@ -42,21 +43,86 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
   const queryClient = useQueryClient();
   const residentId = user?.residentId;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [disabledDates, setDisabledDates] = useState<Date[]>([]);
+  
+  // Fetch existing reservations for this common area
+  useEffect(() => {
+    async function fetchExistingReservations() {
+      if (!commonAreaId) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('common_area_reservations')
+          .select('reservation_date')
+          .eq('common_area_id', commonAreaId);
+        
+        if (error) throw error;
+        
+        // Convert reservation dates to Date objects for the calendar
+        const reservedDates = data?.map(reservation => {
+          return new Date(reservation.reservation_date);
+        }) || [];
+        
+        setDisabledDates(reservedDates);
+      } catch (error: any) {
+        console.error('Error fetching existing reservations:', error);
+      }
+    }
+    
+    if (open && commonAreaId) {
+      fetchExistingReservations();
+    }
+  }, [commonAreaId, open]);
+
+  // Check if the date is already reserved
+  const checkDateAvailability = async (selectedDate: Date): Promise<boolean> => {
+    if (!commonAreaId) return true;
+    
+    try {
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+      
+      const { data, error } = await supabase
+        .from('common_area_reservations')
+        .select('*')
+        .eq('common_area_id', commonAreaId)
+        .eq('reservation_date', formattedDate);
+      
+      if (error) throw error;
+      
+      // If we have data, the date is already reserved
+      return data.length === 0;
+    } catch (error: any) {
+      console.error('Error checking date availability:', error);
+      return false;
+    }
+  };
 
   // When submitting a reservation form
   const onSubmit = async (data: any) => {
-    if (!residentId || !commonAreaId) {
+    if (!residentId || !commonAreaId || !date) {
       toast({
         title: "Dados incompletos para reserva",
       });
       return;
     }
 
+    setValidationError(null);
     setIsSubmitting(true);
+    
     try {
       // Format the date for database storage (YYYY-MM-DD)
       const formattedDate = format(data.date, 'yyyy-MM-dd');
+      
+      // Check if the date is already reserved
+      const isAvailable = await checkDateAvailability(data.date);
+      
+      if (!isAvailable) {
+        setValidationError("Esta área já está reservada para o dia selecionado.");
+        setIsSubmitting(false);
+        return;
+      }
 
       // Insert reservation into database
       const { error } = await supabase
@@ -94,6 +160,36 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
     if (onOpenChange) {
       onOpenChange(newOpen);
     }
+    // Reset validation error when dialog closes
+    if (!newOpen) {
+      setValidationError(null);
+    }
+  };
+
+  // Handler for date selection
+  const handleDateSelect = async (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
+    setValidationError(null);
+    
+    if (selectedDate) {
+      const isAvailable = await checkDateAvailability(selectedDate);
+      if (!isAvailable) {
+        setValidationError("Esta área já está reservada para o dia selecionado.");
+      }
+    }
+  };
+
+  // Determine if a date should be disabled
+  const isDateDisabled = (date: Date) => {
+    // Disable dates in the past
+    if (date < new Date()) return true;
+    
+    // Check if the date is in the disabledDates array
+    return disabledDates.some(disabledDate => 
+      disabledDate.getFullYear() === date.getFullYear() &&
+      disabledDate.getMonth() === date.getMonth() &&
+      disabledDate.getDate() === date.getDate()
+    );
   };
 
   return (
@@ -123,20 +219,24 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={setDate}
-                disabled={(date) =>
-                  date < new Date()
-                }
+                onSelect={handleDateSelect}
+                disabled={isDateDisabled}
                 initialFocus
               />
             </PopoverContent>
           </Popover>
+          
+          {validationError && (
+            <Alert variant="destructive" className="mt-2">
+              <AlertDescription>{validationError}</AlertDescription>
+            </Alert>
+          )}
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => onSubmit({ date: date })}
-            disabled={isSubmitting || !date}
+            disabled={isSubmitting || !date || validationError !== null}
           >
             {isSubmitting ? 'Agendando...' : 'Agendar'}
           </AlertDialogAction>
