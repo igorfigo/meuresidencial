@@ -62,7 +62,8 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
         
         // Convert reservation dates to Date objects for the calendar
         const reservedDates = data?.map(reservation => {
-          return new Date(reservation.reservation_date);
+          // Ensure proper date parsing for comparison
+          return new Date(reservation.reservation_date + 'T00:00:00');
         }) || [];
         
         setDisabledDates(reservedDates);
@@ -182,9 +183,11 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
   // Determine if a date should be disabled
   const isDateDisabled = (date: Date) => {
     // Disable dates in the past
-    if (date < new Date()) return true;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date < today) return true;
     
-    // Check if the date is in the disabledDates array
+    // Check if the date is in the disabledDates array by comparing year, month, and day
     return disabledDates.some(disabledDate => 
       disabledDate.getFullYear() === date.getFullYear() &&
       disabledDate.getMonth() === date.getMonth() &&
@@ -222,6 +225,7 @@ export const CommonAreaReservationDialog: React.FC<CommonAreaReservationDialogPr
                 onSelect={handleDateSelect}
                 disabled={isDateDisabled}
                 initialFocus
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
