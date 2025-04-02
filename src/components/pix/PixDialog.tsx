@@ -16,12 +16,14 @@ interface PixDialogProps {
     amount: number;
     condominiumName: string;
     matricula: string;
+    unit?: string;
   };
   month: string;
   year: string;
   isOverdue?: boolean;
   dueDate?: string;
   interestRate?: string;
+  isHistorical?: boolean;
 }
 
 export const PixDialog = ({ 
@@ -32,7 +34,8 @@ export const PixDialog = ({
   year, 
   isOverdue = false,
   dueDate = '',
-  interestRate = '0.033'
+  interestRate = '0.033',
+  isHistorical = false
 }: PixDialogProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,7 +66,8 @@ export const PixDialog = ({
   // Generate PIX code with the total amount (including interest if applicable)
   const pixCodeData = {
     ...pixData,
-    amount: totalAmount
+    amount: totalAmount,
+    isHistorical
   };
   
   const pixCode = generatePixCode(pixCodeData);
@@ -106,17 +110,33 @@ export const PixDialog = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="border-b pb-4">
-          <DialogTitle className="text-xl font-bold text-blue-600">Pagar via PIX</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-blue-600">
+            {isHistorical ? 'Pagamento para Dados Históricos' : 'Pagar via PIX'}
+          </DialogTitle>
           <DialogDescription className="mt-1">
             <div className="flex flex-col">
-              <span className="text-gray-700">Competência: {monthName} de {year}</span>
+              {!isHistorical && (
+                <span className="text-gray-700">Competência: {monthName} de {year}</span>
+              )}
               <span className="text-gray-700">
                 Valor: <span className="text-blue-600 font-semibold">
                   {formatCurrency(totalAmount)}
                 </span>
               </span>
               
-              {isOverdue && interestAmount > 0 && (
+              {isHistorical && (
+                <div className="mt-2 text-xs bg-blue-50 border border-blue-200 rounded-md p-2">
+                  <div className="flex items-center mb-1 text-blue-700">
+                    <Info className="h-4 w-4 mr-1" />
+                    <span className="font-medium">Serviço de Dados Históricos</span>
+                  </div>
+                  <p className="text-blue-700">
+                    Pagamento único para inclusão dos dados históricos do condomínio no sistema.
+                  </p>
+                </div>
+              )}
+              
+              {isOverdue && interestAmount > 0 && !isHistorical && (
                 <div className="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-md p-2">
                   <div className="flex items-center mb-1 text-amber-700">
                     <Info className="h-4 w-4 mr-1" />

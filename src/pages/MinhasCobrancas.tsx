@@ -476,6 +476,7 @@ const MinhasCobrancas = () => {
             amount: BRLToNumber(selectedCharge.amount),
             condominiumName: condominiumData.nomecondominio || matricula || '',
             matricula: matricula || '',
+            unit: selectedCharge.unit
           }}
           month={selectedCharge.month}
           year={selectedCharge.year}

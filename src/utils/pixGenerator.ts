@@ -1,3 +1,4 @@
+
 import { encode } from 'js-base64';
 
 interface PixData {
@@ -6,6 +7,7 @@ interface PixData {
   amount: number;
   condominiumName: string;
   matricula: string;
+  unit?: string;
   isHistorical?: boolean;
 }
 
@@ -116,8 +118,9 @@ export const generatePixCode = (data: PixData): string => {
   if (data.isHistorical) {
     description = `${data.matricula}HIST24900`;
   } else {
-    // For regular payments, use the condominium name
-    description = normalizeText(data.condominiumName);
+    // For regular payments, use the normalized condominium name + unit (if available)
+    const condoName = normalizeText(data.condominiumName);
+    description = data.unit ? `${condoName}${data.unit}` : condoName;
   }
   
   // Calculate description part including the ID (05) and length
