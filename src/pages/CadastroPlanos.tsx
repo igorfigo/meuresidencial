@@ -374,145 +374,141 @@ export const CadastroPlanos = () => {
           <Separator className="mt-4" />
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <h2 className="text-xl font-semibold mb-4">{isExistingRecord ? 'Editar Plano' : 'Novo Plano'}</h2>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="codigo">Código</Label>
-                  <Input
-                    id="codigo"
-                    placeholder="Código (Ex: BASIC, PREMIUM)"
-                    {...form.register('codigo', { required: true })}
-                    readOnly={isExistingRecord}
-                    className={isExistingRecord ? 'bg-gray-100' : ''}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="nome">Nome do Plano</Label>
-                  <Input
-                    id="nome"
-                    placeholder="Nome do plano"
-                    {...form.register('nome', { required: true })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="descricao">Descrição</Label>
-                  <Textarea
-                    id="descricao"
-                    placeholder="Descrição do plano"
-                    {...form.register('descricao')}
-                    rows={3}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="valor">Valor (R$)</Label>
-                  <Input
-                    id="valor"
-                    placeholder="000,00"
-                    {...form.register('valor', { required: true })}
-                    onChange={handleInputChange}
-                  />
-                  <p className="text-xs text-muted-foreground">Digite apenas os números no formato 0,00</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="max_moradores">Máximo de Moradores</Label>
-                  <Input
-                    id="max_moradores"
-                    type="number"
-                    min="1"
-                    placeholder="50"
-                    {...form.register('max_moradores', { 
-                      required: true,
-                      valueAsNumber: true,
-                      min: 1
-                    })}
-                  />
-                  <p className="text-xs text-muted-foreground">Número máximo de moradores permitidos para este plano</p>
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="w-full bg-brand-600 hover:bg-brand-700"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Plano' : 'Salvar Plano')}
-                </Button>
-              </form>
-            </Card>
-          </div>
+        <div className="flex flex-col gap-6">
+          <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <h2 className="text-xl font-semibold mb-4">{isExistingRecord ? 'Editar Plano' : 'Novo Plano'}</h2>
+              
+              <div className="space-y-2">
+                <Label htmlFor="codigo">Código</Label>
+                <Input
+                  id="codigo"
+                  placeholder="Código (Ex: BASIC, PREMIUM)"
+                  {...form.register('codigo', { required: true })}
+                  readOnly={isExistingRecord}
+                  className={isExistingRecord ? 'bg-gray-100' : ''}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="nome">Nome do Plano</Label>
+                <Input
+                  id="nome"
+                  placeholder="Nome do plano"
+                  {...form.register('nome', { required: true })}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="descricao">Descrição</Label>
+                <Textarea
+                  id="descricao"
+                  placeholder="Descrição do plano"
+                  {...form.register('descricao')}
+                  rows={3}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="valor">Valor (R$)</Label>
+                <Input
+                  id="valor"
+                  placeholder="000,00"
+                  {...form.register('valor', { required: true })}
+                  onChange={handleInputChange}
+                />
+                <p className="text-xs text-muted-foreground">Digite apenas os números no formato 0,00</p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="max_moradores">Máximo de Moradores</Label>
+                <Input
+                  id="max_moradores"
+                  type="number"
+                  min="1"
+                  placeholder="50"
+                  {...form.register('max_moradores', { 
+                    required: true,
+                    valueAsNumber: true,
+                    min: 1
+                  })}
+                />
+                <p className="text-xs text-muted-foreground">Número máximo de moradores permitidos para este plano</p>
+              </div>
+              
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full bg-brand-600 hover:bg-brand-700"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {isSubmitting ? 'Salvando...' : (isExistingRecord ? 'Atualizar Plano' : 'Salvar Plano')}
+              </Button>
+            </form>
+          </Card>
           
-          <div className="lg:col-span-2">
-            <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
-              <h2 className="text-xl font-semibold mb-4">Planos Cadastrados</h2>
-              <ScrollArea className="h-80">
-                <Table>
-                  <TableHeader>
+          <Card className="p-6 border-t-4 border-t-brand-600 shadow-md">
+            <h2 className="text-xl font-semibold mb-4">Planos Cadastrados</h2>
+            <ScrollArea className="h-80">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Código</TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead>Máx. Moradores</TableHead>
+                    <TableHead>Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {plans.length === 0 ? (
                     <TableRow>
-                      <TableHead>Código</TableHead>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Máx. Moradores</TableHead>
-                      <TableHead>Ações</TableHead>
+                      <TableCell colSpan={5} className="text-center py-4">
+                        Nenhum plano cadastrado.
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {plans.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-4">
-                          Nenhum plano cadastrado.
+                  ) : (
+                    plans.map((plan) => (
+                      <TableRow key={plan.codigo}>
+                        <TableCell className="font-medium">{plan.codigo}</TableCell>
+                        <TableCell>{plan.nome}</TableCell>
+                        <TableCell>{formatCurrency(plan.valor)}</TableCell>
+                        <TableCell>{plan.max_moradores || 50}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              onClick={() => handleEditPlan(plan)}
+                              className="h-8 w-8"
+                            >
+                              <FileEdit className="h-4 w-4 text-blue-500" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleViewLogs(plan.codigo)}
+                              className="h-8 w-8"
+                            >
+                              <Eye className="h-4 w-4 text-gray-500" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              onClick={() => handleDeletePlan(plan.codigo)}
+                              className="h-8 w-8"
+                            >
+                              <Trash className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      plans.map((plan) => (
-                        <TableRow key={plan.codigo}>
-                          <TableCell className="font-medium">{plan.codigo}</TableCell>
-                          <TableCell>{plan.nome}</TableCell>
-                          <TableCell>{formatCurrency(plan.valor)}</TableCell>
-                          <TableCell>{plan.max_moradores || 50}</TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button 
-                                variant="outline" 
-                                size="icon" 
-                                onClick={() => handleEditPlan(plan)}
-                                className="h-8 w-8"
-                              >
-                                <FileEdit className="h-4 w-4 text-blue-500" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => handleViewLogs(plan.codigo)}
-                                className="h-8 w-8"
-                              >
-                                <Eye className="h-4 w-4 text-gray-500" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="icon" 
-                                onClick={() => handleDeletePlan(plan.codigo)}
-                                className="h-8 w-8"
-                              >
-                                <Trash className="h-4 w-4 text-red-500" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </Card>
-          </div>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          </Card>
         </div>
         
         <Dialog open={isLogDialogOpen} onOpenChange={setIsLogDialogOpen}>
