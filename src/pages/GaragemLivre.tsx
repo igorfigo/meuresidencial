@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,8 @@ import { useApp } from '@/contexts/AppContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 const GaragemLivre = () => {
   const { user } = useApp();
@@ -87,29 +90,33 @@ const GaragemLivre = () => {
               {isLoading ? (
                 <div className="text-center py-6">Carregando...</div>
               ) : myGarageListings && myGarageListings.length > 0 ? (
-                <div className="space-y-4">
-                  {myGarageListings.map((listing) => (
-                    <div key={listing.id} className="border rounded-lg p-4 relative">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <CarIcon className="h-8 w-8 text-blue-500" />
-                          <div>
-                            <h3 className="font-medium">
-                              Vaga de Garagem - Unidade {user.unit}
-                            </h3>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {listing.description || "Sem descrição adicional"}
-                            </p>
-                            <div className="mt-2">
-                              <span 
-                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                              >
-                                Disponível
-                              </span>
-                            </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Vaga</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {myGarageListings.map((listing) => (
+                      <TableRow key={listing.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center">
+                            <CarIcon className="h-5 w-5 text-blue-500 mr-2" />
+                            <span>Unidade {user.unit}</span>
                           </div>
-                        </div>
-                        <div>
+                        </TableCell>
+                        <TableCell>
+                          {listing.description || "Sem descrição adicional"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-green-500 hover:bg-green-600">
+                            Disponível
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
                           <Button 
                             variant="destructive" 
                             size="sm"
@@ -117,11 +124,11 @@ const GaragemLivre = () => {
                           >
                             <Trash2Icon className="h-4 w-4" />
                           </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               ) : (
                 <div className="text-center py-8 bg-gray-50 border border-dashed rounded-lg">
                   <CarIcon className="h-12 w-12 mx-auto text-gray-400 mb-3" />
@@ -144,37 +151,44 @@ const GaragemLivre = () => {
               {isLoading ? (
                 <div className="text-center py-6">Carregando...</div>
               ) : garageListings && garageListings.length > 0 ? (
-                <div className="space-y-4">
-                  {garageListings.map((listing) => (
-                    <div key={listing.id} className="border rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <CarIcon className="h-8 w-8 text-blue-500 flex-shrink-0 mt-1" />
-                        <div className="flex-1">
-                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
-                            <div>
-                              <h3 className="font-medium">
-                                Vaga de Garagem - Unidade {listing.residents?.unidade}
-                              </h3>
-                              <p className="text-sm text-gray-500 mt-1">
-                                {listing.description || "Sem descrição adicional"}
-                              </p>
-                            </div>
-                            <div className="mt-2 sm:mt-0 sm:ml-4 bg-gray-50 p-3 rounded-md sm:self-start">
-                              <h4 className="text-sm font-medium">Contato:</h4>
-                              <p className="text-sm">{listing.residents?.nome_completo}</p>
-                              {listing.residents?.telefone && (
-                                <p className="text-sm">Tel: {listing.residents.telefone}</p>
-                              )}
-                              {listing.residents?.email && (
-                                <p className="text-sm break-all">{listing.residents.email}</p>
-                              )}
-                            </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Unidade</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Proprietário</TableHead>
+                      <TableHead>Contato</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {garageListings.map((listing) => (
+                      <TableRow key={listing.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center">
+                            <CarIcon className="h-5 w-5 text-blue-500 mr-2" />
+                            <span>Unidade {listing.residents?.unidade}</span>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                        </TableCell>
+                        <TableCell>
+                          {listing.description || "Sem descrição adicional"}
+                        </TableCell>
+                        <TableCell>
+                          {listing.residents?.nome_completo}
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            {listing.residents?.telefone && (
+                              <div className="text-sm">{listing.residents.telefone}</div>
+                            )}
+                            {listing.residents?.email && (
+                              <div className="text-sm text-blue-600">{listing.residents.email}</div>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               ) : (
                 <div className="text-center py-8 bg-gray-50 border border-dashed rounded-lg">
                   <CarIcon className="h-12 w-12 mx-auto text-gray-400 mb-3" />
