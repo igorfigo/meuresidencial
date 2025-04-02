@@ -131,7 +131,7 @@ export const PixDialog = ({
                     <span className="font-medium">Serviço de Dados Históricos</span>
                   </div>
                   <p className="text-blue-700">
-                    Pagamento único para inclusão dos dados históricos do condomínio no sistema.
+                    Pagamento único para inclusão ou download dos dados históricos do condomínio no sistema.
                   </p>
                 </div>
               )}

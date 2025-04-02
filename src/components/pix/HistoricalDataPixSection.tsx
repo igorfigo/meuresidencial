@@ -82,19 +82,19 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
         <CardHeader className="bg-blue-50 pb-3">
           <CardTitle className="flex items-center text-blue-800 text-lg">
             <BadgeInfo className="h-5 w-5 mr-2 text-blue-600" />
-            Pagamento para Inclusão de Dados Históricos
+            Pagamento para Dados Históricos
           </CardTitle>
         </CardHeader>
         
         <CardContent className="pt-4">
           <div className="text-sm text-gray-600 space-y-2">
             <p>
-              A inclusão de dados históricos é um serviço especial que permite trazer o histórico
-              do seu condomínio para o sistema.
+              O serviço de dados históricos permite tanto a inclusão quanto o download
+              do histórico do seu condomínio no sistema.
             </p>
             <p>
-              Após o pagamento, nossa equipe entrará em contato para coletar os dados históricos
-              e importá-los para o sistema em até 3 dias úteis.
+              Após o pagamento, nossa equipe entrará em contato para processar sua solicitação
+              e disponibilizar os dados em até 3 dias úteis.
             </p>
             
             <div className="flex items-start mt-3 bg-amber-50 p-3 rounded-md border border-amber-200">
