@@ -63,7 +63,7 @@ export default function VagaGaragem() {
           </p>
         </div>
 
-        <Card>
+        <Card className="border-t-4 border-t-blue-600">
           <CardHeader>
             <CardTitle className="flex items-center">
               <Car className="mr-2 h-5 w-5" />
@@ -84,24 +84,24 @@ export default function VagaGaragem() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Morador</TableHead>
-                    <TableHead>Unidade</TableHead>
-                    <TableHead>Descrição</TableHead>
+                    <TableHead className="text-center">Morador</TableHead>
+                    <TableHead className="text-center">Unidade</TableHead>
+                    <TableHead className="text-center">Descrição</TableHead>
                     <TableHead>Contato</TableHead>
-                    <TableHead>Disponibilidade</TableHead>
-                    <TableHead>Data de Cadastro</TableHead>
+                    <TableHead className="text-center">Disponibilidade</TableHead>
+                    <TableHead className="text-center">Data de Cadastro</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {garageListings.map((listing) => (
                     <TableRow key={listing.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium text-center">
                         {listing.residents?.nome_completo || "Nome não disponível"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         {listing.residents?.unidade || "Unidade não disponível"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         {listing.description || "Sem descrição"}
                       </TableCell>
                       <TableCell>
@@ -120,7 +120,7 @@ export default function VagaGaragem() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         <Badge 
                           variant={listing.is_available ? "default" : "secondary"}
                           className={listing.is_available ? "bg-green-500 hover:bg-green-600" : ""}
@@ -128,7 +128,7 @@ export default function VagaGaragem() {
                           {listing.is_available ? "Disponível" : "Indisponível"}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         {format(new Date(listing.created_at), 'dd/MM/yyyy')}
                       </TableCell>
                     </TableRow>
