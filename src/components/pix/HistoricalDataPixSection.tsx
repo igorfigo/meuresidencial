@@ -1,8 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { QrCode, Copy, AlertCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { generatePixCode, generatePixQRCode } from '@/utils/pixGenerator';
@@ -113,57 +113,45 @@ export const HistoricalDataPixSection = ({ matricula }: HistoricalDataPixSection
   
   return (
     <Card className="border-t-4 border-t-blue-500 shadow-md mb-6">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-xl flex items-center">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center">
           <QrCode className="mr-2 h-5 w-5 text-blue-500" />
           Pagamento via PIX
         </CardTitle>
         <CardDescription>
-          Utilize o QR code ou código de cópia e cola abaixo para realizar o pagamento da taxa de processamento.
+          Taxa de processamento: R$ 249,00
         </CardDescription>
       </CardHeader>
       
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex flex-col space-y-3">
-            <div className="bg-blue-50 p-4 rounded-md border border-blue-100 mb-2">
-              <div className="flex items-center gap-2 mb-2">
-                <Info className="h-4 w-4 text-blue-600" />
-                <h3 className="font-medium text-blue-700">Detalhes do Pagamento</h3>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+          <div className="md:col-span-2 flex justify-center">
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+            ) : qrCodeUrl ? (
+              <img src={qrCodeUrl} alt="QR Code PIX" className="h-36 w-36 object-contain" />
+            ) : (
+              <div className="text-center text-gray-500">
+                <AlertCircle className="h-10 w-10 mx-auto mb-2" />
+                <p>Não foi possível gerar o QR Code.</p>
               </div>
-              <p className="text-sm text-blue-700">
-                <strong>Valor:</strong> R$ 249,00<br />
-                <strong>Descrição:</strong> Processamento de dados históricos
-              </p>
-            </div>
-            
-            <div className="bg-white border border-gray-200 p-4 rounded-md flex justify-center items-center h-full">
-              {isLoading ? (
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
-              ) : qrCodeUrl ? (
-                <img src={qrCodeUrl} alt="QR Code PIX" className="max-h-64 max-w-full object-contain" />
-              ) : (
-                <div className="text-center text-gray-500">
-                  <AlertCircle className="h-10 w-10 mx-auto mb-2" />
-                  <p>Não foi possível gerar o QR Code.</p>
-                </div>
-              )}
-            </div>
+            )}
           </div>
           
-          <div className="flex flex-col space-y-4">
+          <div className="md:col-span-3 flex flex-col space-y-3">
             <Button 
               onClick={handleCopyClick} 
               variant="outline"
-              className="w-full border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 gap-2"
+              className="border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 gap-2"
             >
               <Copy className="h-4 w-4" />
               Copiar código PIX
             </Button>
             
-            <div className="bg-amber-50 p-3 rounded-md border border-amber-200 mt-4">
-              <p className="text-sm text-amber-700">
-                <strong>Importante:</strong> Somente após o pagamento enviar sua solicitação de Dados Históricos.
+            <div className="bg-amber-50 p-3 rounded-md border border-amber-200">
+              <p className="text-sm text-amber-700 flex items-start gap-2">
+                <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <span><strong>Importante:</strong> Somente após o pagamento enviar sua solicitação de Dados Históricos.</span>
               </p>
             </div>
           </div>

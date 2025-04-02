@@ -104,7 +104,7 @@ const DadosHistoricos = () => {
         <h1 className="text-3xl font-bold mb-2">Dados Históricos</h1>
         <Separator className="mb-2" />
         <p className="text-gray-600 mb-6">
-          Solicite a inclusão ou download de dados históricos para o seu condomínio. Responderemos sua solicitação com uma cotação em até 24 horas úteis.
+          Solicite a inclusão ou download de dados históricos para o seu condomínio.
         </p>
         
         {/* PIX Payment Section */}
