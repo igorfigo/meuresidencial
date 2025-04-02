@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { generatePixCode, generatePixQRCode } from '@/utils/pixGenerator';
 import { toast } from 'sonner';
-import { formatCurrency, BRLToNumber } from '@/utils/currency';
+import { formatCurrency } from '@/utils/currency';
 
 interface PixDialogProps {
   isOpen: boolean;
