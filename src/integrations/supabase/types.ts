@@ -764,6 +764,51 @@ export type Database = {
           },
         ]
       }
+      historical_data_requests: {
+        Row: {
+          condominium_name: string
+          created_at: string
+          id: string
+          manager_email: string
+          manager_name: string
+          matricula: string
+          message: string
+          payment_status: string
+          request_type: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          condominium_name: string
+          created_at?: string
+          id?: string
+          manager_email: string
+          manager_name: string
+          matricula: string
+          message: string
+          payment_status?: string
+          request_type: string
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          condominium_name?: string
+          created_at?: string
+          id?: string
+          manager_email?: string
+          manager_name?: string
+          matricula?: string
+          message?: string
+          payment_status?: string
+          request_type?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       news_items: {
         Row: {
           created_at: string
@@ -1129,6 +1174,10 @@ export type Database = {
     }
     Functions: {
       get_auth_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_user_matricula: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

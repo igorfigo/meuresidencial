@@ -75,8 +75,8 @@ const DadosHistoricos = () => {
       
       const typeText = formData.type === 'inclusao' ? 'Solicitação de Inclusão de Históricos' : 'Solicitação de Download de Históricos';
       
-      // Insert into the database instead of sending an email
-      const { error } = await supabase
+      // Inserir na tabela historical_data_requests
+      const { error: insertError } = await supabase
         .from('historical_data_requests')
         .insert({
           matricula: user?.matricula,
@@ -88,9 +88,24 @@ const DadosHistoricos = () => {
           message: formData.message,
           payment_status: 'pending',
           status: 'new'
-        });
+        })
+        .select();
       
-      if (error) throw error;
+      if (insertError) {
+        console.error('Erro ao inserir dados:', insertError);
+        throw insertError;
+      }
+      
+      // Enviar e-mail através da edge function
+      await sendEmailNotification({
+        name: user?.nome || '',
+        email: user?.email || '',
+        matricula: user?.matricula || '',
+        nomeCondominio: user?.nomeCondominio || '',
+        subject: `${typeText} - ${formData.subject}`,
+        message: formData.message,
+        isHistoricalData: true
+      });
       
       toast.success('Solicitação cadastrada com sucesso! Em breve entraremos em contato.');
       setFormData({ subject: '', message: '', type: 'inclusao' });
@@ -99,6 +114,40 @@ const DadosHistoricos = () => {
       toast.error('Erro ao cadastrar solicitação. Por favor, tente novamente.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  // Função para enviar e-mail de notificação usando a edge function existente
+  const sendEmailNotification = async (data: {
+    name: string;
+    email: string;
+    matricula: string;
+    nomeCondominio: string;
+    subject: string;
+    message: string;
+    isHistoricalData: boolean;
+  }) => {
+    try {
+      const response = await fetch(
+        'https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-contact-email',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Erro ao enviar e-mail: ${errorData.error || 'Erro desconhecido'}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao enviar e-mail de notificação:', error);
+      // Não exibimos toast aqui, pois queremos que a solicitação seja salva mesmo se o e-mail falhar
     }
   };
   
