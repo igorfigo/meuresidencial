@@ -74,6 +74,11 @@ const AreasComuns = () => {
     }
   };
 
+  const handleReservationComplete = () => {
+    // This function will be called after a successful reservation
+    console.log("Reservation completed, refreshing calendar data");
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -122,6 +127,7 @@ const AreasComuns = () => {
                     fetchReservations={fetchReservations}
                     viewOnly={!isManager}
                     showReservationButton={isResident}
+                    onReservationComplete={handleReservationComplete}
                   />
                 </Card>
               )}
