@@ -121,9 +121,16 @@ export const generatePixCode = (data: PixData): string => {
     description = normalizeText(data.condominiumName);
   }
   
-  // Add description length as 2 digits (05 = field ID)
-  const descriptionLength = description.length.toString().padStart(2, '0');
-  pixCode += '05' + descriptionLength + description;
+  // Calculate description part including the ID (05) and length
+  const descriptionPart = `05${description.length.toString().padStart(2, '0')}${description}`;
+  
+  // Add count of characters between "5802BR5901N6001C62" and "6304"
+  // This is the length of the description part (including 05 and the length digits)
+  const countBetweenFixedParts = descriptionPart.length.toString().padStart(2, '0');
+  pixCode += countBetweenFixedParts;
+  
+  // Now add the description part (05 + length + description)
+  pixCode += descriptionPart;
   
   // Add the fixed "6304" for CRC
   pixCode += '6304';
