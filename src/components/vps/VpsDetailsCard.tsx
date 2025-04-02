@@ -122,7 +122,7 @@ const VpsDetailsCard: React.FC<VpsDetailsCardProps> = ({
                 </span>
                 <span className="text-xs font-medium">{serverDetails.cpu}%</span>
               </div>
-              <Progress value={serverDetails.cpu} className="h-2" />
+              <Progress value={serverDetails.cpu} className="h-2" style={{ "--progress-foreground": "rgb(59, 130, 246)" } as React.CSSProperties} />
             </div>
             
             <div>
@@ -132,7 +132,7 @@ const VpsDetailsCard: React.FC<VpsDetailsCardProps> = ({
                 </span>
                 <span className="text-xs font-medium">{serverDetails.memory}%</span>
               </div>
-              <Progress value={serverDetails.memory} className="h-2" />
+              <Progress value={serverDetails.memory} className="h-2" style={{ "--progress-foreground": "rgb(16, 185, 129)" } as React.CSSProperties} />
             </div>
             
             <div>
@@ -144,7 +144,7 @@ const VpsDetailsCard: React.FC<VpsDetailsCardProps> = ({
                   {serverDetails.bandwidthUsed} GB / {serverDetails.bandwidth} GB
                 </span>
               </div>
-              <Progress value={bandwidthPercentage} className="h-2" />
+              <Progress value={bandwidthPercentage} className="h-2" style={{ "--progress-foreground": "rgb(139, 92, 246)" } as React.CSSProperties} />
             </div>
           </div>
         </div>

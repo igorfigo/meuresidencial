@@ -80,7 +80,10 @@ const VpsStatusCard: React.FC<VpsStatusCardProps> = ({
         <Progress 
           value={percentage} 
           className="h-2 bg-gray-100" 
-          indicatorClassName={progressColor}
+          // Replace indicatorClassName with an inline style using the progressColor
+          style={{ 
+            "--progress-foreground": progressColor 
+          } as React.CSSProperties}
         />
       </CardContent>
     </Card>
