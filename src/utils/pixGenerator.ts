@@ -110,7 +110,7 @@ export const generatePixCode = (data: PixData): string => {
   // Fixed part
   pixCode += '5802BR5901N6001C62';
   
-  // Add field length as 2 digits
+  // Prepare description
   let description = '';
   
   // For historical data, format is "matricula+HIST249.00"
@@ -121,9 +121,14 @@ export const generatePixCode = (data: PixData): string => {
     description = normalizeText(data.condominiumName);
   }
   
-  // Add description with size prefix (05 = field ID)
+  // Add description field ID and length (05 = field ID)
+  // First add the field ID (05)
   pixCode += '05';
+  
+  // Add the length of the description as a 2-character string
   pixCode += description.length.toString().padStart(2, '0');
+  
+  // Add the description itself
   pixCode += description;
   
   // Fixed part for CRC
