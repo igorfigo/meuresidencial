@@ -195,7 +195,7 @@ export const ReservationsCalendar: React.FC = () => {
                 <TableHead>Data</TableHead>
                 <TableHead>Área</TableHead>
                 {!isResident && <TableHead>Unidade</TableHead>}
-                <TableHead>Reserva</TableHead>
+                {isResident && <TableHead>Reserva</TableHead>}
                 <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -214,16 +214,16 @@ export const ReservationsCalendar: React.FC = () => {
                       </div>
                     </TableCell>
                   )}
-                  <TableCell>
-                    {isResident && (
+                  {isResident && (
+                    <TableCell>
                       <Badge 
                         variant={isUserReservation(reservation) ? "default" : "outline"}
                         className={isUserReservation(reservation) ? "bg-brand-600" : ""}
                       >
                         {isUserReservation(reservation) ? "Minha Reserva" : "Outro Morador"}
                       </Badge>
-                    )}
-                  </TableCell>
+                    </TableCell>
+                  )}
                   <TableCell>
                     {canDeleteReservation(reservation) && (
                       <Button
