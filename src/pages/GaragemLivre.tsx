@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,7 +78,7 @@ const GaragemLivre = () => {
 
         <div className="space-y-6">
           {/* Minhas Vagas Section */}
-          <Card>
+          <Card className="border-t-4 border-t-brand-600">
             <CardHeader>
               <CardTitle>Minhas Vagas Cadastradas</CardTitle>
               <CardDescription>
@@ -135,7 +136,7 @@ const GaragemLivre = () => {
           </Card>
           
           {/* Vagas Disponíveis Section */}
-          <Card>
+          <Card className="border-t-4 border-t-brand-600">
             <CardHeader>
               <CardTitle>Vagas Disponíveis no Condomínio</CardTitle>
               <CardDescription>

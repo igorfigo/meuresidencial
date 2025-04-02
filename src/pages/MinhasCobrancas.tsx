@@ -370,7 +370,7 @@ const MinhasCobrancas = () => {
           </p>
         </div>
         
-        <Card>
+        <Card className="border-t-4 border-t-brand-600">
           <CardHeader>
             <CardTitle>Histórico de Cobranças</CardTitle>
             <CardDescription>

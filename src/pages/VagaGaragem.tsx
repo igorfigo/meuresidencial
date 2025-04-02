@@ -63,7 +63,7 @@ export default function VagaGaragem() {
           </p>
         </div>
 
-        <Card className="border-t-4 border-t-blue-600">
+        <Card className="border-t-4 border-t-brand-600">
           <CardHeader>
             <CardTitle className="flex items-center">
               <Car className="mr-2 h-5 w-5" />
