@@ -1,4 +1,3 @@
-
 import { encode } from 'js-base64';
 
 interface PixData {
@@ -6,6 +5,7 @@ interface PixData {
   pixKey: string;
   amount: number;
   condominiumName: string;
+  matricula: string;
 }
 
 // Function to normalize text by removing accents and concatenating words
@@ -42,9 +42,6 @@ export const generateCRC16 = (payload: string): string => {
 };
 
 export const generatePixCode = (data: PixData): string => {
-  // Normalize the condominium name
-  const normalizedCondominiumName = normalizeText(data.condominiumName);
-  
   // Format amount with 2 decimal places and no separators
   const formattedAmount = data.amount.toFixed(2);
   
@@ -80,31 +77,39 @@ export const generatePixCode = (data: PixData): string => {
     pixKey = digits.startsWith('55') ? `+${digits}` : `+55${digits}`;
   }
   
-  // Build the PIX code according to the structure
+  // Build the PIX code according to the updated structure
   let pixCode = '';
   
-  // Fixed start
+  // Fixed start (unchanged)
   pixCode += '0002012';
   
-  // Merchant key type
+  // Merchant key type (unchanged)
   pixCode += merchantKeyTypeId;
   
-  // Fixed part
+  // Fixed part (unchanged)
   pixCode += '0014BR.GOV.BCB.PIX0';
   
-  // Key type
+  // Key type (unchanged)
   pixCode += keyTypeId;
   
-  // PIX key
+  // PIX key (unchanged)
   pixCode += pixKey;
   
-  // Fixed part and amount
+  // Fixed part and amount (unchanged)
   pixCode += '5204000053039865406';
   pixCode += formattedAmount;
   
-  // Fixed part and condominium name
-  pixCode += '5802BR5901N6001C62100506';
-  pixCode += normalizedCondominiumName;
+  // Fixed part for receiver info
+  pixCode += '5802BR5901N6001C62';
+  
+  // Count characters for the dynamic part - storing data for the "05" size part
+  const countPart = pixCode.length;
+  
+  // Fixed "05" part
+  pixCode += '05';
+  
+  // Concatenate matricula+HIST+amount as per the new requirements
+  pixCode += `${data.matricula}HIST${formattedAmount.replace('.', '')}`;
   
   // Fixed part for CRC
   pixCode += '6304';

@@ -17,8 +17,8 @@ export const HistoricalDataPixSection = ({ amount = 249.00 }: HistoricalDataPixS
   const [pixCode, setPixCode] = useState<string>('');
   const { user } = useApp();
   
-  // Get condominium name to use in PIX generation
-  const condominiumName = user?.nomeCondominio || 'MeuResidencial';
+  // Get matricula to use in PIX generation
+  const matricula = user?.matricula || '';
 
   const handleGeneratePix = async () => {
     try {
@@ -42,12 +42,13 @@ export const HistoricalDataPixSection = ({ amount = 249.00 }: HistoricalDataPixS
       
       const pixKeyData = pixData[0];
       
-      // Create the PIX data for generator
+      // Create the PIX data for generator with the updated parameters including matricula
       const pixGeneratorData = {
         keyType: pixKeyData.tipochave as 'CPF' | 'CNPJ' | 'EMAIL' | 'TELEFONE',
         pixKey: pixKeyData.chavepix,
         amount: amount,
-        condominiumName: `HIST${amount.toFixed(2).replace('.', '')}`
+        condominiumName: `HIST${amount.toFixed(2).replace('.', '')}`,
+        matricula: matricula
       };
       
       // Generate the PIX code
