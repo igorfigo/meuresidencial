@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -247,7 +248,7 @@ const FinanceiroRecebimentoPix = () => {
           </div>
         </div>
         
-        <Card className="bg-white shadow-md border-t-4 border-t-blue-500">
+        <Card className="bg-white shadow-md border-t-4 border-t-brand-700">
           <CardHeader className="bg-blue-50 border-b border-blue-100">
             <div className="flex justify-between items-center">
               <div>
