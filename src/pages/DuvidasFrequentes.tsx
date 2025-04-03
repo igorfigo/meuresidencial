@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -167,7 +168,7 @@ const DuvidasFrequentes = () => {
         
         {Object.entries(groupedFaqs).length > 0 ? (
           Object.entries(groupedFaqs).map(([category, faqs]) => (
-            <Card key={category} className="mb-6 border-t-4 border-t-brand-600 shadow-md">
+            <Card key={category} className="mb-6 border-t-4 border-t-blue-500">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl">{category}</CardTitle>
               </CardHeader>
@@ -188,7 +189,7 @@ const DuvidasFrequentes = () => {
             </Card>
           ))
         ) : (
-          <Card className="mb-6 border-t-4 border-t-brand-600">
+          <Card className="mb-6 border-t-4 border-t-blue-500">
             <CardContent className="p-6 text-center">
               <p className="text-gray-500">
                 Nenhuma dúvida encontrada com o termo "{searchTerm}".
