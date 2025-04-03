@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useApp } from '@/contexts/AppContext';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +19,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { FinancialIncome, useFinances } from '@/hooks/use-finances';
 import { formatCurrencyInput } from '@/utils/currency';
@@ -61,7 +63,8 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   const currentDate = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
   const [selectedUnitHasCondominiumValue, setSelectedUnitHasCondominiumValue] = useState(true);
   const [incomeSchema, setIncomeSchema] = useState(() => incomeSchemaCreator(true));
-  
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialData?.category || '');
+
   const form = useForm<any>({
     resolver: zodResolver(incomeSchema),
     defaultValues: initialData || {
@@ -174,6 +177,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
           observations: ''
         });
         setDateError(null);
+        setSelectedCategory('');
       }
     } finally {
       setIsSubmitting(false);
@@ -247,6 +251,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
           observations: ''
         });
         setDateError(null);
+        setSelectedCategory('');
       }
     } finally {
       setIsSubmitting(false);
@@ -265,6 +270,11 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     
     form.setValue('unit', unitValue);
   };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    form.setValue('category', category);
+  };
   
   return (
     <>
@@ -282,7 +292,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                   <FormItem>
                     <FormLabel required>Categoria</FormLabel>
                     <Select 
-                      onValueChange={field.onChange} 
+                      onValueChange={(value) => handleCategoryChange(value)} 
                       defaultValue={field.value}
                     >
                       <FormControl>
@@ -423,6 +433,17 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
             </form>
           </Form>
         </CardContent>
+        
+        {selectedCategory === 'taxa_condominio' && (
+          <CardFooter className="pt-2">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                É obrigatório registrar a receita de moradores isentos de taxa de condomínio.
+              </AlertDescription>
+            </Alert>
+          </CardFooter>
+        )}
       </Card>
       
       <AlertDialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
