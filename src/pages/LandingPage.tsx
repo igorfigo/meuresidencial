@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
@@ -567,10 +568,10 @@ const LandingPage = () => {
                   <span className="font-semibold">Perguntas Frequentes</span>
                 </div>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#8B5CF6] to-[#D946EF]">
                 Perguntas Frequentes
               </h2>
-              <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
+              <p className="text-xl max-w-3xl mx-auto mb-8 bg-clip-text text-transparent bg-gradient-to-r from-[#F97316] to-[#0EA5E9]">
                 Encontre respostas para as dúvidas mais comuns sobre nossos serviços
               </p>
             </div>
