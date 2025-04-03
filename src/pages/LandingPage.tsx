@@ -1,726 +1,481 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
-import { ArrowRight, CheckCircle, Building, Users, CreditCard, Calendar, Shield, Settings, AlertCircle } from 'lucide-react';
+import { ArrowRight, Building, Calendar, CheckCircle2, Coins, FileText, Key, Lock, MessageSquare, Shield, Users, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { usePlans } from '@/hooks/use-plans';
 
-// Hero section
-const Hero = () => {
-  const { ref, inView } = useInView({
-    triggerOnce: false,
+const FadeInSection = ({ children, delay = 0, className = '' }) => {
+  const [ref, inView] = useInView({
+    triggerOnce: true,
     threshold: 0.1,
   });
 
   return (
-    <section ref={ref} className="w-full flex flex-col md:flex-row py-6 sm:py-16 px-6 sm:px-16">
-      <div className={`flex-1 flex flex-col justify-center items-start ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }}>
-        <div className="flex flex-row items-center py-[6px] px-4 bg-blue-100 rounded-[10px] mb-2">
-          <p className="text-brand-600 font-medium text-[18px] leading-[23px] mr-2">
-            <span className="text-brand-800">Nova</span> Geração de Gestão
-          </p>
-        </div>
-        
-        <div className="w-full">
-          <h1 className="font-display font-semibold text-[52px] text-gray-800 leading-[75px] sm:leading-[100px]">
-            A Plataforma <br className="sm:block hidden" /> de 
-            <span className="text-brand-600"> Gestão</span> Completa
-          </h1>
-          
-          <p className="font-normal text-gray-600 text-[18px] leading-[30.8px] max-w-[470px] mt-5">
-            Uma ferramenta completa para síndicos profissionais administrarem 
-            condomínios de forma eficiente e moderna, com todas as funcionalidades necessárias
-            para uma gestão transparente.
-          </p>
-        </div>
-        
-        <Button 
-          className="mt-10 py-6 px-6 bg-brand-600 hover:bg-brand-700 text-white rounded-[10px] outline-none text-lg"
-          asChild
-        >
-          <Link to="/login">
-            Acessar Meu Residencial <ArrowRight className="ml-2 h-5 w-5" />
-          </Link>
-        </Button>
-      </div>
-      
-      <div className={`flex-1 flex justify-center items-center md:ml-10 mt-10 md:mt-0 relative ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: '400ms' }}>
-        <div className="absolute z-[0] w-[40%] h-[35%] top-0 pink__gradient" />
-        <div className="absolute z-[1] w-[80%] h-[80%] rounded-full white__gradient bottom-40" />
-        <div className="absolute z-[0] w-[50%] h-[50%] right-20 bottom-20 blue__gradient" />
-        
-        <div className="w-full h-full relative z-[5] rounded-[20px] overflow-hidden">
-          <img src="/placeholder.svg" alt="Gestão de condomínios" className="w-full h-full object-contain relative z-[5]" />
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// Stats section
-const Stats = () => {
-  const { ref, inView } = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-  });
-
-  const stats = [
-    { value: '300+', title: 'Condomínios' },
-    { value: '15k+', title: 'Usuários Ativos' },
-    { value: 'R$50M+', title: 'Transações' },
-  ];
-
-  return (
-    <section ref={ref} className={`w-full flex justify-center items-center flex-row flex-wrap sm:mb-20 mb-6 ${inView ? 'animate-fade-in' : 'opacity-0'}`}>
-      {stats.map((stat, index) => (
-        <div key={index} className="flex-1 flex justify-start items-center flex-row m-3">
-          <h4 className="font-display font-semibold text-[30px] sm:text-[40px] leading-[43px] sm:leading-[53px] text-brand-600">
-            {stat.value}
-          </h4>
-          <p className="font-normal text-gray-600 text-[15px] sm:text-[20px] leading-[21px] sm:leading-[26px] ml-3">
-            {stat.title}
-          </p>
-        </div>
-      ))}
-    </section>
-  );
-};
-
-// Business feature card
-const FeatureCard = ({ icon: Icon, title, content, index, inView }) => (
-  <div className={`flex flex-row p-6 rounded-[20px] ${index !== 2 ? "mb-6" : "mb-0"} feature-card ${inView ? 'animate-fade-in' : 'opacity-0'}`}
-       style={{ transitionDelay: `${index * 200}ms` }}>
-    <div className="w-[64px] h-[64px] rounded-full flex justify-center items-center bg-blue-100">
-      <Icon className="w-[50%] h-[50%] text-brand-600" />
+    <div
+      ref={ref}
+      className={`${className} transition-all duration-1000 ease-out ${
+        inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
     </div>
-    <div className="flex-1 flex flex-col ml-3">
-      <h4 className="font-display font-semibold text-gray-800 text-[18px] leading-[23px] mb-1">{title}</h4>
-      <p className="font-normal text-gray-600 text-[16px] leading-[24px]">{content}</p>
-    </div>
-  </div>
-);
-
-// Business section
-const Business = () => {
-  const { ref, inView } = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-  });
-
-  const features = [
-    {
-      id: "feature-1",
-      icon: Building,
-      title: "Gestão Completa",
-      content: "Controle todas as operações do condomínio em uma única plataforma, desde financeiro até comunicados.",
-    },
-    {
-      id: "feature-2",
-      icon: Users,
-      title: "Comunicação com Moradores",
-      content: "Mantenha todos os moradores informados com avisos, comunicados e atualizações importantes.",
-    },
-    {
-      id: "feature-3",
-      icon: CreditCard,
-      title: "Controle Financeiro",
-      content: "Gerencie receitas e despesas com transparência, emita relatórios e mantenha as contas organizadas.",
-    },
-    {
-      id: "feature-4",
-      icon: Calendar,
-      title: "Agendamento de Áreas",
-      content: "Sistema inteligente para reserva de áreas comuns, evitando conflitos e facilitando o uso.",
-    },
-  ];
-
-  return (
-    <section id="features" ref={ref} className="w-full flex flex-col md:flex-row py-16 px-6 sm:px-16">
-      <div className="flex-1 flex flex-col justify-center items-start">
-        <h2 className={`font-display font-semibold text-[40px] text-gray-800 leading-[66px] ${inView ? 'animate-fade-in' : 'opacity-0'}`}>
-          Você cuida do seu condomínio, <br className="sm:block hidden" /> 
-          nós cuidamos da gestão.
-        </h2>
-        <p className={`font-normal text-gray-600 text-[18px] leading-[30.8px] max-w-[470px] mt-5 ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }}>
-          O MeuResidencial foi desenvolvido para simplificar a administração de condomínios, 
-          automatizando processos e garantindo transparência para síndicos e moradores.
-        </p>
-        
-        <Button 
-          className={`mt-10 py-4 px-6 bg-brand-600 hover:bg-brand-700 text-white rounded-[10px] outline-none ${inView ? 'animate-fade-in' : 'opacity-0'}`} 
-          style={{ transitionDelay: '400ms' }}
-          asChild
-        >
-          <Link to="/login">
-            Comece Agora
-          </Link>
-        </Button>
-      </div>
-
-      <div className="flex-1 flex justify-center items-center flex-col ml-0 md:ml-10 mt-10 md:mt-0 relative">
-        {features.map((feature, index) => (
-          <FeatureCard key={feature.id} {...feature} index={index} inView={inView} />
-        ))}
-      </div>
-    </section>
   );
 };
 
-// Billing section
-const Billing = () => {
-  const { ref, inView } = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-  });
-
+const Feature = ({ icon, title, description, delay }) => {
+  const Icon = icon;
+  
   return (
-    <section id="product" ref={ref} className="w-full flex md:flex-row flex-col-reverse py-16 px-6 sm:px-16">
-      <div className={`flex-1 flex justify-center items-center md:mr-10 mr-0 ml-0 md:mt-0 mt-10 relative ${inView ? 'animate-fade-in' : 'opacity-0'}`}>
-        <div className="absolute z-[0] w-[40%] h-[35%] top-0 pink__gradient" />
-        <div className="absolute z-[1] w-[80%] h-[80%] rounded-full white__gradient bottom-40" />
-        <div className="absolute z-[0] w-[50%] h-[50%] right-20 bottom-20 blue__gradient" />
-        
-        <div className="w-full h-[100%] relative z-[5]">
-          <img src="/placeholder.svg" alt="Financeiro" className="w-full h-full object-contain" />
-        </div>
+    <FadeInSection delay={delay} className="flex flex-col items-start p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+      <div className="h-12 w-12 flex items-center justify-center rounded-full bg-brand-100 text-brand-600 mb-4">
+        <Icon size={24} />
       </div>
-      
-      <div className={`flex-1 flex flex-col justify-center items-start ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: '300ms' }}>
-        <h2 className="font-display font-semibold text-[40px] text-gray-800 leading-[66px]">
-          Controle financeiro <br className="sm:block hidden" /> 
-          simplificado e completo
-        </h2>
-        <p className="font-normal text-gray-600 text-[18px] leading-[30.8px] max-w-[470px] mt-5">
-          Gerencie as finanças do condomínio com facilidade. Registre receitas e despesas, 
-          gere relatórios detalhados, e garanta total transparência para os moradores.
-        </p>
-        
-        <div className="flex flex-row flex-wrap mt-6">
-          <div className="flex flex-row items-center mr-5 mb-4">
-            <CheckCircle className="w-6 h-6 text-brand-600" />
-            <p className="font-normal text-gray-600 text-[16px] leading-[24px] ml-2">
-              Controle de receitas e despesas
-            </p>
-          </div>
-          
-          <div className="flex flex-row items-center mr-5 mb-4">
-            <CheckCircle className="w-6 h-6 text-brand-600" />
-            <p className="font-normal text-gray-600 text-[16px] leading-[24px] ml-2">
-              Prestação de contas transparente
-            </p>
-          </div>
-          
-          <div className="flex flex-row items-center mr-5 mb-4">
-            <CheckCircle className="w-6 h-6 text-brand-600" />
-            <p className="font-normal text-gray-600 text-[16px] leading-[24px] ml-2">
-              Recebimento por PIX
-            </p>
-          </div>
-          
-          <div className="flex flex-row items-center mb-4">
-            <CheckCircle className="w-6 h-6 text-brand-600" />
-            <p className="font-normal text-gray-600 text-[16px] leading-[24px] ml-2">
-              Histórico financeiro completo
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <p className="text-gray-600">{description}</p>
+    </FadeInSection>
   );
 };
 
-// Card Deal section
-const CardDeal = () => {
-  const { ref, inView } = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-  });
-
+const PlanCard = ({ plan, featured = false, delay }) => {
   return (
-    <section ref={ref} className="w-full flex flex-col md:flex-row py-16 px-6 sm:px-16">
-      <div className={`flex-1 flex flex-col justify-center items-start ${inView ? 'animate-fade-in' : 'opacity-0'}`}>
-        <h2 className="font-display font-semibold text-[40px] text-gray-800 leading-[66px]">
-          Comunicação eficiente <br className="sm:block hidden" /> 
-          com seus moradores
-        </h2>
-        <p className="font-normal text-gray-600 text-[18px] leading-[30.8px] max-w-[470px] mt-5">
-          Mantenha todos os moradores informados através de comunicados, 
-          envio de documentos e alertas importantes. Reduza conflitos com uma 
-          comunicação clara e eficiente.
-        </p>
-        
-        <Button 
-          className={`mt-10 py-4 px-6 bg-brand-600 hover:bg-brand-700 text-white rounded-[10px] outline-none ${inView ? 'animate-fade-in' : 'opacity-0'}`} 
-          style={{ transitionDelay: '300ms' }}
-          asChild
-        >
-          <Link to="/login">
-            Conheça mais
-          </Link>
-        </Button>
+    <FadeInSection delay={delay} className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${featured ? 'border-2 border-brand-500 transform scale-105' : 'border border-gray-200'}`}>
+      <div className={`p-6 ${featured ? 'bg-gradient-to-r from-brand-600 to-brand-700 text-white' : 'bg-white text-gray-800'}`}>
+        <h3 className="text-xl font-bold mb-2">{plan.nome}</h3>
+        <div className="text-3xl font-bold mb-4">{plan.valor}</div>
+        <p className="mb-4 text-sm">{plan.descricao || 'Ideal para condomínios de pequeno porte.'}</p>
       </div>
-      
-      <div className={`flex-1 flex justify-center items-center md:ml-10 ml-0 md:mt-0 mt-10 relative ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: '400ms' }}>
-        <div className="w-full h-full relative z-[5]">
-          <img src="/placeholder.svg" alt="Comunicação" className="w-full h-full object-contain" />
-        </div>
+      <div className="bg-white p-6">
+        <ul className="space-y-3">
+          <li className="flex items-start">
+            <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+            <span>Até {plan.max_moradores || '50'} moradores</span>
+          </li>
+          <li className="flex items-start">
+            <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+            <span>Gestão financeira completa</span>
+          </li>
+          <li className="flex items-start">
+            <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+            <span>Comunicados e avisos</span>
+          </li>
+          <li className="flex items-start">
+            <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+            <span>Reserva de áreas comuns</span>
+          </li>
+          {featured && (
+            <>
+              <li className="flex items-start">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                <span>Controle de dedetizações</span>
+              </li>
+              <li className="flex items-start">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                <span>Gestão de documentos</span>
+              </li>
+            </>
+          )}
+        </ul>
+        <Link to="/login" className="w-full">
+          <Button className={`w-full mt-6 ${featured ? 'bg-brand-600 hover:bg-brand-700' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
+            Escolher Plano
+          </Button>
+        </Link>
       </div>
-    </section>
+    </FadeInSection>
   );
 };
 
-// Testimonials card
-const FeedbackCard = ({ content, name, title, img, index, inView }) => (
-  <div className={`flex justify-between flex-col px-10 py-12 rounded-[20px] max-w-[370px] md:mr-10 sm:mr-5 mr-0 my-5 feedback-card ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: `${index * 200}ms` }}>
-    <div className="text-white text-[28px]">"</div>
-    <p className="font-normal text-[18px] leading-[32px] text-gray-600 my-10">
-      {content}
-    </p>
-    
-    <div className="flex flex-row">
-      <div className="w-[48px] h-[48px] rounded-full">
-        <img src={img} alt={name} className="w-full h-full rounded-full object-cover" />
-      </div>
-      <div className="flex flex-col ml-4">
-        <h4 className="font-display font-semibold text-[20px] leading-[32px] text-gray-800">{name}</h4>
-        <p className="font-normal text-[16px] leading-[24px] text-gray-600">{title}</p>
-      </div>
-    </div>
-  </div>
-);
-
-// Testimonial section
-const Testimonials = () => {
-  const { ref, inView } = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-  });
-
-  const feedback = [
-    {
-      id: "feedback-1",
-      content: "O MeuResidencial transformou a forma como eu gerencio o condomínio. Reduziu meu trabalho administrativo em 50%.",
-      name: "Roberto Almeida",
-      title: "Síndico Profissional",
-      img: "/placeholder.svg",
-    },
-    {
-      id: "feedback-2",
-      content: "A transparência financeira que o sistema proporciona melhorou muito a relação com os moradores.",
-      name: "Carla Mendes",
-      title: "Síndica",
-      img: "/placeholder.svg",
-    },
-    {
-      id: "feedback-3",
-      content: "Como morador, posso acompanhar tudo que acontece no condomínio e agendar áreas de lazer facilmente.",
-      name: "Paulo Santos",
-      title: "Morador",
-      img: "/placeholder.svg",
-    },
-  ];
-
-  return (
-    <section id="clients" ref={ref} className="w-full flex flex-col justify-center py-16 px-6 sm:px-16 relative">
-      <div className="absolute z-[0] w-[60%] h-[60%] -right-[50%] rounded-full blue__gradient" />
-      
-      <div className="w-full flex justify-between items-center md:flex-row flex-col mb-16 relative z-[1]">
-        <h1 className={`font-display font-semibold text-[40px] text-gray-800 leading-[66px] ${inView ? 'animate-fade-in' : 'opacity-0'}`}>
-          O que estão dizendo <br className="sm:block hidden" /> sobre nós
-        </h1>
-        <div className={`w-full md:mt-0 mt-6 ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }}>
-          <p className="font-normal text-gray-600 text-[18px] leading-[30.8px] text-left max-w-[450px]">
-            Centenas de síndicos e moradores já aproveitam as vantagens do 
-            MeuResidencial para uma gestão condominial mais eficiente.
-          </p>
-        </div>
-      </div>
-      
-      <div className="flex flex-wrap justify-center w-full feedback-container relative z-[1]">
-        {feedback.map((card, index) => (
-          <FeedbackCard key={card.id} {...card} index={index} inView={inView} />
-        ))}
-      </div>
-    </section>
-  );
-};
-
-// CTA section
-const CTA = () => {
-  const { ref, inView } = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-  });
-
-  return (
-    <section ref={ref} className={`w-full flex justify-center items-center py-16 px-6 sm:px-16 sm:flex-row flex-col bg-gradient-to-r from-blue-700 to-blue-500 rounded-[20px] ${inView ? 'animate-fade-in' : 'opacity-0'}`}>
-      <div className="flex-1 flex flex-col">
-        <h2 className="font-display font-semibold text-[40px] text-white leading-[66px]">
-          Experimente o MeuResidencial agora!
-        </h2>
-        <p className="font-normal text-white text-[18px] leading-[30.8px] max-w-[470px] mt-5">
-          Cadastre seu condomínio e aproveite todos os recursos da plataforma 
-          mais completa para a gestão de condomínios.
-        </p>
-      </div>
-      
-      <div className={`flex justify-center items-center sm:ml-10 ml-0 sm:mt-0 mt-10 ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: '300ms' }}>
-        <Button 
-          className="py-4 px-6 bg-white hover:bg-gray-200 text-brand-700 rounded-[10px] outline-none text-lg"
-          asChild
-        >
-          <Link to="/login">
-            Acessar Meu Residencial
-          </Link>
-        </Button>
-      </div>
-    </section>
-  );
-};
-
-// Pricing section
-const Pricing = () => {
-  const { ref, inView } = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-  });
-
-  const plans = [
-    {
-      id: "plan-1",
-      title: "Básico",
-      price: "R$ 149,90",
-      description: "Ideal para condomínios pequenos de até 20 unidades",
-      features: [
-        "Gestão financeira básica",
-        "Comunicados para moradores",
-        "Cadastro de moradores",
-        "Reserva de áreas comuns",
-        "Suporte por email"
-      ],
-      icon: Building
-    },
-    {
-      id: "plan-2",
-      title: "Profissional",
-      price: "R$ 249,90",
-      description: "Perfeito para condomínios médios de até 50 unidades",
-      features: [
-        "Todas as funcionalidades do Básico",
-        "Prestação de contas avançada",
-        "Recebimento por PIX",
-        "Gestão de documentos",
-        "Suporte prioritário"
-      ],
-      icon: Shield,
-      highlight: true
-    },
-    {
-      id: "plan-3",
-      title: "Empresarial",
-      price: "R$ 399,90",
-      description: "Completo para condomínios grandes ou administradoras",
-      features: [
-        "Todas as funcionalidades do Profissional",
-        "Múltiplos condomínios",
-        "APIs para integração",
-        "Relatórios personalizados",
-        "Suporte 24/7"
-      ],
-      icon: Settings
-    }
-  ];
-
-  return (
-    <section id="pricing" ref={ref} className="w-full py-16 px-6 sm:px-16">
-      <div className="text-center mb-16">
-        <h2 className={`font-display font-semibold text-[40px] text-gray-800 leading-[66px] ${inView ? 'animate-fade-in' : 'opacity-0'}`}>
-          Planos que se adaptam às suas necessidades
-        </h2>
-        <p className={`font-normal text-gray-600 text-[18px] leading-[30.8px] max-w-[600px] mx-auto mt-5 ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }}>
-          Escolha o plano ideal para o seu condomínio e comece a 
-          aproveitar todos os benefícios do MeuResidencial.
-        </p>
-      </div>
-      
-      <div className="flex flex-wrap justify-center gap-10">
-        {plans.map((plan, index) => (
-          <div 
-            key={plan.id} 
-            className={`w-full max-w-[350px] p-8 rounded-[20px] ${plan.highlight ? 'border-2 border-brand-600 shadow-lg' : 'border border-gray-200'} ${inView ? 'animate-fade-in' : 'opacity-0'}`}
-            style={{ transitionDelay: `${index * 200}ms` }}
-          >
-            <div className="flex items-center mb-4">
-              <div className={`w-[48px] h-[48px] rounded-full flex justify-center items-center ${plan.highlight ? 'bg-brand-600' : 'bg-blue-100'}`}>
-                <plan.icon className={`w-6 h-6 ${plan.highlight ? 'text-white' : 'text-brand-600'}`} />
-              </div>
-              <h3 className="font-display font-semibold text-[24px] text-gray-800 ml-4">{plan.title}</h3>
-            </div>
-            
-            <h4 className="font-display font-semibold text-[36px] text-gray-800 mt-4">{plan.price}</h4>
-            <p className="text-gray-600 mt-2 mb-6">{plan.description}</p>
-            
-            <div className="space-y-3 mb-8">
-              {plan.features.map((feature, i) => (
-                <div key={i} className="flex items-start">
-                  <CheckCircle className="w-5 h-5 text-brand-600 mt-1 flex-shrink-0" />
-                  <p className="ml-3 text-gray-700">{feature}</p>
-                </div>
-              ))}
-            </div>
-            
-            <Button 
-              className={`w-full py-3 ${plan.highlight ? 'bg-brand-600 hover:bg-brand-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'} rounded-[10px]`}
-              asChild
-            >
-              <Link to="/login">
-                Começar Agora
-              </Link>
-            </Button>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-};
-
-// FAQ section
-const FAQ = () => {
-  const { ref, inView } = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-  });
-
-  const faqs = [
-    {
-      question: "Como posso começar a usar o MeuResidencial?",
-      answer: "Basta clicar no botão 'Acessar Meu Residencial', criar sua conta e cadastrar seu condomínio. O processo é simples e rápido, e você poderá começar a usar a plataforma imediatamente."
-    },
-    {
-      question: "É possível migrar dados de outro sistema?",
-      answer: "Sim, oferecemos suporte para migração de dados. Entre em contato com nosso time de suporte após criar sua conta, e ajudaremos você a importar os dados do seu condomínio."
-    },
-    {
-      question: "Quanto tempo leva para implementar o sistema?",
-      answer: "A implementação é imediata. Após o cadastro, você já terá acesso à plataforma. O tempo para configurar todas as funcionalidades depende do tamanho do condomínio, mas geralmente leva de 1 a 3 dias."
-    },
-    {
-      question: "Os moradores precisam pagar para usar?",
-      answer: "Não, apenas o condomínio precisa assinar um plano. Os moradores têm acesso gratuito à plataforma através de suas contas individuais."
-    },
-    {
-      question: "Posso cancelar a assinatura a qualquer momento?",
-      answer: "Sim, não há fidelidade. Você pode cancelar sua assinatura a qualquer momento sem taxas adicionais."
-    }
-  ];
-
-  return (
-    <section id="faq" ref={ref} className="w-full py-16 px-6 sm:px-16">
-      <div className="text-center mb-16">
-        <h2 className={`font-display font-semibold text-[40px] text-gray-800 leading-[66px] ${inView ? 'animate-fade-in' : 'opacity-0'}`}>
-          Perguntas Frequentes
-        </h2>
-        <p className={`font-normal text-gray-600 text-[18px] leading-[30.8px] max-w-[600px] mx-auto mt-5 ${inView ? 'animate-fade-in' : 'opacity-0'}`} style={{ transitionDelay: '200ms' }}>
-          Tire suas dúvidas sobre o MeuResidencial
-        </p>
-      </div>
-      
-      <div className="max-w-3xl mx-auto">
-        {faqs.map((faq, index) => (
-          <div 
-            key={index} 
-            className={`mb-6 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden ${inView ? 'animate-fade-in' : 'opacity-0'}`}
-            style={{ transitionDelay: `${index * 150}ms` }}
-          >
-            <div className="p-6">
-              <div className="flex items-start">
-                <AlertCircle className="w-5 h-5 text-brand-600 mt-1" />
-                <div className="ml-4">
-                  <h3 className="font-display font-semibold text-lg text-gray-800">{faq.question}</h3>
-                  <p className="mt-2 text-gray-600">{faq.answer}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-};
-
-// Footer section
-const Footer = () => {
-  return (
-    <footer className="w-full flex flex-col justify-center items-center bg-gray-100 py-16 px-6 sm:px-16">
-      <div className="w-full max-w-[1200px] flex justify-between items-start md:flex-row flex-col mb-8 pt-6">
-        <div className="flex flex-col justify-start">
-          <div className="flex items-center">
-            <Building className="h-8 w-8 text-brand-600" />
-            <h1 className="text-3xl font-bold text-gray-800 ml-2 font-display">MeuResidencial</h1>
-          </div>
-          <p className="font-normal text-gray-600 text-[18px] leading-[30.8px] mt-4 max-w-[310px]">
-            A plataforma completa para gestão de condomínios.
-          </p>
-        </div>
-        
-        <div className="flex flex-row flex-wrap justify-between md:mt-0 mt-10 w-full md:w-[60%]">
-          <div className="flex flex-col ss:my-0 my-4 min-w-[150px]">
-            <h4 className="font-medium text-[18px] leading-[27px] text-gray-800">
-              Links Úteis
-            </h4>
-            <ul className="list-none mt-4">
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer mb-3">
-                Sobre Nós
-              </li>
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer mb-3">
-                Funcionalidades
-              </li>
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer mb-3">
-                Planos
-              </li>
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer">
-                Blog
-              </li>
-            </ul>
-          </div>
-          
-          <div className="flex flex-col ss:my-0 my-4 min-w-[150px]">
-            <h4 className="font-medium text-[18px] leading-[27px] text-gray-800">
-              Comunidade
-            </h4>
-            <ul className="list-none mt-4">
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer mb-3">
-                Ajuda
-              </li>
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer mb-3">
-                Parceiros
-              </li>
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer mb-3">
-                Sugestões
-              </li>
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer">
-                Boletim
-              </li>
-            </ul>
-          </div>
-          
-          <div className="flex flex-col ss:my-0 my-4 min-w-[150px]">
-            <h4 className="font-medium text-[18px] leading-[27px] text-gray-800">
-              Contato
-            </h4>
-            <ul className="list-none mt-4">
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer mb-3">
-                contato@meuresidencial.com
-              </li>
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer mb-3">
-                (11) 99999-9999
-              </li>
-              <li className="font-normal text-[16px] leading-[24px] text-gray-600 hover:text-brand-600 cursor-pointer">
-                São Paulo, SP
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      
-      <div className="w-full flex justify-between items-center md:flex-row flex-col pt-6 border-t-[1px] border-t-gray-300">
-        <p className="font-normal text-center text-[18px] leading-[27px] text-gray-600">
-          2025 MeuResidencial. Todos os direitos reservados.
-        </p>
-      </div>
-    </footer>
-  );
-};
-
-// Landing Page component
 const LandingPage = () => {
+  const { plans, isLoading } = usePlans();
+  const [activePlans, setActivePlans] = useState([]);
+  const heroRef = useRef(null);
+  
+  // Create sample plans if API doesn't return any
   useEffect(() => {
-    window.scrollTo(0, 0);
-    document.title = 'MeuResidencial - Gestão de Condomínios';
+    if (!isLoading) {
+      if (plans.length > 0) {
+        setActivePlans(plans);
+      } else {
+        setActivePlans([
+          {
+            id: "1",
+            codigo: "BASICO",
+            nome: "Plano Básico",
+            descricao: "Ideal para condomínios de pequeno porte.",
+            valor: "R$ 99,90",
+            max_moradores: 50
+          },
+          {
+            id: "2",
+            codigo: "PADRAO",
+            nome: "Plano Padrão",
+            descricao: "Para condomínios de médio porte com mais recursos.",
+            valor: "R$ 199,90",
+            max_moradores: 150
+          },
+          {
+            id: "3",
+            codigo: "PREMIUM",
+            nome: "Plano Premium",
+            descricao: "Solução completa para condomínios de grande porte.",
+            valor: "R$ 299,90",
+            max_moradores: 300
+          }
+        ]);
+      }
+    }
+  }, [isLoading, plans]);
+  
+  // Parallax effect for hero section
+  useEffect(() => {
+    const handleScroll = () => {
+      if (heroRef.current) {
+        const scrollPosition = window.scrollY;
+        heroRef.current.style.transform = `translateY(${scrollPosition * 0.4}px)`;
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <div className="w-full overflow-hidden bg-white">
-      <div className="px-6 sm:px-16 flex justify-center items-center">
-        <div className="w-full max-w-[1200px]">
-          <div className="w-full flex py-6 justify-between items-center">
-            <div className="flex items-center">
-              <Building className="h-8 w-8 text-brand-600" />
-              <h1 className="text-3xl font-bold text-gray-800 ml-2 font-display">MeuResidencial</h1>
+    <div className="w-full overflow-x-hidden bg-gradient-to-b from-blue-50 to-white">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div 
+          className="absolute inset-0 z-0 bg-gradient-to-r from-brand-800/30 to-brand-600/30"
+          ref={heroRef}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center">
+            <div className="lg:w-1/2 mb-12 lg:mb-0">
+              <FadeInSection delay={0}>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+                  Gestão de condomínios <span className="text-brand-600">simplificada</span>
+                </h1>
+              </FadeInSection>
+              
+              <FadeInSection delay={200}>
+                <p className="text-xl text-gray-700 mb-8">
+                  Ofereça aos síndicos total autonomia para uma gestão eficiente e transparente, com todas as ferramentas necessárias em um único lugar.
+                </p>
+              </FadeInSection>
+              
+              <FadeInSection delay={400}>
+                <Link to="/login">
+                  <Button size="lg" className="group bg-brand-600 hover:bg-brand-700 text-white">
+                    Acessar Meu Residencial
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </Link>
+              </FadeInSection>
             </div>
             
-            <div className="hidden md:flex space-x-6 items-center">
-              <a href="#features" className="text-gray-600 hover:text-brand-600">Funcionalidades</a>
-              <a href="#pricing" className="text-gray-600 hover:text-brand-600">Planos</a>
-              <a href="#clients" className="text-gray-600 hover:text-brand-600">Depoimentos</a>
-              <a href="#faq" className="text-gray-600 hover:text-brand-600">FAQ</a>
-              <Button className="bg-brand-600 hover:bg-brand-700 text-white" asChild>
-                <Link to="/login">
+            <div className="lg:w-1/2 relative">
+              <FadeInSection delay={600} className="relative">
+                <div className="absolute -top-10 -left-10 w-40 h-40 bg-brand-200 rounded-full filter blur-3xl opacity-40 animate-pulse" />
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-200 rounded-full filter blur-3xl opacity-40 animate-pulse" />
+                <img 
+                  src="/placeholder.svg"
+                  alt="Gestão de condomínios" 
+                  className="relative z-10 rounded-xl shadow-2xl w-full max-w-lg mx-auto"
+                />
+              </FadeInSection>
+            </div>
+          </div>
+        </div>
+        
+        <div className="absolute -bottom-1 left-0 right-0">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="white" fillOpacity="1" d="M0,96L48,106.7C96,117,192,139,288,128C384,117,480,75,576,80C672,85,768,139,864,138.7C960,139,1056,85,1152,64C1248,43,1344,53,1392,58.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
+        </div>
+      </section>
+      
+      {/* Features Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FadeInSection>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Funcionalidades Completas</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Tudo o que o síndico precisa para uma gestão transparente e eficiente em um único sistema
+              </p>
+            </div>
+          </FadeInSection>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Feature 
+              icon={Wallet}
+              title="Gestão Financeira" 
+              description="Controle completo de receitas, despesas e prestação de contas com relatórios detalhados."
+              delay={100}
+            />
+            <Feature 
+              icon={Users}
+              title="Cadastro de Moradores" 
+              description="Gerencie facilmente os moradores do condomínio com informações completas e atualizadas."
+              delay={200}
+            />
+            <Feature 
+              icon={MessageSquare}
+              title="Comunicados" 
+              description="Envie avisos e comunicados importantes para todos os moradores com facilidade."
+              delay={300}
+            />
+            <Feature 
+              icon={Calendar}
+              title="Reserva de Áreas" 
+              description="Sistema para agendamento e reserva de áreas comuns do condomínio."
+              delay={400}
+            />
+            <Feature 
+              icon={FileText}
+              title="Documentos" 
+              description="Armazenamento e compartilhamento de documentos importantes do condomínio."
+              delay={500}
+            />
+            <Feature 
+              icon={Shield}
+              title="Segurança" 
+              description="Controle de acesso e permissões para diferentes perfis de usuários."
+              delay={600}
+            />
+            <Feature 
+              icon={Coins}
+              title="Recebimento PIX" 
+              description="Facilidade para recebimento de pagamentos via PIX integrado ao sistema."
+              delay={700}
+            />
+            <Feature 
+              icon={Building}
+              title="Gestão Empresarial" 
+              description="Ferramentas para gestão completa da administração do condomínio."
+              delay={800}
+            />
+            <Feature 
+              icon={Key}
+              title="Controle de Vagas" 
+              description="Gerenciamento de vagas de garagem e espaços privativos."
+              delay={900}
+            />
+          </div>
+        </div>
+      </section>
+      
+      {/* Plans Section */}
+      <section className="py-20 bg-gradient-to-b from-white to-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FadeInSection>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Planos que se Adaptam às Suas Necessidades</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Escolha o plano ideal para o seu condomínio, com preços acessíveis e funcionalidades completas
+              </p>
+            </div>
+          </FadeInSection>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {activePlans.map((plan, index) => (
+              <PlanCard 
+                key={plan.id} 
+                plan={plan} 
+                featured={index === 1} 
+                delay={index * 200}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+      
+      {/* Testimonials Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FadeInSection>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">O Que Nossos Clientes Dizem</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Síndicos que transformaram a gestão de seus condomínios com nossa plataforma
+              </p>
+            </div>
+          </FadeInSection>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FadeInSection delay={100} className="bg-white p-6 rounded-lg shadow-md">
+              <div className="mb-4">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 mb-4">
+                "O MeuResidencial transformou completamente a gestão do nosso condomínio. Antes era tudo manual e agora temos controle total com muito mais transparência."
+              </p>
+              <div className="flex items-center">
+                <div className="mr-4 h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 font-bold">RP</span>
+                </div>
+                <div>
+                  <h4 className="font-bold">Ricardo Pereira</h4>
+                  <p className="text-sm text-gray-500">Síndico - Edifício Aurora</p>
+                </div>
+              </div>
+            </FadeInSection>
+            
+            <FadeInSection delay={200} className="bg-white p-6 rounded-lg shadow-md">
+              <div className="mb-4">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 mb-4">
+                "A facilidade de comunicação com os moradores e o controle financeiro são extraordinários. Economizamos tempo e dinheiro com essa plataforma."
+              </p>
+              <div className="flex items-center">
+                <div className="mr-4 h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 font-bold">MS</span>
+                </div>
+                <div>
+                  <h4 className="font-bold">Mariana Silva</h4>
+                  <p className="text-sm text-gray-500">Síndica - Condomínio Parque Verde</p>
+                </div>
+              </div>
+            </FadeInSection>
+            
+            <FadeInSection delay={300} className="bg-white p-6 rounded-lg shadow-md">
+              <div className="mb-4">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 mb-4">
+                "Os moradores adoraram a transparência que o sistema proporciona. As reservas de áreas comuns funcionam perfeitamente e sem conflitos."
+              </p>
+              <div className="flex items-center">
+                <div className="mr-4 h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 font-bold">CA</span>
+                </div>
+                <div>
+                  <h4 className="font-bold">Carlos Almeida</h4>
+                  <p className="text-sm text-gray-500">Síndico - Residencial Montanha</p>
+                </div>
+              </div>
+            </FadeInSection>
+          </div>
+        </div>
+      </section>
+      
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-brand-600 to-brand-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between">
+            <FadeInSection className="mb-8 lg:mb-0 lg:w-2/3">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Pronto para transformar a gestão do seu condomínio?</h2>
+              <p className="text-xl text-blue-100">
+                Comece hoje mesmo e descubra como é fácil ter o controle total do seu condomínio em suas mãos.
+              </p>
+            </FadeInSection>
+            
+            <FadeInSection delay={200}>
+              <Link to="/login">
+                <Button size="lg" className="bg-white text-brand-600 hover:bg-blue-50 group">
                   Acessar Meu Residencial
-                </Link>
-              </Button>
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </FadeInSection>
+          </div>
+        </div>
+      </section>
+      
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between">
+            <div className="mb-8 md:mb-0">
+              <div className="flex items-center mb-4">
+                <Building className="h-7 w-7 text-brand-400" />
+                <h3 className="text-2xl font-bold text-white ml-2">MeuResidencial</h3>
+              </div>
+              <p className="text-gray-400 max-w-md">
+                A solução completa para a gestão eficiente do seu condomínio, proporcionando transparência e facilidade para síndicos e moradores.
+              </p>
             </div>
             
-            <div className="md:hidden">
-              <Button className="bg-brand-600 hover:bg-brand-700 text-white" asChild>
-                <Link to="/login">
-                  Acessar
-                </Link>
-              </Button>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+              <div>
+                <h4 className="text-lg font-semibold mb-4">Plataforma</h4>
+                <ul className="space-y-2">
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Funcionalidades</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Planos</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Depoimentos</a></li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="text-lg font-semibold mb-4">Empresa</h4>
+                <ul className="space-y-2">
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Sobre nós</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contato</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="text-lg font-semibold mb-4">Legal</h4>
+                <ul className="space-y-2">
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Termos de Uso</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacidade</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm">
+              &copy; {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.
+            </p>
+            
+            <div className="flex space-x-4 mt-4 md:mt-0">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <span className="sr-only">Facebook</span>
+                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+                </svg>
+              </a>
+              
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <span className="sr-only">Instagram</span>
+                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" />
+                </svg>
+              </a>
+              
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <span className="sr-only">Twitter</span>
+                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                </svg>
+              </a>
             </div>
           </div>
         </div>
-      </div>
-      
-      <div className="px-0">
-        <Hero />
-        <Stats />
-        <Business />
-        <Billing />
-        <CardDeal />
-        <Testimonials />
-        <Pricing />
-        <FAQ />
-        <div className="px-6 sm:px-16 flex justify-center items-center py-16">
-          <div className="w-full max-w-[1200px]">
-            <CTA />
-          </div>
-        </div>
-        <Footer />
-      </div>
-      
-      <style jsx="true">{`
-        .feature-card:hover {
-          background: rgba(229, 236, 255, 0.5);
-          transition: all 0.3s ease-in-out;
-        }
-        
-        .feedback-card {
-          background: white;
-          border: 1px solid rgba(229, 236, 255, 1);
-          box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.03);
-          transition: all 0.3s ease-in-out;
-        }
-        
-        .feedback-card:hover {
-          transform: translateY(-5px);
-        }
-        
-        .blue__gradient {
-          background: linear-gradient(180deg, rgba(188, 207, 251, 0.5) 0%, rgba(188, 207, 251, 0) 100%);
-          filter: blur(80px);
-        }
-        
-        .pink__gradient {
-          background: linear-gradient(90deg, rgba(255, 207, 240, 0.5) 0%, rgba(255, 207, 240, 0) 100%);
-          filter: blur(100px);
-        }
-        
-        .white__gradient {
-          background: rgba(255, 255, 255, 0.7);
-          filter: blur(80px);
-        }
-      `}</style>
+      </footer>
     </div>
   );
 };

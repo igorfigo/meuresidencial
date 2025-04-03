@@ -48,7 +48,6 @@ function App() {
           <div className="app">
             <Routes>
               <Route path="/" element={<LandingPage />} />
-              <Route path="/app" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/dashboard" element={<AuthRequired><Dashboard /></AuthRequired>} />
               <Route path="/perfil" element={<AuthRequired><UserProfile /></AuthRequired>} />
