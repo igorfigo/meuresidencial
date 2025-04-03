@@ -621,7 +621,7 @@ const LandingPage = () => {
                 <p className="text-white/80 text-sm mb-2">CNPJ: 60112929000134</p>
                 <div className="flex items-start mb-2">
                   <MapPin className="h-5 w-5 text-white mr-2 flex-shrink-0 mt-0.5" />
-                  <p className="text-white/80">Rua das Flores, 123, Centro<br />Belo Horizonte - MG, 30123-456</p>
+                  <p className="text-white/80">Av. João Machado, 849, João Pessoa - PB</p>
                 </div>
               </div>
             </div>
