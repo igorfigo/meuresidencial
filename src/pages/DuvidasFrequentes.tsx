@@ -25,18 +25,6 @@ const DuvidasFrequentes = () => {
   
   // FAQs categorized by functionality
   const faqItems: FaqItem[] = [
-    // Dashboard
-    {
-      question: 'Como visualizar a ocupação atual do condomínio?',
-      answer: 'No Dashboard principal, você pode visualizar um gráfico com a taxa de ocupação do condomínio, mostrando quantas unidades estão ocupadas versus unidades vazias.',
-      category: 'Dashboard'
-    },
-    {
-      question: 'Como verificar as cobranças pendentes do mês atual?',
-      answer: 'No Dashboard, há um card com as cobranças pendentes do mês atual. Clique em "Ver Detalhes" para acessar o relatório completo no módulo Financeiro.',
-      category: 'Dashboard'
-    },
-    
     // Moradores
     {
       question: 'Como adicionar um novo morador?',
@@ -71,16 +59,16 @@ const DuvidasFrequentes = () => {
       category: 'Comunicados'
     },
     
-    // Documentos
+    // Documentos Úteis
     {
       question: 'Quais tipos de arquivos posso disponibilizar na seção de Documentos?',
       answer: 'Você pode fazer upload de arquivos PDF, Word, Excel, PowerPoint e imagens. Cada arquivo pode ter até 10MB. Para arquivos maiores, recomendamos comprimi-los antes do upload.',
-      category: 'Documentos'
+      category: 'Documentos Úteis'
     },
     {
       question: 'Como organizar os documentos por categoria?',
       answer: 'Ao adicionar um novo documento, selecione ou crie uma categoria na opção "Tipo". Isso ajudará os moradores a encontrarem mais facilmente os documentos que procuram.',
-      category: 'Documentos'
+      category: 'Documentos Úteis'
     },
     
     // Financeiro
@@ -143,18 +131,6 @@ const DuvidasFrequentes = () => {
       question: 'Como alterar o plano contratado?',
       answer: 'Na seção Minha Assinatura, você encontrará informações sobre seu plano atual e opções de upgrade. Selecione o novo plano desejado e siga as instruções para concluir a alteração.',
       category: 'Minha Assinatura'
-    },
-    {
-      question: 'Como atualizar os dados de pagamento?',
-      answer: 'Acesse Minha Assinatura e clique em "Métodos de Pagamento". Você pode adicionar um novo método ou editar os existentes.',
-      category: 'Minha Assinatura'
-    },
-    
-    // Fale Conosco
-    {
-      question: 'Qual o prazo para resposta ao entrar em contato com o suporte?',
-      answer: 'Nossa equipe de suporte responde em até 24 horas úteis. Para casos urgentes, recomendamos utilizar o chat disponível no horário comercial (9h às 18h, de segunda a sexta).',
-      category: 'Fale Conosco'
     }
   ];
   
@@ -192,7 +168,7 @@ const DuvidasFrequentes = () => {
         
         {Object.entries(groupedFaqs).length > 0 ? (
           Object.entries(groupedFaqs).map(([category, faqs]) => (
-            <Card key={category} className="mb-6">
+            <Card key={category} className="mb-6 border-t-4 border-t-blue-500">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl">{category}</CardTitle>
               </CardHeader>
@@ -213,7 +189,7 @@ const DuvidasFrequentes = () => {
             </Card>
           ))
         ) : (
-          <Card className="mb-6">
+          <Card className="mb-6 border-t-4 border-t-blue-500">
             <CardContent className="p-6 text-center">
               <p className="text-gray-500">
                 Nenhuma dúvida encontrada com o termo "{searchTerm}".
