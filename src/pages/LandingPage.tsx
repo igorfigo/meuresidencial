@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
@@ -641,4 +642,47 @@ const LandingPage = () => {
                 <li>
                   <button 
                     onClick={() => scrollToSection('faq')}
-                    className="hover
+                    className="hover:text-white hover:underline transition-colors"
+                  >
+                    Perguntas Frequentes
+                  </button>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="mb-8 md:mb-0">
+              <h4 className="font-bold text-lg mb-4 text-white">Contato</h4>
+              <ul className="space-y-2 text-white/80">
+                <li>Email: contato@meuresidencial.com.br</li>
+                <li>Telefone: (83) 3333-3333</li>
+                <li>Horário: Segunda a Sexta, 9h às 18h</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-lg mb-4 text-white">Legal</h4>
+              <ul className="space-y-2 text-white/80">
+                <li>
+                  <Link to="/termos" className="hover:text-white hover:underline transition-colors">
+                    Termos de Uso
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacidade" className="hover:text-white hover:underline transition-colors">
+                    Política de Privacidade
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="mt-12 pt-8 border-t border-white/20 text-center text-white/60 text-sm">
+            <p>© {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default LandingPage;
