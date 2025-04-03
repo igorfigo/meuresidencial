@@ -78,7 +78,7 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
   
   return (
     <>
-      <Card className="mb-6 border-t-4 shadow-md" style={{ borderTopColor: '#2151B9' }}>
+      <Card className="mb-6 border-t-4 shadow-md" style={{ borderTopColor: 'var(--primary)' }}>
         <CardHeader className="bg-blue-50 pb-3">
           <CardTitle className="flex items-center text-blue-800 text-lg">
             <BadgeInfo className="h-5 w-5 mr-2 text-blue-600" />

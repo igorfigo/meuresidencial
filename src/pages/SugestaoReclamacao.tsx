@@ -127,7 +127,7 @@ const SugestaoReclamacao = () => {
           Envie sugestões ou reclamações diretamente para o síndico do seu condomínio.
         </p>
         
-        <Card className="border-t-4 shadow-md" style={{ borderTopColor: '#2151B9' }}>
+        <Card className="border-t-4 shadow-md" style={{ borderTopColor: 'var(--primary)' }}>
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl text-brand-700">Envie sua mensagem</CardTitle>
             <CardDescription className="text-gray-600">
