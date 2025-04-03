@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
@@ -172,7 +171,6 @@ const TestimonialCard = ({ author, role, company, content, stars = 5, delay = 0 
   );
 };
 
-// WhatsApp floating button component
 const WhatsAppButton = () => {
   const phoneNumber = "5511914420166"; // Format for WhatsApp API
   const whatsappUrl = `https://wa.me/${phoneNumber}`;
@@ -182,7 +180,7 @@ const WhatsAppButton = () => {
       href={whatsappUrl} 
       target="_blank" 
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform duration-300 flex items-center justify-center"
+      className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform duration-300 flex items-center justify-center animate-pulse-whatsapp"
       aria-label="Chat on WhatsApp"
     >
       <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -559,11 +557,11 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <section id="faq" className="py-16 bg-gradient-to-b from-[#EFEFEF] to-[#000000] text-white">
+      <section id="faq" className="py-16 bg-gradient-to-b from-[#EFEFEF] to-brand-700 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <FadeInSection>
             <div className="text-center mb-12">
-              <div className="inline-block mb-4 px-6 py-2 rounded-full bg-white/10 text-white">
+              <div className="inline-block mb-4 px-6 py-2 rounded-full bg-brand-600/20 text-white">
                 <div className="flex items-center space-x-2">
                   <HelpCircle className="h-5 w-5" />
                   <span className="font-semibold">Perguntas Frequentes</span>
@@ -572,21 +570,21 @@ const LandingPage = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                 Perguntas Frequentes
               </h2>
-              <p className="text-xl text-white/80 max-w-3xl mx-auto mb-8">
+              <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
                 Encontre respostas para as dúvidas mais comuns sobre nossos serviços
               </p>
             </div>
           </FadeInSection>
           
-          <div className="bg-custom-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-brand-100/30">
             <FadeInSection delay={100}>
               <Accordion type="single" collapsible className="w-full">
                 {faqItems.map((item, index) => (
                   <AccordionItem key={index} value={`item-${index}`}>
-                    <AccordionTrigger className="px-6 py-4 text-left font-medium text-gray-900 hover:text-custom-primary">
+                    <AccordionTrigger className="px-6 py-4 text-left font-medium text-gray-900 hover:text-brand-700 border-b border-gray-100">
                       {item.question}
                     </AccordionTrigger>
-                    <AccordionContent className="px-6 pb-4 text-gray-600">
+                    <AccordionContent className="px-6 pb-4 text-gray-700 bg-brand-50/30">
                       {item.answer}
                     </AccordionContent>
                   </AccordionItem>
@@ -597,36 +595,21 @@ const LandingPage = () => {
         </div>
       </section>
       
-      {/* Simplified footer section */}
       <footer className="bg-gradient-to-r from-[#2151B9] to-[#103381] text-custom-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <div className="flex items-center mb-4">
-                <Building className="h-7 w-7 text-white" />
-                <h3 className="text-2xl font-bold text-custom-white ml-2">MeuResidencial</h3>
-              </div>
-              <div className="text-white max-w-md">
-                <p className="text-white font-semibold">GESTAO EFICIENTE SOLUCOES TECNOLOGICAS LTDA</p>
-                <p className="text-white/80 text-sm mb-2">CNPJ: 60112929000134</p>
-                <div className="flex items-start mb-2">
-                  <MapPin className="h-5 w-5 text-white mr-2 flex-shrink-0 mt-0.5" />
-                  <p className="text-white/80">Av. João Machado, 849, João Pessoa - PB</p>
-                </div>
-                <p className="text-white/80 mt-2">Email: contato@meuresidencial.com</p>
-              </div>
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center mb-4 md:mb-0">
+              <Building className="h-7 w-7 text-white" />
+              <h3 className="text-2xl font-bold text-custom-white ml-2">MeuResidencial</h3>
             </div>
             
-            <div className="flex flex-col md:items-end justify-center">
-              <div className="flex flex-wrap gap-4 md:justify-end mb-4">
-                <Link to="/termos" className="text-white/80 hover:text-white hover:underline">
-                  Termos de Uso
-                </Link>
-                <Link to="/privacidade" className="text-white/80 hover:text-white hover:underline">
-                  Política de Privacidade
-                </Link>
+            <div className="text-white text-center md:text-right">
+              <div className="flex items-center justify-center md:justify-end mb-2">
+                <MapPin className="h-5 w-5 text-white mr-2 flex-shrink-0" />
+                <p className="text-white/90">Av. João Machado, 849, João Pessoa - PB</p>
               </div>
-              <p className="text-white/60 text-sm mt-auto">
+              <p className="text-white/90">Email: contato@meuresidencial.com</p>
+              <p className="text-white/60 text-sm mt-4">
                 © {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.
               </p>
             </div>
@@ -634,7 +617,6 @@ const LandingPage = () => {
         </div>
       </footer>
       
-      {/* WhatsApp floating button */}
       <WhatsAppButton />
     </div>
   );
