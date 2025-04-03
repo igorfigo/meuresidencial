@@ -79,13 +79,16 @@ const PlanCard = ({ plan, featured = false, delay }) => {
       <div className={`p-6 ${featured ? 'bg-gradient-to-r from-brand-600 to-brand-700 text-white' : 'bg-white text-gray-800'}`}>
         <h3 className="text-xl font-bold mb-2">{plan.nome}</h3>
         <div className="text-3xl font-bold mb-4">{plan.valor}</div>
-        <p className="mb-4 text-sm">{plan.descricao || 'Ideal para condomínios de pequeno porte.'}</p>
       </div>
       <div className="bg-white p-6">
         <ul className="space-y-3">
           <li className="flex items-start">
             <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-            <span>Até {plan.max_moradores || '50'} moradores</span>
+            <span>
+              {plan.codigo === "PREMIUM" 
+                ? "Mais que 50 moradores" 
+                : `Até ${plan.max_moradores || '50'} moradores`}
+            </span>
           </li>
           
           {commonFeatures.map((feature, index) => (
@@ -121,7 +124,6 @@ const LandingPage = () => {
             id: "1",
             codigo: "BASICO",
             nome: "Plano Básico",
-            descricao: "Ideal para condomínios de pequeno porte.",
             valor: "R$ 99,90",
             max_moradores: 50
           },
@@ -129,7 +131,6 @@ const LandingPage = () => {
             id: "2",
             codigo: "PADRAO",
             nome: "Plano Padrão",
-            descricao: "Para condomínios de médio porte com mais recursos.",
             valor: "R$ 199,90",
             max_moradores: 150
           },
@@ -137,7 +138,6 @@ const LandingPage = () => {
             id: "3",
             codigo: "PREMIUM",
             nome: "Plano Premium",
-            descricao: "Solução completa para condomínios de grande porte.",
             valor: "R$ 299,90",
             max_moradores: 300
           }
@@ -230,13 +230,13 @@ const LandingPage = () => {
         </div>
       </header>
       
-      {/* Hero Section */}
+      {/* Hero Section - Content moved up to fit within blue background */}
       <section className="relative overflow-hidden pt-24">
         <div 
           className="absolute inset-0 z-0 bg-gradient-to-r from-brand-800/30 to-brand-600/30"
           ref={heroRef}
         />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 relative z-10">
           <div className="flex flex-col lg:flex-row items-center">
             <div className="lg:w-1/2 mb-12 lg:mb-0">
               <FadeInSection delay={0}>
@@ -249,15 +249,6 @@ const LandingPage = () => {
                 <p className="text-xl text-gray-700 mb-8">
                   Ofereça aos síndicos total autonomia para uma gestão eficiente e transparente, com todas as ferramentas necessárias em um único lugar.
                 </p>
-              </FadeInSection>
-              
-              <FadeInSection delay={400}>
-                <Link to="/login">
-                  <Button size="lg" className="group bg-brand-600 hover:bg-brand-700 text-white">
-                    Acessar Meu Residencial
-                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </Link>
               </FadeInSection>
             </div>
             

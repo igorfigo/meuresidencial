@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -12,7 +13,7 @@ const Index = () => {
     if (isAuthenticated) {
       navigate('/dashboard');
     } else {
-      navigate('/');
+      navigate('/landing');
     }
   }, [navigate, isAuthenticated]);
 
