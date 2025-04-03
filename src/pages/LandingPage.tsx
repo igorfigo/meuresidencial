@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
@@ -361,7 +360,7 @@ const LandingPage = () => {
             <div className="lg:w-1/2 mb-12 lg:mb-0">
               <FadeInSection delay={0}>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-custom-white leading-tight mb-6">
-                  Gerencie seu Condomínio <span className="text-white">facilmente</span>
+                  Gestão Eficiente do seu Condomínio
                 </h1>
               </FadeInSection>
               
@@ -577,23 +576,6 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <section className="py-16 md:py-20 bg-gradient-to-r from-custom-dark to-custom-primary text-custom-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FadeInSection className="text-center">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">Pronto para transformar a gestão do seu condomínio?</h2>
-            <p className="text-lg md:text-xl text-custom-light max-w-3xl mx-auto mb-8">
-              Comece hoje mesmo e descubra como é fácil ter o controle total do seu condomínio em suas mãos.
-            </p>
-            <Link to="/login">
-              <Button size="lg" className="bg-white text-custom-primary hover:bg-white/90 font-semibold">
-                Começar Agora
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </FadeInSection>
-        </div>
-      </section>
-      
       <footer className="bg-gradient-to-r from-[#2151B9] to-[#103381] text-custom-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -671,18 +653,3 @@ const LandingPage = () => {
                   <Link to="/privacidade" className="hover:text-white hover:underline transition-colors">
                     Política de Privacidade
                   </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="mt-12 pt-8 border-t border-white/20 text-center text-white/60 text-sm">
-            <p>© {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
-export default LandingPage;
