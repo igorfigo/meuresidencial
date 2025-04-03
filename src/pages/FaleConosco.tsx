@@ -82,7 +82,7 @@ const FaleConosco = () => {
           Entre em contato com nossa equipe de suporte. Responderemos sua mensagem em até 24 horas úteis.
         </p>
         
-        <Card id="contact-form" className="border-t-4 shadow-md" style={{ borderTopColor: '#2151B9' }}>
+        <Card className="border-t-4 shadow-md" style={{ borderTopColor: '#2151B9' }}>
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl text-brand-700">Envie sua mensagem</CardTitle>
             <CardDescription className="text-gray-600">
