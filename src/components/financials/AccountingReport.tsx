@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format, parse, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -34,7 +33,6 @@ const formatDateToBR = (dateString) => {
   
   try {
     if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
-      // Add one day to fix the date display issue
       const date = new Date(dateString);
       const correctedDate = addDays(date, 1);
       return format(correctedDate, 'dd/MM/yyyy');
@@ -47,7 +45,6 @@ const formatDateToBR = (dateString) => {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
     
-    // Add one day to fix the date display issue
     const correctedDate = addDays(date, 1);
     return format(correctedDate, 'dd/MM/yyyy');
   } catch (error) {
@@ -175,12 +172,6 @@ export const AccountingReport = () => {
       
       doc.setFillColor(59, 130, 246);
       doc.rect(0, 0, pageWidth, 5, 'F');
-      
-      doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
-      doc.text("Relatório gerado em: " + currentDate, margin, yPosition);
-      doc.text("Gerado por: www.meuresidencial.com", pageWidth - margin, yPosition, { align: 'right' });
-      yPosition += 10;
       
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
