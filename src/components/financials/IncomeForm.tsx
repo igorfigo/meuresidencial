@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,14 +31,18 @@ const incomeCategories = [
   { value: 'outros', label: 'Outros' }
 ];
 
-const incomeSchema = z.object({
-  category: z.string().min(1, { message: 'Categoria é obrigatória' }),
-  amount: z.string().min(1, { message: 'Valor é obrigatório' }),
-  reference_month: z.string().min(1, { message: 'Mês de referência é obrigatório' }),
-  payment_date: z.string().min(1, { message: 'Data de recebimento é obrigatória' }),
-  unit: z.string().min(1, { message: 'Unidade é obrigatória' }),
-  observations: z.string().optional()
-});
+let incomeSchemaCreator = (hasCondominiumValue: boolean) => {
+  return z.object({
+    category: z.string().min(1, { message: 'Categoria é obrigatória' }),
+    amount: hasCondominiumValue 
+      ? z.string().min(1, { message: 'Valor é obrigatório' })
+      : z.string().optional(),
+    reference_month: z.string().min(1, { message: 'Mês de referência é obrigatório' }),
+    payment_date: z.string().min(1, { message: 'Data de recebimento é obrigatória' }),
+    unit: z.string().min(1, { message: 'Unidade é obrigatória' }),
+    observations: z.string().optional()
+  });
+};
 
 interface IncomeFormProps {
   onSubmit: (data: FinancialIncome) => Promise<void>;
@@ -49,15 +52,17 @@ interface IncomeFormProps {
 export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   const { user } = useApp();
   const { checkDuplicateIncome } = useFinances();
-  const [units, setUnits] = useState<{ value: string; label: string; }[]>([]);
+  const [units, setUnits] = useState<{ value: string; label: string; condominiumValue?: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastBalanceAdjustmentDate, setLastBalanceAdjustmentDate] = useState<string | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
-  const [pendingSubmitData, setPendingSubmitData] = useState<z.infer<typeof incomeSchema> | null>(null);
+  const [pendingSubmitData, setPendingSubmitData] = useState<any | null>(null);
   const currentDate = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
+  const [selectedUnitHasCondominiumValue, setSelectedUnitHasCondominiumValue] = useState(true);
+  const [incomeSchema, setIncomeSchema] = useState(() => incomeSchemaCreator(true));
   
-  const form = useForm<z.infer<typeof incomeSchema>>({
+  const form = useForm<any>({
     resolver: zodResolver(incomeSchema),
     defaultValues: initialData || {
       category: '',
@@ -66,7 +71,8 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
       payment_date: '',
       unit: '',
       observations: ''
-    }
+    },
+    mode: 'onChange'
   });
 
   useEffect(() => {
@@ -76,14 +82,26 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
       try {
         const { data, error } = await supabase
           .from('residents')
-          .select('unidade')
+          .select('unidade, valor_condominio')
           .eq('matricula', user.selectedCondominium)
           .order('unidade');
         
         if (error) throw error;
         
-        const uniqueUnits = [...new Set(data.map(item => item.unidade))];
-        setUnits(uniqueUnits.map(unit => ({ value: unit, label: unit })));
+        const formattedUnits = data.map(item => ({
+          value: item.unidade,
+          label: item.unidade,
+          condominiumValue: item.valor_condominio
+        }));
+
+        setUnits(formattedUnits);
+        
+        if (initialData?.unit) {
+          const selectedUnit = formattedUnits.find(unit => unit.value === initialData.unit);
+          const hasValue = !!(selectedUnit?.condominiumValue && selectedUnit.condominiumValue !== '' && selectedUnit.condominiumValue !== '0' && selectedUnit.condominiumValue !== '0,00' && selectedUnit.condominiumValue !== 'R$ 0,00');
+          setSelectedUnitHasCondominiumValue(hasValue);
+          setIncomeSchema(incomeSchemaCreator(hasValue));
+        }
       } catch (error) {
         console.error('Error fetching units:', error);
       }
@@ -114,7 +132,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     
     fetchUnits();
     fetchLastBalanceAdjustmentDate();
-  }, [user?.selectedCondominium]);
+  }, [user?.selectedCondominium, initialData]);
   
   const validatePaymentDate = (paymentDate: string | undefined): boolean => {
     if (!paymentDate || !lastBalanceAdjustmentDate) return true;
@@ -163,13 +181,12 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     }
   };
   
-  const handleSubmit = async (values: z.infer<typeof incomeSchema>) => {
+  const handleSubmit = async (values: any) => {
     if (!user?.selectedCondominium) return;
     
     setDateError(null);
     
     if (values.payment_date) {
-      // Check that payment date is not after today
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
@@ -181,7 +198,6 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
         return;
       }
       
-      // Also validate against last balance adjustment date
       const isValidDate = validatePaymentDate(values.payment_date);
       
       if (!isValidDate) {
@@ -237,6 +253,19 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
     }
   };
   
+  const handleUnitChange = (unitValue: string) => {
+    const selectedUnit = units.find(unit => unit.value === unitValue);
+    const hasValue = !!(selectedUnit?.condominiumValue && selectedUnit.condominiumValue !== '' && selectedUnit.condominiumValue !== '0' && selectedUnit.condominiumValue !== '0,00' && selectedUnit.condominiumValue !== 'R$ 0,00');
+    
+    setSelectedUnitHasCondominiumValue(hasValue);
+    const newSchema = incomeSchemaCreator(hasValue);
+    setIncomeSchema(newSchema);
+
+    form.clearErrors('amount');
+    
+    form.setValue('unit', unitValue);
+  };
+  
   return (
     <>
       <Card className="border-t-4 border-t-green-500 shadow-md">
@@ -279,7 +308,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>Valor</FormLabel>
+                    <FormLabel required={selectedUnitHasCondominiumValue}>Valor</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="0,00"
@@ -291,6 +320,11 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                         value={field.value ? `R$ ${field.value}` : ''}
                       />
                     </FormControl>
+                    {!selectedUnitHasCondominiumValue && (
+                      <p className="text-xs text-muted-foreground">
+                        O valor pode ser deixado em branco pois esta unidade está isenta de pagamento.
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -342,7 +376,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                   <FormItem>
                     <FormLabel required>Unidade</FormLabel>
                     <Select 
-                      onValueChange={field.onChange} 
+                      onValueChange={handleUnitChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
