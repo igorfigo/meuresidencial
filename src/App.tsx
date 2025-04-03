@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -47,6 +48,7 @@ function App() {
           <div className="app">
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/landing" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/dashboard" element={<AuthRequired><Dashboard /></AuthRequired>} />
               <Route path="/perfil" element={<AuthRequired><UserProfile /></AuthRequired>} />
