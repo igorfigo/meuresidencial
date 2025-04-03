@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
@@ -61,14 +62,14 @@ const Feature = ({ icon, title, description, delay }) => {
   const Icon = icon;
   
   return (
-    <FadeInSection delay={delay} className="flex flex-col items-start p-6 bg-custom-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-custom-primary/20 relative overflow-hidden group">
-      <div className="absolute top-0 right-0 w-20 h-20 bg-custom-primary/10 rounded-full -translate-x-10 -translate-y-10 opacity-0 group-hover:opacity-50 transition-all duration-500"></div>
-      <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-custom-secondary to-custom-primary group-hover:w-full transition-all duration-300"></div>
+    <FadeInSection delay={delay} className="flex flex-col items-start p-6 bg-custom-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-custom-accent/20 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 w-20 h-20 bg-custom-accent/10 rounded-full -translate-x-10 -translate-y-10 opacity-0 group-hover:opacity-50 transition-all duration-500"></div>
+      <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-custom-accent to-custom-primary group-hover:w-full transition-all duration-300"></div>
       
-      <div className="h-12 w-12 flex items-center justify-center rounded-full bg-custom-primary/10 text-custom-primary mb-4 z-10 group-hover:scale-110 transition-transform duration-300">
-        <Icon size={24} className="group-hover:text-custom-dark transition-colors duration-300" />
+      <div className="h-12 w-12 flex items-center justify-center rounded-full bg-custom-accent/10 text-custom-accent mb-4 z-10 group-hover:scale-110 transition-transform duration-300">
+        <Icon size={24} className="group-hover:text-custom-primary transition-colors duration-300" />
       </div>
-      <h3 className="text-xl font-semibold mb-2 group-hover:text-custom-primary transition-colors duration-300">{title}</h3>
+      <h3 className="text-xl font-semibold mb-2 group-hover:text-custom-accent transition-colors duration-300">{title}</h3>
       <p className="text-gray-600 z-10">{description}</p>
     </FadeInSection>
   );
