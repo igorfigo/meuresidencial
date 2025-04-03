@@ -32,6 +32,7 @@ import {
   PieChart,
   History,
   Files,
+  HelpCircle,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -136,6 +137,7 @@ export function Sidebar() {
     { path: '/dados-historicos', label: 'Dados Históricos', icon: <History className="h-5 w-5" /> },
     { path: '/vaga-garagem', label: 'Garagem Livre', icon: <Car className="h-5 w-5" /> },
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" /> },
+    { path: '/duvidas-frequentes', label: 'Dúvidas Frequentes', icon: <HelpCircle className="h-5 w-5" /> },
     { path: '/contato', label: 'Fale Conosco', icon: <Mail className="h-5 w-5" /> },
   ];
   

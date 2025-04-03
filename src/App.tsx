@@ -35,6 +35,7 @@ import GaragemLivre from '@/pages/GaragemLivre';
 import BusinessManagement from '@/pages/BusinessManagement';
 import DadosHistoricos from './pages/DadosHistoricos';
 import VagaGaragem from './pages/VagaGaragem';
+import DuvidasFrequentes from './pages/DuvidasFrequentes';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
@@ -75,6 +76,7 @@ function App() {
               <Route path="/dedetizacoes" element={<AuthRequired><Dedetizacoes /></AuthRequired>} />
               <Route path="/minha-assinatura" element={<AuthRequired><MinhaAssinatura /></AuthRequired>} />
               <Route path="/contato" element={<AuthRequired><FaleConosco /></AuthRequired>} />
+              <Route path="/duvidas-frequentes" element={<AuthRequired><DuvidasFrequentes /></AuthRequired>} />
               
               {/* Resident Routes */}
               <Route path="/minhas-cobrancas" element={<AuthRequired><MinhasCobrancas /></AuthRequired>} />
