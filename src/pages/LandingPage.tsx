@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
@@ -17,7 +16,8 @@ import {
   Shield, 
   Star, 
   Users, 
-  Wallet 
+  Wallet,
+  HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlans } from '@/hooks/use-plans';
@@ -31,6 +31,12 @@ import {
   navigationMenuTriggerStyle
 } from '@/components/ui/navigation-menu';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const FadeInSection = ({ children, delay = 0, className = '' }) => {
   const [ref, inView] = useInView({
@@ -221,6 +227,29 @@ const LandingPage = () => {
     }
   };
 
+  const faqItems = [
+    {
+      question: "Como funciona o plano de gestão de condomínios?",
+      answer: "Nosso plano de gestão oferece uma plataforma completa para síndicos e moradores, com ferramentas para controle financeiro, comunicação, reserva de áreas comuns, gestão de documentos e muito mais, tudo em um único lugar."
+    },
+    {
+      question: "Quanto custa o serviço?",
+      answer: "Oferecemos diferentes planos com preços que variam de acordo com o tamanho do condomínio e recursos desejados. Consulte a seção de planos para mais detalhes sobre os valores."
+    },
+    {
+      question: "É necessário instalar algum aplicativo?",
+      answer: "Não é necessário instalar nenhum aplicativo. Nossa plataforma é totalmente baseada na web e pode ser acessada através de qualquer navegador de internet, seja em computadores, tablets ou smartphones."
+    },
+    {
+      question: "Como é feito o suporte técnico?",
+      answer: "Oferecemos suporte técnico por e-mail, chat e telefone em horário comercial para todos os clientes. Os planos premium contam com atendimento prioritário e suporte estendido."
+    },
+    {
+      question: "É possível migrar dados de outro sistema?",
+      answer: "Sim, oferecemos serviço de migração de dados para facilitar a transição de outros sistemas para o MeuResidencial, mantendo todo o histórico do seu condomínio."
+    }
+  ];
+
   return (
     <div className="w-full overflow-x-hidden bg-gradient-to-b from-blue-50 to-white">
       <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm z-50 shadow-sm">
@@ -255,6 +284,14 @@ const LandingPage = () => {
                     className={navigationMenuTriggerStyle()}
                   >
                     Clientes
+                  </button>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <button 
+                    onClick={() => scrollToSection('faq')}
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    FAQ
                   </button>
                 </NavigationMenuItem>
               </NavigationMenuList>
@@ -432,7 +469,7 @@ const LandingPage = () => {
                 O Que Nossos Clientes Dizem
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Síndicos que transformaram a gestão de seus condomínios com nossa plataforma
+                Síndicos que transformaram a gestão do nosso condomínio com nossa plataforma
               </p>
             </div>
           </FadeInSection>
@@ -476,6 +513,58 @@ const LandingPage = () => {
         </div>
       </section>
       
+      <section id="faq" className="py-20 bg-blue-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <FadeInSection>
+            <div className="text-center mb-16">
+              <div className="inline-block mb-4 px-6 py-2 rounded-full bg-brand-100 text-brand-800">
+                <div className="flex items-center space-x-2">
+                  <HelpCircle className="h-5 w-5" />
+                  <span className="font-semibold">Dúvidas Frequentes</span>
+                </div>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Perguntas Frequentes
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Encontre respostas para as dúvidas mais comuns sobre nossos serviços
+              </p>
+            </div>
+          </FadeInSection>
+          
+          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <FadeInSection delay={100}>
+              <Accordion type="single" collapsible className="w-full">
+                {faqItems.map((item, index) => (
+                  <AccordionItem key={index} value={`item-${index}`}>
+                    <AccordionTrigger className="px-6 py-4 text-left font-medium text-gray-900 hover:text-brand-600">
+                      {item.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-4 text-gray-600">
+                      {item.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </FadeInSection>
+          </div>
+          
+          <FadeInSection delay={200} className="mt-12 text-center">
+            <p className="text-gray-600 mb-4">
+              Não encontrou o que procurava?
+            </p>
+            <Button 
+              onClick={() => scrollToSection('testimonials')}
+              variant="outline" 
+              className="bg-white hover:bg-gray-50"
+            >
+              Entre em contato
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </FadeInSection>
+        </div>
+      </section>
+      
       <section className="py-20 bg-gradient-to-r from-brand-600 to-brand-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection className="text-center">
@@ -514,6 +603,7 @@ const LandingPage = () => {
                   <li><button onClick={() => scrollToSection('features')} className="text-gray-400 hover:text-white transition-colors">Funcionalidades</button></li>
                   <li><button onClick={() => scrollToSection('plans')} className="text-gray-400 hover:text-white transition-colors">Planos</button></li>
                   <li><button onClick={() => scrollToSection('testimonials')} className="text-gray-400 hover:text-white transition-colors">Depoimentos</button></li>
+                  <li><button onClick={() => scrollToSection('faq')} className="text-gray-400 hover:text-white transition-colors">FAQ</button></li>
                 </ul>
               </div>
               
