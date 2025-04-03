@@ -4,9 +4,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Pencil, Wallet, LockIcon, Search } from 'lucide-react';
+import { Pencil, Wallet, LockIcon, Search, AlertTriangle } from 'lucide-react';
 import { formatCurrencyInput, BRLToNumber } from '@/utils/currency';
 import { BalanceHistoryDialog } from './BalanceHistoryDialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface BalanceDisplayProps {
   balance: string;
@@ -21,6 +22,7 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
   const [editBalance, setEditBalance] = useState(balance);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   
   // Update local state when balance changes
   useEffect(() => {
@@ -30,10 +32,12 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
   const handleEdit = () => {
     setEditBalance(balance);
     setIsEditing(true);
+    setShowAlert(true);
   };
   
   const handleCancel = () => {
     setIsEditing(false);
+    setShowAlert(false);
   };
   
   const handleSave = async () => {
@@ -44,6 +48,7 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
       // By awaiting this operation, we ensure the promise resolves before setting isEditing to false
       await onBalanceChange(editBalance);
       setIsEditing(false);
+      setShowAlert(false);
     } catch (error) {
       console.error('Error saving balance:', error);
     } finally {
@@ -97,6 +102,15 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
                 )}
               </div>
             </div>
+            
+            {showAlert && (
+              <Alert variant="destructive" className="mb-3 py-2 text-xs">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Atenção: Após modificar o saldo, datas de recebimento de receitas e de pagamento de despesas não poderão ser anteriores a esta data.
+                </AlertDescription>
+              </Alert>
+            )}
             
             <div className="w-full">
               {!readOnly && isEditing ? (
