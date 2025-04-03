@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -36,7 +37,8 @@ import {
   BarChart3,
   PieChart,
   History,
-  Files
+  Files,
+  HelpCircle
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -150,6 +152,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Dados Históricos', icon: <History className="h-5 w-5" />, path: '/dados-historicos' },
     { name: 'Garagem Livre', icon: <Car className="h-5 w-5" />, path: '/vaga-garagem' },
     { name: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" />, path: '/minha-assinatura' },
+    { name: 'Dúvidas Frequentes', icon: <HelpCircle className="h-5 w-5" />, path: '/duvidas-frequentes' },
     { name: 'Fale Conosco', icon: <Mail className="h-5 w-5" />, path: '/contato' },
   ];
   
