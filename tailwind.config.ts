@@ -64,18 +64,27 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				brand: {
-					50: '#f0f8ff',
-					100: '#e0f1fe',
-					200: '#bae2fd',
-					300: '#7ccdfb',
-					400: '#37b4f7',
-					500: '#1399e9',
-					600: '#0579c7',
-					700: '#0460a2',
-					800: '#065286',
-					900: '#0a456f',
-					950: '#072b49',
+					50: '#f0f4ff',
+					100: '#e0e9ff',
+					200: '#c7d7fe',
+					300: '#a5beff',
+					400: '#8a9ff9',
+					500: '#6a7ef2',
+					600: '#4d5edf',
+					700: '#2151B9', // Main brand color
+					800: '#103381', // Darker shade
+					900: '#0c256b',
+					950: '#040c31',
 				},
+				// New palette colors
+				custom: {
+					primary: '#2151B9',
+					secondary: '#295AC3',
+					dark: '#103381',
+					light: '#EFEFEF',
+					white: '#FFFFFF',
+					black: '#000000'
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
