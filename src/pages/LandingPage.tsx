@@ -95,7 +95,7 @@ const PlanCard = ({ plan, featured = false, delay }) => {
                   ? "Mais que 50 moradores" 
                   : plan.codigo === "PADRAO" 
                     ? "Até 50 moradores"
-                    : `Até ${plan.max_moradores || '30'} moradores`}
+                    : "Até 30 moradores"}
               </span>
             </div>
           </li>
@@ -133,14 +133,14 @@ const LandingPage = () => {
             codigo: "BASICO",
             nome: "Plano Básico",
             valor: "R$ 99,90",
-            max_moradores: 50
+            max_moradores: 30
           },
           {
             id: "2",
             codigo: "PADRAO",
             nome: "Plano Padrão",
             valor: "R$ 199,90",
-            max_moradores: 150
+            max_moradores: 50
           },
           {
             id: "3",
@@ -375,7 +375,7 @@ const LandingPage = () => {
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">O Que Nossos Clientes Dizem</h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Síndicos que transformaram a gestão de seus condomínios com nossa plataforma
+                Síndicos que transformaram a gestão do seu condomínio com nossa plataforma
               </p>
             </div>
           </FadeInSection>
