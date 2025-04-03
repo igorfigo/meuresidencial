@@ -557,36 +557,34 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <section id="faq" className="py-16 bg-gradient-to-b from-[#EFEFEF] via-[#D946EF]/10 to-[#8B5CF6]/70 text-white">
+      <section id="faq" className="py-16 bg-gradient-to-b from-[#EFEFEF] to-[#2151B9]/80 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <FadeInSection>
             <div className="text-center mb-12">
-              <div className="inline-block mb-4 px-6 py-2 rounded-full bg-[#8B5CF6]/30 text-white backdrop-blur-sm border border-white/30 animate-soft-bounce">
+              <div className="inline-block mb-4 px-6 py-2 rounded-full bg-white/20 text-white backdrop-blur-sm">
                 <div className="flex items-center space-x-2">
-                  <HelpCircle className="h-5 w-5 text-[#F97316]" />
-                  <span className="font-semibold text-white">Perguntas Frequentes</span>
+                  <HelpCircle className="h-5 w-5" />
+                  <span className="font-semibold">Perguntas Frequentes</span>
                 </div>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-md">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#F97316] to-[#8B5CF6]">
-                  Perguntas Frequentes
-                </span>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Perguntas Frequentes
               </h2>
-              <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8 drop-shadow-sm">
+              <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
                 Encontre respostas para as dúvidas mais comuns sobre nossos serviços
               </p>
             </div>
           </FadeInSection>
           
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-[#8B5CF6]/30 hover:shadow-[#8B5CF6]/20 transition-shadow duration-300">
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-white/30">
             <FadeInSection delay={100}>
               <Accordion type="single" collapsible className="w-full">
                 {faqItems.map((item, index) => (
-                  <AccordionItem key={index} value={`item-${index}`} className="border-b border-[#8B5CF6]/10">
-                    <AccordionTrigger className="px-6 py-4 text-left font-medium text-gray-800 hover:text-[#8B5CF6] transition-colors duration-300">
+                  <AccordionItem key={index} value={`item-${index}`}>
+                    <AccordionTrigger className="px-6 py-4 text-left font-medium text-gray-800 hover:text-brand-700 border-b border-gray-100">
                       {item.question}
                     </AccordionTrigger>
-                    <AccordionContent className="px-6 pb-4 text-gray-700 bg-gradient-to-r from-[#8B5CF6]/5 to-transparent">
+                    <AccordionContent className="px-6 pb-4 text-gray-700 bg-brand-50/30">
                       {item.answer}
                     </AccordionContent>
                   </AccordionItem>
@@ -597,7 +595,7 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <footer className="bg-gradient-to-b from-[#8B5CF6]/80 to-[#103381] text-custom-white py-8">
+      <footer className="bg-gradient-to-b from-[#2151B9]/90 to-[#103381] text-custom-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
