@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -172,6 +173,17 @@ export const AccountingReport = () => {
       
       doc.setFillColor(59, 130, 246);
       doc.rect(0, 0, pageWidth, 5, 'F');
+      
+      // Add two paragraphs above the title
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(31, 41, 55);
+      doc.setFontSize(12);
+      doc.text("TRANSPARÊNCIA E GESTÃO EFICIENTE", pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += lineHeight * 1.5;
+      
+      doc.setFontSize(10);
+      doc.text("Demonstrativo mensal de receitas e despesas para acompanhamento dos moradores", pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += lineHeight * 1.5;
       
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
