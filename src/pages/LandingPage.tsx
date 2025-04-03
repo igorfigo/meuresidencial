@@ -19,7 +19,8 @@ import {
   Wallet,
   HelpCircle,
   Menu,
-  X
+  X,
+  Phone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlans } from '@/hooks/use-plans';
@@ -235,6 +236,11 @@ const LandingPage = () => {
     }
   };
 
+  const openWhatsApp = () => {
+    const whatsappUrl = `https://wa.me/5511914420166`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   const faqItems = [
     {
       question: "Como funciona o plano de gestão de condomínios?",
@@ -295,6 +301,14 @@ const LandingPage = () => {
               </button>
             </nav>
             
+            <button
+              onClick={openWhatsApp}
+              className="group flex items-center mr-3 text-custom-primary hover:text-custom-secondary"
+            >
+              <Phone className="h-5 w-5 mr-1" />
+              <span className="text-sm font-medium">11-91442-0166</span>
+            </button>
+            
             <Link to="/login">
               <Button size="sm" className="group bg-custom-primary hover:bg-custom-dark text-custom-white">
                 Acessar Meu Residencial
@@ -304,6 +318,12 @@ const LandingPage = () => {
           </div>
           
           <div className="md:hidden flex items-center space-x-2">
+            <button
+              onClick={openWhatsApp}
+              className="p-2 text-custom-primary hover:text-custom-secondary"
+            >
+              <Phone size={20} />
+            </button>
             <Link to="/login">
               <Button size="sm" className="bg-custom-primary hover:bg-custom-dark text-custom-white">
                 Acessar
@@ -344,6 +364,12 @@ const LandingPage = () => {
                 className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
               >
                 FAQ
+              </button>
+              <button 
+                onClick={openWhatsApp}
+                className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
+              >
+                Contato via WhatsApp
               </button>
             </div>
           </div>
@@ -501,7 +527,7 @@ const LandingPage = () => {
                   <span className="font-semibold">Depoimentos</span>
                 </div>
               </div>
-              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-custom-primary to-custom-dark">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#103381] to-[#295AC3]">
                 O Que Nossos Clientes Dizem
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -591,6 +617,13 @@ const LandingPage = () => {
                   <MapPin className="h-5 w-5 text-white mr-2 flex-shrink-0 mt-0.5" />
                   <p className="text-white/80">Av. João Machado, 849, João Pessoa - PB</p>
                 </div>
+                <button 
+                  onClick={openWhatsApp}
+                  className="flex items-center mt-4 text-white hover:text-white/80 transition-colors"
+                >
+                  <Phone className="h-5 w-5 mr-2" />
+                  <span>11-91442-0166</span>
+                </button>
               </div>
             </div>
             
@@ -638,6 +671,15 @@ const LandingPage = () => {
                 <li>Email: contato@meuresidencial.com.br</li>
                 <li>Telefone: (83) 3333-3333</li>
                 <li>Horário: Segunda a Sexta, 9h às 18h</li>
+                <li>
+                  <button 
+                    onClick={openWhatsApp}
+                    className="flex items-center mt-2 text-white/80 hover:text-white transition-colors"
+                  >
+                    <Phone className="h-4 w-4 mr-2" />
+                    <span>WhatsApp: 11-91442-0166</span>
+                  </button>
+                </li>
               </ul>
             </div>
             
