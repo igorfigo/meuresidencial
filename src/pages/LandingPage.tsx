@@ -2,9 +2,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
-import { ArrowRight, Building, Calendar, CheckCircle2, Coins, FileText, Key, Lock, MessageSquare, Shield, Users, Wallet } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Building, 
+  Calendar, 
+  CheckCircle2, 
+  Coins, 
+  FileText, 
+  Key, 
+  Lock, 
+  MessageSquare, 
+  Shield, 
+  Users, 
+  Wallet 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlans } from '@/hooks/use-plans';
+import { 
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle
+} from '@/components/ui/navigation-menu';
 
 const FadeInSection = ({ children, delay = 0, className = '' }) => {
   const [ref, inView] = useInView({
@@ -40,6 +62,18 @@ const Feature = ({ icon, title, description, delay }) => {
 };
 
 const PlanCard = ({ plan, featured = false, delay }) => {
+  // Common features for all plans
+  const commonFeatures = [
+    "Gestão financeira completa",
+    "Comunicados e avisos",
+    "Reserva de áreas comuns",
+    "Controle de dedetizações",
+    "Gestão de documentos",
+    "Recebimento via PIX",
+    "Controle de vagas",
+    "Suporte técnico"
+  ];
+
   return (
     <FadeInSection delay={delay} className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${featured ? 'border-2 border-brand-500 transform scale-105' : 'border border-gray-200'}`}>
       <div className={`p-6 ${featured ? 'bg-gradient-to-r from-brand-600 to-brand-700 text-white' : 'bg-white text-gray-800'}`}>
@@ -53,30 +87,13 @@ const PlanCard = ({ plan, featured = false, delay }) => {
             <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
             <span>Até {plan.max_moradores || '50'} moradores</span>
           </li>
-          <li className="flex items-start">
-            <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-            <span>Gestão financeira completa</span>
-          </li>
-          <li className="flex items-start">
-            <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-            <span>Comunicados e avisos</span>
-          </li>
-          <li className="flex items-start">
-            <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-            <span>Reserva de áreas comuns</span>
-          </li>
-          {featured && (
-            <>
-              <li className="flex items-start">
-                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                <span>Controle de dedetizações</span>
-              </li>
-              <li className="flex items-start">
-                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                <span>Gestão de documentos</span>
-              </li>
-            </>
-          )}
+          
+          {commonFeatures.map((feature, index) => (
+            <li key={index} className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+              <span>{feature}</span>
+            </li>
+          ))}
         </ul>
         <Link to="/login" className="w-full">
           <Button className={`w-full mt-6 ${featured ? 'bg-brand-600 hover:bg-brand-700' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
@@ -142,10 +159,79 @@ const LandingPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      window.scrollTo({
+        top: element.offsetTop - 80, // Offset for header
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="w-full overflow-x-hidden bg-gradient-to-b from-blue-50 to-white">
+      {/* Header Navigation */}
+      <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Building className="h-7 w-7 text-brand-600" />
+            <span className="text-xl font-bold ml-2">MeuResidencial</span>
+          </div>
+          
+          {/* Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <button 
+                    onClick={() => scrollToSection('features')}
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Funcionalidades
+                  </button>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <button 
+                    onClick={() => scrollToSection('plans')}
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Planos
+                  </button>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <button 
+                    onClick={() => scrollToSection('testimonials')}
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Clientes
+                  </button>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+            
+            <Link to="/login">
+              <Button size="sm" className="group bg-brand-600 hover:bg-brand-700 text-white">
+                Acessar Meu Residencial
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+          </div>
+          
+          {/* Mobile login button */}
+          <div className="md:hidden">
+            <Link to="/login">
+              <Button size="sm" className="bg-brand-600 hover:bg-brand-700 text-white">
+                Acessar
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden pt-24">
         <div 
           className="absolute inset-0 z-0 bg-gradient-to-r from-brand-800/30 to-brand-600/30"
           ref={heroRef}
@@ -197,7 +283,7 @@ const LandingPage = () => {
       </section>
       
       {/* Features Section */}
-      <section className="py-20 bg-white">
+      <section id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
             <div className="text-center mb-16">
@@ -268,7 +354,7 @@ const LandingPage = () => {
       </section>
       
       {/* Plans Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-blue-50">
+      <section id="plans" className="py-20 bg-gradient-to-b from-white to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
             <div className="text-center mb-16">
@@ -293,7 +379,7 @@ const LandingPage = () => {
       </section>
       
       {/* Testimonials Section */}
-      <section className="py-20 bg-white">
+      <section id="testimonials" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
             <div className="text-center mb-16">
@@ -380,26 +466,15 @@ const LandingPage = () => {
         </div>
       </section>
       
-      {/* CTA Section */}
+      {/* CTA Section - Removed the button as requested */}
       <section className="py-20 bg-gradient-to-r from-brand-600 to-brand-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center justify-between">
-            <FadeInSection className="mb-8 lg:mb-0 lg:w-2/3">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Pronto para transformar a gestão do seu condomínio?</h2>
-              <p className="text-xl text-blue-100">
-                Comece hoje mesmo e descubra como é fácil ter o controle total do seu condomínio em suas mãos.
-              </p>
-            </FadeInSection>
-            
-            <FadeInSection delay={200}>
-              <Link to="/login">
-                <Button size="lg" className="bg-white text-brand-600 hover:bg-blue-50 group">
-                  Acessar Meu Residencial
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-            </FadeInSection>
-          </div>
+          <FadeInSection className="text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Pronto para transformar a gestão do seu condomínio?</h2>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              Comece hoje mesmo e descubra como é fácil ter o controle total do seu condomínio em suas mãos.
+            </p>
+          </FadeInSection>
         </div>
       </section>
       
@@ -421,9 +496,9 @@ const LandingPage = () => {
               <div>
                 <h4 className="text-lg font-semibold mb-4">Plataforma</h4>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Funcionalidades</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Planos</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Depoimentos</a></li>
+                  <li><button onClick={() => scrollToSection('features')} className="text-gray-400 hover:text-white transition-colors">Funcionalidades</button></li>
+                  <li><button onClick={() => scrollToSection('plans')} className="text-gray-400 hover:text-white transition-colors">Planos</button></li>
+                  <li><button onClick={() => scrollToSection('testimonials')} className="text-gray-400 hover:text-white transition-colors">Depoimentos</button></li>
                 </ul>
               </div>
               
