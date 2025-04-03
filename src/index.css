@@ -168,7 +168,7 @@
 }
 
 .section-subtitle {
-  @apply text-xl text-custom-dark/80 max-w-3xl mx-auto;
+  @apply text-xl text-custom-secondary/80 max-w-3xl mx-auto;
 }
 
 .feature-icon-bg {
