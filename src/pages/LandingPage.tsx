@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
@@ -17,7 +18,9 @@ import {
   Star, 
   Users, 
   Wallet,
-  HelpCircle
+  HelpCircle,
+  Menu,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlans } from '@/hooks/use-plans';
@@ -37,6 +40,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const FadeInSection = ({ children, delay = 0, className = '' }) => {
   const [ref, inView] = useInView({
@@ -91,7 +95,7 @@ const PlanCard = ({ plan, featured = false, delay }) => {
     : featured ? "border-t-4 border-t-custom-primary" : "";
 
   return (
-    <FadeInSection delay={delay} className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${topBorderClass} ${featured ? 'border-2 border-custom-primary transform scale-105' : 'border border-gray-200'}`}>
+    <FadeInSection delay={delay} className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${topBorderClass} ${featured ? 'border-2 border-custom-primary transform scale-105 md:transform md:scale-105' : 'border border-gray-200'}`}>
       <div className={`p-6 ${featured ? 'bg-gradient-to-r from-custom-dark to-custom-primary text-custom-white' : 'bg-custom-white text-gray-800'}`}>
         <h3 className="text-xl font-bold mb-2">{plan.nome}</h3>
         <div className="text-3xl font-bold mb-4">{plan.valor}</div>
@@ -172,6 +176,8 @@ const LandingPage = () => {
   const { plans, isLoading } = usePlans();
   const [activePlans, setActivePlans] = useState([]);
   const heroRef = useRef(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     if (!isLoading) {
@@ -225,6 +231,9 @@ const LandingPage = () => {
         behavior: 'smooth'
       });
     }
+    if (mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
   };
 
   const faqItems = [
@@ -252,6 +261,7 @@ const LandingPage = () => {
 
   return (
     <div className="w-full overflow-x-hidden bg-gradient-to-b from-custom-light to-custom-white">
+      {/* Header - com menu mobile responsivo */}
       <header className="fixed top-0 left-0 right-0 bg-custom-white/90 backdrop-blur-sm z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center">
@@ -259,6 +269,7 @@ const LandingPage = () => {
             <span className="text-xl font-bold ml-2">MeuResidencial</span>
           </div>
           
+          {/* Menu Desktop */}
           <div className="hidden md:flex items-center space-x-6">
             <nav className="flex items-center space-x-6 mr-4">
               <button 
@@ -295,16 +306,56 @@ const LandingPage = () => {
             </Link>
           </div>
           
-          <div className="md:hidden">
+          {/* Menu Mobile - Hamburger e botão de acesso */}
+          <div className="md:hidden flex items-center space-x-2">
             <Link to="/login">
               <Button size="sm" className="bg-custom-primary hover:bg-custom-dark text-custom-white">
                 Acessar
               </Button>
             </Link>
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-gray-700 hover:text-custom-primary"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
+        
+        {/* Menu Mobile - Expandido */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white shadow-lg animate-slide-in-top">
+            <div className="px-4 py-3 space-y-3">
+              <button 
+                onClick={() => scrollToSection('features')}
+                className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
+              >
+                Funcionalidades
+              </button>
+              <button 
+                onClick={() => scrollToSection('plans')}
+                className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
+              >
+                Planos
+              </button>
+              <button 
+                onClick={() => scrollToSection('testimonials')}
+                className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
+              >
+                Clientes
+              </button>
+              <button 
+                onClick={() => scrollToSection('faq')}
+                className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
+              >
+                FAQ
+              </button>
+            </div>
+          </div>
+        )}
       </header>
       
+      {/* Hero Section - Responsivo */}
       <section className="relative overflow-hidden pt-24 bg-gradient-to-b from-brand-700 to-brand-800">
         <div 
           className="absolute inset-0 z-0 bg-gradient-to-b from-brand-700 to-brand-800"
@@ -347,6 +398,7 @@ const LandingPage = () => {
         </div>
       </section>
       
+      {/* Features Section - Grid responsivo */}
       <section id="features" className="py-20 bg-custom-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
@@ -358,7 +410,7 @@ const LandingPage = () => {
             </div>
           </FadeInSection>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <Feature 
               icon={Wallet}
               title="Gestão Financeira" 
@@ -417,6 +469,7 @@ const LandingPage = () => {
         </div>
       </section>
       
+      {/* Plans Section - Cards responsivos */}
       <section id="plans" className="py-20 bg-gradient-to-b from-brand-700 to-brand-800 relative">
         <div className="absolute -top-1 left-0 right-0 transform rotate-180">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
@@ -433,7 +486,7 @@ const LandingPage = () => {
             </div>
           </FadeInSection>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {activePlans.map((plan, index) => (
               <PlanCard 
                 key={plan.id} 
@@ -451,6 +504,7 @@ const LandingPage = () => {
         </div>
       </section>
       
+      {/* Testimonials Section - Grid responsivo */}
       <section id="testimonials" className="py-20 bg-custom-white relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-custom-light to-transparent"></div>
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-custom-primary/10 rounded-full filter blur-3xl opacity-30"></div>
@@ -474,7 +528,7 @@ const LandingPage = () => {
             </div>
           </FadeInSection>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <TestimonialCard 
               author="Ricardo Pereira"
               role="Síndico"
@@ -502,6 +556,7 @@ const LandingPage = () => {
         </div>
       </section>
       
+      {/* FAQ Section - Responsivo */}
       <section id="faq" className="py-20 bg-custom-light">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <FadeInSection>
@@ -540,21 +595,29 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <section className="py-20 bg-gradient-to-r from-custom-dark to-custom-primary text-custom-white">
+      {/* CTA Section - Responsivo */}
+      <section className="py-16 md:py-20 bg-gradient-to-r from-custom-dark to-custom-primary text-custom-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection className="text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Pronto para transformar a gestão do seu condomínio?</h2>
-            <p className="text-xl text-custom-light max-w-3xl mx-auto">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">Pronto para transformar a gestão do seu condomínio?</h2>
+            <p className="text-lg md:text-xl text-custom-light max-w-3xl mx-auto mb-8">
               Comece hoje mesmo e descubra como é fácil ter o controle total do seu condomínio em suas mãos.
             </p>
+            <Link to="/login">
+              <Button size="lg" className="bg-white text-custom-primary hover:bg-white/90 font-semibold">
+                Começar Agora
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </FadeInSection>
         </div>
       </section>
       
+      {/* Footer - Responsivo */}
       <footer className="bg-custom-black text-custom-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between">
-            <div className="mb-8 md:mb-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="mb-8 md:mb-0 col-span-1 lg:col-span-1">
               <div className="flex items-center mb-4">
                 <Building className="h-7 w-7 text-custom-primary" />
                 <h3 className="text-2xl font-bold text-custom-white ml-2">MeuResidencial</h3>
@@ -571,7 +634,7 @@ const LandingPage = () => {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:col-span-3 gap-8">
               <div>
                 <h4 className="text-lg font-semibold mb-4">Plataforma</h4>
                 <ul className="space-y-2">
