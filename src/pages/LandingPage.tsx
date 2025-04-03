@@ -564,13 +564,13 @@ const LandingPage = () => {
               <div className="inline-block mb-4 px-6 py-2 rounded-full bg-white/20 text-white backdrop-blur-sm">
                 <div className="flex items-center space-x-2">
                   <HelpCircle className="h-5 w-5" />
-                  <span className="font-semibold">Perguntas Frequentes</span>
+                  <span className="font-semibold text-[#295AC3]">Perguntas Frequentes</span>
                 </div>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#295AC3] mb-4">
                 Perguntas Frequentes
               </h2>
-              <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
+              <p className="text-xl text-[#295AC3] max-w-3xl mx-auto mb-8">
                 Encontre respostas para as dúvidas mais comuns sobre nossos serviços
               </p>
             </div>
