@@ -557,11 +557,11 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <section id="faq" className="py-16 bg-gradient-to-b from-[#EFEFEF] to-brand-700 text-white">
+      <section id="faq" className="py-16 bg-gradient-to-b from-[#EFEFEF] to-[#2151B9]/80 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <FadeInSection>
             <div className="text-center mb-12">
-              <div className="inline-block mb-4 px-6 py-2 rounded-full bg-brand-600/20 text-white">
+              <div className="inline-block mb-4 px-6 py-2 rounded-full bg-white/20 text-white backdrop-blur-sm">
                 <div className="flex items-center space-x-2">
                   <HelpCircle className="h-5 w-5" />
                   <span className="font-semibold">Perguntas Frequentes</span>
@@ -576,12 +576,12 @@ const LandingPage = () => {
             </div>
           </FadeInSection>
           
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-brand-100/30">
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-white/30">
             <FadeInSection delay={100}>
               <Accordion type="single" collapsible className="w-full">
                 {faqItems.map((item, index) => (
                   <AccordionItem key={index} value={`item-${index}`}>
-                    <AccordionTrigger className="px-6 py-4 text-left font-medium text-gray-900 hover:text-brand-700 border-b border-gray-100">
+                    <AccordionTrigger className="px-6 py-4 text-left font-medium text-gray-800 hover:text-brand-700 border-b border-gray-100">
                       {item.question}
                     </AccordionTrigger>
                     <AccordionContent className="px-6 pb-4 text-gray-700 bg-brand-50/30">
@@ -595,7 +595,7 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <footer className="bg-gradient-to-r from-[#2151B9] to-[#103381] text-custom-white py-8">
+      <footer className="bg-gradient-to-b from-[#2151B9]/90 to-[#103381] text-custom-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
@@ -609,7 +609,7 @@ const LandingPage = () => {
                 <p className="text-white/90">Av. João Machado, 849, João Pessoa - PB</p>
               </div>
               <p className="text-white/90">Email: contato@meuresidencial.com</p>
-              <p className="text-white/60 text-sm mt-4">
+              <p className="text-white/70 text-sm mt-4">
                 © {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.
               </p>
             </div>

@@ -147,6 +147,10 @@ export default {
 				'pulse-whatsapp': {
 					'0%, 100%': { transform: 'scale(1)' },
 					'50%': { transform: 'scale(1.1)' }
+				},
+				'soft-bounce': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' }
 				}
 			},
 			animation: {
@@ -162,7 +166,8 @@ export default {
 				'slide-out-top': 'slide-out-top 0.3s ease-out',
 				'slide-in-bottom': 'slide-in-bottom 0.3s ease-out',
 				'slide-out-bottom': 'slide-out-bottom 0.3s ease-out',
-				'pulse-whatsapp': 'pulse-whatsapp 2s infinite'
+				'pulse-whatsapp': 'pulse-whatsapp 2s infinite',
+				'soft-bounce': 'soft-bounce 2s ease-in-out infinite'
 			}
 		}
 	},
