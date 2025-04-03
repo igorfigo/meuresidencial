@@ -328,33 +328,13 @@ const LandingPage = () => {
             
             <div className="lg:w-1/2 relative">
               <FadeInSection delay={600} className="relative">
-                <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/20 rounded-full -translate-x-16 -translate-y-16 opacity-30"></div>
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/20 rounded-full filter blur-3xl opacity-30"></div>
-                
-                <div className="relative p-6">
-                  <div className="mb-4 flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-current" />
-                    ))}
-                  </div>
-                  
-                  <div className="relative">
-                    <Quote className="absolute -left-2 -top-2 text-custom-primary/30 w-8 h-8 opacity-40" />
-                    <p className="text-gray-600 mb-6 pl-5 relative z-10">
-                      "O MeuResidencial transformou completamente a gestão do nosso condomínio. Antes era tudo manual e agora temos controle total com muito mais transparência."
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center mt-2">
-                    <div className="mr-4 h-12 w-12 rounded-full bg-custom-primary/10 flex items-center justify-center">
-                      <span className="text-custom-primary font-bold">R</span>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900">Ricardo Pereira</h4>
-                      <p className="text-sm text-custom-primary">Síndico - Edifício Aurora</p>
-                    </div>
-                  </div>
-                </div>
+                <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/20 rounded-full filter blur-3xl opacity-40 animate-pulse" />
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/20 rounded-full filter blur-3xl opacity-40 animate-pulse" />
+                <img 
+                  src="/placeholder.svg"
+                  alt="Gestão de condomínios" 
+                  className="relative z-10 rounded-xl shadow-2xl w-full max-w-lg mx-auto"
+                />
               </FadeInSection>
             </div>
           </div>
@@ -443,17 +423,13 @@ const LandingPage = () => {
             <path fill="white" fillOpacity="1" d="M0,96L48,106.7C96,117,192,139,288,128C384,117,480,75,576,80C672,85,768,139,864,138.7C960,139,1056,85,1152,64C1248,43,1344,53,1392,58.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
           </svg>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
-            <div className="text-center mb-16 pt-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg py-6 px-8 inline-block mb-4">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-md">
-                  Planos que se Adaptam às Suas Necessidades
-                </h2>
-                <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
-                  Escolha o plano ideal para o seu condomínio, com preços acessíveis e funcionalidades completas
-                </p>
-              </div>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Planos que se Adaptam às Suas Necessidades</h2>
+              <p className="text-xl text-white/80 max-w-3xl mx-auto">
+                Escolha o plano ideal para o seu condomínio, com preços acessíveis e funcionalidades completas
+              </p>
             </div>
           </FadeInSection>
           
