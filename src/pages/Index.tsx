@@ -1,25 +1,24 @@
-
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
-import { useIsMobile } from '@/hooks/use-mobile';
+import LandingPage from './LandingPage';
 
 const Index = () => {
-  const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useApp();
   
-  useEffect(() => {
-    // Only redirect authenticated users, show landing page to unauthenticated users
-    if (!isLoading) {
-      if (isAuthenticated) {
-        navigate('/dashboard');
-      } else {
-        navigate('/landing');
-      }
-    }
-  }, [navigate, isAuthenticated, isLoading]);
-
-  return null;
+  if (isLoading) {
+    // Show blank page while loading authentication status
+    return null;
+  }
+  
+  // If user is authenticated, redirect to dashboard
+  // Otherwise, show the landing page directly
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // Show landing page for unauthenticated users
+  return <LandingPage />;
 };
 
 export default Index;
