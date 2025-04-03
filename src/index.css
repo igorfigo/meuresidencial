@@ -19,13 +19,13 @@
     --primary: 220 73% 43%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 65% 47%;
+    --secondary: 220 78% 28%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 0 0% 94%;
     --muted-foreground: 220 10% 40%;
 
-    --accent: 220 73% 43%;
+    --accent: 220 62% 46%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -84,7 +84,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-custom-light text-custom-black font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -148,4 +148,41 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
+}
+
+/* Landing page specific styles */
+.nav-link {
+  @apply text-custom-black hover:text-custom-primary transition-colors duration-200 px-3 py-2 text-sm font-medium;
+}
+
+.nav-link.active {
+  @apply text-custom-primary font-semibold;
+}
+
+.hero-gradient {
+  @apply bg-gradient-to-r from-custom-secondary to-custom-primary/90;
+}
+
+.section-title {
+  @apply text-3xl md:text-4xl font-bold text-custom-black mb-4;
+}
+
+.section-subtitle {
+  @apply text-xl text-custom-dark/80 max-w-3xl mx-auto;
+}
+
+.feature-icon-bg {
+  @apply h-12 w-12 flex items-center justify-center rounded-full bg-custom-light text-custom-primary;
+}
+
+.btn-primary {
+  @apply bg-custom-primary text-custom-white hover:bg-custom-accent transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-custom-light text-custom-black border border-custom-primary/20 hover:bg-custom-light/80 transition-colors;
+}
+
+.footer-bg {
+  @apply bg-custom-secondary text-custom-white;
 }

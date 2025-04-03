@@ -76,14 +76,14 @@ export default {
 					900: '#0c256b',
 					950: '#040c31',
 				},
-				// New palette colors
+				// Updated custom palette colors
 				custom: {
-					primary: '#2151B9',
-					secondary: '#295AC3',
-					dark: '#103381',
-					light: '#EFEFEF',
-					white: '#FFFFFF',
-					black: '#000000'
+					primary: '#2151B9',    // Cor Primária - para cabeçalho, rodapé e CTAs
+					secondary: '#103381',  // Cor Secundária - para elementos de destaque
+					accent: '#295AC3',     // Cor de Destaque - para hover effects
+					light: '#EFEFEF',      // Cor de Fundo - para fundo da página
+					white: '#FFFFFF',      // Cor de Contraste - para textos e seções
+					black: '#000000'       // Cor de Texto - para texto principal
 				}
 			},
 			borderRadius: {
