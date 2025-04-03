@@ -335,6 +335,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUser(null);
     localStorage.removeItem('condoUser');
     toast.info("Logout realizado com sucesso");
+    // Note: No need to navigate here as our routes will handle the redirection
   };
 
   return (
