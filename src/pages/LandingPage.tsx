@@ -417,12 +417,17 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <section id="plans" className="py-20 bg-gradient-to-b from-custom-white to-custom-light">
+      <section id="plans" className="py-20 bg-gradient-to-b from-brand-700 to-brand-800 relative">
+        <div className="absolute -top-1 left-0 right-0 transform rotate-180">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="white" fillOpacity="1" d="M0,96L48,106.7C96,117,192,139,288,128C384,117,480,75,576,80C672,85,768,139,864,138.7C960,139,1056,85,1152,64C1248,43,1344,53,1392,58.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
+        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Planos que se Adaptam às Suas Necessidades</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Planos que se Adaptam às Suas Necessidades</h2>
+              <p className="text-xl text-white/80 max-w-3xl mx-auto">
                 Escolha o plano ideal para o seu condomínio, com preços acessíveis e funcionalidades completas
               </p>
             </div>
@@ -438,6 +443,11 @@ const LandingPage = () => {
               />
             ))}
           </div>
+        </div>
+        <div className="absolute -bottom-1 left-0 right-0">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="white" fillOpacity="1" d="M0,96L48,106.7C96,117,192,139,288,128C384,117,480,75,576,80C672,85,768,139,864,138.7C960,139,1056,85,1152,64C1248,43,1344,53,1392,58.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
         </div>
       </section>
       
