@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -338,15 +337,58 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     );
   };
 
+  const getCurrentPageName = () => {
+    const currentPath = location.pathname;
+    const currentItem = menuItems.find(item => item.path === currentPath);
+    
+    if (currentItem) return currentItem.name;
+    
+    // Check submenu items
+    for (const item of menuItems) {
+      if (item.submenu) {
+        const subItem = item.submenu.find(sub => sub.path === currentPath);
+        if (subItem) return subItem.name;
+      }
+    }
+    
+    // Default fallback based on URL path segments
+    const segments = currentPath.split('/').filter(s => s);
+    if (segments.length > 0) {
+      // Capitalize first letter and replace hyphens with spaces
+      const lastSegment = segments[segments.length - 1];
+      return lastSegment.charAt(0).toUpperCase() + 
+             lastSegment.slice(1).replace(/-/g, ' ');
+    }
+    
+    return 'Dashboard';
+  };
+
   return (
     <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
-      <button
-        onClick={toggleMobileMenu}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white shadow-md text-gray-700"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
+      {/* Mobile Fixed Top Bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-md flex items-center justify-between px-4 py-3">
+        <div className="flex items-center">
+          <button
+            onClick={toggleMobileMenu}
+            className="p-2 rounded-md text-gray-700 mr-3"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <h1 className="text-xl font-semibold truncate max-w-[200px]">
+            {getCurrentPageName()}
+          </h1>
+        </div>
+        <div className="flex items-center space-x-2">
+          <NavLink to="/perfil" className="p-2">
+            <Settings className="h-5 w-5 text-gray-700" />
+          </NavLink>
+          <div className="h-8 w-8 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
+            {user?.nome?.charAt(0) || 'U'}
+          </div>
+        </div>
+      </div>
 
+      {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
         <div 
           className="lg:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
@@ -354,6 +396,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         />
       )}
 
+      {/* Mobile Sidebar */}
       <aside
         className={cn(
           "lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-sidebar flex flex-col transition-transform duration-300 ease-in-out transform",
@@ -419,6 +462,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
+      {/* Desktop Sidebar */}
       <aside
         className={cn(
           "hidden lg:flex flex-col h-screen sticky top-0 z-30 transition-all duration-300 ease-in-out",
@@ -537,7 +581,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 lg:p-8 overflow-y-auto pt-[64px] lg:pt-4">
           {children}
         </main>
       </div>
