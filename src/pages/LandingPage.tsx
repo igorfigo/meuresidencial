@@ -92,7 +92,7 @@ const PlanCard = ({ plan, featured = false, delay }) => {
             <div className="flex">
               <span className="font-bold px-3 py-1 bg-brand-100 text-brand-800 rounded-full">
                 {plan.codigo === "PREMIUM" 
-                  ? "Mais que 50 moradores" 
+                  ? "Até 50 moradores" 
                   : plan.codigo === "PADRAO" 
                     ? "Até 50 moradores"
                     : `Até ${plan.max_moradores || '30'} moradores`}
@@ -133,21 +133,21 @@ const LandingPage = () => {
             codigo: "BASICO",
             nome: "Plano Básico",
             valor: "R$ 99,90",
-            max_moradores: 50
+            max_moradores: 30
           },
           {
             id: "2",
             codigo: "PADRAO",
             nome: "Plano Padrão",
             valor: "R$ 199,90",
-            max_moradores: 150
+            max_moradores: 50
           },
           {
             id: "3",
             codigo: "PREMIUM",
             nome: "Plano Premium",
             valor: "R$ 299,90",
-            max_moradores: 300
+            max_moradores: 50
           }
         ]);
       }
