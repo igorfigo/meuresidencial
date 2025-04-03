@@ -1,18 +1,19 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Plus, Minus, Wallet, PiggyBank, FileText, FilePlus, FileMinus } from 'lucide-react';
-import { FinanceiroReceitas } from './FinanceiroReceitas';
-import { FinanceiroDespesas } from './FinanceiroDespesas';
-import { FinanceiroFluxoCaixa } from './FinanceiroFluxoCaixa';
-import { FinanceiroRecebimentoPix } from './FinanceiroRecebimentoPix';
-import { DuvidasFrequentes } from './DuvidasFrequentes';
 import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import FinanceiroReceitas from './FinanceiroReceitas';
+import FinanceiroDespesas from './FinanceiroDespesas';
+import FinanceiroFluxoCaixa from './FinanceiroFluxoCaixa';
+import FinanceiroRecebimentoPix from './FinanceiroRecebimentoPix';
+import DuvidasFrequentes from './DuvidasFrequentes';
 
 const FinanceiroDashboard = () => {
   const [selectedTab, setSelectedTab] = useState<"income" | "expense">("income");
@@ -30,8 +31,8 @@ const FinanceiroDashboard = () => {
     setIsBalanceLoading(true);
     try {
       const { data, error } = await supabase
-        .from('condominiums')
-        .select('saldo')
+        .from('financial_balance')
+        .select('balance')
         .eq('matricula', user.selectedCondominium)
         .single();
         
@@ -39,7 +40,7 @@ const FinanceiroDashboard = () => {
         throw error;
       }
       
-      setBalance(data?.saldo || '0.00');
+      setBalance(data?.balance || '0.00');
     } catch (error) {
       console.error('Error fetching balance:', error);
       toast.error('Erro ao carregar saldo.');
@@ -54,8 +55,8 @@ const FinanceiroDashboard = () => {
     
     try {
       const { error } = await supabase
-        .from('condominiums')
-        .update({ saldo: newBalance })
+        .from('financial_balance')
+        .update({ balance: newBalance })
         .eq('matricula', user.selectedCondominium);
         
       if (error) {
@@ -97,7 +98,7 @@ const FinanceiroDashboard = () => {
             </TabsTrigger>
           </TabsList>
           
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
+          <Tabs value={selectedTab} onValueChange={(value: "income" | "expense") => setSelectedTab(value)} className="space-y-4">
             <TabsContent value="income">
               <FinanceiroReceitas />
             </TabsContent>
