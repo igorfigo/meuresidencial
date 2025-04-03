@@ -626,7 +626,7 @@ const LandingPage = () => {
                     onClick={() => scrollToSection('faq')}
                     className="hover:text-white hover:underline transition-colors"
                   >
-                    Perguntas Frequentes
+                    FAQ
                   </button>
                 </li>
               </ul>
@@ -653,3 +653,18 @@ const LandingPage = () => {
                   <Link to="/privacidade" className="hover:text-white hover:underline transition-colors">
                     Política de Privacidade
                   </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="mt-12 pt-8 border-t border-white/20 text-center text-white/60 text-sm">
+            <p>© {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default LandingPage;
