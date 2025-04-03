@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { format, parse } from 'date-fns';
+import { format, parse, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -34,8 +34,10 @@ const formatDateToBR = (dateString) => {
   
   try {
     if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      // Add one day to fix the date display issue
       const date = new Date(dateString);
-      return format(date, 'dd/MM/yyyy');
+      const correctedDate = addDays(date, 1);
+      return format(correctedDate, 'dd/MM/yyyy');
     }
     
     if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
@@ -45,7 +47,9 @@ const formatDateToBR = (dateString) => {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
     
-    return format(date, 'dd/MM/yyyy');
+    // Add one day to fix the date display issue
+    const correctedDate = addDays(date, 1);
+    return format(correctedDate, 'dd/MM/yyyy');
   } catch (error) {
     console.error("Error formatting date:", error);
     return dateString;
@@ -545,7 +549,7 @@ export const AccountingReport = () => {
                       <TableHead>Categoria</TableHead>
                       <TableHead>Unidade</TableHead>
                       <TableHead>Mês Referência</TableHead>
-                      <TableHead>Data de Pagamento</TableHead>
+                      <TableHead>Data de Recebimento</TableHead>
                       <TableHead className="text-right">Valor</TableHead>
                     </TableRow>
                   </TableHeader>
