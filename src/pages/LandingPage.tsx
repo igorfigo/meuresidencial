@@ -106,7 +106,7 @@ const PlanCard = ({ plan, featured = false, delay }) => {
             <div className="flex">
               <span className="font-bold px-3 py-1 bg-custom-primary/10 text-custom-dark rounded-full">
                 {plan.codigo === "PREMIUM" 
-                  ? "Até 200 moradores" 
+                  ? "Até 50 moradores" 
                   : plan.codigo === "PADRAO" 
                     ? "Até 50 moradores"
                     : `Até ${plan.max_moradores || '30'} moradores`}
@@ -203,7 +203,7 @@ const LandingPage = () => {
             codigo: "PREMIUM",
             nome: "Plano Premium",
             valor: "R$ 299,90",
-            max_moradores: 200
+            max_moradores: 50
           }
         ]);
       }
@@ -358,13 +358,13 @@ const LandingPage = () => {
             <div className="lg:w-1/2 mb-12 lg:mb-0">
               <FadeInSection delay={0}>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-custom-white leading-tight mb-6">
-                  Gestão de condomínios <span className="text-white">simplificada</span>
+                  Gerencie seu Condomínio <span className="text-white">facilmente</span>
                 </h1>
               </FadeInSection>
               
               <FadeInSection delay={200}>
                 <p className="text-xl text-white mb-8">
-                  Ofereça aos síndicos total autonomia para uma gestão eficiente e transparente, com todas as ferramentas necessárias em um único lugar.
+                  Síndicos com autonomia para uma gestão eficiente e transparente, com todas as ferramentas necessárias em um único lugar.
                 </p>
               </FadeInSection>
             </div>
