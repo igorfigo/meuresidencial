@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -33,7 +34,7 @@ const SugestaoReclamacao = () => {
         <div className="container mx-auto py-6 max-w-3xl">
           <h1 className="text-3xl font-bold mb-2">Sugestão/Reclamação</h1>
           <Separator className="mb-4" />
-          <Card className="border-t-4 border-t-amber-500 shadow-md">
+          <Card className="border-t-4 shadow-md" style={{ borderTopColor: '#2151B9' }}>
             <CardContent className="pt-6">
               <div className="flex items-start space-x-4">
                 <AlertTriangle className="h-6 w-6 text-amber-500 mt-1 flex-shrink-0" />
@@ -126,7 +127,7 @@ const SugestaoReclamacao = () => {
           Envie sugestões ou reclamações diretamente para o síndico do seu condomínio.
         </p>
         
-        <Card className="border-t-4 border-t-brand-600 shadow-md">
+        <Card className="border-t-4 shadow-md" style={{ borderTopColor: '#2151B9' }}>
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl text-brand-700">Envie sua mensagem</CardTitle>
             <CardDescription className="text-gray-600">
