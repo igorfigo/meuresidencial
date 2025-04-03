@@ -149,7 +149,7 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
   };
 
   return (
-    <Card className="overflow-hidden border-blue-300 shadow-md">
+    <Card className="overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600">
       <CardContent className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="h-5 w-5 text-blue-500" />

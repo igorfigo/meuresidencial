@@ -428,7 +428,7 @@ const FinanceiroDashboard = () => {
             <BalanceDisplay balance={balance} readOnly={true} className="h-full" />
           </div>
           
-          <Card className="overflow-hidden border-blue-300 shadow-md h-full">
+          <Card className="overflow-hidden border-blue-300 shadow-md h-full border-t-4 border-t-brand-600">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Home className="h-5 w-5 text-blue-500" />
@@ -512,7 +512,7 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="overflow-hidden border-blue-300 shadow-md h-full">
+          <Card className="overflow-hidden border-blue-300 shadow-md h-full border-t-4 border-t-brand-600">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <AlertCircle className="h-5 w-5 text-amber-500" />
@@ -545,7 +545,7 @@ const FinanceiroDashboard = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="overflow-hidden border-blue-300 shadow-md">
+          <Card className="overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <BarChart3 className="h-5 w-5 text-blue-500" />
@@ -590,7 +590,7 @@ const FinanceiroDashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="overflow-hidden border-blue-300 shadow-md">
+          <Card className="overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <PieChart className="h-5 w-5 text-blue-500" />
@@ -646,7 +646,7 @@ const FinanceiroDashboard = () => {
           <ExpenseEvolutionChart matricula={user?.selectedCondominium || ''} />
         </div>
         
-        <Card className="overflow-hidden border-blue-300 shadow-md mb-8 w-full">
+        <Card className="overflow-hidden border-blue-300 shadow-md mb-8 w-full border-t-4 border-t-brand-600">
           <CardContent className="p-4">
             <div className="flex items-center justify-center gap-2 mb-3">
               <Calendar className="h-5 w-5 text-blue-500" />
