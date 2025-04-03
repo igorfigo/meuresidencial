@@ -489,11 +489,7 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <section id="testimonials" className="py-16 bg-custom-white relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-custom-light to-transparent"></div>
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-custom-primary/10 rounded-full filter blur-3xl opacity-30"></div>
-        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-custom-secondary/10 rounded-full filter blur-3xl opacity-30"></div>
-        
+      <section id="testimonials" className="py-16 bg-gradient-to-b from-white to-[#EFEFEF] relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeInSection>
             <div className="text-center mb-16">
