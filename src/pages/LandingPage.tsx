@@ -64,15 +64,15 @@ const Feature = ({ icon, title, description, delay }) => {
   const Icon = icon;
   
   return (
-    <FadeInSection delay={delay} className="flex flex-col items-start p-6 bg-custom-accent text-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-white/20 relative overflow-hidden group">
-      <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-x-10 -translate-y-10 opacity-0 group-hover:opacity-50 transition-all duration-500"></div>
+    <FadeInSection delay={delay} className="flex flex-col items-start p-4 bg-custom-accent text-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-transparent hover:border-white/20 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -translate-x-8 -translate-y-8 opacity-0 group-hover:opacity-50 transition-all duration-500"></div>
       <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-white/60 to-white/20 group-hover:w-full transition-all duration-300"></div>
       
-      <div className="h-12 w-12 flex items-center justify-center rounded-full bg-white/20 text-white mb-4 z-10 group-hover:scale-110 transition-transform duration-300">
-        <Icon size={24} className="group-hover:text-white transition-colors duration-300" />
+      <div className="h-10 w-10 flex items-center justify-center rounded-full bg-white/20 text-white mb-3 z-10 group-hover:scale-110 transition-transform duration-300">
+        <Icon size={20} className="group-hover:text-white transition-colors duration-300" />
       </div>
-      <h3 className="text-xl font-semibold mb-2 text-white">{title}</h3>
-      <p className="text-white/80 z-10">{description}</p>
+      <h3 className="text-lg font-semibold mb-1 text-white">{title}</h3>
+      <p className="text-sm text-white/80 z-10">{description}</p>
     </FadeInSection>
   );
 };
@@ -402,7 +402,7 @@ const LandingPage = () => {
       <section id="features" className="py-20 bg-custom-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Funcionalidades Completas</h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 Tudo o que o síndico precisa para uma gestão transparente e eficiente em um único sistema
@@ -410,59 +410,59 @@ const LandingPage = () => {
             </div>
           </FadeInSection>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             <Feature 
               icon={Wallet}
               title="Gestão Financeira" 
-              description="Controle completo de receitas, despesas e prestação de contas com relatórios detalhados."
+              description="Controle completo de receitas, despesas e prestação de contas."
               delay={100}
             />
             <Feature 
               icon={Users}
               title="Cadastro de Moradores" 
-              description="Gerencie facilmente os moradores do condomínio com informações completas e atualizadas."
+              description="Gerencie facilmente os moradores com informações atualizadas."
               delay={200}
             />
             <Feature 
               icon={MessageSquare}
               title="Comunicados" 
-              description="Envie avisos e comunicados importantes para todos os moradores com facilidade."
+              description="Envie avisos importantes para todos os moradores."
               delay={300}
             />
             <Feature 
               icon={Calendar}
               title="Reserva de Áreas" 
-              description="Sistema para agendamento e reserva de áreas comuns do condomínio."
+              description="Sistema para agendamento de áreas comuns."
               delay={400}
             />
             <Feature 
               icon={FileText}
               title="Documentos" 
-              description="Armazenamento e compartilhamento de documentos importantes do condomínio."
+              description="Armazenamento e compartilhamento de documentos."
               delay={500}
             />
             <Feature 
               icon={Shield}
               title="Segurança" 
-              description="Controle de acesso e permissões para diferentes perfis de usuários."
+              description="Controle de acesso para diferentes perfis."
               delay={600}
             />
             <Feature 
               icon={Coins}
               title="Recebimento PIX" 
-              description="Facilidade para recebimento de pagamentos via PIX integrado ao sistema."
+              description="Recebimento de pagamentos via PIX integrado."
               delay={700}
             />
             <Feature 
               icon={Building}
               title="Gestão Empresarial" 
-              description="Ferramentas para gestão completa da administração do condomínio."
+              description="Ferramentas para administração do condomínio."
               delay={800}
             />
             <Feature 
               icon={Key}
               title="Controle de Vagas" 
-              description="Gerenciamento de vagas de garagem e espaços privativos."
+              description="Gerenciamento de vagas de garagem."
               delay={900}
             />
           </div>
