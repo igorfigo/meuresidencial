@@ -20,7 +20,7 @@ export const residentSchema = z.object({
   unidade: z.string()
     .min(1, "Unidade é obrigatória")
     .refine(value => !/\s/.test(value), "Unidade não pode conter espaços"),
-  valor_condominio: z.string().min(1, "Valor do condomínio é obrigatório"),
+  valor_condominio: z.string().optional(),
 });
 
 export type ResidentFormValues = z.infer<typeof residentSchema>;

@@ -171,7 +171,7 @@ export const ResidentForm = ({
               name="valor_condominio"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Valor do Condomínio</FormLabel>
+                  <FormLabel>Valor do Condomínio</FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
