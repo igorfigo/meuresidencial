@@ -11,6 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResidentFormValues } from '@/hooks/use-residents';
@@ -183,6 +184,9 @@ export const ResidentForm = ({
                       }}
                     />
                   </FormControl>
+                  <FormDescription className="text-xs text-muted-foreground">
+                    Se o morador for isento de pagamento, deixe o valor zerado (R$ 0,00).
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
