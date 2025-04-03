@@ -36,7 +36,6 @@ import BusinessManagement from '@/pages/BusinessManagement';
 import DadosHistoricos from './pages/DadosHistoricos';
 import VagaGaragem from './pages/VagaGaragem';
 import DuvidasFrequentes from './pages/DuvidasFrequentes';
-import LandingPage from './pages/LandingPage';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
@@ -47,7 +46,7 @@ function App() {
         <AppProvider>
           <div className="app">
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/dashboard" element={<AuthRequired><Dashboard /></AuthRequired>} />
               <Route path="/perfil" element={<AuthRequired><UserProfile /></AuthRequired>} />
