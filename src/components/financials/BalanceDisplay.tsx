@@ -84,7 +84,7 @@ export const BalanceDisplay = ({ balance, onBalanceChange, readOnly = false, cla
   
   return (
     <>
-      <Card className={`bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 ${className || ''}`}>
+      <Card className={`bg-gradient-to-br from-white to-blue-50 border-2 border-blue-300 shadow-md hover:shadow-lg transition-all duration-300 border-t-4 border-t-brand-600 ${className || ''}`}>
         <CardContent className="p-4">
           <div className="flex flex-col items-center">
             <div className="flex items-center justify-center gap-2 mb-3 w-full">
