@@ -305,9 +305,9 @@ const LandingPage = () => {
         </div>
       </header>
       
-      <section className="relative overflow-hidden pt-24 bg-custom-primary">
+      <section className="relative overflow-hidden pt-24 bg-gradient-to-b from-brand-700 to-brand-800">
         <div 
-          className="absolute inset-0 z-0 bg-custom-primary"
+          className="absolute inset-0 z-0 bg-gradient-to-b from-brand-700 to-brand-800"
           ref={heroRef}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 relative z-10">
