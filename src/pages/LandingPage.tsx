@@ -106,7 +106,7 @@ const PlanCard = ({ plan, featured = false, delay }) => {
             <div className="flex">
               <span className="font-bold px-3 py-1 bg-custom-primary/10 text-custom-dark rounded-full">
                 {plan.codigo === "PREMIUM" 
-                  ? "Até 50 moradores" 
+                  ? "Até 200 moradores" 
                   : plan.codigo === "PADRAO" 
                     ? "Até 50 moradores"
                     : `Até ${plan.max_moradores || '30'} moradores`}
@@ -203,7 +203,7 @@ const LandingPage = () => {
             codigo: "PREMIUM",
             nome: "Plano Premium",
             valor: "R$ 299,90",
-            max_moradores: 50
+            max_moradores: 200
           }
         ]);
       }
@@ -260,7 +260,6 @@ const LandingPage = () => {
 
   return (
     <div className="w-full overflow-x-hidden bg-gradient-to-b from-custom-light to-custom-white">
-      {/* Header - com menu mobile responsivo */}
       <header className="fixed top-0 left-0 right-0 bg-custom-white/90 backdrop-blur-sm z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center">
@@ -268,7 +267,6 @@ const LandingPage = () => {
             <span className="text-xl font-bold ml-2">MeuResidencial</span>
           </div>
           
-          {/* Menu Desktop */}
           <div className="hidden md:flex items-center space-x-6">
             <nav className="flex items-center space-x-6 mr-4">
               <button 
@@ -305,7 +303,6 @@ const LandingPage = () => {
             </Link>
           </div>
           
-          {/* Menu Mobile - Hamburger e botão de acesso */}
           <div className="md:hidden flex items-center space-x-2">
             <Link to="/login">
               <Button size="sm" className="bg-custom-primary hover:bg-custom-dark text-custom-white">
@@ -321,40 +318,36 @@ const LandingPage = () => {
           </div>
         </div>
         
-        {/* Menu Mobile - Expandido */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white shadow-lg animate-slide-in-top">
-            <div className="px-4 py-3 space-y-3">
-              <button 
-                onClick={() => scrollToSection('features')}
-                className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
-              >
-                Funcionalidades
-              </button>
-              <button 
-                onClick={() => scrollToSection('plans')}
-                className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
-              >
-                Planos
-              </button>
-              <button 
-                onClick={() => scrollToSection('testimonials')}
-                className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
-              >
-                Clientes
-              </button>
-              <button 
-                onClick={() => scrollToSection('faq')}
-                className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
-              >
-                FAQ
-              </button>
-            </div>
+        <div className="md:hidden bg-white shadow-lg animate-slide-in-top">
+          <div className="px-4 py-3 space-y-3">
+            <button 
+              onClick={() => scrollToSection('features')}
+              className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
+            >
+              Funcionalidades
+            </button>
+            <button 
+              onClick={() => scrollToSection('plans')}
+              className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
+            >
+              Planos
+            </button>
+            <button 
+              onClick={() => scrollToSection('testimonials')}
+              className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
+            >
+              Clientes
+            </button>
+            <button 
+              onClick={() => scrollToSection('faq')}
+              className="w-full text-left py-2 px-3 rounded-md hover:bg-gray-100 text-gray-700 hover:text-custom-primary font-medium transition-colors"
+            >
+              FAQ
+            </button>
           </div>
-        )}
+        </div>
       </header>
       
-      {/* Hero Section - Responsivo */}
       <section className="relative overflow-hidden pt-24 bg-gradient-to-b from-brand-700 to-brand-800">
         <div 
           className="absolute inset-0 z-0 bg-gradient-to-b from-brand-700 to-brand-800"
@@ -398,7 +391,6 @@ const LandingPage = () => {
         </div>
       </section>
       
-      {/* Features Section - Grid responsivo */}
       <section id="features" className="py-20 bg-custom-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
@@ -463,16 +455,15 @@ const LandingPage = () => {
         </div>
       </section>
       
-      {/* Plans Section - Cards responsivos */}
-      <section id="plans" className="py-15 bg-gradient-to-b from-brand-700 to-brand-800 relative">
-        <div className="absolute -top-16 left-0 right-0 transform rotate-180">
+      <section id="plans" className="py-20 bg-gradient-to-b from-brand-700 to-brand-800 relative">
+        <div className="absolute -top-1 left-0 right-0 transform rotate-180">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
             <path fill="white" fillOpacity="1" d="M0,96L48,106.7C96,117,192,139,288,128C384,117,480,75,576,80C672,85,768,139,864,138.7C960,139,1056,85,1152,64C1248,43,1344,53,1392,58.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
           </svg>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
           <FadeInSection>
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Planos que se Adaptam às Suas Necessidades</h2>
               <p className="text-xl text-white/80 max-w-3xl mx-auto">
                 Escolha o plano ideal para o seu condomínio, com preços acessíveis e funcionalidades completas
@@ -480,7 +471,7 @@ const LandingPage = () => {
             </div>
           </FadeInSection>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {activePlans.map((plan, index) => (
               <PlanCard 
                 key={plan.id} 
@@ -498,7 +489,6 @@ const LandingPage = () => {
         </div>
       </section>
       
-      {/* Testimonials Section - Grid responsivo */}
       <section id="testimonials" className="py-20 bg-custom-white relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-custom-light to-transparent"></div>
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-custom-primary/10 rounded-full filter blur-3xl opacity-30"></div>
@@ -550,7 +540,6 @@ const LandingPage = () => {
         </div>
       </section>
       
-      {/* FAQ Section - Responsivo */}
       <section id="faq" className="py-20 bg-custom-light">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <FadeInSection>
@@ -589,7 +578,6 @@ const LandingPage = () => {
         </div>
       </section>
       
-      {/* CTA Section - Responsivo */}
       <section className="py-16 md:py-20 bg-gradient-to-r from-custom-dark to-custom-primary text-custom-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection className="text-center">
@@ -607,7 +595,6 @@ const LandingPage = () => {
         </div>
       </section>
       
-      {/* Footer - Responsivo - with gradient background */}
       <footer className="bg-gradient-to-r from-[#2151B9] to-[#103381] text-custom-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
