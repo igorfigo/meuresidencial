@@ -620,7 +620,7 @@ const LandingPage = () => {
               </div>
               <div className="flex items-center mb-3">
                 <Phone className="h-5 w-5 text-white mr-2 flex-shrink-0" />
-                <p className="text-white/90">(83) 3023-5555</p>
+                <p className="text-white/90">(11) 91442-0166</p>
               </div>
             </div>
             
