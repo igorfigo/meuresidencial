@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,7 @@ import { useOverdueCharges } from '@/hooks/use-overdue-charges';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  mobileTopBarContent?: React.ReactNode;
 }
 
 interface MenuItem {
