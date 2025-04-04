@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -9,17 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Send, History, ChevronLeft } from 'lucide-react';
+import { Loader2, Send, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { HistoricalDataPixSection } from '@/components/pix/HistoricalDataPixSection';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 const DadosHistoricos = () => {
   const { user } = useApp();
@@ -38,20 +31,8 @@ const DadosHistoricos = () => {
   if (user?.isAdmin || user?.isResident) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-4 px-2 sm:px-6 max-w-3xl">
-          {isMobile && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="mb-3 -ml-2 text-gray-600 hover:text-gray-900"
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Voltar
-            </Button>
-          )}
-          
-          <h1 className="text-2xl font-bold mb-2">Dados Históricos</h1>
+        <div className="container mx-auto py-6 max-w-3xl">
+          <h1 className="text-3xl font-bold mb-2">Dados Históricos</h1>
           <Separator className="mb-4" />
           <Card className="border-t-4 border-t-amber-500 shadow-md">
             <CardContent className="pt-6">
@@ -118,70 +99,34 @@ const DadosHistoricos = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-4 px-2 sm:px-6 max-w-3xl">
-        {isMobile && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="mb-3 -ml-2 text-gray-600 hover:text-gray-900"
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Voltar
-          </Button>
-        )}
-        
-        <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold mb-2`}>Dados Históricos</h1>
+      <div className="container mx-auto py-6 max-w-3xl">
+        <h1 className="text-3xl font-bold mb-2">Dados Históricos</h1>
         <Separator className="mb-2" />
-        <p className={`text-gray-600 mb-4 ${isMobile ? 'text-sm' : ''}`}>
+        <p className="text-gray-600 mb-6">
           Solicite a inclusão ou download de dados históricos para o seu condomínio.
         </p>
         
         {/* PIX Payment Section */}
-        {user?.matricula && (
-          isMobile ? (
-            <Accordion type="single" collapsible className="mb-4">
-              <AccordionItem value="pix-payment" className="border-b-0">
-                <AccordionTrigger className="py-2 text-brand-700 font-medium">
-                  Pagamento para Dados Históricos
-                </AccordionTrigger>
-                <AccordionContent>
-                  <HistoricalDataPixSection matricula={user.matricula} />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          ) : (
-            <HistoricalDataPixSection matricula={user.matricula} />
-          )
-        )}
+        {user?.matricula && <HistoricalDataPixSection matricula={user.matricula} />}
         
         <Card className="border-t-4 border-t-brand-600 shadow-md">
-          {!isMobile ? (
-            <CardHeader className="pb-3">
-              <CardTitle className="text-2xl text-brand-700">Envie sua solicitação</CardTitle>
-              <CardDescription className="text-gray-600">
-                Após o envio da sua solicitação, você receberá um formulário com todos os dados do seu sistema, ou um formulário para preenchimento com todos os dados para inclusão no sistema.
-              </CardDescription>
-            </CardHeader>
-          ) : (
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl text-brand-700">Envie sua solicitação</CardTitle>
-              <CardDescription className="text-sm text-gray-600">
-                Preencha o formulário abaixo para solicitar dados históricos
-              </CardDescription>
-            </CardHeader>
-          )}
+          <CardHeader className="pb-3">
+            <CardTitle className="text-2xl text-brand-700">Envie sua solicitação</CardTitle>
+            <CardDescription className="text-gray-600">
+              Após o envio da sua solicitação, você receberá um formulário com todos os dados do seu sistema, ou um formulário para preenchimento com todos os dados para inclusão no sistema.
+            </CardDescription>
+          </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="type" className={`font-medium ${isMobile ? 'text-sm' : ''}`}>Tipo de Solicitação</Label>
-                  <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'space-x-4'} mt-2`}>
+                  <Label htmlFor="type" className="font-medium">Tipo de Solicitação</Label>
+                  <div className="flex space-x-4 mt-2">
                     <Button
                       type="button"
                       variant={formData.type === 'inclusao' ? 'default' : 'outline'}
-                      className={`${formData.type === 'inclusao' ? 'bg-brand-600 hover:bg-brand-700' : ''} ${isMobile ? 'w-full' : ''}`}
+                      className={formData.type === 'inclusao' ? 'bg-brand-600 hover:bg-brand-700' : ''}
                       onClick={() => handleTypeChange('inclusao')}
                     >
                       Inclusão de Históricos
@@ -189,7 +134,7 @@ const DadosHistoricos = () => {
                     <Button
                       type="button"
                       variant={formData.type === 'download' ? 'default' : 'outline'}
-                      className={`${formData.type === 'download' ? 'bg-brand-600 hover:bg-brand-700' : ''} ${isMobile ? 'w-full' : ''}`}
+                      className={formData.type === 'download' ? 'bg-brand-600 hover:bg-brand-700' : ''}
                       onClick={() => handleTypeChange('download')}
                     >
                       Download de Históricos
@@ -197,56 +142,52 @@ const DadosHistoricos = () => {
                   </div>
                 </div>
                 
-                <div className={`grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2'} gap-4`}>
-                  <div className="space-y-1">
-                    <Label htmlFor="nome" className={`font-medium ${isMobile ? 'text-sm' : ''}`}>Nome</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="nome" className="font-medium">Nome</Label>
                     <Input 
                       id="nome" 
                       value={user?.nome || 'Não informado'} 
                       disabled 
                       className="bg-gray-50"
-                      size={isMobile ? 'sm' : undefined}
                     />
                   </div>
                   
-                  <div className="space-y-1">
-                    <Label htmlFor="email" className={`font-medium ${isMobile ? 'text-sm' : ''}`}>Email</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="font-medium">Email</Label>
                     <Input 
                       id="email" 
                       value={user?.email || 'Não informado'} 
                       disabled 
                       className="bg-gray-50"
-                      size={isMobile ? 'sm' : undefined}
                     />
                   </div>
                 </div>
                 
-                <div className={`grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2'} gap-4`}>
-                  <div className="space-y-1">
-                    <Label htmlFor="matricula" className={`font-medium ${isMobile ? 'text-sm' : ''}`}>Matrícula</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="matricula" className="font-medium">Matrícula</Label>
                     <Input 
                       id="matricula" 
                       value={user?.matricula || 'N/A'} 
                       disabled 
                       className="bg-gray-50"
-                      size={isMobile ? 'sm' : undefined}
                     />
                   </div>
                   
-                  <div className="space-y-1">
-                    <Label htmlFor="condominio" className={`font-medium ${isMobile ? 'text-sm' : ''}`}>Condomínio</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="condominio" className="font-medium">Condomínio</Label>
                     <Input 
                       id="condominio" 
                       value={user?.nomeCondominio || 'N/A'} 
                       disabled 
                       className="bg-gray-50"
-                      size={isMobile ? 'sm' : undefined}
                     />
                   </div>
                 </div>
                 
-                <div className="space-y-1">
-                  <Label htmlFor="subject" className={`font-medium ${isMobile ? 'text-sm' : ''}`} required>Assunto</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="subject" className="font-medium" required>Assunto</Label>
                   <Input 
                     id="subject" 
                     name="subject" 
@@ -255,12 +196,11 @@ const DadosHistoricos = () => {
                     placeholder="Digite o assunto da solicitação" 
                     required 
                     className="border-gray-300 focus:border-brand-500 focus:ring-brand-500"
-                    size={isMobile ? 'sm' : undefined}
                   />
                 </div>
                 
-                <div className="space-y-1">
-                  <Label htmlFor="message" className={`font-medium ${isMobile ? 'text-sm' : ''}`} required>Mensagem</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="message" className="font-medium" required>Mensagem</Label>
                   <Textarea 
                     id="message" 
                     name="message" 
@@ -269,7 +209,7 @@ const DadosHistoricos = () => {
                     placeholder={formData.type === 'inclusao' 
                       ? "Descreva os dados históricos que deseja incluir no sistema..." 
                       : "Descreva os dados históricos que deseja baixar do sistema..."} 
-                    rows={isMobile ? 4 : 6} 
+                    rows={6} 
                     required 
                     className="border-gray-300 focus:border-brand-500 focus:ring-brand-500 resize-none"
                   />
@@ -284,7 +224,6 @@ const DadosHistoricos = () => {
               variant="outline"
               onClick={() => navigate(-1)}
               className={`${isMobile ? 'w-full' : ''} border-gray-300 hover:bg-gray-100 hover:text-gray-700`}
-              size={isMobile ? 'sm' : undefined}
             >
               Voltar
             </Button>
@@ -293,7 +232,6 @@ const DadosHistoricos = () => {
               onClick={handleSubmit}
               disabled={isSubmitting}
               className={`${isMobile ? 'w-full' : ''} bg-brand-600 hover:bg-brand-700 transition-colors`}
-              size={isMobile ? 'sm' : undefined}
             >
               {isSubmitting ? (
                 <>
