@@ -17,17 +17,36 @@ export function usePreventiveAlerts() {
     
     try {
       setLoading(true);
-      // Use type assertion to work around TypeScript errors with Supabase client
-      // since the preventive_alerts table was just created
-      const { data, error } = await supabase
-        .from('preventive_alerts' as any)
-        .select('*')
-        .eq('matricula', matricula)
-        .order('alert_date', { ascending: true });
-        
-      if (error) throw error;
+      
+      let data;
+      let error;
+      
+      try {
+        // Attempt to fetch data with error handling
+        const result = await supabase
+          .from('preventive_alerts')
+          .select('*')
+          .eq('matricula', matricula)
+          .order('alert_date', { ascending: true });
+          
+        data = result.data;
+        error = result.error;
+      } catch (fetchError) {
+        console.error('Error in Supabase query:', fetchError);
+        error = fetchError;
+      }
+      
+      if (error) {
+        console.error('Error fetching preventive alerts:', error);
+        // Set empty data array when there's an error so the app doesn't break
+        data = [];
+        toast.error('Erro ao carregar alertas preventivos');
+      }
 
-      const formattedData: PreventiveAlert[] = data.map(alert => ({
+      // Always ensure we have a valid data array even if error occurs
+      const safeData = Array.isArray(data) ? data : [];
+      
+      const formattedData: PreventiveAlert[] = safeData.map(alert => ({
         id: alert.id,
         matricula: alert.matricula,
         category: alert.category as PreventiveAlertCategory,
@@ -51,7 +70,9 @@ export function usePreventiveAlerts() {
       setPendingAlerts(pending);
       
     } catch (error) {
-      console.error('Error fetching preventive alerts:', error);
+      console.error('Error in fetchAlerts function:', error);
+      setAlerts([]);
+      setPendingAlerts(0);
       toast.error('Erro ao carregar alertas preventivos');
     } finally {
       setLoading(false);
@@ -76,18 +97,22 @@ export function usePreventiveAlerts() {
         updated_at: new Date().toISOString()
       };
       
-      // Use type assertion to work around TypeScript errors
-      const { data, error } = await supabase
-        .from('preventive_alerts' as any)
-        .insert(newAlert)
-        .select()
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('preventive_alerts')
+          .insert(newAlert)
+          .select()
+          .single();
+          
+        if (error) throw error;
         
-      if (error) throw error;
-      
-      toast.success('Alerta preventivo adicionado com sucesso');
-      await fetchAlerts();
-      return data;
+        toast.success('Alerta preventivo adicionado com sucesso');
+        await fetchAlerts();
+        return data;
+      } catch (dbError) {
+        console.error('Database error adding preventive alert:', dbError);
+        throw dbError;
+      }
       
     } catch (error) {
       console.error('Error adding preventive alert:', error);
@@ -108,17 +133,21 @@ export function usePreventiveAlerts() {
       // Always update the updated_at timestamp
       dbUpdates.updated_at = new Date().toISOString();
       
-      // Use type assertion to work around TypeScript errors
-      const { error } = await supabase
-        .from('preventive_alerts' as any)
-        .update(dbUpdates)
-        .eq('id', id);
+      try {
+        const { error } = await supabase
+          .from('preventive_alerts')
+          .update(dbUpdates)
+          .eq('id', id);
+          
+        if (error) throw error;
         
-      if (error) throw error;
-      
-      toast.success('Alerta preventivo atualizado com sucesso');
-      await fetchAlerts();
-      return true;
+        toast.success('Alerta preventivo atualizado com sucesso');
+        await fetchAlerts();
+        return true;
+      } catch (dbError) {
+        console.error('Database error updating preventive alert:', dbError);
+        throw dbError;
+      }
       
     } catch (error) {
       console.error('Error updating preventive alert:', error);
@@ -133,17 +162,21 @@ export function usePreventiveAlerts() {
 
   const deleteAlert = async (id: string) => {
     try {
-      // Use type assertion to work around TypeScript errors
-      const { error } = await supabase
-        .from('preventive_alerts' as any)
-        .delete()
-        .eq('id', id);
+      try {
+        const { error } = await supabase
+          .from('preventive_alerts')
+          .delete()
+          .eq('id', id);
+          
+        if (error) throw error;
         
-      if (error) throw error;
-      
-      toast.success('Alerta preventivo removido com sucesso');
-      await fetchAlerts();
-      return true;
+        toast.success('Alerta preventivo removido com sucesso');
+        await fetchAlerts();
+        return true;
+      } catch (dbError) {
+        console.error('Database error deleting preventive alert:', dbError);
+        throw dbError;
+      }
       
     } catch (error) {
       console.error('Error deleting preventive alert:', error);
@@ -152,30 +185,46 @@ export function usePreventiveAlerts() {
     }
   };
 
-  // Initial fetch and setup realtime subscription
+  // Initial fetch and setup realtime subscription with error handling
   useEffect(() => {
     if (matricula) {
-      fetchAlerts();
+      fetchAlerts().catch(error => {
+        console.error('Error in fetchAlerts effect:', error);
+        setLoading(false);
+      });
       
-      // Setup realtime subscription
-      const channel = supabase
-        .channel('preventive-alerts-changes')
-        .on('postgres_changes', 
-          {
-            event: '*',
-            schema: 'public',
-            table: 'preventive_alerts',
-            filter: `matricula=eq.${matricula}`
-          }, 
-          () => {
-            fetchAlerts();
-          }
-        )
-        .subscribe();
+      // Setup realtime subscription with error handling
+      let channel;
+      try {
+        channel = supabase
+          .channel('preventive-alerts-changes')
+          .on('postgres_changes', 
+            {
+              event: '*',
+              schema: 'public',
+              table: 'preventive_alerts',
+              filter: `matricula=eq.${matricula}`
+            }, 
+            () => {
+              fetchAlerts().catch(console.error);
+            }
+          )
+          .subscribe(error => {
+            if (error) console.error('Error setting up realtime subscription:', error);
+          });
+      } catch (error) {
+        console.error('Error creating channel:', error);
+      }
         
       // Cleanup subscription
       return () => {
-        supabase.removeChannel(channel);
+        if (channel) {
+          try {
+            supabase.removeChannel(channel).catch(console.error);
+          } catch (error) {
+            console.error('Error removing channel:', error);
+          }
+        }
       };
     }
   }, [matricula]);
