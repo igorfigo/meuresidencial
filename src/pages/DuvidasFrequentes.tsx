@@ -152,51 +152,53 @@ const DuvidasFrequentes = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6">
-        <h1 className="text-3xl font-bold mb-2">Dúvidas Frequentes</h1>
-        <Separator className="mb-6" />
-        
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-          <Input 
-            className="pl-10" 
-            placeholder="Pesquisar dúvidas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        {Object.entries(groupedFaqs).length > 0 ? (
-          Object.entries(groupedFaqs).map(([category, faqs]) => (
-            <Card key={category} className="mb-6 border-t-4 border-t-custom-primary shadow-md">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">{category}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Accordion type="single" collapsible className="w-full">
-                  {faqs.map((faq, index) => (
-                    <AccordionItem key={index} value={`${category}-${index}`}>
-                      <AccordionTrigger className="text-left font-medium">
-                        {faq.question}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-gray-700">
-                        {faq.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+      <div className="min-h-screen bg-gradient-to-b from-[#EFEFEF] via-[#295AC3] to-[#103381] py-6">
+        <div className="container mx-auto">
+          <h1 className="text-3xl font-bold mb-2 text-white">Dúvidas Frequentes</h1>
+          <Separator className="mb-6 bg-white/30" />
+          
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+            <Input 
+              className="pl-10" 
+              placeholder="Pesquisar dúvidas..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          {Object.entries(groupedFaqs).length > 0 ? (
+            Object.entries(groupedFaqs).map(([category, faqs]) => (
+              <Card key={category} className="mb-6 border-t-4 border-t-custom-primary shadow-md bg-white/90 backdrop-blur-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xl">{category}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Accordion type="single" collapsible className="w-full">
+                    {faqs.map((faq, index) => (
+                      <AccordionItem key={index} value={`${category}-${index}`}>
+                        <AccordionTrigger className="text-left font-medium">
+                          {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-gray-700">
+                          {faq.answer}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card className="mb-6 border-t-4 border-t-custom-primary shadow-md bg-white/90 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <p className="text-gray-500">
+                  Nenhuma dúvida encontrada com o termo "{searchTerm}".
+                </p>
               </CardContent>
             </Card>
-          ))
-        ) : (
-          <Card className="mb-6 border-t-4 border-t-custom-primary shadow-md">
-            <CardContent className="p-6 text-center">
-              <p className="text-gray-500">
-                Nenhuma dúvida encontrada com o termo "{searchTerm}".
-              </p>
-            </CardContent>
-          </Card>
-        )}
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );

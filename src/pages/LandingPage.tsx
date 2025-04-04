@@ -557,7 +557,7 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <section id="faq" className="py-16 bg-gradient-to-b from-[#EFEFEF] to-[#2151B9]/80 text-white">
+      <section id="faq" className="py-16 bg-gradient-to-b from-[#EFEFEF] via-[#295AC3] to-[#2151B9] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <FadeInSection>
             <div className="text-center mb-12">
@@ -595,7 +595,7 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <footer className="bg-gradient-to-b from-[#2151B9]/90 to-[#103381] text-custom-white py-8">
+      <footer className="bg-[#103381] text-custom-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
