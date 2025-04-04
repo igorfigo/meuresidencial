@@ -167,14 +167,14 @@ export const AccountingReport = () => {
       const lineHeight = 7;
       const margin = 15;
       
-      doc.setFillColor(240, 247, 255);
+      doc.setFillColor(33, 81, 185);
       doc.rect(0, 0, pageWidth, 40, 'F');
       
       doc.setFillColor(33, 81, 185);
       doc.rect(0, 0, pageWidth, 5, 'F');
       
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(31, 41, 55);
+      doc.setTextColor(255, 255, 255);
       doc.setFontSize(12);
       doc.text("TRANSPARÊNCIA E GESTÃO EFICIENTE", pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 1.5;
@@ -185,7 +185,7 @@ export const AccountingReport = () => {
       
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(33, 81, 185);
+      doc.setTextColor(255, 255, 255);
       const title = `Prestação de Contas - ${monthName} ${year}`;
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
@@ -436,9 +436,9 @@ export const AccountingReport = () => {
       
       doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
-      doc.setTextColor(41, 90, 195);
+      doc.setTextColor(255, 255, 255);
       
-      doc.setFillColor(246, 249, 252);
+      doc.setFillColor(33, 81, 185);
       doc.rect(0, pageHeight - 12, pageWidth, 12, 'F');
       
       doc.text(`Relatório gerado pelo sistema Meu Residencial - www.meuresidencial.com - ${currentDate}`, 
