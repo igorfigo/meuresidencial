@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format, parse, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -469,7 +468,7 @@ export const AccountingReport = () => {
           <div className="w-full">
             <Label htmlFor="month" className={`mb-1 block ${isMobile ? 'text-sm' : ''}`}>Mês de Referência</Label>
             <div className="flex gap-2">
-              <Select value={selectedMonth} onValueChange={handleMonthChange} className="flex-1">
+              <Select value={selectedMonth} onValueChange={handleMonthChange}>
                 <SelectTrigger id="month" className={isMobile ? "h-8 text-sm" : ""}>
                   <SelectValue placeholder="Selecione o mês" />
                 </SelectTrigger>
@@ -538,7 +537,6 @@ export const AccountingReport = () => {
         </div>
         
         <div className="space-y-4">
-          {/* Receitas Section with collapsible header */}
           <div className="border rounded-lg overflow-hidden">
             <div 
               className={`flex justify-between items-center p-3 bg-gray-50 cursor-pointer ${isMobile ? 'text-sm' : ''}`}
@@ -599,7 +597,6 @@ export const AccountingReport = () => {
             )}
           </div>
           
-          {/* Despesas Section with collapsible header */}
           <div className="border rounded-lg overflow-hidden">
             <div 
               className={`flex justify-between items-center p-3 bg-gray-50 cursor-pointer ${isMobile ? 'text-sm' : ''}`}
