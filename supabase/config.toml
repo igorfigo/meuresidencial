@@ -1,2 +1,5 @@
 
 project_id = "kcbvdcacgbwigefwacrk"
+
+[functions.send-manager-password]
+verify_jwt = false
