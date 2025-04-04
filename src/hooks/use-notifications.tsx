@@ -10,20 +10,62 @@ export function useNotifications() {
   
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const isResident = user?.isResident === true;
+  const userId = user?.id || '';
   
   // Only track notifications for residents
-  const enabled = isResident && !!matricula;
+  const enabled = isResident && !!matricula && !!userId;
 
-  // Get last viewed timestamps from localStorage
-  const getLastViewedTime = (key: string) => {
-    const stored = localStorage.getItem(`last_viewed_${key}_${matricula}`);
-    return stored ? new Date(stored).getTime() : 0;
+  // Get last viewed timestamps from both localStorage (for backward compatibility) and database
+  const fetchLastViewedTime = async (type: 'announcements' | 'documents') => {
+    try {
+      // Check database for last viewed time first
+      if (userId) {
+        const { data, error } = await supabase
+          .from('user_notification_views')
+          .select('last_viewed_at')
+          .eq('user_id', userId)
+          .eq('matricula', matricula)
+          .eq('notification_type', type)
+          .single();
+          
+        if (!error && data) {
+          return new Date(data.last_viewed_at).getTime();
+        }
+      }
+      
+      // Fall back to localStorage for backward compatibility
+      const stored = localStorage.getItem(`last_viewed_${type}_${matricula}`);
+      return stored ? new Date(stored).getTime() : 0;
+    } catch (error) {
+      console.error(`Error fetching last viewed time for ${type}:`, error);
+      return 0;
+    }
   };
 
-  // Update last viewed timestamp
-  const markAsViewed = (type: 'announcements' | 'documents') => {
+  // Update last viewed timestamp in both localStorage and database
+  const markAsViewed = async (type: 'announcements' | 'documents') => {
     const now = new Date().toISOString();
+    
+    // Update localStorage for backward compatibility
     localStorage.setItem(`last_viewed_${type}_${matricula}`, now);
+    
+    // Update database
+    if (userId) {
+      const { error } = await supabase
+        .from('user_notification_views')
+        .upsert({
+          user_id: userId,
+          matricula,
+          notification_type: type,
+          last_viewed_at: now
+        }, {
+          onConflict: 'user_id,matricula,notification_type'
+        });
+        
+      if (error) {
+        console.error(`Error updating last viewed time for ${type}:`, error);
+      }
+    }
     
     if (type === 'announcements') {
       setUnreadAnnouncements(0);
@@ -35,45 +77,53 @@ export function useNotifications() {
   // Check for new announcements and documents
   useEffect(() => {
     if (!enabled) return;
-
-    const lastViewedAnnouncements = getLastViewedTime('announcements');
-    const lastViewedDocuments = getLastViewedTime('documents');
     
-    // Function to fetch and count new items
-    const fetchNewItems = async () => {
-      try {
-        // Check for new announcements
-        const { data: announcements, error: announcementsError } = await supabase
-          .from('announcements')
-          .select('created_at')
-          .eq('matricula', matricula)
-          .gt('created_at', new Date(lastViewedAnnouncements).toISOString());
+    let lastViewedAnnouncements = 0;
+    let lastViewedDocuments = 0;
+    
+    // Fetch initial data
+    const initializeNotifications = async () => {
+      lastViewedAnnouncements = await fetchLastViewedTime('announcements');
+      lastViewedDocuments = await fetchLastViewedTime('documents');
+      
+      // Function to fetch and count new items
+      const fetchNewItems = async () => {
+        try {
+          // Check for new announcements
+          const { data: announcements, error: announcementsError } = await supabase
+            .from('announcements')
+            .select('created_at')
+            .eq('matricula', matricula)
+            .gt('created_at', new Date(lastViewedAnnouncements).toISOString());
+            
+          if (announcementsError) {
+            console.error('Error fetching announcements:', announcementsError);
+          } else {
+            setUnreadAnnouncements(announcements?.length || 0);
+          }
           
-        if (announcementsError) {
-          console.error('Error fetching announcements:', announcementsError);
-        } else {
-          setUnreadAnnouncements(announcements?.length || 0);
+          // Check for new documents
+          const { data: documents, error: documentsError } = await supabase
+            .from('documents')
+            .select('created_at')
+            .eq('matricula', matricula)
+            .gt('created_at', new Date(lastViewedDocuments).toISOString());
+            
+          if (documentsError) {
+            console.error('Error fetching documents:', documentsError);
+          } else {
+            setUnreadDocuments(documents?.length || 0);
+          }
+        } catch (error) {
+          console.error('Error checking for new items:', error);
         }
-        
-        // Check for new documents
-        const { data: documents, error: documentsError } = await supabase
-          .from('documents')
-          .select('created_at')
-          .eq('matricula', matricula)
-          .gt('created_at', new Date(lastViewedDocuments).toISOString());
-          
-        if (documentsError) {
-          console.error('Error fetching documents:', documentsError);
-        } else {
-          setUnreadDocuments(documents?.length || 0);
-        }
-      } catch (error) {
-        console.error('Error checking for new items:', error);
-      }
-    };
+      };
 
-    // Initial fetch
-    fetchNewItems();
+      // Initial fetch
+      await fetchNewItems();
+    };
+    
+    initializeNotifications();
     
     // Set up real-time subscription for announcements
     const announcementsChannel = supabase
@@ -85,9 +135,10 @@ export function useNotifications() {
           table: 'announcements',
           filter: `matricula=eq.${matricula}`
         }, 
-        (payload) => {
+        async (payload) => {
+          const currentLastViewed = await fetchLastViewedTime('announcements');
           const payloadDate = new Date(payload.new.created_at).getTime();
-          if (payloadDate > lastViewedAnnouncements) {
+          if (payloadDate > currentLastViewed) {
             setUnreadAnnouncements(prev => prev + 1);
           }
         }
@@ -104,9 +155,10 @@ export function useNotifications() {
           table: 'documents',
           filter: `matricula=eq.${matricula}`
         }, 
-        (payload) => {
+        async (payload) => {
+          const currentLastViewed = await fetchLastViewedTime('documents');
           const payloadDate = new Date(payload.new.created_at).getTime();
-          if (payloadDate > lastViewedDocuments) {
+          if (payloadDate > currentLastViewed) {
             setUnreadDocuments(prev => prev + 1);
           }
         }
@@ -118,7 +170,7 @@ export function useNotifications() {
       supabase.removeChannel(announcementsChannel);
       supabase.removeChannel(documentsChannel);
     };
-  }, [matricula, enabled]);
+  }, [matricula, enabled, userId]);
 
   return {
     unreadAnnouncements,
