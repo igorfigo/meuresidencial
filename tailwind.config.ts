@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -150,10 +151,6 @@ export default {
 				'soft-bounce': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-5px)' }
-				},
-				'pulse-slow': {
-					'0%, 100%': { opacity: '0.4' },
-					'50%': { opacity: '0.7' }
 				}
 			},
 			animation: {
@@ -170,8 +167,7 @@ export default {
 				'slide-in-bottom': 'slide-in-bottom 0.3s ease-out',
 				'slide-out-bottom': 'slide-out-bottom 0.3s ease-out',
 				'pulse-whatsapp': 'pulse-whatsapp 2s infinite',
-				'soft-bounce': 'soft-bounce 2s ease-in-out infinite',
-				'pulse-slow': 'pulse-slow 4s ease-in-out infinite'
+				'soft-bounce': 'soft-bounce 2s ease-in-out infinite'
 			}
 		}
 	},
