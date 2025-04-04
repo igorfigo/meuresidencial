@@ -7,7 +7,6 @@ export function useNotifications() {
   const { user } = useApp();
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
   const [unreadDocuments, setUnreadDocuments] = useState(0);
-  const [unreadGarageListings, setUnreadGarageListings] = useState(0);
   
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const isResident = user?.isResident === true;
@@ -22,26 +21,23 @@ export function useNotifications() {
   };
 
   // Update last viewed timestamp
-  const markAsViewed = (type: 'announcements' | 'documents' | 'garage_listings') => {
+  const markAsViewed = (type: 'announcements' | 'documents') => {
     const now = new Date().toISOString();
     localStorage.setItem(`last_viewed_${type}_${matricula}`, now);
     
     if (type === 'announcements') {
       setUnreadAnnouncements(0);
-    } else if (type === 'documents') {
+    } else {
       setUnreadDocuments(0);
-    } else if (type === 'garage_listings') {
-      setUnreadGarageListings(0);
     }
   };
 
-  // Check for new announcements, documents, and garage listings
+  // Check for new announcements and documents
   useEffect(() => {
     if (!enabled) return;
 
     const lastViewedAnnouncements = getLastViewedTime('announcements');
     const lastViewedDocuments = getLastViewedTime('documents');
-    const lastViewedGarageListings = getLastViewedTime('garage_listings');
     
     // Function to fetch and count new items
     const fetchNewItems = async () => {
@@ -70,20 +66,6 @@ export function useNotifications() {
           console.error('Error fetching documents:', documentsError);
         } else {
           setUnreadDocuments(documents?.length || 0);
-        }
-        
-        // Check for new garage listings
-        const { data: garageListings, error: garageListingsError } = await supabase
-          .from('garage_listings')
-          .select('created_at')
-          .eq('matricula', matricula)
-          .eq('is_available', true)
-          .gt('created_at', new Date(lastViewedGarageListings).toISOString());
-          
-        if (garageListingsError) {
-          console.error('Error fetching garage listings:', garageListingsError);
-        } else {
-          setUnreadGarageListings(garageListings?.length || 0);
         }
       } catch (error) {
         console.error('Error checking for new items:', error);
@@ -124,35 +106,17 @@ export function useNotifications() {
         }
       )
       .subscribe();
-      
-    // Set up real-time subscription for garage listings
-    const garageListingsChannel = supabase
-      .channel('garage-listings-changes')
-      .on('postgres_changes', 
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'garage_listings',
-          filter: `matricula=eq.${matricula}`
-        }, 
-        (payload) => {
-          setUnreadGarageListings(prev => prev + 1);
-        }
-      )
-      .subscribe();
 
     // Cleanup subscriptions
     return () => {
       supabase.removeChannel(announcementsChannel);
       supabase.removeChannel(documentsChannel);
-      supabase.removeChannel(garageListingsChannel);
     };
   }, [matricula, enabled]);
 
   return {
     unreadAnnouncements,
     unreadDocuments,
-    unreadGarageListings,
     markAsViewed
   };
 }

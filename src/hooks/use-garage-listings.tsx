@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -108,19 +107,6 @@ export const useGarageListings = () => {
       if (error) {
         console.error('Error details:', error);
         throw error;
-      }
-      
-      // Create a notification entry for all users in the condominium
-      try {
-        const unit = user.unit || 'Unidade não especificada';
-        await supabase.rpc('create_garage_notification', {
-          p_matricula: user.matricula,
-          p_message: `Nova vaga de garagem disponível na unidade ${unit}`,
-          p_type: 'garage_listing'
-        });
-      } catch (notifyError) {
-        console.error('Error creating notification:', notifyError);
-        // Continue execution even if notification fails
       }
       
       return data;

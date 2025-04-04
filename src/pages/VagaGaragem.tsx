@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useGarageListings } from '@/hooks/use-garage-listings';
 import { 
@@ -24,19 +24,10 @@ import { format } from 'date-fns';
 import { useApp } from '@/contexts/AppContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { useNotifications } from '@/hooks/use-notifications';
 
 export default function VagaGaragem() {
   const { user } = useApp();
   const { garageListings, isLoading } = useGarageListings();
-  const { markAsViewed } = useNotifications();
-  
-  // Mark garage listings as viewed when the page loads for property managers
-  useEffect(() => {
-    if (user && !user.isResident && !user.isAdmin) {
-      markAsViewed('garage_listings');
-    }
-  }, [user, markAsViewed]);
 
   if (!user || user.isResident || user.isAdmin) {
     return (

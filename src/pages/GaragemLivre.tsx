@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useNotifications } from '@/hooks/use-notifications';
 
 const GaragemLivre = () => {
   const { user } = useApp();
@@ -23,16 +22,8 @@ const GaragemLivre = () => {
     deleteGarageListing 
   } = useGarageListings();
   
-  const { markAsViewed } = useNotifications();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [description, setDescription] = useState('');
-  
-  // Mark garage listings as viewed when the page loads
-  useEffect(() => {
-    if (user?.isResident) {
-      markAsViewed('garage_listings');
-    }
-  }, [user, markAsViewed]);
   
   const handleAddGarageListing = () => {
     if (!description.trim()) return;
