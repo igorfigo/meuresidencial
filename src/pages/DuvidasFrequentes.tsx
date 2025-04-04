@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -152,54 +151,58 @@ const DuvidasFrequentes = () => {
   
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-b from-[#EFEFEF] via-[#EFEFEF]/80 to-[#103381] py-6 flex flex-col">
-        <div className="container mx-auto flex-grow">
-          <h1 className="text-3xl font-bold mb-2 text-white">Dúvidas Frequentes</h1>
-          <Separator className="mb-6 bg-white/30" />
-          
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-            <Input 
-              className="pl-10" 
-              placeholder="Pesquisar dúvidas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <div className="animate-fade-in space-y-6">
+        <header className="mb-4">
+          <div className="flex items-center">
+            <h1 className="text-3xl font-bold">Dúvidas Frequentes</h1>
           </div>
-          
-          {Object.entries(groupedFaqs).length > 0 ? (
-            Object.entries(groupedFaqs).map(([category, faqs]) => (
-              <Card key={category} className="mb-6 border-t-4 border-t-custom-primary shadow-md bg-white/90 backdrop-blur-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl">{category}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
-                    {faqs.map((faq, index) => (
-                      <AccordionItem key={index} value={`${category}-${index}`}>
-                        <AccordionTrigger className="text-left font-medium">
-                          {faq.question}
-                        </AccordionTrigger>
-                        <AccordionContent className="text-gray-700">
-                          {faq.answer}
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <Card className="mb-6 border-t-4 border-t-custom-primary shadow-md bg-white/90 backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <p className="text-gray-500">
-                  Nenhuma dúvida encontrada com o termo "{searchTerm}".
-                </p>
+          <p className="text-muted-foreground mt-1">
+            Encontre respostas para as perguntas mais comuns sobre o sistema.
+          </p>
+          <Separator className="mt-4" />
+        </header>
+
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+          <Input 
+            className="pl-10" 
+            placeholder="Pesquisar dúvidas..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        {Object.entries(groupedFaqs).length > 0 ? (
+          Object.entries(groupedFaqs).map(([category, faqs]) => (
+            <Card key={category} className="mb-6 border-t-4 border-t-brand-600 shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">{category}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`${category}-${index}`}>
+                      <AccordionTrigger className="text-left font-medium">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-700">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </CardContent>
             </Card>
-          )}
-        </div>
-        <div className="h-8 bg-[#103381]"></div>
+          ))
+        ) : (
+          <Card className="mb-6 border-t-4 border-t-brand-600 shadow-md">
+            <CardContent className="p-6 text-center">
+              <p className="text-gray-500">
+                Nenhuma dúvida encontrada com o termo "{searchTerm}".
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
