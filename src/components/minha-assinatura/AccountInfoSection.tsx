@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Building2, Mail, User, Building, Briefcase } from 'lucide-react';
+import { Building2, Mail, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AccountInfoSectionProps {
   condominiumData: any;
@@ -15,18 +14,14 @@ interface AccountInfoSectionProps {
 
 export const AccountInfoSection: React.FC<AccountInfoSectionProps> = ({ condominiumData, userMatricula }) => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
 
   const navigateToContactPage = () => {
     navigate('/contato');
   };
-  
-  const fieldLabelClasses = isMobile ? "flex items-center mb-1 text-sm font-medium" : "";
-  const fieldIconClasses = "h-4 w-4 mr-2 text-brand-600";
 
   return (
     <Card className="border-t-4 border-t-brand-600 shadow-md h-full">
-      <CardHeader className="p-4">
+      <CardHeader>
         <CardTitle className="flex items-center text-lg">
           <Building2 className="h-5 w-5 mr-2 text-brand-600" />
           Informações da Conta
@@ -35,12 +30,9 @@ export const AccountInfoSection: React.FC<AccountInfoSectionProps> = ({ condomin
           Detalhes de registro do condomínio
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-4 pt-0 space-y-3">
+      <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="matricula" className={fieldLabelClasses}>
-            {isMobile && <User className={fieldIconClasses} />}
-            Matrícula
-          </Label>
+          <Label htmlFor="matricula">Matrícula</Label>
           <Input
             id="matricula"
             value={userMatricula || ''}
@@ -50,10 +42,7 @@ export const AccountInfoSection: React.FC<AccountInfoSectionProps> = ({ condomin
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="nome" className={fieldLabelClasses}>
-            {isMobile && <Building className={fieldIconClasses} />}
-            Nome do Condomínio
-          </Label>
+          <Label htmlFor="nome">Nome do Condomínio</Label>
           <Input
             id="nome"
             value={condominiumData.nome || ''}
@@ -63,10 +52,7 @@ export const AccountInfoSection: React.FC<AccountInfoSectionProps> = ({ condomin
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="cnpj" className={fieldLabelClasses}>
-            {isMobile && <Briefcase className={fieldIconClasses} />}
-            CNPJ
-          </Label>
+          <Label htmlFor="cnpj">CNPJ</Label>
           <Input
             id="cnpj"
             value={condominiumData.cnpj || ''}
@@ -76,10 +62,7 @@ export const AccountInfoSection: React.FC<AccountInfoSectionProps> = ({ condomin
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="email" className={fieldLabelClasses}>
-            {isMobile && <Mail className={fieldIconClasses} />}
-            E-mail de Contato
-          </Label>
+          <Label htmlFor="email">E-mail de Contato</Label>
           <Input
             id="email"
             value={condominiumData.email || ''}

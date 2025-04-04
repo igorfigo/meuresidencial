@@ -9,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { KeyRound, Eye, EyeOff } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { KeyRound } from 'lucide-react';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'A senha atual é obrigatória'),
@@ -29,10 +28,6 @@ interface PasswordChangeSectionProps {
 
 export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ userMatricula }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const isMobile = useIsMobile();
   
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
@@ -76,16 +71,10 @@ export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ us
       setIsLoading(false);
     }
   };
-
-  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
-    if (field === 'current') setShowCurrentPassword(!showCurrentPassword);
-    if (field === 'new') setShowNewPassword(!showNewPassword);
-    if (field === 'confirm') setShowConfirmPassword(!showConfirmPassword);
-  };
   
   return (
     <Card className="border-t-4 border-t-brand-600 shadow-md">
-      <CardHeader className="p-4">
+      <CardHeader>
         <CardTitle className="flex items-center text-lg">
           <KeyRound className="h-5 w-5 mr-2 text-brand-600" />
           Alterar Senha
@@ -94,34 +83,22 @@ export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ us
           Altere sua senha de acesso ao sistema
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
+      <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="currentPassword"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Senha Atual</FormLabel>
-                  <div className="relative">
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type={showCurrentPassword ? "text" : "password"}
-                        placeholder="Digite sua senha atual"
-                      />
-                    </FormControl>
-                    <button 
-                      type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                      onClick={() => togglePasswordVisibility('current')}
-                    >
-                      {showCurrentPassword ? 
-                        <EyeOff className="h-4 w-4" /> : 
-                        <Eye className="h-4 w-4" />
-                      }
-                    </button>
-                  </div>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="Digite sua senha atual"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -133,25 +110,13 @@ export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ us
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nova Senha</FormLabel>
-                  <div className="relative">
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type={showNewPassword ? "text" : "password"}
-                        placeholder="Digite sua nova senha"
-                      />
-                    </FormControl>
-                    <button 
-                      type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                      onClick={() => togglePasswordVisibility('new')}
-                    >
-                      {showNewPassword ? 
-                        <EyeOff className="h-4 w-4" /> : 
-                        <Eye className="h-4 w-4" />
-                      }
-                    </button>
-                  </div>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="Digite sua nova senha"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -163,36 +128,20 @@ export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ us
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Confirmar Nova Senha</FormLabel>
-                  <div className="relative">
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirme sua nova senha"
-                      />
-                    </FormControl>
-                    <button 
-                      type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                      onClick={() => togglePasswordVisibility('confirm')}
-                    >
-                      {showConfirmPassword ? 
-                        <EyeOff className="h-4 w-4" /> : 
-                        <Eye className="h-4 w-4" />
-                      }
-                    </button>
-                  </div>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="Confirme sua nova senha"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            <div className="flex justify-end pt-2">
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-                className={isMobile ? "w-full" : ""}
-              >
+            <div className="flex justify-end">
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? 'Alterando...' : 'Alterar Senha'}
               </Button>
             </div>
