@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,6 @@ const Login = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('manager');
 
-  // Password reset state
   const [resetPasswordEmail, setResetPasswordEmail] = useState('');
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
@@ -64,15 +62,10 @@ const Login = () => {
     setResetLoading(true);
     
     try {
-      // Update here: Using fetch with Authorization header that doesn't rely on session()
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData?.session?.access_token || '';
-      
       const response = await fetch('https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-password-reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ email: resetPasswordEmail }),
       });
@@ -114,7 +107,6 @@ const Login = () => {
             </TabsList>
             
             <TabsContent value="manager">
-              {/* Inactive account alert */}
               {inactiveAccount && (
                 <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
@@ -127,7 +119,6 @@ const Login = () => {
             </TabsContent>
             
             <TabsContent value="resident">
-              {/* Alert removed as requested */}
             </TabsContent>
           </Tabs>
           
@@ -255,7 +246,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Password Reset Dialog */}
       <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

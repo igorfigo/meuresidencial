@@ -1,2 +1,32 @@
 
 project_id = "kcbvdcacgbwigefwacrk"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://localhost"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+port = 54325
+
+[storage]
+enabled = true
+port = 54328
+
+[functions]
+[functions.send-password-reset]
+verify_jwt = false
+
