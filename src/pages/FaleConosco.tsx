@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Send, MessageCircle } from 'lucide-react';
+import { Loader2, Send, MessageCircle, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -72,28 +72,49 @@ const FaleConosco = () => {
     window.open(whatsappUrl, '_blank');
     toast.success('Abrindo WhatsApp...');
   };
+
+  // Custom top bar content for mobile
+  const mobileTopBarContent = (
+    <div className="flex items-center">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="mr-2"
+        onClick={() => navigate('/dashboard')}
+      >
+        <Home className="h-5 w-5" />
+      </Button>
+      <h1 className="text-xl font-semibold truncate">Fale Conosco</h1>
+    </div>
+  );
   
   return (
-    <DashboardLayout>
-      <div className="container mx-auto py-6 max-w-3xl">
-        <h1 className="text-3xl font-bold mb-2">Fale Conosco</h1>
-        <Separator className="mb-2" />
-        <p className="text-gray-600 mb-6">
-          Entre em contato com nossa equipe de suporte. Responderemos sua mensagem em até 24 horas úteis.
-        </p>
+    <DashboardLayout mobileTopBarContent={isMobile ? mobileTopBarContent : undefined}>
+      <div className={`container mx-auto py-${isMobile ? '4' : '6'} ${isMobile ? 'px-2' : 'max-w-3xl'}`}>
+        {!isMobile && (
+          <>
+            <h1 className="text-3xl font-bold mb-2">Fale Conosco</h1>
+            <Separator className="mb-2" />
+            <p className="text-gray-600 mb-6">
+              Entre em contato com nossa equipe de suporte. Responderemos sua mensagem em até 24 horas úteis.
+            </p>
+          </>
+        )}
         
-        <Card className="border-t-4 border-t-custom-primary shadow-md">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-2xl text-brand-700">Envie sua mensagem</CardTitle>
-            <CardDescription className="text-gray-600">
-              Utilize este formulário para entrar em contato com a administração do sistema.
-              Responderemos em até 24 horas úteis.
-            </CardDescription>
-          </CardHeader>
+        <Card className={`border-t-4 border-t-custom-primary shadow-md ${isMobile ? 'mx-0' : ''}`}>
+          {!isMobile && (
+            <CardHeader className="pb-3">
+              <CardTitle className="text-2xl text-brand-700">Envie sua mensagem</CardTitle>
+              <CardDescription className="text-gray-600">
+                Utilize este formulário para entrar em contato com a administração do sistema.
+                Responderemos em até 24 horas úteis.
+              </CardDescription>
+            </CardHeader>
+          )}
           
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <CardContent className={isMobile ? "pt-4 px-3" : ""}>
+            <form onSubmit={handleSubmit} className={`space-y-${isMobile ? '4' : '6'}`}>
+              <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'}`}>
                 <div className="space-y-2">
                   <Label htmlFor="nome" className="font-medium">Nome</Label>
                   <Input 
@@ -116,7 +137,7 @@ const FaleConosco = () => {
               </div>
               
               {user && !user.isAdmin && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'}`}>
                   <div className="space-y-2">
                     <Label htmlFor="matricula" className="font-medium">Matrícula</Label>
                     <Input 
@@ -160,7 +181,7 @@ const FaleConosco = () => {
                   value={formData.message} 
                   onChange={handleChange} 
                   placeholder="Digite sua mensagem aqui..." 
-                  rows={6} 
+                  rows={isMobile ? 4 : 6} 
                   required 
                   className="border-gray-300 focus:border-brand-500 focus:ring-brand-500 resize-none"
                 />
@@ -168,7 +189,7 @@ const FaleConosco = () => {
             </form>
           </CardContent>
           
-          <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-between gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg`}>
+          <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-between gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg ${isMobile ? 'px-3 pb-3' : ''}`}>
             <Button
               onClick={openWhatsApp}
               className={`${isMobile ? 'w-full' : ''} bg-green-600 hover:bg-green-700 transition-colors`}
@@ -178,14 +199,16 @@ const FaleConosco = () => {
             </Button>
             
             <div className={`flex ${isMobile ? 'flex-col w-full' : ''} gap-3`}>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(-1)}
-                className={`${isMobile ? 'w-full' : ''} border-gray-300 hover:bg-gray-100 hover:text-gray-700`}
-              >
-                Voltar
-              </Button>
+              {!isMobile && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate(-1)}
+                  className="border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                >
+                  Voltar
+                </Button>
+              )}
               
               <Button 
                 onClick={handleSubmit}
