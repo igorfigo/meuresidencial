@@ -1,7 +1,7 @@
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Users, FileText, MapPin, Wallet, Home, Bug, BellRing, FileCheck, Receipt, PiggyBank, ArrowDownCircle, ArrowUpCircle, Clock, UserX, UserCheck, FileText as FileTextIcon } from 'lucide-react';
+import { Users, FileText, MapPin, Wallet, Home, Bug, BellRing, FileCheck, Receipt, PiggyBank, ArrowDownCircle, ArrowUpCircle, Clock, UserX, UserCheck, FileText as FileTextIcon, BarChart3 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +22,7 @@ import {
   TooltipTrigger 
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
+import { usePlans } from '@/hooks/use-plans';
 
 interface LocationStats {
   states: [string, number][];
@@ -62,6 +63,7 @@ const Dashboard = () => {
   const [recentItems, setRecentItems] = useState<RecentItem[]>([]);
   const { balance, recentTransactions, isLoading: isFinancesLoading } = useFinances();
   const [unitStatusData, setUnitStatusData] = useState<any[]>([]);
+  const { plans } = usePlans();
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
@@ -80,10 +82,14 @@ const Dashboard = () => {
     bankSlipPreference: 0,
     regionData: []
   });
+
+  const [planDistribution, setPlanDistribution] = useState<{name: string, count: number, color: string}[]>([]);
+  const [isLoadingPlanData, setIsLoadingPlanData] = useState(false);
   
   useEffect(() => {
     if (user?.isAdmin) {
       fetchDetailedStats();
+      fetchPlanDistribution();
     }
     if (!user?.isAdmin) {
       fetchLatestNews();
@@ -97,6 +103,46 @@ const Dashboard = () => {
     }
   }, [user?.isAdmin, user?.isResident, user?.selectedCondominium]);
   
+  const fetchPlanDistribution = async () => {
+    try {
+      setIsLoadingPlanData(true);
+      
+      const { data, error } = await supabase
+        .from('condominiums')
+        .select('planocontratado')
+        .not('planocontratado', 'is', null);
+        
+      if (error) throw error;
+      
+      const planCounts: Record<string, number> = {};
+      
+      data.forEach(item => {
+        const plan = item.planocontratado || 'unknown';
+        planCounts[plan] = (planCounts[plan] || 0) + 1;
+      });
+      
+      const colors = {
+        'basic': '#3498db',
+        'standard': '#2ecc71',
+        'premium': '#f1c40f',
+        'enterprise': '#9b59b6',
+        'unknown': '#95a5a6'
+      };
+      
+      const formattedData = Object.entries(planCounts).map(([name, count]) => ({
+        name,
+        count,
+        color: colors[name as keyof typeof colors] || '#95a5a6'
+      })).sort((a, b) => b.count - a.count);
+      
+      setPlanDistribution(formattedData);
+    } catch (err) {
+      console.error('Error fetching plan distribution:', err);
+    } finally {
+      setIsLoadingPlanData(false);
+    }
+  };
+
   const fetchLatestNews = async () => {
     try {
       const { data, error } = await supabase
@@ -495,6 +541,48 @@ const Dashboard = () => {
                 <div className="text-sm text-gray-500">Sem dados regionais</div>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md md:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Condomínios por Tipo de Plano</CardTitle>
+            <BarChart3 className="h-4 w-4 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            {isLoadingPlanData ? (
+              <div className="flex justify-center items-center h-24">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-2">
+                  {planDistribution.map((plan) => (
+                    <div key={plan.name} className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium capitalize">{plan.name}</span>
+                          <span className="text-sm font-semibold">{plan.count}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div 
+                            className="h-2.5 rounded-full" 
+                            style={{ 
+                              width: `${(plan.count / planDistribution.reduce((sum, p) => sum + p.count, 0) * 100)}%`,
+                              backgroundColor: plan.color 
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="pt-2 text-xs text-gray-500 text-center">
+                  Total: {planDistribution.reduce((sum, p) => sum + p.count, 0)} condominios
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
