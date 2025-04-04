@@ -11,7 +11,8 @@ export function useNotifications() {
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const isResident = user?.isResident === true;
   // Need to access the user ID - in AppContext it's stored directly as id
-  const userId = user ? user.id : '';
+  // Use type assertion to handle the type mismatch
+  const userId = user ? (user as any).id : '';
   
   // Only track notifications for residents
   const enabled = isResident && !!matricula && !!userId;
@@ -31,7 +32,8 @@ export function useNotifications() {
           .single();
           
         if (!error && data) {
-          return new Date(data.last_viewed_at as string).getTime();
+          // Use type assertion to ensure TypeScript knows last_viewed_at exists
+          return new Date((data as any).last_viewed_at).getTime();
         }
       }
       
