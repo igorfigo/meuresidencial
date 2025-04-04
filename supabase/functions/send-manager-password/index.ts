@@ -1,9 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { supabaseAdmin } from "../_shared/supabase-admin.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,6 +19,25 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Check if RESEND_API_KEY is set
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY is not set. Cannot send emails.");
+      return new Response(
+        JSON.stringify({ 
+          error: "Email service is not configured. Please contact the administrator." 
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Import Resend only if we have an API key
+    const { Resend } = await import("npm:resend@2.0.0");
+    const resend = new Resend(resendApiKey);
+
     // Parse the request body to get the user's identifier (email or matricula)
     const { identifier }: PasswordResetRequest = await req.json();
 
