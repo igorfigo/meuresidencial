@@ -19,7 +19,9 @@ import {
   Wallet,
   HelpCircle,
   Menu,
-  X
+  X,
+  Mail,
+  Phone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlans } from '@/hooks/use-plans';
@@ -569,7 +571,7 @@ const LandingPage = () => {
             </div>
           </FadeInSection>
           
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-white/30 max-w-3xl mx-auto">
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-white/30 max-w-2xl mx-auto">
             <FadeInSection delay={100}>
               <Accordion type="single" collapsible className="w-full">
                 {faqItems.map((item, index) => (
@@ -590,26 +592,84 @@ const LandingPage = () => {
       
       <Separator className="h-px bg-gray-200 w-full" />
       
-      <footer className="bg-[#103381] text-custom-white py-8">
+      <footer className="bg-[#103381] text-custom-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center mb-4 md:mb-0">
-              <Building className="h-7 w-7 text-white" />
-              <h3 className="text-2xl font-bold text-custom-white ml-2">MeuResidencial</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col">
+              <div className="flex items-center mb-4">
+                <Building className="h-7 w-7 text-white" />
+                <h3 className="text-2xl font-bold text-custom-white ml-2">MeuResidencial</h3>
+              </div>
+              <p className="text-white/90 mb-2">Gestão eficiente para o seu condomínio</p>
+              <p className="text-white/90 mb-1">CNPJ: 60.112.929/0001-34</p>
+              <p className="text-white/90">Gestão Eficiente Soluções Tecnológicas LTDA</p>
             </div>
             
-            <div className="text-white text-center md:text-right">
-              <div className="flex items-center justify-center md:justify-end mb-2">
+            <div className="flex flex-col">
+              <h4 className="text-lg font-semibold mb-4 text-white">Contato</h4>
+              <div className="flex items-center mb-3">
                 <MapPin className="h-5 w-5 text-white mr-2 flex-shrink-0" />
                 <p className="text-white/90">Av. João Machado, 849, João Pessoa - PB</p>
               </div>
-              <p className="text-white/90">Email: contato@meuresidencial.com</p>
-              <p className="text-white/90">CNPJ: 60.112.929/0001-34</p>
-              <p className="text-white/90">Gestão Eficiente Soluções Tecnológicas LTDA</p>
-              <p className="text-white/70 text-sm mt-4">
-                © {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.
-              </p>
+              <div className="flex items-center mb-3">
+                <Mail className="h-5 w-5 text-white mr-2 flex-shrink-0" />
+                <p className="text-white/90">contato@meuresidencial.com</p>
+              </div>
+              <div className="flex items-center mb-3">
+                <Phone className="h-5 w-5 text-white mr-2 flex-shrink-0" />
+                <p className="text-white/90">(83) 3023-5555</p>
+              </div>
             </div>
+            
+            <div className="flex flex-col">
+              <h4 className="text-lg font-semibold mb-4 text-white">Links Rápidos</h4>
+              <ul className="space-y-2">
+                <li>
+                  <button 
+                    onClick={() => scrollToSection('features')}
+                    className="text-white/90 hover:text-white transition-colors flex items-center"
+                  >
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    Funcionalidades
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => scrollToSection('plans')}
+                    className="text-white/90 hover:text-white transition-colors flex items-center"
+                  >
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    Planos
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => scrollToSection('testimonials')}
+                    className="text-white/90 hover:text-white transition-colors flex items-center"
+                  >
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    Clientes
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => scrollToSection('faq')}
+                    className="text-white/90 hover:text-white transition-colors flex items-center"
+                  >
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    FAQ
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <Separator className="h-px bg-white/20 w-full my-6" />
+          
+          <div className="text-center">
+            <p className="text-white/70 text-sm">
+              © {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.
+            </p>
           </div>
         </div>
       </footer>
