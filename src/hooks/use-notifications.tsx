@@ -11,7 +11,7 @@ export function useNotifications() {
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const isResident = user?.isResident === true;
   // Need to access the user ID - in AppContext it's stored directly as id
-  const userId = user?.id || '';
+  const userId = user ? user.id : '';
   
   // Only track notifications for residents
   const enabled = isResident && !!matricula && !!userId;
@@ -31,7 +31,7 @@ export function useNotifications() {
           .single();
           
         if (!error && data) {
-          return new Date(data.last_viewed_at).getTime();
+          return new Date(data.last_viewed_at as string).getTime();
         }
       }
       
