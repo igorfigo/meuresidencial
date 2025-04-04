@@ -426,7 +426,7 @@ const Dashboard = () => {
   const renderAdminDashboard = () => (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="card-hover border-t-4 border-t-blue-600 shadow-md">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Status dos Gestores</CardTitle>
           </CardHeader>
@@ -450,7 +450,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-hover border-t-4 border-t-blue-600 shadow-md">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Preferência de Pagamento</CardTitle>
             <FileTextIcon className="h-4 w-4 text-blue-600" />
@@ -469,7 +469,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="card-hover border-t-4 border-t-blue-600 shadow-md">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Distribuição Regional</CardTitle>
             <MapPin className="h-4 w-4 text-green-600" />
