@@ -21,6 +21,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  ResponsiveContainer,
   PieChart as RechartsPie,
   Pie,
   Cell,
@@ -552,17 +553,26 @@ const FinanceiroDashboard = () => {
                 <h3 className="font-semibold text-gray-800">Receitas e Despesas Mensais</h3>
               </div>
               
-              <div className="h-64">
-                <ChartContainer 
-                  config={{
-                    receita: { color: '#4db35e', label: 'Receita' },
-                    despesa: { color: '#f97150', label: 'Despesa' }
-                  }}
-                >
-                  <BarChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis tickFormatter={formatTooltipValue} />
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart 
+                    data={monthlyData}
+                    margin={{ top: 10, right: 30, left: 20, bottom: 40 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis 
+                      dataKey="month" 
+                      tick={{ fontSize: 12 }}
+                      height={40}
+                      tickLine={{ stroke: '#e5e7eb' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                    />
+                    <YAxis 
+                      tickFormatter={formatTooltipValue}
+                      tick={{ fontSize: 11 }}
+                      tickLine={{ stroke: '#e5e7eb' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                    />
                     <Tooltip 
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
@@ -581,11 +591,31 @@ const FinanceiroDashboard = () => {
                         return null;
                       }}
                     />
-                    <Legend />
-                    <Bar dataKey="receita" fill="#4db35e" name="Receita" />
-                    <Bar dataKey="despesa" fill="#f97150" name="Despesa" />
+                    <Legend 
+                      verticalAlign="bottom" 
+                      height={36}
+                      iconType="circle"
+                      wrapperStyle={{ 
+                        paddingTop: '10px', 
+                        fontSize: '12px'
+                      }}
+                    />
+                    <Bar 
+                      dataKey="receita" 
+                      fill="#4db35e" 
+                      name="Receita"
+                      radius={[4, 4, 0, 0]} 
+                      barSize={16}
+                    />
+                    <Bar 
+                      dataKey="despesa" 
+                      fill="#f97150" 
+                      name="Despesa"
+                      radius={[4, 4, 0, 0]} 
+                      barSize={16}
+                    />
                   </BarChart>
-                </ChartContainer>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
