@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -110,8 +109,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col sm:flex-row bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="sm:w-1/2 flex flex-col justify-center items-center p-8 sm:p-16 animate-fade-in bg-brand-700 text-white">
+    <div className="min-h-screen flex flex-col sm:flex-row bg-gradient-to-br from-blue-50 to-indigo-100 h-screen w-screen">
+      <div className="sm:w-1/2 flex flex-col justify-center items-center p-8 sm:p-16 animate-fade-in bg-brand-700 text-white h-full">
         <div className="max-w-md w-full">
           <div className="mb-8 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start mb-4">
@@ -119,7 +118,6 @@ const Login = () => {
               <h1 className="text-3xl font-bold text-white ml-2 font-display">MeuResidencial</h1>
             </div>
             <h2 className="text-2xl font-semibold text-white mb-1">Seja bem-vindo!</h2>
-            <p className="text-blue-100">Faça login para acessar sua conta</p>
           </div>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
@@ -129,7 +127,6 @@ const Login = () => {
             </TabsList>
             
             <TabsContent value="manager">
-              {/* Inactive account alert */}
               {inactiveAccount && (
                 <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
@@ -222,19 +219,10 @@ const Login = () => {
               {loading ? 'Carregando...' : 'Entrar'}
             </Button>
           </form>
-          
-          <div className="mt-6 text-center">
-            <p className="text-sm text-blue-100">
-              Não tem uma conta?{' '}
-              <a href="#" className="text-white hover:underline">
-                Entre em contato conosco
-              </a>
-            </p>
-          </div>
         </div>
       </div>
       
-      <div className="hidden sm:flex sm:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden">
+      <div className="hidden sm:flex sm:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
         <div className="relative z-10 max-w-lg text-center">
           <h2 className="text-4xl font-bold mb-6 font-display text-brand-800">Gerencie seu condomínio com facilidade</h2>
           <p className="text-lg text-brand-700 mb-8">
@@ -282,7 +270,6 @@ const Login = () => {
         </div>
       </div>
       
-      {/* Password Recovery Dialog */}
       <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
