@@ -10,7 +10,7 @@ export function useNotifications() {
   
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const isResident = user?.isResident === true;
-  // Fix: Use the correct property name, which appears to be 'id' not 'uid'
+  // Need to access the user ID - in AppContext it's stored directly as id
   const userId = user?.id || '';
   
   // Only track notifications for residents
@@ -21,7 +21,7 @@ export function useNotifications() {
     try {
       // Check database for last viewed time first
       if (userId) {
-        // Fix: Use type assertion to handle the table that might not be in the TypeScript definitions
+        // Use type assertion to handle the table that might not be in the TypeScript definitions
         const { data, error } = await supabase
           .from('user_notification_views' as any)
           .select('last_viewed_at')
