@@ -29,4 +29,3 @@ port = 54328
 [functions]
 [functions.send-password-reset]
 verify_jwt = false
-
