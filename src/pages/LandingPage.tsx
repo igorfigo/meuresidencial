@@ -40,6 +40,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Separator } from '@/components/ui/separator';
 
 const FadeInSection = ({ children, delay = 0, className = '' }) => {
   const [ref, inView] = useInView({
@@ -558,11 +559,6 @@ const LandingPage = () => {
       </section>
       
       <section id="faq" className="py-16 bg-gradient-to-b from-brand-700 to-brand-800 relative">
-        <div className="absolute -top-1 left-0 right-0 transform rotate-180">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
-            <path fill="white" fillOpacity="1" d="M0,32L48,26.7C96,21,192,11,288,10.7C384,11,480,21,576,32C672,43,768,53,864,53.3C960,53,1056,43,1152,37.3C1248,32,1344,32,1392,32L1440,32L1440,80L1392,80C1344,80,1248,80,1152,80C1056,80,960,80,864,80C768,80,672,80,576,80C480,80,384,80,288,80C192,80,96,80,48,80L0,80Z"></path>
-          </svg>
-        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 relative z-10">
           <FadeInSection>
             <div className="text-center mb-12">
@@ -592,6 +588,8 @@ const LandingPage = () => {
         </div>
       </section>
       
+      <Separator className="h-px bg-gray-200 w-full" />
+      
       <footer className="bg-[#103381] text-custom-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
@@ -606,6 +604,8 @@ const LandingPage = () => {
                 <p className="text-white/90">Av. João Machado, 849, João Pessoa - PB</p>
               </div>
               <p className="text-white/90">Email: contato@meuresidencial.com</p>
+              <p className="text-white/90">CNPJ: 60.112.929/0001-34</p>
+              <p className="text-white/90">Gestão Eficiente Soluções Tecnológicas LTDA</p>
               <p className="text-white/70 text-sm mt-4">
                 © {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.
               </p>
