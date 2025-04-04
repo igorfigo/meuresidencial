@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useApp } from '@/contexts/AppContext';
 import { getPixKey, savePixKey, deletePixKey } from '@/integrations/supabase/client';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PixKeyFormData {
   matricula: string;
@@ -45,6 +46,7 @@ interface PixKeyFormData {
 
 const FinanceiroRecebimentoPix = () => {
   const { user } = useApp();
+  const isMobile = useIsMobile();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pixKey, setPixKey] = useState<PixKeyFormData | null>(null);
@@ -240,42 +242,48 @@ const FinanceiroRecebimentoPix = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row justify-between items-start mb-6">
+      <div className={`container mx-auto ${isMobile ? 'px-2 py-3' : 'px-4 py-6'}`}>
+        <div className="flex flex-col md:flex-row justify-between items-start mb-3">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Recebimento PIX / Juros</h1>
-            <p className="text-gray-500">Configure as informações da chave PIX e juros para recebimento de pagamentos.</p>
+            <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold mb-1`}>Recebimento PIX / Juros</h1>
+            <p className="text-gray-500 text-sm">Configure as informações da chave PIX e juros para recebimento de pagamentos.</p>
           </div>
         </div>
         
         <Card className="bg-white shadow-md border-t-4 border-t-brand-600">
-          <CardHeader className="bg-blue-50 border-b border-blue-100">
+          <CardHeader className={`bg-blue-50 border-b border-blue-100 ${isMobile ? 'px-3 py-3' : 'p-4'}`}>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-lg font-medium flex items-center">
-                  <QrCode className="mr-2 h-5 w-5 text-blue-500" />
+                <CardTitle className={`${isMobile ? 'text-base' : 'text-lg'} font-medium flex items-center`}>
+                  <QrCode className="mr-2 h-4 w-4 text-blue-500" />
                   Dados da Chave PIX e Juros
                 </CardTitle>
-                <CardDescription>
-                  Configure a chave PIX para recebimento de pagamentos do condomínio
-                </CardDescription>
+                {!isMobile && (
+                  <CardDescription>
+                    Configure a chave PIX para recebimento de pagamentos do condomínio
+                  </CardDescription>
+                )}
               </div>
               
               {!isLoading && pixKey && !isEditing && (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleEdit}>
-                    <Pencil className="mr-1 h-3 w-3" />
-                    Editar
+                  <Button variant="outline" size={isMobile ? "sm" : "default"} className={isMobile ? "px-2 py-1 text-xs" : ""} onClick={handleEdit}>
+                    <Pencil className={`${isMobile ? "h-3 w-3" : "mr-1 h-3 w-3"}`} />
+                    {!isMobile && "Editar"}
                   </Button>
                   
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="bg-red-50 border-red-200 text-red-600 hover:bg-red-100">
-                        <Trash2 className="mr-1 h-3 w-3" />
-                        Excluir
+                      <Button 
+                        variant="outline" 
+                        size={isMobile ? "sm" : "default"}
+                        className={`${isMobile ? "px-2 py-1 text-xs" : ""} bg-red-50 border-red-200 text-red-600 hover:bg-red-100`}
+                      >
+                        <Trash2 className={`${isMobile ? "h-3 w-3" : "mr-1 h-3 w-3"}`} />
+                        {!isMobile && "Excluir"}
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className={isMobile ? "max-w-[95%] p-3" : ""}>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Excluir Chave PIX</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -294,38 +302,41 @@ const FinanceiroRecebimentoPix = () => {
               )}
               
               {!isLoading && !pixKey && !isEditing && (
-                <Button onClick={() => setIsEditing(true)}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
+                <Button 
+                  onClick={() => setIsEditing(true)} 
+                  size={isMobile ? "sm" : "default"}
+                  className={isMobile ? "text-xs" : ""}
+                >
+                  <PlusCircle className={`${isMobile ? "h-3 w-3 mr-1" : "mr-2 h-4 w-4"}`} />
                   Cadastrar Chave PIX
                 </Button>
               )}
             </div>
           </CardHeader>
           
-          <CardContent className="pt-6">
+          <CardContent className={`${isMobile ? 'p-3' : 'pt-6'}`}>
             {isLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
+              <div className="space-y-3">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
               </div>
             ) : isEditing ? (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <FormField
                       control={form.control}
                       name="tipochave"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel required>Tipo da Chave</FormLabel>
+                          <FormLabel required className={isMobile ? "text-sm" : ""}>Tipo da Chave</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className={isMobile ? "h-8 text-sm" : ""}>
                                 <SelectValue placeholder="Selecione o tipo de chave" />
                               </SelectTrigger>
                             </FormControl>
@@ -346,10 +357,11 @@ const FinanceiroRecebimentoPix = () => {
                       name="chavepix"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel required>Chave PIX</FormLabel>
+                          <FormLabel required className={isMobile ? "text-sm" : ""}>Chave PIX</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
+                              className={isMobile ? "h-8 text-sm" : ""}
                               placeholder={getChavePixPlaceholder(watchTipoChave)}
                               type={getChavePixInputType(watchTipoChave)}
                               maxLength={getChavePixMaxLength(watchTipoChave)}
@@ -375,10 +387,11 @@ const FinanceiroRecebimentoPix = () => {
                       name="diavencimento"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel required>Dia de Vencimento</FormLabel>
+                          <FormLabel required className={isMobile ? "text-sm" : ""}>Dia de Vencimento</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
+                              className={isMobile ? "h-8 text-sm" : ""}
                               type="number"
                               min="1"
                               max="31"
@@ -395,69 +408,89 @@ const FinanceiroRecebimentoPix = () => {
                       name="jurosaodia"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel required>Juros ao Dia (%)</FormLabel>
+                          <FormLabel required className={isMobile ? "text-sm" : ""}>Juros ao Dia (%)</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
+                              className={isMobile ? "h-8 text-sm" : ""}
                               placeholder="0.033"
                             />
                           </FormControl>
-                          <p className="text-xs text-gray-500">Exemplo: 0.033 para uma taxa de 0,033% ao dia</p>
+                          {!isMobile && (
+                            <p className="text-xs text-gray-500">Exemplo: 0.033 para uma taxa de 0,033% ao dia</p>
+                          )}
                         </FormItem>
                       )}
                     />
                   </div>
                   
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="outline" onClick={handleCancel}>
+                  <div className="flex justify-end gap-2 pt-3">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleCancel} 
+                      size={isMobile ? "sm" : "default"}
+                      className={isMobile ? "text-xs" : ""}
+                    >
                       Cancelar
                     </Button>
-                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                    <Button 
+                      type="submit" 
+                      disabled={form.formState.isSubmitting}
+                      size={isMobile ? "sm" : "default"}
+                      className={isMobile ? "text-xs" : ""}
+                    >
                       {form.formState.isSubmitting ? 'Salvando...' : pixKey ? 'Salvar Alterações' : 'Cadastrar'}
                     </Button>
                   </div>
                 </form>
               </Form>
             ) : pixKey ? (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Tipo da Chave</h3>
-                    <p className="text-base font-medium">{pixKey.tipochave}</p>
+                    <h3 className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-500 mb-1`}>Tipo da Chave</h3>
+                    <p className={`${isMobile ? 'text-sm' : 'text-base'} font-medium`}>{pixKey.tipochave}</p>
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Chave PIX</h3>
-                    <p className="text-base font-medium">{pixKey.chavepix}</p>
+                    <h3 className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-500 mb-1`}>Chave PIX</h3>
+                    <p className={`${isMobile ? 'text-sm' : 'text-base'} font-medium`}>{pixKey.chavepix}</p>
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Dia de Vencimento</h3>
-                    <p className="text-base font-medium">{pixKey.diavencimento || '10'}</p>
+                    <h3 className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-500 mb-1`}>Dia de Vencimento</h3>
+                    <p className={`${isMobile ? 'text-sm' : 'text-base'} font-medium`}>{pixKey.diavencimento || '10'}</p>
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Juros ao Dia</h3>
-                    <p className="text-base font-medium">{pixKey.jurosaodia || '0.033'}%</p>
+                    <h3 className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-500 mb-1`}>Juros ao Dia</h3>
+                    <p className={`${isMobile ? 'text-sm' : 'text-base'} font-medium`}>{pixKey.jurosaodia || '0.033'}%</p>
                   </div>
                 </div>
                 
-                <div className="bg-blue-50 p-4 rounded-md border border-blue-100 mt-6">
-                  <p className="text-sm text-blue-700">
-                    <strong>Importante:</strong> Esta chave PIX será utilizada para receber os pagamentos dos moradores. 
-                    Certifique-se de que as informações estão corretas.
-                  </p>
-                </div>
+                {!isMobile && (
+                  <div className="bg-blue-50 p-4 rounded-md border border-blue-100 mt-6">
+                    <p className="text-sm text-blue-700">
+                      <strong>Importante:</strong> Esta chave PIX será utilizada para receber os pagamentos dos moradores. 
+                      Certifique-se de que as informações estão corretas.
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="text-center py-6">
-                <QrCode className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-                <h3 className="text-lg font-medium mb-2">Nenhuma chave PIX cadastrada</h3>
-                <p className="text-gray-500 mb-4">
+              <div className="text-center py-4">
+                <QrCode className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-medium mb-2`}>Nenhuma chave PIX cadastrada</h3>
+                <p className="text-gray-500 mb-3 text-sm">
                   Para receber pagamentos via PIX, cadastre uma chave PIX para o condomínio.
                 </p>
-                <Button onClick={() => setIsEditing(true)}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
+                <Button 
+                  onClick={() => setIsEditing(true)}
+                  size={isMobile ? "sm" : "default"}
+                  className={isMobile ? "text-xs" : ""}
+                >
+                  <PlusCircle className={`${isMobile ? "h-3 w-3 mr-1" : "mr-2 h-4 w-4"}`} />
                   Cadastrar Chave PIX
                 </Button>
               </div>
@@ -465,8 +498,8 @@ const FinanceiroRecebimentoPix = () => {
           </CardContent>
           
           {!isLoading && pixKey && !isEditing && (
-            <CardFooter className="bg-gray-50 border-t border-gray-100">
-              <p className="text-sm text-gray-500">
+            <CardFooter className={`bg-gray-50 border-t border-gray-100 ${isMobile ? 'px-3 py-2' : ''}`}>
+              <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500`}>
                 Última atualização: {new Date(pixKey.updated_at || pixKey.created_at || new Date()).toLocaleDateString('pt-BR')}
               </p>
             </CardFooter>
