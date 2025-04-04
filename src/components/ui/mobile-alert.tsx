@@ -21,6 +21,7 @@ interface MobileAlertProps {
   cancelText?: string;
   onConfirm?: () => void;
   destructive?: boolean;
+  hideCancel?: boolean;
 }
 
 export function MobileAlert({
@@ -32,6 +33,7 @@ export function MobileAlert({
   cancelText = 'Cancelar',
   onConfirm,
   destructive = false,
+  hideCancel = false,
 }: MobileAlertProps) {
   const isMobile = useIsMobile();
   
@@ -50,12 +52,14 @@ export function MobileAlert({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className={isMobile ? 'flex-col space-y-2 sm:space-y-0 mt-3' : ''}>
-          <AlertDialogCancel 
-            className={isMobile ? 'w-full mt-0 sm:mt-0' : ''}
-            onClick={onClose}
-          >
-            {cancelText}
-          </AlertDialogCancel>
+          {!hideCancel && (
+            <AlertDialogCancel 
+              className={isMobile ? 'w-full mt-0 sm:mt-0' : ''}
+              onClick={onClose}
+            >
+              {cancelText}
+            </AlertDialogCancel>
+          )}
           <AlertDialogAction 
             className={`${isMobile ? 'w-full' : ''} ${destructive ? 'bg-red-600 hover:bg-red-700' : ''}`}
             onClick={handleConfirm}
