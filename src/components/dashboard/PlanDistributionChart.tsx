@@ -5,9 +5,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 interface PlanDistributionProps {
   data: {name: string, count: number, color: string}[];
   isLoading: boolean;
+  viewMode?: 'chart' | 'list';
 }
 
-const PlanDistributionChart: React.FC<PlanDistributionProps> = ({ data, isLoading }) => {
+const PlanDistributionChart: React.FC<PlanDistributionProps> = ({ data, isLoading, viewMode = 'chart' }) => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-32">
@@ -26,6 +27,28 @@ const PlanDistributionChart: React.FC<PlanDistributionProps> = ({ data, isLoadin
 
   // Calculate total for the label
   const total = data.reduce((sum, entry) => sum + entry.count, 0);
+
+  if (viewMode === 'list') {
+    return (
+      <div className="space-y-2">
+        {data.map((item, index) => (
+          <div key={item.name} className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`h-3 w-3 rounded-full`} style={{ backgroundColor: item.color }}></div>
+              <span className="text-sm capitalize">{item.name}</span>
+            </div>
+            <span className="font-medium">{item.count}</span>
+          </div>
+        ))}
+        {data.length === 0 && (
+          <div className="text-sm text-gray-500">Sem dados de planos</div>
+        )}
+        <div className="text-xs text-gray-500 text-center mt-2 pt-1 border-t">
+          Total: {total} condomínios ativos
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-48">

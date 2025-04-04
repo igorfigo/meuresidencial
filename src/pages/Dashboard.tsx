@@ -554,7 +554,8 @@ const Dashboard = () => {
           <CardContent>
             <PlanDistributionChart 
               data={planDistribution} 
-              isLoading={isLoadingPlanData} 
+              isLoading={isLoadingPlanData}
+              viewMode="list"
             />
           </CardContent>
         </Card>
