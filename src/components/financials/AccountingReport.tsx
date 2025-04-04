@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format, parse, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -171,10 +170,9 @@ export const AccountingReport = () => {
       doc.setFillColor(240, 247, 255);
       doc.rect(0, 0, pageWidth, 40, 'F');
       
-      doc.setFillColor(59, 130, 246);
+      doc.setFillColor(33, 81, 185);
       doc.rect(0, 0, pageWidth, 5, 'F');
       
-      // Add two paragraphs above the title
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(31, 41, 55);
       doc.setFontSize(12);
@@ -187,7 +185,7 @@ export const AccountingReport = () => {
       
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(31, 41, 55);
+      doc.setTextColor(33, 81, 185);
       const title = `Prestação de Contas - ${monthName} ${year}`;
       doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += lineHeight * 2.5;
@@ -222,7 +220,7 @@ export const AccountingReport = () => {
       doc.setFillColor(243, 250, 247);
       doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 42, 3, 3, 'F');
       
-      doc.setFillColor(45, 122, 128);
+      doc.setFillColor(41, 90, 195);
       doc.rect(margin, yPosition, pageWidth - (margin * 2), 8, 'F');
       
       doc.setFont('helvetica', 'bold');
@@ -244,7 +242,7 @@ export const AccountingReport = () => {
       yPosition += lineHeight;
       
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(31, 41, 55);
+      doc.setTextColor(33, 81, 185);
       doc.text(`Saldo Final: R$ ${endBalance}`, margin + 10, yPosition);
       yPosition += lineHeight * 3;
       
@@ -275,12 +273,12 @@ export const AccountingReport = () => {
             doc.addPage();
             currentY = 20;
             
-            doc.setFillColor(59, 130, 246);
+            doc.setFillColor(33, 81, 185);
             doc.rect(0, 0, pageWidth, 5, 'F');
             
             doc.setFontSize(8);
             doc.setFont('helvetica', 'italic');
-            doc.setTextColor(100, 116, 139);
+            doc.setTextColor(41, 90, 195);
             doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
           }
           
@@ -373,12 +371,12 @@ export const AccountingReport = () => {
         doc.addPage();
         yPosition = 20;
         
-        doc.setFillColor(59, 130, 246);
+        doc.setFillColor(33, 81, 185);
         doc.rect(0, 0, pageWidth, 5, 'F');
         
         doc.setFontSize(8);
         doc.setFont('helvetica', 'italic');
-        doc.setTextColor(100, 116, 139);
+        doc.setTextColor(41, 90, 195);
         doc.text("www.meuresidencial.com", pageWidth - 15, 10, { align: 'right' });
       }
       
@@ -438,7 +436,7 @@ export const AccountingReport = () => {
       
       doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
-      doc.setTextColor(148, 163, 184);
+      doc.setTextColor(41, 90, 195);
       
       doc.setFillColor(246, 249, 252);
       doc.rect(0, pageHeight - 12, pageWidth, 12, 'F');
