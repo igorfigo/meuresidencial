@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -52,7 +53,7 @@ const Login = () => {
     setLoading(false);
   };
 
-  const handleResetPassword = async (e: React.FormEvent) => {
+  const handleSendPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetPasswordEmail) {
       toast.error('Por favor, informe seu email');
@@ -73,14 +74,14 @@ const Login = () => {
       const data = await response.json();
       
       if (response.ok) {
-        toast.success('Email de redefinição de senha enviado com sucesso');
+        toast.success('Senha enviada para o seu email com sucesso');
         setResetDialogOpen(false);
         setResetPasswordEmail('');
       } else {
         toast.error(`Erro ao enviar email: ${data.error || 'Tente novamente mais tarde'}`);
       }
     } catch (error) {
-      console.error('Erro ao solicitar redefinição de senha:', error);
+      console.error('Erro ao solicitar recuperação de senha:', error);
       toast.error('Erro ao processar sua solicitação. Tente novamente mais tarde.');
     } finally {
       setResetLoading(false);
@@ -251,10 +252,10 @@ const Login = () => {
           <DialogHeader>
             <DialogTitle>Esqueceu sua senha?</DialogTitle>
             <DialogDescription>
-              Digite seu email abaixo para receber um link de redefinição de senha.
+              Digite seu email abaixo para receber sua senha atual por email.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleResetPassword}>
+          <form onSubmit={handleSendPassword}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="resetEmail">Email</Label>
@@ -273,7 +274,7 @@ const Login = () => {
                 Cancelar
               </Button>
               <Button type="submit" disabled={resetLoading}>
-                {resetLoading ? 'Enviando...' : 'Enviar link'}
+                {resetLoading ? 'Enviando...' : 'Enviar senha'}
               </Button>
             </DialogFooter>
           </form>
