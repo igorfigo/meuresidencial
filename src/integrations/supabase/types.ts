@@ -998,6 +998,39 @@ export type Database = {
         }
         Relationships: []
       }
+      preventive_alerts: {
+        Row: {
+          alert_date: string
+          category: string
+          created_at: string
+          id: string
+          is_completed: boolean
+          matricula: string
+          observations: string | null
+          updated_at: string
+        }
+        Insert: {
+          alert_date: string
+          category: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          matricula: string
+          observations?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alert_date?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          matricula?: string
+          observations?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       resident_charges: {
         Row: {
           amount: string

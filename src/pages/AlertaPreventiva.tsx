@@ -1,176 +1,205 @@
 
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePreventiveAlerts } from '@/hooks/use-preventive-alerts';
-import { PreventiveAlertCategory, alertCategoryLabels } from '@/types/preventiveAlerts';
-import { AlertCircle, Calendar, Check, CheckCircle2, CircleAlert, Clock, Edit, Loader2, Plus, Trash2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { CalendarIcon, Plus, Check, X, AlertCircle } from 'lucide-react';
+import { usePreventiveAlerts } from '@/hooks/use-preventive-alerts';
+import { PreventiveAlert, PreventiveAlertCategory, alertCategoryLabels } from '@/types/preventiveAlerts';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from 'sonner';
+
+interface FormValues {
+  category: PreventiveAlertCategory;
+  alertDate: Date;
+  observations: string;
+}
 
 const AlertaPreventiva = () => {
-  const { 
-    alerts, 
-    loading, 
-    pendingAlerts,
-    addAlert, 
-    toggleAlertCompletion, 
-    deleteAlert 
-  } = usePreventiveAlerts();
+  const { alerts, loading, addAlert, toggleAlertCompletion, deleteAlert } = usePreventiveAlerts();
+  const [formOpen, setFormOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState<PreventiveAlert | null>(null);
   
-  const [openDialog, setOpenDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'completed'>('all');
-  const [editAlertId, setEditAlertId] = useState<string | null>(null);
-
-  const form = useForm({
+  const form = useForm<FormValues>({
     defaultValues: {
-      category: '' as PreventiveAlertCategory,
-      alertDate: new Date(),
+      category: 'eletricos',
       observations: '',
-    },
+    }
   });
 
-  const onSubmit = async (values: {
-    category: PreventiveAlertCategory;
-    alertDate: Date;
-    observations: string;
-  }) => {
-    const result = await addAlert(
-      values.category,
-      values.alertDate,
-      values.observations
-    );
-    
-    if (result) {
+  const onSubmit = async (values: FormValues) => {
+    try {
+      await addAlert(
+        values.category,
+        values.alertDate,
+        values.observations
+      );
+      setFormOpen(false);
       form.reset();
-      setOpenDialog(false);
+    } catch (error) {
+      console.error('Error submitting form:', error);
     }
   };
 
-  const handleToggleCompletion = async (id: string, currentState: boolean) => {
-    await toggleAlertCompletion(id, !currentState);
+  const handleToggleCompletion = async (alert: PreventiveAlert) => {
+    await toggleAlertCompletion(alert.id, !alert.isCompleted);
   };
 
-  const handleDeleteAlert = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja remover este alerta?')) {
-      await deleteAlert(id);
+  const handleDeleteClick = (alert: PreventiveAlert) => {
+    setSelectedAlert(alert);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (selectedAlert) {
+      await deleteAlert(selectedAlert.id);
+      setDeleteDialogOpen(false);
+      setSelectedAlert(null);
     }
   };
 
-  // Filter alerts based on active tab
-  const filteredAlerts = alerts.filter(alert => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'pending') return !alert.isCompleted;
-    if (activeTab === 'completed') return alert.isCompleted;
-    return true;
-  });
+  const isPastDue = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date <= today && !form.getValues().alertDate;
+  };
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
           <div>
-            <h1 className="text-2xl font-bold">Alerta Preventiva</h1>
-            <p className="text-muted-foreground">Gerencie alertas de manutenção preventiva</p>
+            <h1 className="text-3xl font-bold tracking-tight">Alerta Preventiva</h1>
+            <p className="text-muted-foreground">
+              Gerencie os alertas preventivos para manutenções e inspeções
+            </p>
           </div>
-          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus size={16} />
-                <span>Novo Alerta</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Criar Novo Alerta Preventivo</DialogTitle>
-                <DialogDescription>
-                  Adicione um novo alerta para manutenção preventiva no condomínio.
-                </DialogDescription>
-              </DialogHeader>
+          <Button 
+            onClick={() => setFormOpen(!formOpen)} 
+            className="bg-brand-600 hover:bg-brand-700 text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Alerta
+          </Button>
+        </div>
+
+        {formOpen && (
+          <Card className="border-t-4 border-t-brand-600">
+            <CardHeader>
+              <CardTitle>Cadastrar Novo Alerta Preventivo</CardTitle>
+              <CardDescription>
+                Preencha os dados para criar um novo alerta de manutenção preventiva
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Categoria</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione uma categoria" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.entries(alertCategoryLabels).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="alertDate"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Data do Alerta</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      rules={{ required: "Selecione uma categoria" }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Categoria</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
                             <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "PPP", { locale: ptBR })
-                                ) : (
-                                  <span>Selecione uma data</span>
-                                )}
-                                <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione uma categoria" />
+                              </SelectTrigger>
                             </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <CalendarComponent
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              initialFocus
-                              className="p-3 pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
+                            <SelectContent>
+                              {Object.entries(alertCategoryLabels).map(([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="alertDate"
+                      rules={{ required: "Selecione uma data para o alerta" }}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Data do Alerta</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP", { locale: ptBR })
+                                  ) : (
+                                    <span>Selecionar data</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                initialFocus
+                                locale={ptBR}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={form.control}
                     name="observations"
@@ -179,194 +208,137 @@ const AlertaPreventiva = () => {
                         <FormLabel>Observações</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="Descreva detalhes sobre esta manutenção preventiva" 
+                            placeholder="Digite observações ou detalhes sobre o alerta" 
+                            className="h-24"
                             {...field} 
-                            rows={4}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
+
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setFormOpen(false)}
+                    >
                       Cancelar
                     </Button>
-                    <Button type="submit">Salvar Alerta</Button>
-                  </DialogFooter>
+                    <Button 
+                      type="submit"
+                      className="bg-brand-600 hover:bg-brand-700 text-white"
+                    >
+                      Salvar Alerta
+                    </Button>
+                  </div>
                 </form>
               </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
-        
-        {pendingAlerts > 0 && (
-          <Card className="mb-6 border-l-4 border-l-amber-500">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-amber-100 p-2 rounded-full">
-                  <AlertCircle className="h-5 w-5 text-amber-500" />
-                </div>
-                <div>
-                  <p className="font-medium">
-                    Você possui {pendingAlerts} alerta{pendingAlerts > 1 ? 's' : ''} pendente{pendingAlerts > 1 ? 's' : ''} 
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Verifique as manutenções preventivas que precisam ser realizadas.
-                  </p>
-                </div>
-              </div>
             </CardContent>
           </Card>
         )}
-        
-        <Tabs defaultValue="all" className="w-full" onValueChange={(value) => setActiveTab(value as any)}>
-          <div className="flex justify-between items-center mb-4">
-            <TabsList>
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                <Clock size={16} />
-                <span>Todos</span>
-              </TabsTrigger>
-              <TabsTrigger value="pending" className="flex items-center gap-2">
-                <CircleAlert size={16} />
-                <span>Pendentes</span>
-                {pendingAlerts > 0 && (
-                  <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
-                    {pendingAlerts}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="completed" className="flex items-center gap-2">
-                <CheckCircle2 size={16} />
-                <span>Concluídos</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <TabsContent value="all" className="space-y-4">
-            {renderAlertsList(filteredAlerts, loading, handleToggleCompletion, handleDeleteAlert)}
-          </TabsContent>
-          
-          <TabsContent value="pending" className="space-y-4">
-            {renderAlertsList(filteredAlerts, loading, handleToggleCompletion, handleDeleteAlert)}
-          </TabsContent>
-          
-          <TabsContent value="completed" className="space-y-4">
-            {renderAlertsList(filteredAlerts, loading, handleToggleCompletion, handleDeleteAlert)}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </DashboardLayout>
-  );
-};
 
-const renderAlertsList = (
-  alerts: any[], 
-  loading: boolean, 
-  handleToggleCompletion: (id: string, currentState: boolean) => void, 
-  handleDeleteAlert: (id: string) => void
-) => {
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (alerts.length === 0) {
-    return (
-      <Card className="border-dashed">
-        <CardContent className="p-6 flex flex-col items-center justify-center text-center">
-          <Calendar className="h-12 w-12 text-muted-foreground mb-3" />
-          <h3 className="font-medium text-lg">Nenhum alerta encontrado</h3>
-          <p className="text-muted-foreground">
-            Crie novos alertas preventivos para acompanhar manutenções necessárias.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return alerts.map(alert => {
-    const isOverdue = !alert.isCompleted && new Date(alert.alertDate) < new Date();
-    const isPendingToday = !alert.isCompleted && 
-      new Date(alert.alertDate).toDateString() === new Date().toDateString();
-    
-    return (
-      <Card 
-        key={alert.id} 
-        className={cn(
-          "transition-all hover:shadow-md",
-          alert.isCompleted ? "border-l-4 border-l-green-500" : 
-          isOverdue ? "border-l-4 border-l-red-500" : 
-          isPendingToday ? "border-l-4 border-l-amber-500" : ""
-        )}
-      >
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-xl font-medium">
-                {alertCategoryLabels[alert.category as PreventiveAlertCategory]}
-              </CardTitle>
-              <CardDescription>
-                Data do Alerta: {format(new Date(alert.alertDate), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant={alert.isCompleted ? "outline" : "default"}
-                size="sm"
-                onClick={() => handleToggleCompletion(alert.id, alert.isCompleted)}
-              >
-                {alert.isCompleted ? (
-                  <>
-                    <CircleAlert size={16} className="mr-1" />
-                    <span>Reabrir</span>
-                  </>
-                ) : (
-                  <>
-                    <Check size={16} className="mr-1" />
-                    <span>Concluir</span>
-                  </>
-                )}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                onClick={() => handleDeleteAlert(alert.id)}
-              >
-                <Trash2 size={16} />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm whitespace-pre-line">{alert.observations}</p>
-        </CardContent>
-        <CardFooter className="pt-0 pb-3 text-xs text-muted-foreground">
-          {alert.isCompleted ? (
-            <div className="flex items-center gap-1">
-              <CheckCircle2 size={14} className="text-green-500" />
-              <span>Concluído em {format(new Date(alert.updatedAt), "d MMM yyyy", { locale: ptBR })}</span>
-            </div>
-          ) : isOverdue ? (
-            <div className="flex items-center gap-1">
-              <AlertCircle size={14} className="text-red-500" />
-              <span>Atrasado por {Math.ceil((new Date().getTime() - new Date(alert.alertDate).getTime()) / (1000 * 60 * 60 * 24))} dias</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {loading ? (
+            <p>Carregando alertas...</p>
+          ) : alerts.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center p-10 border rounded-lg border-dashed text-center">
+              <AlertCircle className="w-12 h-12 text-muted-foreground mb-4" />
+              <h3 className="font-medium text-lg">Nenhum alerta encontrado</h3>
+              <p className="text-muted-foreground mt-1">
+                Cadastre alertas preventivos para receber notificações de manutenção
+              </p>
             </div>
           ) : (
-            <div className="flex items-center gap-1">
-              <Clock size={14} />
-              <span>Em {Math.ceil((new Date(alert.alertDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dias</span>
-            </div>
+            alerts.map((alert) => (
+              <Card key={alert.id} className={cn(
+                "border-l-4",
+                alert.isCompleted 
+                  ? "border-l-green-500"
+                  : isPastDue(alert.alertDate) 
+                    ? "border-l-red-500"
+                    : "border-l-amber-500"
+              )}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">
+                      {alertCategoryLabels[alert.category]}
+                    </CardTitle>
+                    <Badge variant={alert.isCompleted ? "success" : isPastDue(alert.alertDate) ? "destructive" : "outline"}>
+                      {alert.isCompleted 
+                        ? "Concluído" 
+                        : isPastDue(alert.alertDate)
+                          ? "Pendente"
+                          : "Agendado"
+                      }
+                    </Badge>
+                  </div>
+                  <CardDescription>
+                    Data: {format(alert.alertDate, "PPP", { locale: ptBR })}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {alert.observations ? (
+                    <p className="text-sm text-muted-foreground line-clamp-3">{alert.observations}</p>
+                  ) : (
+                    <p className="text-sm italic text-muted-foreground">Sem observações</p>
+                  )}
+                </CardContent>
+                <CardFooter className="pt-2 flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleToggleCompletion(alert)}
+                    className={cn(
+                      alert.isCompleted && "text-green-600 border-green-200 hover:text-green-700 hover:border-green-300"
+                    )}
+                  >
+                    {alert.isCompleted ? (
+                      <>
+                        <X className="w-4 h-4 mr-1" />
+                        Desfazer
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4 mr-1" />
+                        Concluir
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDeleteClick(alert)}
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    Excluir
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))
           )}
-        </CardFooter>
-      </Card>
-    );
-  });
+        </div>
+      </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este alerta preventivo? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </DashboardLayout>
+  );
 };
 
 export default AlertaPreventiva;

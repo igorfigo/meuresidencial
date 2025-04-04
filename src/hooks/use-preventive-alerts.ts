@@ -21,15 +21,15 @@ export function usePreventiveAlerts() {
         .from('preventive_alerts')
         .select('*')
         .eq('matricula', matricula)
-        .order('alertDate', { ascending: true });
+        .order('alert_date', { ascending: true });
         
       if (error) throw error;
 
       const formattedData: PreventiveAlert[] = data.map(alert => ({
         ...alert,
-        alertDate: new Date(alert.alertDate),
-        createdAt: new Date(alert.createdAt),
-        updatedAt: new Date(alert.updatedAt)
+        alertDate: new Date(alert.alert_date),
+        createdAt: new Date(alert.created_at),
+        updatedAt: new Date(alert.updated_at)
       }));
       
       setAlerts(formattedData);
@@ -63,11 +63,11 @@ export function usePreventiveAlerts() {
       const newAlert = {
         matricula,
         category,
-        alertDate: alertDate.toISOString(),
+        alert_date: alertDate.toISOString(),
         observations,
-        isCompleted: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        is_completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
       
       const { data, error } = await supabase
@@ -95,7 +95,7 @@ export function usePreventiveAlerts() {
         .from('preventive_alerts')
         .update({
           ...updates,
-          updatedAt: new Date().toISOString()
+          updated_at: new Date().toISOString()
         })
         .eq('id', id);
         
