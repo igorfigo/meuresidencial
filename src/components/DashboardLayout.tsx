@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,8 +37,7 @@ import {
   PieChart,
   History,
   Files,
-  HelpCircle,
-  AlertTriangle
+  HelpCircle
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -52,7 +50,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/use-notifications';
 import { Separator } from './ui/separator';
-import { usePreventiveAlerts } from '@/hooks/use-preventive-alerts';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -75,7 +72,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
   const { unreadAnnouncements, unreadDocuments, markAsViewed } = useNotifications();
-  const { pendingAlerts } = usePreventiveAlerts();
 
   const isFinanceiroPath = location.pathname.includes('/financeiro');
   const isBusinessPath = location.pathname.includes('/business-management') || 
@@ -152,12 +148,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
     { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
-    { 
-      name: 'Alerta Preventiva', 
-      icon: <AlertTriangle className="h-5 w-5" />, 
-      path: '/alerta-preventiva',
-      badge: pendingAlerts > 0 ? pendingAlerts : undefined
-    },
     { name: 'Dados Históricos', icon: <History className="h-5 w-5" />, path: '/dados-historicos' },
     { name: 'Garagem Livre', icon: <Car className="h-5 w-5" />, path: '/vaga-garagem' },
     { name: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" />, path: '/minha-assinatura' },
