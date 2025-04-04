@@ -17,8 +17,10 @@ export function usePreventiveAlerts() {
     
     try {
       setLoading(true);
+      // Use type assertion to work around TypeScript errors with Supabase client
+      // since the preventive_alerts table was just created
       const { data, error } = await supabase
-        .from('preventive_alerts')
+        .from('preventive_alerts' as any)
         .select('*')
         .eq('matricula', matricula)
         .order('alert_date', { ascending: true });
@@ -26,8 +28,12 @@ export function usePreventiveAlerts() {
       if (error) throw error;
 
       const formattedData: PreventiveAlert[] = data.map(alert => ({
-        ...alert,
+        id: alert.id,
+        matricula: alert.matricula,
+        category: alert.category as PreventiveAlertCategory,
         alertDate: new Date(alert.alert_date),
+        observations: alert.observations || '',
+        isCompleted: alert.is_completed,
         createdAt: new Date(alert.created_at),
         updatedAt: new Date(alert.updated_at)
       }));
@@ -70,8 +76,9 @@ export function usePreventiveAlerts() {
         updated_at: new Date().toISOString()
       };
       
+      // Use type assertion to work around TypeScript errors
       const { data, error } = await supabase
-        .from('preventive_alerts')
+        .from('preventive_alerts' as any)
         .insert(newAlert)
         .select()
         .single();
@@ -91,12 +98,20 @@ export function usePreventiveAlerts() {
 
   const updateAlert = async (id: string, updates: Partial<PreventiveAlert>) => {
     try {
+      // Convert from our frontend model to the database model
+      const dbUpdates: any = {};
+      if (updates.isCompleted !== undefined) dbUpdates.is_completed = updates.isCompleted;
+      if (updates.observations !== undefined) dbUpdates.observations = updates.observations;
+      if (updates.alertDate !== undefined) dbUpdates.alert_date = updates.alertDate.toISOString();
+      if (updates.category !== undefined) dbUpdates.category = updates.category;
+      
+      // Always update the updated_at timestamp
+      dbUpdates.updated_at = new Date().toISOString();
+      
+      // Use type assertion to work around TypeScript errors
       const { error } = await supabase
-        .from('preventive_alerts')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .from('preventive_alerts' as any)
+        .update(dbUpdates)
         .eq('id', id);
         
       if (error) throw error;
@@ -118,8 +133,9 @@ export function usePreventiveAlerts() {
 
   const deleteAlert = async (id: string) => {
     try {
+      // Use type assertion to work around TypeScript errors
       const { error } = await supabase
-        .from('preventive_alerts')
+        .from('preventive_alerts' as any)
         .delete()
         .eq('id', id);
         

@@ -95,7 +95,16 @@ const AlertaPreventiva = () => {
   const isPastDue = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return date <= today && !form.getValues().alertDate;
+    return date <= today && !alert.isCompleted;
+  };
+
+  // Custom variant for the badge
+  const getBadgeVariant = (alert: PreventiveAlert) => {
+    if (alert.isCompleted) return "outline";
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return alert.alertDate <= today ? "destructive" : "outline";
   };
 
   return (
@@ -265,7 +274,7 @@ const AlertaPreventiva = () => {
                     <CardTitle className="text-lg">
                       {alertCategoryLabels[alert.category]}
                     </CardTitle>
-                    <Badge variant={alert.isCompleted ? "success" : isPastDue(alert.alertDate) ? "destructive" : "outline"}>
+                    <Badge variant={alert.isCompleted ? "outline" : isPastDue(alert.alertDate) ? "destructive" : "outline"}>
                       {alert.isCompleted 
                         ? "Concluído" 
                         : isPastDue(alert.alertDate)
