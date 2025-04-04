@@ -525,7 +525,7 @@ const LandingPage = () => {
                 O Que Nossos Clientes Dizem
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Síndicos que transformaram a gestão do nosso condomínio com nossa plataforma
+                Síndicos que transformaram a gestão dos seus condomínios com nossa plataforma
               </p>
             </div>
           </FadeInSection>
