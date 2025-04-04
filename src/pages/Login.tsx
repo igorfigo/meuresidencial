@@ -9,6 +9,15 @@ import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
@@ -19,6 +28,11 @@ const Login = () => {
   const { login } = useApp();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('manager');
+
+  // Password reset state
+  const [resetPasswordEmail, setResetPasswordEmail] = useState('');
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +52,42 @@ const Login = () => {
     }
     
     setLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetPasswordEmail) {
+      toast.error('Por favor, informe seu email');
+      return;
+    }
+    
+    setResetLoading(true);
+    
+    try {
+      const response = await fetch('https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-password-reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.auth.session()?.access_token || ''}`,
+        },
+        body: JSON.stringify({ email: resetPasswordEmail }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('Email de redefinição de senha enviado com sucesso');
+        setResetDialogOpen(false);
+        setResetPasswordEmail('');
+      } else {
+        toast.error(`Erro ao enviar email: ${data.error || 'Tente novamente mais tarde'}`);
+      }
+    } catch (error) {
+      console.error('Erro ao solicitar redefinição de senha:', error);
+      toast.error('Erro ao processar sua solicitação. Tente novamente mais tarde.');
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   return (
@@ -103,9 +153,13 @@ const Login = () => {
                   {activeTab === 'manager' ? 'Senha' : 'CPF (Senha)'}
                 </Label>
                 {activeTab === 'manager' && (
-                  <a href="#" className="text-xs text-blue-200 hover:text-white hover:underline">
+                  <button 
+                    type="button"
+                    onClick={() => setResetDialogOpen(true)}
+                    className="text-xs text-blue-200 hover:text-white hover:underline"
+                  >
                     Esqueceu a senha?
-                  </a>
+                  </button>
                 )}
               </div>
               <div className="relative">
@@ -146,15 +200,6 @@ const Login = () => {
               {loading ? 'Carregando...' : 'Entrar'}
             </Button>
           </form>
-          
-          <div className="mt-6 text-center">
-            <p className="text-sm text-blue-100">
-              Não tem uma conta?{' '}
-              <a href="#" className="text-white hover:underline">
-                Entre em contato conosco
-              </a>
-            </p>
-          </div>
         </div>
       </div>
       
@@ -205,6 +250,41 @@ const Login = () => {
           </div>
         </div>
       </div>
+
+      {/* Password Reset Dialog */}
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Esqueceu sua senha?</DialogTitle>
+            <DialogDescription>
+              Digite seu email abaixo para receber um link de redefinição de senha.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleResetPassword}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="resetEmail">Email</Label>
+                <Input
+                  id="resetEmail"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={resetPasswordEmail}
+                  onChange={(e) => setResetPasswordEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setResetDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={resetLoading}>
+                {resetLoading ? 'Enviando...' : 'Enviar link'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
