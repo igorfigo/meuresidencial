@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -108,6 +109,16 @@ export const useGarageListings = () => {
         console.error('Error details:', error);
         throw error;
       }
+      
+      // Notify all other users in the condominium about the new listing
+      await supabase
+        .from('notifications_channel')
+        .insert({
+          matricula: user.matricula,
+          message: `Nova vaga de garagem disponível na unidade ${user.unit}`,
+          type: 'garage_listing'
+        })
+        .select();
       
       return data;
     },
