@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { usePlans } from '@/hooks/use-plans';
 import { Separator } from '@/components/ui/separator';
 import { SubscriptionDetailsCard } from '@/components/minha-assinatura/SubscriptionDetailsCard';
+import { PasswordChangeSection } from '@/components/minha-assinatura/PasswordChangeSection';
+import { AccountInfoSection } from '@/components/minha-assinatura/AccountInfoSection';
 import { formatCurrencyDisplay, getCurrentPlanDetails } from '@/utils/subscription-utils';
 
 const MinhaAssinatura = () => {
@@ -75,7 +77,7 @@ const MinhaAssinatura = () => {
   if (!isAuthenticated || !user) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6">
+        <div className="container mx-auto py-6 max-w-full">
           <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
           <Separator className="mb-2" />
           <p className="text-gray-600 mb-6">
@@ -90,7 +92,7 @@ const MinhaAssinatura = () => {
   if (user.isAdmin) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6">
+        <div className="container mx-auto py-6 max-w-full">
           <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
           <Separator className="mb-2" />
           <p className="text-gray-600 mb-6">
@@ -105,7 +107,7 @@ const MinhaAssinatura = () => {
   if (user.isResident) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6">
+        <div className="container mx-auto py-6 max-w-full">
           <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
           <Separator className="mb-2" />
           <p className="text-gray-600 mb-6">
@@ -119,7 +121,7 @@ const MinhaAssinatura = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6">
+      <div className="container mx-auto py-6 max-w-full">
         <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
         <Separator className="mb-2" />
         <p className="text-gray-600 mb-6">
@@ -127,14 +129,26 @@ const MinhaAssinatura = () => {
         </p>
         
         {condominiumData && (
-          <SubscriptionDetailsCard 
-            condominiumData={condominiumData}
-            user={{ matricula: user.matricula, email: user.email }}
-            formatCurrencyDisplay={formatCurrencyDisplay}
-            getCurrentPlanDetails={getPlanDetails}
-            pixDueDate={pixDueDate}
-            onPlanUpdate={handlePlanUpdate}
-          />
+          <div className="grid grid-cols-1 gap-6">
+            <SubscriptionDetailsCard 
+              condominiumData={condominiumData}
+              user={{ matricula: user.matricula, email: user.email }}
+              formatCurrencyDisplay={formatCurrencyDisplay}
+              getCurrentPlanDetails={getPlanDetails}
+              pixDueDate={pixDueDate}
+              onPlanUpdate={handlePlanUpdate}
+            />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <AccountInfoSection 
+                condominiumData={condominiumData} 
+                userMatricula={user.matricula} 
+              />
+              <PasswordChangeSection 
+                userMatricula={user.matricula} 
+              />
+            </div>
+          </div>
         )}
       </div>
     </DashboardLayout>
