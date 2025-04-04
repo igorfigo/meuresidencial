@@ -248,7 +248,7 @@ const FinanceiroRecebimentoPix = () => {
           </div>
         </div>
         
-        <Card className="bg-white shadow-md border-t-4" style={{ borderTopColor: '#2151B9' }}>
+        <Card className="bg-white shadow-md border-t-4 border-t-brand-600">
           <CardHeader className="bg-blue-50 border-b border-blue-100">
             <div className="flex justify-between items-center">
               <div>

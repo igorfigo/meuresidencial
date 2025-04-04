@@ -78,7 +78,7 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
   
   return (
     <>
-      <Card className="mb-6 border-t-4 shadow-md" style={{ borderTopColor: 'var(--primary)' }}>
+      <Card className="mb-6 border-t-4 border-t-brand-600 shadow-md">
         <CardHeader className="bg-blue-50 pb-3">
           <CardTitle className="flex items-center text-blue-800 text-lg">
             <BadgeInfo className="h-5 w-5 mr-2 text-blue-600" />
@@ -119,7 +119,7 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
             <Button 
               onClick={openPixDialog} 
               variant="default" 
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-brand-600 hover:bg-brand-700"
             >
               Gerar PIX para Pagamento
             </Button>
