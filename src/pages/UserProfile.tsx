@@ -50,7 +50,7 @@ const UserProfile = () => {
       <DashboardLayout>
         <div className="container mx-auto py-6">
           <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
-          <Card className="p-6 border-l-4 border-l-amber-500">
+          <Card className="p-6 border-l-4 border-l-amber-500 border-t-4 border-t-brand-600">
             <div className="flex items-start gap-4">
               <AlertCircle className="h-6 w-6 text-amber-500 flex-shrink-0 mt-1" />
               <div>
