@@ -86,7 +86,10 @@ export function useNotifications() {
           filter: `matricula=eq.${matricula}`
         }, 
         (payload) => {
-          setUnreadAnnouncements(prev => prev + 1);
+          const payloadDate = new Date(payload.new.created_at).getTime();
+          if (payloadDate > lastViewedAnnouncements) {
+            setUnreadAnnouncements(prev => prev + 1);
+          }
         }
       )
       .subscribe();
@@ -102,7 +105,10 @@ export function useNotifications() {
           filter: `matricula=eq.${matricula}`
         }, 
         (payload) => {
-          setUnreadDocuments(prev => prev + 1);
+          const payloadDate = new Date(payload.new.created_at).getTime();
+          if (payloadDate > lastViewedDocuments) {
+            setUnreadDocuments(prev => prev + 1);
+          }
         }
       )
       .subscribe();
