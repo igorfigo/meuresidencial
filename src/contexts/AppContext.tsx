@@ -1,7 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 interface Condominium {
   matricula: string;
@@ -51,6 +51,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user is already logged in from localStorage
@@ -335,7 +336,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUser(null);
     localStorage.removeItem('condoUser');
     toast.info("Logout realizado com sucesso");
-    // Note: No need to navigate here as our routes will handle the redirection
+    navigate('/login'); // Redirect to login page will be handled in the DashboardLayout component
   };
 
   return (
