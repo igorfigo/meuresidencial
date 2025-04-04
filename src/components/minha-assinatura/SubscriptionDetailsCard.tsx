@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +17,7 @@ interface SubscriptionDetailsCardProps {
   formatCurrencyDisplay: (value: string | null | undefined) => string;
   getCurrentPlanDetails: () => { name: string; value: string };
   pixDueDate?: string;
+  onPlanUpgrade?: (updatedData: any) => void;
 }
 
 export const SubscriptionDetailsCard = ({ 
@@ -23,11 +25,17 @@ export const SubscriptionDetailsCard = ({
   user, 
   formatCurrencyDisplay,
   getCurrentPlanDetails,
-  pixDueDate
+  pixDueDate,
+  onPlanUpgrade
 }: SubscriptionDetailsCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [localCondominiumData, setLocalCondominiumData] = useState(condominiumData);
   const navigate = useNavigate();
+  
+  // Update local data when props change
+  React.useEffect(() => {
+    setLocalCondominiumData(condominiumData);
+  }, [condominiumData]);
   
   const isCnpjEmpty = !localCondominiumData.cnpj || localCondominiumData.cnpj.trim() === '';
   
@@ -72,6 +80,9 @@ export const SubscriptionDetailsCard = ({
   
   const handlePlanUpgrade = (updatedData: any) => {
     setLocalCondominiumData(updatedData);
+    if (onPlanUpgrade) {
+      onPlanUpgrade(updatedData);
+    }
   };
   
   const navigateToContactPage = () => {

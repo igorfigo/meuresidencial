@@ -36,6 +36,12 @@ export const CondominiumForm = ({
     }
   }, [cnpj, form]);
   
+  // Add this effect to make sure the form shows the most current data
+  useEffect(() => {
+    const subscription = form.watch();
+    return () => subscription.unsubscribe();
+  }, [form]);
+  
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

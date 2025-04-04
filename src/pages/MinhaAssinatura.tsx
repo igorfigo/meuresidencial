@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,6 +53,11 @@ const MinhaAssinatura = () => {
       setIsLoading(false);
     }
   };
+  
+  // Handler for plan updates
+  const handlePlanUpgrade = useCallback((updatedData: any) => {
+    setCondominiumData(updatedData);
+  }, []);
   
   useEffect(() => {
     if (user?.matricula) {
@@ -127,6 +133,7 @@ const MinhaAssinatura = () => {
             formatCurrencyDisplay={formatCurrencyDisplay}
             getCurrentPlanDetails={getPlanDetails}
             pixDueDate={pixDueDate}
+            onPlanUpgrade={handlePlanUpgrade}
           />
         )}
       </div>
