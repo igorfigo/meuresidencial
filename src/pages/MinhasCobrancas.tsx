@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -360,6 +360,13 @@ const MinhasCobrancas = () => {
     setSelectedCharge(null);
   };
 
+  useEffect(() => {
+    if (!isLoading) {
+      const overdueCharges = filteredCharges.filter(charge => charge.status === 'overdue');
+      localStorage.setItem('overdueChargesCount', overdueCharges.length.toString());
+    }
+  }, [filteredCharges, isLoading]);
+  
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -367,6 +374,11 @@ const MinhasCobrancas = () => {
           <h1 className="text-3xl font-bold tracking-tight">Minhas Cobranças</h1>
           <p className="text-muted-foreground">
             Acompanhe suas cobranças de condomínio
+            {overdueCount > 0 && (
+              <Badge variant="destructive" className="ml-2">
+                {overdueCount} em atraso
+              </Badge>
+            )}
           </p>
         </div>
         

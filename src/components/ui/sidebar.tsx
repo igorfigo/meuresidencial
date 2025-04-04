@@ -52,6 +52,7 @@ import { SwitchCondominium } from './switch-condominium';
 import { Badge } from './badge';
 import { useNotifications } from '@/hooks/use-notifications';
 import { Separator } from './separator';
+import { useOverdueCharges } from '@/hooks/use-overdue-charges';
 
 interface MenuItem {
   path: string;
@@ -71,6 +72,7 @@ export function Sidebar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
   const { unreadAnnouncements, unreadDocuments, markAsViewed } = useNotifications();
+  const { overdueCount } = useOverdueCharges();
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -156,7 +158,12 @@ export function Sidebar() {
       badge: unreadDocuments > 0 ? unreadDocuments : undefined
     },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
-    { path: '/minhas-cobrancas', label: 'Minhas Cobranças', icon: <Receipt className="h-5 w-5" /> },
+    { 
+      path: '/minhas-cobrancas', 
+      label: 'Minhas Cobranças', 
+      icon: <Receipt className="h-5 w-5" />,
+      badge: overdueCount > 0 ? overdueCount : undefined
+    },
     { path: '/garagem-livre', label: 'Garagem Livre', icon: <Car className="h-5 w-5" /> },
     { path: '/sugestao-reclamacao', label: 'Sugestão/Reclamação', icon: <MessagesSquare className="h-5 w-5" /> },
   ];

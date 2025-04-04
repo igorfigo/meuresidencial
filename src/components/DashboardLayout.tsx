@@ -50,6 +50,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/use-notifications';
 import { Separator } from './ui/separator';
+import { useOverdueCharges } from '@/hooks/use-overdue-charges';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -72,6 +73,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
   const { unreadAnnouncements, unreadDocuments, markAsViewed } = useNotifications();
+  const { overdueCount } = useOverdueCharges();
 
   const isFinanceiroPath = location.pathname.includes('/financeiro');
   const isBusinessPath = location.pathname.includes('/business-management') || 
@@ -170,7 +172,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       badge: unreadDocuments > 0 ? unreadDocuments : undefined
     },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
-    { name: 'Minhas Cobranças', icon: <PaymentIcon className="h-5 w-5" />, path: '/minhas-cobrancas' },
+    { 
+      name: 'Minhas Cobranças', 
+      icon: <PaymentIcon className="h-5 w-5" />, 
+      path: '/minhas-cobrancas',
+      badge: overdueCount > 0 ? overdueCount : undefined
+    },
     { name: 'Garagem Livre', icon: <Car className="h-5 w-5" />, path: '/garagem-livre' },
     { name: 'Sugestão/Reclamação', icon: <MessagesSquare className="h-5 w-5" />, path: '/sugestao-reclamacao' },
   ];
