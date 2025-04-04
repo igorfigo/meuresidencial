@@ -8,7 +8,7 @@ const MOBILE_BREAKPOINT = 768
  * @returns boolean indicating if the device is mobile
  */
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+  const [isMobile, setIsMobile] = React.useState<boolean>(false)
 
   React.useEffect(() => {
     // Initial check for mobile status
@@ -29,6 +29,5 @@ export function useIsMobile() {
     return () => mql.removeEventListener("change", checkMobile)
   }, [])
 
-  // Ensure we always return a boolean, even before the effect runs
-  return !!isMobile
+  return isMobile
 }

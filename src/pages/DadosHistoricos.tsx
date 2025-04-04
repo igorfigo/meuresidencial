@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -32,7 +33,7 @@ const DadosHistoricos = () => {
     return (
       <DashboardLayout>
         <div className="container mx-auto py-6 max-w-3xl">
-          <h1 className="text-3xl font-bold mb-2">Dados Históricos</h1>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold mb-2`}>Dados Históricos</h1>
           <Separator className="mb-4" />
           <Card className="border-t-4 border-t-amber-500 shadow-md">
             <CardContent className="pt-6">
@@ -100,33 +101,41 @@ const DadosHistoricos = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6 max-w-3xl">
-        <h1 className="text-3xl font-bold mb-2">Dados Históricos</h1>
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold mb-2`}>Dados Históricos</h1>
         <Separator className="mb-2" />
         <p className="text-gray-600 mb-6">
           Solicite a inclusão ou download de dados históricos para o seu condomínio.
         </p>
         
         {/* PIX Payment Section */}
-        {user?.matricula && <HistoricalDataPixSection matricula={user.matricula} />}
+        {user?.matricula && (
+          <div className={isMobile ? "mb-4" : "mb-6"}>
+            <HistoricalDataPixSection matricula={user.matricula} />
+          </div>
+        )}
         
         <Card className="border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-2xl text-brand-700">Envie sua solicitação</CardTitle>
+          <CardHeader className={isMobile ? "pb-2" : "pb-3"}>
+            <CardTitle className={`${isMobile ? 'text-xl' : 'text-2xl'} text-brand-700`}>Envie sua solicitação</CardTitle>
             <CardDescription className="text-gray-600">
-              Após o envio da sua solicitação, você receberá um formulário com todos os dados do seu sistema, ou um formulário para preenchimento com todos os dados para inclusão no sistema.
+              {!isMobile ? (
+                "Após o envio da sua solicitação, você receberá um formulário com todos os dados do seu sistema, ou um formulário para preenchimento com todos os dados para inclusão no sistema."
+              ) : (
+                "Após o envio, entraremos em contato para processar sua solicitação."
+              )}
             </CardDescription>
           </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className={`space-y-${isMobile ? '4' : '6'}`}>
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="type" className="font-medium">Tipo de Solicitação</Label>
-                  <div className="flex space-x-4 mt-2">
+                  <div className={`${isMobile ? 'flex flex-col space-y-2' : 'flex space-x-4'} mt-2`}>
                     <Button
                       type="button"
                       variant={formData.type === 'inclusao' ? 'default' : 'outline'}
-                      className={formData.type === 'inclusao' ? 'bg-brand-600 hover:bg-brand-700' : ''}
+                      className={`${formData.type === 'inclusao' ? 'bg-brand-600 hover:bg-brand-700' : ''} ${isMobile ? 'w-full' : ''}`}
                       onClick={() => handleTypeChange('inclusao')}
                     >
                       Inclusão de Históricos
@@ -134,7 +143,7 @@ const DadosHistoricos = () => {
                     <Button
                       type="button"
                       variant={formData.type === 'download' ? 'default' : 'outline'}
-                      className={formData.type === 'download' ? 'bg-brand-600 hover:bg-brand-700' : ''}
+                      className={`${formData.type === 'download' ? 'bg-brand-600 hover:bg-brand-700' : ''} ${isMobile ? 'w-full' : ''}`}
                       onClick={() => handleTypeChange('download')}
                     >
                       Download de Históricos
@@ -142,7 +151,7 @@ const DadosHistoricos = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`${isMobile ? '' : 'grid grid-cols-1 md:grid-cols-2'} gap-4`}>
                   <div className="space-y-2">
                     <Label htmlFor="nome" className="font-medium">Nome</Label>
                     <Input 
@@ -164,7 +173,7 @@ const DadosHistoricos = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`${isMobile ? '' : 'grid grid-cols-1 md:grid-cols-2'} gap-4`}>
                   <div className="space-y-2">
                     <Label htmlFor="matricula" className="font-medium">Matrícula</Label>
                     <Input 
@@ -209,7 +218,7 @@ const DadosHistoricos = () => {
                     placeholder={formData.type === 'inclusao' 
                       ? "Descreva os dados históricos que deseja incluir no sistema..." 
                       : "Descreva os dados históricos que deseja baixar do sistema..."} 
-                    rows={6} 
+                    rows={isMobile ? 4 : 6} 
                     required 
                     className="border-gray-300 focus:border-brand-500 focus:ring-brand-500 resize-none"
                   />

@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const GaragemLivre = () => {
   const { user } = useApp();
@@ -24,6 +25,7 @@ const GaragemLivre = () => {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [description, setDescription] = useState('');
+  const isMobile = useIsMobile();
   
   const handleAddGarageListing = () => {
     if (!description.trim()) return;
@@ -59,6 +61,55 @@ const GaragemLivre = () => {
     );
   }
 
+  // Mobile card for listings
+  const GarageListingCard = ({ listing, isMyListing = false }) => (
+    <Card key={listing.id} className="mb-3">
+      <CardContent className="pt-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <CarIcon className="h-5 w-5 text-blue-500 mr-2" />
+            <span className="font-medium">
+              {isMyListing ? `Unidade ${user.unit}` : `Unidade ${listing.residents?.unidade}`}
+            </span>
+          </div>
+          {isMyListing && (
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => handleDeleteListing(listing.id)}
+            >
+              <Trash2Icon className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+        
+        <div className="mt-2 text-sm text-gray-600">
+          {listing.description || "Sem descrição adicional"}
+        </div>
+        
+        {isMyListing && (
+          <div className="mt-2">
+            <Badge className="bg-green-500 hover:bg-green-600">
+              Disponível
+            </Badge>
+          </div>
+        )}
+        
+        {!isMyListing && (
+          <div className="mt-3 pt-2 border-t text-sm">
+            <div className="font-medium text-gray-700 mb-1">{listing.residents?.nome_completo}</div>
+            {listing.residents?.telefone && (
+              <div className="mb-1">{listing.residents.telefone}</div>
+            )}
+            {listing.residents?.email && (
+              <div className="text-blue-600">{listing.residents.email}</div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6">
@@ -72,7 +123,7 @@ const GaragemLivre = () => {
             </div>
             <Button onClick={() => setIsDialogOpen(true)}>
               <PlusCircleIcon className="h-4 w-4 mr-2" />
-              Cadastrar Vaga
+              {!isMobile ? 'Cadastrar Vaga' : 'Cadastrar'}
             </Button>
           </div>
           <Separator className="mt-4" />
@@ -83,52 +134,60 @@ const GaragemLivre = () => {
             <CardHeader>
               <CardTitle>Minhas Vagas Cadastradas</CardTitle>
               <CardDescription>
-                Gerencie as vagas de garagem que você disponibilizou para os demais moradores.
+                Gerencie as vagas de garagem que você disponibilizou.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="text-center py-6">Carregando...</div>
               ) : myGarageListings && myGarageListings.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Vaga</TableHead>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                isMobile ? (
+                  <div>
                     {myGarageListings.map((listing) => (
-                      <TableRow key={listing.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center">
-                            <CarIcon className="h-5 w-5 text-blue-500 mr-2" />
-                            <span>Unidade {user.unit}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {listing.description || "Sem descrição adicional"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-500 hover:bg-green-600">
-                            Disponível
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="destructive" 
-                            size="sm"
-                            onClick={() => handleDeleteListing(listing.id)}
-                          >
-                            <Trash2Icon className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
+                      <GarageListingCard key={listing.id} listing={listing} isMyListing={true} />
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Vaga</TableHead>
+                        <TableHead>Descrição</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {myGarageListings.map((listing) => (
+                        <TableRow key={listing.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center">
+                              <CarIcon className="h-5 w-5 text-blue-500 mr-2" />
+                              <span>Unidade {user.unit}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {listing.description || "Sem descrição adicional"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className="bg-green-500 hover:bg-green-600">
+                              Disponível
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => handleDeleteListing(listing.id)}
+                            >
+                              <Trash2Icon className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )
               ) : (
                 <div className="text-center py-8 bg-gray-50 border border-dashed rounded-lg">
                   <CarIcon className="h-12 w-12 mx-auto text-gray-400 mb-3" />
@@ -144,51 +203,59 @@ const GaragemLivre = () => {
             <CardHeader>
               <CardTitle>Vagas Disponíveis no Condomínio</CardTitle>
               <CardDescription>
-                Veja as vagas de garagem disponíveis e entre em contato com os proprietários.
+                Veja as vagas de garagem disponíveis e entre em contato.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="text-center py-6">Carregando...</div>
               ) : garageListings && garageListings.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead>Proprietário</TableHead>
-                      <TableHead>Contato</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                isMobile ? (
+                  <div>
                     {garageListings.map((listing) => (
-                      <TableRow key={listing.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center">
-                            <CarIcon className="h-5 w-5 text-blue-500 mr-2" />
-                            <span>Unidade {listing.residents?.unidade}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {listing.description || "Sem descrição adicional"}
-                        </TableCell>
-                        <TableCell>
-                          {listing.residents?.nome_completo}
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {listing.residents?.telefone && (
-                              <div className="text-sm">{listing.residents.telefone}</div>
-                            )}
-                            {listing.residents?.email && (
-                              <div className="text-sm text-blue-600">{listing.residents.email}</div>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                      <GarageListingCard key={listing.id} listing={listing} />
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Unidade</TableHead>
+                        <TableHead>Descrição</TableHead>
+                        <TableHead>Proprietário</TableHead>
+                        <TableHead>Contato</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {garageListings.map((listing) => (
+                        <TableRow key={listing.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center">
+                              <CarIcon className="h-5 w-5 text-blue-500 mr-2" />
+                              <span>Unidade {listing.residents?.unidade}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {listing.description || "Sem descrição adicional"}
+                          </TableCell>
+                          <TableCell>
+                            {listing.residents?.nome_completo}
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {listing.residents?.telefone && (
+                                <div className="text-sm">{listing.residents.telefone}</div>
+                              )}
+                              {listing.residents?.email && (
+                                <div className="text-sm text-blue-600">{listing.residents.email}</div>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )
               ) : (
                 <div className="text-center py-8 bg-gray-50 border border-dashed rounded-lg">
                   <CarIcon className="h-12 w-12 mx-auto text-gray-400 mb-3" />
@@ -205,11 +272,11 @@ const GaragemLivre = () => {
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
+          <DialogContent className={isMobile ? "max-w-[95vw] p-4" : undefined}>
             <DialogHeader>
               <DialogTitle>Cadastrar Vaga de Garagem</DialogTitle>
               <DialogDescription>
-                Informe os detalhes da vaga de garagem que você deseja disponibilizar.
+                Informe os detalhes da vaga que deseja disponibilizar.
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
@@ -232,16 +299,18 @@ const GaragemLivre = () => {
                 </p>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className={isMobile ? "flex-col space-y-2" : undefined}>
               <Button 
                 variant="outline" 
                 onClick={() => setIsDialogOpen(false)}
+                className={isMobile ? "w-full" : undefined}
               >
                 Cancelar
               </Button>
               <Button
                 onClick={handleAddGarageListing}
                 disabled={!description.trim() || addGarageListing.isPending}
+                className={isMobile ? "w-full" : undefined}
               >
                 {addGarageListing.isPending ? 'Cadastrando...' : 'Cadastrar Vaga'}
               </Button>

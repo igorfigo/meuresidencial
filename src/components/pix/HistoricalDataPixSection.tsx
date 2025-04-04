@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Info, BadgeInfo } from 'lucide-react';
 import { generatePixCode, generatePixQRCode } from '@/utils/pixGenerator';
 import { PixDialog } from './PixDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface HistoricalDataPixSectionProps {
   matricula: string;
@@ -16,6 +17,7 @@ interface HistoricalDataPixSectionProps {
 
 export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixSectionProps) => {
   const [isPixDialogOpen, setIsPixDialogOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   const { data: pixSettings, isLoading: isLoadingPixSettings } = useQuery({
     queryKey: ['pix-settings-historical', matricula],
@@ -78,28 +80,37 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
   
   return (
     <>
-      <Card className="mb-6 border-t-4 border-t-brand-600 shadow-md">
-        <CardHeader className="bg-blue-50 pb-3">
-          <CardTitle className="flex items-center text-blue-800 text-lg">
-            <BadgeInfo className="h-5 w-5 mr-2 text-blue-600" />
+      <Card className={`${isMobile ? 'mb-4' : 'mb-6'} border-t-4 border-t-brand-600 shadow-md`}>
+        <CardHeader className={`bg-blue-50 ${isMobile ? 'pb-2 pt-3' : 'pb-3'}`}>
+          <CardTitle className={`flex items-center text-blue-800 ${isMobile ? 'text-base' : 'text-lg'}`}>
+            <BadgeInfo className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} mr-2 text-blue-600`} />
             Pagamento para Dados Históricos
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="pt-4">
-          <div className="text-sm text-gray-600 space-y-2">
-            <p>
-              O serviço de dados históricos permite tanto a inclusão quanto o download
-              do histórico do seu condomínio no sistema.
-            </p>
-            <p>
-              Após o pagamento, nossa equipe entrará em contato para processar sua solicitação
-              e disponibilizar os dados em até 3 dias úteis.
-            </p>
+        <CardContent className={isMobile ? "px-3 py-3" : "pt-4"}>
+          <div className={`text-sm text-gray-600 space-y-${isMobile ? '1.5' : '2'}`}>
+            {!isMobile ? (
+              <>
+                <p>
+                  O serviço de dados históricos permite tanto a inclusão quanto o download
+                  do histórico do seu condomínio no sistema.
+                </p>
+                <p>
+                  Após o pagamento, nossa equipe entrará em contato para processar sua solicitação
+                  e disponibilizar os dados em até 3 dias úteis.
+                </p>
+              </>
+            ) : (
+              <p>
+                Este serviço permite inclusão/download do histórico do seu condomínio.
+                Após pagamento, processaremos em até 3 dias úteis.
+              </p>
+            )}
             
-            <div className="flex items-start mt-3 bg-amber-50 p-3 rounded-md border border-amber-200">
-              <Info className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-              <div className="ml-2 text-amber-800 text-xs">
+            <div className={`flex items-start mt-${isMobile ? '2' : '3'} bg-amber-50 ${isMobile ? 'p-2' : 'p-3'} rounded-md border border-amber-200`}>
+              <Info className={`${isMobile ? 'h-4 w-4 mt-0' : 'h-5 w-5 mt-0.5'} text-amber-600 flex-shrink-0`} />
+              <div className={`ml-2 text-amber-800 ${isMobile ? 'text-xs' : 'text-xs'}`}>
                 <p className="font-medium mb-1">Valor único: R$ 249,00</p>
                 <p>Este é um serviço avulso cobrado uma única vez para todos os dados históricos do condomínio.</p>
               </div>
@@ -109,7 +120,7 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
         
         <Separator />
         
-        <CardFooter className="bg-gray-50 p-4">
+        <CardFooter className={`bg-gray-50 ${isMobile ? 'p-3' : 'p-4'}`}>
           {isLoading ? (
             <div className="flex items-center justify-center w-full">
               <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
