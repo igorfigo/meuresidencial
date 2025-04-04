@@ -278,7 +278,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
   
   return (
     <>
-      <Card className="border-t-4 border-t-green-500 shadow-md">
+      <Card className="shadow-md">
         <CardHeader>
           <CardTitle>{initialData ? 'Editar Receita' : 'Nova Receita'}</CardTitle>
         </CardHeader>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -116,7 +115,6 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
     
     setDateError(null);
     
-    // Check that payment date is not after today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -128,7 +126,6 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
       return;
     }
     
-    // Also validate against last balance adjustment date
     if (values.payment_date) {
       const isValidDate = validatePaymentDate(values.payment_date);
       
@@ -250,7 +247,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
   
   return (
     <>
-      <Card className="border-t-4 border-t-blue-500">
+      <Card className="shadow-md">
         <CardHeader>
           <CardTitle>{initialData ? 'Editar Despesa' : 'Nova Despesa'}</CardTitle>
         </CardHeader>
