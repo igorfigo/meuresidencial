@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,7 @@ import { useOverdueCharges } from '@/hooks/use-overdue-charges';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  mobileTopBarContent?: React.ReactNode;
 }
 
 interface MenuItem {
@@ -66,7 +68,7 @@ interface MenuItem {
   isSeparator?: boolean;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, mobileTopBarContent }) => {
   const { user, logout, switchCondominium } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
@@ -377,21 +379,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Mobile Fixed Top Bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-sidebar flex items-center justify-between px-4 py-3 text-sidebar-foreground">
-        <div className="flex items-center">
-          <button
-            onClick={toggleMobileMenu}
-            className="p-2 rounded-md text-sidebar-foreground hover:bg-sidebar-accent/50 mr-3"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <h1 className="text-xl font-semibold truncate max-w-[200px]">
-            {getCurrentPageName()}
-          </h1>
-        </div>
+        {mobileTopBarContent ? (
+          mobileTopBarContent
+        ) : (
+          <div className="flex items-center">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-md text-sidebar-foreground hover:bg-sidebar-accent/50 mr-3"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <h1 className="text-xl font-semibold truncate max-w-[200px]">
+              {getCurrentPageName()}
+            </h1>
+          </div>
+        )}
         <div className="flex items-center space-x-2">
-          <NavLink to="/perfil" className="p-2 hover:bg-sidebar-accent/50 rounded-md">
-            <Settings className="h-5 w-5" />
-          </NavLink>
+          {!mobileTopBarContent && (
+            <NavLink to="/perfil" className="p-2 hover:bg-sidebar-accent/50 rounded-md">
+              <Settings className="h-5 w-5" />
+            </NavLink>
+          )}
           <div className="h-8 w-8 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
             {user?.nome?.charAt(0) || 'U'}
           </div>

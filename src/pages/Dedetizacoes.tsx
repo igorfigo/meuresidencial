@@ -2,13 +2,14 @@
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Plus, Bug } from 'lucide-react';
+import { Plus, Bug, Home } from 'lucide-react';
 import { usePestControl } from '@/hooks/use-pest-control';
 import { PestControlForm } from '@/components/pest-control/PestControlForm';
 import { PestControlsList } from '@/components/pest-control/PestControlsList';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Link } from 'react-router-dom';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -86,8 +87,20 @@ const Dedetizacoes = () => {
     }
   };
 
+  // Add mobile top bar content
+  const MobileTopBarContent = () => (
+    <div className="flex items-center">
+      <Link to="/dashboard" className="p-2 hover:bg-sidebar-accent/50 rounded-md mr-3">
+        <Home className="h-5 w-5" />
+      </Link>
+      <h1 className="text-xl font-semibold truncate max-w-[200px]">
+        Dedetizações
+      </h1>
+    </div>
+  );
+
   return (
-    <DashboardLayout>
+    <DashboardLayout mobileTopBarContent={<MobileTopBarContent />}>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
