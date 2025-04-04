@@ -376,21 +376,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Mobile Fixed Top Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-md flex items-center justify-between px-4 py-3">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-sidebar text-sidebar-foreground shadow-md flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
           <button
             onClick={toggleMobileMenu}
-            className="p-2 rounded-md text-gray-700 mr-3"
+            className="p-2 rounded-md text-sidebar-foreground hover:bg-sidebar-accent/50 mr-3"
           >
             <Menu className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-semibold truncate max-w-[200px]">
+          <h1 className="text-xl font-semibold truncate max-w-[200px] text-sidebar-foreground">
             {getCurrentPageName()}
           </h1>
         </div>
         <div className="flex items-center space-x-2">
-          <NavLink to="/perfil" className="p-2">
-            <Settings className="h-5 w-5 text-gray-700" />
+          <NavLink to="/perfil" className="p-2 text-sidebar-foreground hover:text-white transition-colors">
+            <Settings className="h-5 w-5" />
           </NavLink>
           <div className="h-8 w-8 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
             {user?.nome?.charAt(0) || 'U'}

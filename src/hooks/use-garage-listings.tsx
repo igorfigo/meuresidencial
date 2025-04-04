@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -107,6 +108,22 @@ export const useGarageListings = () => {
       if (error) {
         console.error('Error details:', error);
         throw error;
+      }
+      
+      // After successful insertion, create a notification using a function call
+      // instead of directly trying to insert into a table that doesn't exist
+      try {
+        const { error: notifyError } = await supabase.rpc('notify_new_garage_listing', {
+          p_matricula: user.matricula,
+          p_title: 'Nova vaga de garagem disponível',
+          p_message: `${user.nome} disponibilizou uma vaga de garagem`
+        });
+        
+        if (notifyError) {
+          console.error('Error sending notification:', notifyError);
+        }
+      } catch (notifyError) {
+        console.error('Exception sending notification:', notifyError);
       }
       
       return data;
