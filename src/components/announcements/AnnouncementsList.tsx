@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -249,16 +248,16 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                   )}
                   <TableCell className="text-center">
                     <div className="flex justify-center space-x-1">
-                      {/* Always show view button */}
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => announcement.id && handleViewAnnouncement(announcement.id)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                      {!isMobile && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => announcement.id && handleViewAnnouncement(announcement.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      )}
                       
-                      {/* For non-residents, show print and delete */}
                       {!isResident && (
                         <>
                           <Button 
