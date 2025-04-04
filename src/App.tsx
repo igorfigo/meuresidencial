@@ -37,6 +37,7 @@ import DadosHistoricos from './pages/DadosHistoricos';
 import VagaGaragem from './pages/VagaGaragem';
 import DuvidasFrequentes from './pages/DuvidasFrequentes';
 import LandingPage from './pages/LandingPage';
+import AlertaPreventiva from './pages/AlertaPreventiva';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
@@ -76,6 +77,7 @@ function App() {
               <Route path="/documentos" element={<AuthRequired><Documentos /></AuthRequired>} />
               <Route path="/areas-comuns" element={<AuthRequired><AreasComuns /></AuthRequired>} />
               <Route path="/dedetizacoes" element={<AuthRequired><Dedetizacoes /></AuthRequired>} />
+              <Route path="/alerta-preventiva" element={<AuthRequired><AlertaPreventiva /></AuthRequired>} />
               <Route path="/minha-assinatura" element={<AuthRequired><MinhaAssinatura /></AuthRequired>} />
               <Route path="/contato" element={<AuthRequired><FaleConosco /></AuthRequired>} />
               <Route path="/duvidas-frequentes" element={<AuthRequired><DuvidasFrequentes /></AuthRequired>} />

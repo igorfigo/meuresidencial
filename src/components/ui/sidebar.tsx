@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -33,6 +34,7 @@ import {
   History,
   Files,
   HelpCircle,
+  AlertTriangle
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -52,6 +54,7 @@ import { SwitchCondominium } from './switch-condominium';
 import { Badge } from './badge';
 import { useNotifications } from '@/hooks/use-notifications';
 import { Separator } from './separator';
+import { usePreventiveAlerts } from '@/hooks/use-preventive-alerts';
 
 interface MenuItem {
   path: string;
@@ -71,6 +74,7 @@ export function Sidebar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
   const { unreadAnnouncements, unreadDocuments, markAsViewed } = useNotifications();
+  const { pendingAlerts } = usePreventiveAlerts();
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -134,6 +138,12 @@ export function Sidebar() {
     },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
     { path: '/dedetizacoes', label: 'Dedetizações', icon: <Bug className="h-5 w-5" /> },
+    { 
+      path: '/alerta-preventiva', 
+      label: 'Alerta Preventiva', 
+      icon: <AlertTriangle className="h-5 w-5" />,
+      badge: pendingAlerts > 0 ? pendingAlerts : undefined
+    },
     { path: '/dados-historicos', label: 'Dados Históricos', icon: <History className="h-5 w-5" /> },
     { path: '/vaga-garagem', label: 'Garagem Livre', icon: <Car className="h-5 w-5" /> },
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" /> },
