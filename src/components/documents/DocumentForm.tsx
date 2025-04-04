@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -271,7 +272,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
           </div>
         </div>
 
-        <div className="flex gap-2 justify-end">
+        <div className="flex justify-center gap-2">
           <Button 
             type="button" 
             variant="outline" 

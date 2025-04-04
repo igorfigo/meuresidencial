@@ -32,6 +32,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Card } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DocumentsListProps {
   documents: Document[];
@@ -74,6 +75,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
   const [detailView, setDetailView] = useState<Document | null>(null);
   const [attachments, setAttachments] = useState<DocumentAttachment[]>([]);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
+  const isMobile = useIsMobile();
 
   const formatDate = (dateString: string) => {
     try {
@@ -206,7 +208,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
             <TableHeader>
               <TableRow>
                 <TableHead>Tipo</TableHead>
-                <TableHead className="text-center">Data de Cadastro</TableHead>
+                {!isMobile && <TableHead className="text-center">Data de Cadastro</TableHead>}
                 <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -216,7 +218,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
                   <TableCell className="font-medium">
                     {getDocumentTypeLabel(document.tipo)}
                   </TableCell>
-                  <TableCell className="text-center">{formatDate(document.data_cadastro)}</TableCell>
+                  {!isMobile && <TableCell className="text-center">{formatDate(document.data_cadastro)}</TableCell>}
                   <TableCell className="text-center">
                     <div className="flex justify-center space-x-1">
                       <Button 
