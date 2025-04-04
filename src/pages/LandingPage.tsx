@@ -600,7 +600,6 @@ const LandingPage = () => {
                 <Building className="h-7 w-7 text-white" />
                 <h3 className="text-2xl font-bold text-custom-white ml-2">MeuResidencial</h3>
               </div>
-              <p className="text-white/90 mb-2">Gestão eficiente para o seu condomínio</p>
               <p className="text-white/90 mb-1">CNPJ: 60.112.929/0001-34</p>
               <p className="text-white/90 mb-4">Gestão Eficiente Soluções Tecnológicas LTDA</p>
               <p className="text-white/70 text-sm">
