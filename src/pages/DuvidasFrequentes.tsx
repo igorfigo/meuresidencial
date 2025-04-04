@@ -152,7 +152,7 @@ const DuvidasFrequentes = () => {
   
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-b from-[#EFEFEF] to-[#103381] py-6 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-b from-[#EFEFEF] via-[#EFEFEF]/80 to-[#103381] py-6 flex flex-col">
         <div className="container mx-auto flex-grow">
           <h1 className="text-3xl font-bold mb-2 text-white">Dúvidas Frequentes</h1>
           <Separator className="mb-6 bg-white/30" />
