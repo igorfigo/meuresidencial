@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -6,19 +5,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { IncomeForm } from '@/components/financials/IncomeForm';
 import { ExpenseForm } from '@/components/financials/ExpenseForm';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
-import { RecentTransactions } from '@/components/financials/RecentTransactions';
 import { useFinances, FinancialIncome, FinancialExpense } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const FinanceiroReceitasDespesas = () => {
   const { user } = useApp();
+  const isMobile = useIsMobile();
   const { 
     incomes, 
     expenses, 
     balance, 
-    recentTransactions,
     addIncome,
     editIncome,
     removeIncome,
@@ -215,12 +214,12 @@ const FinanceiroReceitasDespesas = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-start mb-6">
-          <div>
+        <div className={`flex justify-between items-start mb-6 ${isMobile ? 'flex-col' : ''}`}>
+          <div className={isMobile ? 'mb-4 w-full' : ''}>
             <h1 className="text-3xl font-bold">Receitas/Despesas</h1>
             <p className="text-gray-500 mt-1">Gestão de receitas e despesas do condomínio</p>
           </div>
-          <div className="w-64">
+          <div className={`${isMobile ? 'mx-auto w-64' : 'w-64'}`}>
             <BalanceDisplay 
               balance={balance?.balance || currentBalance} 
               onBalanceChange={handleUpdateBalance}
@@ -253,14 +252,6 @@ const FinanceiroReceitasDespesas = () => {
             <ExpenseForm onSubmit={handleExpenseSubmit} />
           </TabsContent>
         </Tabs>
-        
-        <div className="mb-8">
-          <RecentTransactions 
-            transactions={recentTransactions} 
-            onDeleteIncome={handleDeleteIncome}
-            onDeleteExpense={handleDeleteExpense}
-          />
-        </div>
       </div>
     </DashboardLayout>
   );
