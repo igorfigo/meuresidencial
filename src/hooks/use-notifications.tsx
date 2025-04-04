@@ -24,7 +24,7 @@ export function useNotifications() {
       if (userId) {
         // Use type assertion to handle the table that might not be in the TypeScript definitions
         const { data, error } = await supabase
-          .from('user_notification_views' as any)
+          .from('user_notification_views')
           .select('last_viewed_at')
           .eq('user_id', userId)
           .eq('matricula', matricula)
@@ -56,7 +56,7 @@ export function useNotifications() {
     // Update database
     if (userId) {
       const { error } = await supabase
-        .from('user_notification_views' as any)
+        .from('user_notification_views')
         .upsert({
           user_id: userId,
           matricula,
