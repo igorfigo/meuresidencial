@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/pagination";
 import { jsPDF } from 'jspdf';
 import { useApp } from '@/contexts/AppContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AnnouncementsListProps {
   onEdit?: (announcement: Announcement) => void;
@@ -54,6 +55,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   } = useAnnouncements();
   
   const { user } = useApp();
+  const isMobile = useIsMobile();
   
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [detailView, setDetailView] = useState<Announcement | null>(null);
@@ -216,7 +218,9 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
               <TableRow>
                 <TableHead>Título</TableHead>
                 <TableHead className="text-center">Data</TableHead>
-                <TableHead className="text-center">Enviado por</TableHead>
+                {!isMobile && (
+                  <TableHead className="text-center">Enviado por</TableHead>
+                )}
                 <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -225,24 +229,27 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                 <TableRow key={announcement.id}>
                   <TableCell className="font-medium">{announcement.title}</TableCell>
                   <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Mail 
-                              className={`h-4 w-4 ${announcement.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} 
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {announcement.sent_by_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </TableCell>
+                  {!isMobile && (
+                    <TableCell className="text-center">
+                      <div className="flex justify-center">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Mail 
+                                className={`h-4 w-4 ${announcement.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} 
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {announcement.sent_by_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </TableCell>
+                  )}
                   <TableCell className="text-center">
                     <div className="flex justify-center space-x-1">
+                      {/* Always show view button */}
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -251,6 +258,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                         <Eye className="h-4 w-4" />
                       </Button>
                       
+                      {/* For non-residents, show print and delete */}
                       {!isResident && (
                         <>
                           <Button 
@@ -332,15 +340,17 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                 <p className="text-sm whitespace-pre-line">{detailView.content}</p>
               </div>
               
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground">Enviado via</h4>
-                <div className="flex mt-1">
-                  <div className="flex items-center">
-                    <Mail className={`h-4 w-4 mr-2 ${detailView.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} />
-                    <span>{detailView.sent_by_email ? 'E-mail' : 'Não enviado por e-mail'}</span>
+              {!isMobile && (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Enviado via</h4>
+                  <div className="flex mt-1">
+                    <div className="flex items-center">
+                      <Mail className={`h-4 w-4 mr-2 ${detailView.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} />
+                      <span>{detailView.sent_by_email ? 'E-mail' : 'Não enviado por e-mail'}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
               
               {!isResident && (
                 <div className="flex justify-end">
