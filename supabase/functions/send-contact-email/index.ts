@@ -187,21 +187,20 @@ ${message.replace(/\n/g, '<br>')}
       headers: emailHeaders
     });
 
-    // Send confirmation email to the sender
-    const confirmationSubject = isComplaint ? 
-              `Recebemos sua ${subject.includes('Sugestão') ? 'sugestão' : 'reclamação'} - Meu Residencial` : 
-              (isHistoricalData ? "Recebemos sua solicitação de Dados Históricos - Meu Residencial" : 
-              "Recebemos sua mensagem - Meu Residencial");
-    
-    await client.send({
-      from: isComplaint ? "Sugestões e Reclamações <noreply@meuresidencial.com>" : 
-           (isHistoricalData ? "Dados Históricos <noreply@meuresidencial.com>" : 
-           "Fale Conosco <noreply@meuresidencial.com>"),
-      to: email,
-      subject: confirmationSubject,
-      html: confirmationEmailContent,
-      headers: emailHeaders
-    });
+    // Send confirmation email to the sender ONLY if not a historical data request
+    if (!isHistoricalData) {
+      const confirmationSubject = isComplaint ? 
+                `Recebemos sua ${subject.includes('Sugestão') ? 'sugestão' : 'reclamação'} - Meu Residencial` : 
+                "Recebemos sua mensagem - Meu Residencial";
+      
+      await client.send({
+        from: isComplaint ? "Sugestões e Reclamações <noreply@meuresidencial.com>" : "Fale Conosco <noreply@meuresidencial.com>",
+        to: email,
+        subject: confirmationSubject,
+        html: confirmationEmailContent,
+        headers: emailHeaders
+      });
+    }
 
     await client.close();
     

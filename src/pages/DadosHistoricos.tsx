@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -114,7 +115,7 @@ const DadosHistoricos = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl text-brand-700">Envie sua solicitação</CardTitle>
             <CardDescription className="text-gray-600">
-              Após o envio da sua solicitação, você receberá um formulário com todos os dados do seu sistema, ou um formulário para preenchimento com todos os dados para inclusão no sistema.
+              Sua solicitação será enviada diretamente para a nossa equipe, sem enviar confirmação para o gestor.
             </CardDescription>
           </CardHeader>
           
