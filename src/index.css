@@ -1,3 +1,5 @@
+
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Lexend:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
@@ -186,11 +188,6 @@
   @apply bg-custom-secondary text-custom-white;
 }
 
-/* Mobile top bar styling */
-.mobile-top-bar {
-  @apply bg-sidebar text-sidebar-foreground shadow-md;
-}
-
 /* Animações adicionais para responsividade */
 @keyframes slide-in-top {
   from {
@@ -232,3 +229,4 @@
     @apply text-base;
   }
 }
+
