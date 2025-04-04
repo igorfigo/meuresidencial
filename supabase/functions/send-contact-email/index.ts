@@ -159,7 +159,9 @@ ${message.replace(/\n/g, '<br>')}
       emailContent = historicalDataEmailContent;
       emailSubject = subject;
       fromEmail = "Dados Históricos <noreply@meuresidencial.com>";
+      // Updated to explicitly set to contato@meuresidencial.com for historical data
       recipient = "contato@meuresidencial.com";
+      console.log("Enviando solicitação de dados históricos para: contato@meuresidencial.com");
     } else {
       emailContent = regularEmailContent;
       emailSubject = subject;
@@ -177,27 +179,43 @@ ${message.replace(/\n/g, '<br>')}
       "X-Mailer": "MeuResidencial"
     };
 
-    // Send email to the appropriate recipient
-    await client.send({
-      from: fromEmail,
-      to: recipient,
-      subject: emailSubject,
-      html: emailContent,
-      replyTo: email,
-      headers: emailHeaders
-    });
+    // Debug log to check recipient
+    console.log(`Enviando email principal para: ${recipient}`);
+
+    try {
+      // Send email to the appropriate recipient
+      await client.send({
+        from: fromEmail,
+        to: recipient,
+        subject: emailSubject,
+        html: emailContent,
+        replyTo: email,
+        headers: emailHeaders
+      });
+      console.log(`Email principal enviado com sucesso para ${recipient}`);
+    } catch (emailError) {
+      console.error("Erro ao enviar email principal:", emailError);
+      throw emailError;
+    }
 
     // For historical data requests, send confirmation to the manager (sender)
     if (isHistoricalData) {
       const historicalConfirmationSubject = "Recebemos sua solicitação de Dados Históricos - Meu Residencial";
       
-      await client.send({
-        from: "Dados Históricos <noreply@meuresidencial.com>",
-        to: email,
-        subject: historicalConfirmationSubject,
-        html: confirmationEmailContent,
-        headers: emailHeaders
-      });
+      try {
+        console.log(`Enviando email de confirmação para: ${email}`);
+        await client.send({
+          from: "Dados Históricos <noreply@meuresidencial.com>",
+          to: email,
+          subject: historicalConfirmationSubject,
+          html: confirmationEmailContent,
+          headers: emailHeaders
+        });
+        console.log(`Email de confirmação enviado com sucesso para ${email}`);
+      } catch (confirmEmailError) {
+        console.error("Erro ao enviar email de confirmação:", confirmEmailError);
+        // Don't throw here - we still sent the main email
+      }
     } 
     // For non-historical data requests, follow the previous logic
     else if (!isHistoricalData) {
@@ -205,18 +223,30 @@ ${message.replace(/\n/g, '<br>')}
                 `Recebemos sua ${subject.includes('Sugestão') ? 'sugestão' : 'reclamação'} - Meu Residencial` : 
                 "Recebemos sua mensagem - Meu Residencial";
       
-      await client.send({
-        from: isComplaint ? "Sugestões e Reclamações <noreply@meuresidencial.com>" : "Fale Conosco <noreply@meuresidencial.com>",
-        to: email,
-        subject: confirmationSubject,
-        html: confirmationEmailContent,
-        headers: emailHeaders
-      });
+      try {
+        await client.send({
+          from: isComplaint ? "Sugestões e Reclamações <noreply@meuresidencial.com>" : "Fale Conosco <noreply@meuresidencial.com>",
+          to: email,
+          subject: confirmationSubject,
+          html: confirmationEmailContent,
+          headers: emailHeaders
+        });
+        console.log(`Email de confirmação enviado com sucesso para ${email}`);
+      } catch (confirmEmailError) {
+        console.error("Erro ao enviar email de confirmação:", confirmEmailError);
+        // Don't throw here - we still sent the main email
+      }
     }
 
-    await client.close();
+    try {
+      await client.close();
+      console.log('Cliente SMTP fechado com sucesso');
+    } catch (closeError) {
+      console.error("Erro ao fechar cliente SMTP:", closeError);
+      // Don't throw here - emails were already sent
+    }
     
-    console.log('E-mails enviados com sucesso');
+    console.log('Processo de envio de e-mails concluído');
 
     return new Response(
       JSON.stringify({ success: true }),
