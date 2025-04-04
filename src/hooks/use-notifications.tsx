@@ -10,7 +10,7 @@ export function useNotifications() {
   
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const isResident = user?.isResident === true;
-  const userId = user?.id || '';
+  const userId = user?.uid || ''; // Fixed: using uid instead of id
   
   // Only track notifications for residents
   const enabled = isResident && !!matricula && !!userId;
@@ -20,6 +20,7 @@ export function useNotifications() {
     try {
       // Check database for last viewed time first
       if (userId) {
+        // Fixed: using typed approach with explicit table name
         const { data, error } = await supabase
           .from('user_notification_views')
           .select('last_viewed_at')
