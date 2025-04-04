@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -74,7 +73,6 @@ const DadosHistoricos = () => {
       setIsSubmitting(true);
       
       const typeText = formData.type === 'inclusao' ? 'Solicitação de Inclusão de Históricos' : 'Solicitação de Download de Históricos';
-      const formattedSubject = `${typeText}: ${formData.subject}`;
       
       const { error } = await supabase.functions.invoke('send-contact-email', {
         body: {
@@ -82,7 +80,7 @@ const DadosHistoricos = () => {
           email: user?.email || 'Email não informado',
           matricula: user?.matricula || 'N/A',
           nomeCondominio: user?.nomeCondominio || 'N/A',
-          subject: formattedSubject,
+          subject: `[${typeText}] ${formData.subject}`,
           message: formData.message
         }
       });
@@ -115,7 +113,7 @@ const DadosHistoricos = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl text-brand-700">Envie sua solicitação</CardTitle>
             <CardDescription className="text-gray-600">
-              Sua solicitação será enviada diretamente para a nossa equipe e você receberá uma confirmação por e-mail.
+              Após o envio da sua solicitação, você receberá um formulário com todos os dados do seu sistema, ou um formulário para preenchimento com todos os dados para inclusão no sistema.
             </CardDescription>
           </CardHeader>
           
