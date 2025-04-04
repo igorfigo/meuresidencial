@@ -573,7 +573,7 @@ const LandingPage = () => {
             </div>
           </FadeInSection>
           
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-white/30">
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-white/30 max-w-3xl mx-auto">
             <FadeInSection delay={100}>
               <Accordion type="single" collapsible className="w-full">
                 {faqItems.map((item, index) => (
@@ -589,11 +589,6 @@ const LandingPage = () => {
               </Accordion>
             </FadeInSection>
           </div>
-        </div>
-        <div className="absolute -bottom-1 left-0 right-0">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
-            <path fill="white" fillOpacity="1" d="M0,32L48,26.7C96,21,192,11,288,10.7C384,11,480,21,576,32C672,43,768,53,864,53.3C960,53,1056,43,1152,37.3C1248,32,1344,32,1392,32L1440,32L1440,80L1392,80C1344,80,1248,80,1152,80C1056,80,960,80,864,80C768,80,672,80,576,80C480,80,384,80,288,80C192,80,96,80,48,80L0,80Z"></path>
-          </svg>
         </div>
       </section>
       
