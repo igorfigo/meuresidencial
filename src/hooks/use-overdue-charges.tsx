@@ -54,6 +54,15 @@ export const useOverdueCharges = () => {
         let overdue = 0;
         const dueDayNum = parseInt(dueDay);
         
+        // Get resident creation date to check if we should count a month
+        const { data: residentData } = await supabase
+          .from('residents')
+          .select('created_at')
+          .eq('id', user.residentId)
+          .single();
+          
+        const residentCreationDate = residentData?.created_at ? new Date(residentData.created_at) : null;
+        
         for (let month = 1; month <= parseInt(currentMonth); month++) {
           const monthStr = month.toString().padStart(2, '0');
           const referenceMonth = `${currentYear}-${monthStr}`;
@@ -62,13 +71,19 @@ export const useOverdueCharges = () => {
           if (!paidMonthsMap.has(referenceMonth)) {
             // If not paid and due date has passed, it's overdue
             const dueDate = new Date(parseInt(currentYear), month - 1, dueDayNum);
-            if (today > dueDate) {
+            
+            // Only count if the resident already existed when the payment was due
+            // and the due date has passed
+            if (today > dueDate && 
+                (!residentCreationDate || dueDate >= residentCreationDate)) {
               overdue++;
             }
           }
         }
         
         setOverdueCount(overdue);
+        // Store in localStorage for the badge in DashboardLayout
+        localStorage.setItem('overdueChargesCount', overdue.toString());
       } catch (error) {
         console.error('Error checking overdue charges:', error);
       } finally {

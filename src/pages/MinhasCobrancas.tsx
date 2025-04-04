@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -363,13 +362,6 @@ const MinhasCobrancas = () => {
     setSelectedCharge(null);
   };
 
-  useEffect(() => {
-    if (!isLoading) {
-      const overdueCharges = filteredCharges.filter(charge => charge.status === 'overdue');
-      localStorage.setItem('overdueChargesCount', overdueCharges.length.toString());
-    }
-  }, [filteredCharges, isLoading]);
-  
   return (
     <DashboardLayout>
       <div className="space-y-6">
