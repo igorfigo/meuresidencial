@@ -9,6 +9,16 @@ import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
+
+const SUPABASE_URL = "https://kcbvdcacgbwigefwacrk.supabase.co";
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
@@ -19,6 +29,13 @@ const Login = () => {
   const { login } = useApp();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('manager');
+  
+  // Password recovery states
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [recoverySending, setRecoverySending] = useState(false);
+  const [recoverySuccess, setRecoverySuccess] = useState(false);
+  const [recoveryError, setRecoveryError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +55,58 @@ const Login = () => {
     }
     
     setLoading(false);
+  };
+  
+  const handleRecoverySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recoveryEmail.trim()) {
+      setRecoveryError('Por favor, insira seu email ou matrícula');
+      return;
+    }
+    
+    setRecoverySending(true);
+    setRecoveryError('');
+    setRecoverySuccess(false);
+    
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/send-manager-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ identifier: recoveryEmail.trim() }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao enviar email de recuperação');
+      }
+      
+      setRecoverySuccess(true);
+      toast.success('Email de recuperação enviado com sucesso!');
+      
+      // Close dialog after success
+      setTimeout(() => {
+        setForgotPasswordOpen(false);
+        // Reset states after the dialog is closed
+        setTimeout(() => {
+          setRecoveryEmail('');
+          setRecoverySuccess(false);
+        }, 300);
+      }, 3000);
+    } catch (error: any) {
+      console.error('Erro na recuperação de senha:', error);
+      setRecoveryError(error.message || 'Erro ao enviar email de recuperação');
+    } finally {
+      setRecoverySending(false);
+    }
+  };
+  
+  const resetRecoveryState = () => {
+    setRecoveryEmail('');
+    setRecoveryError('');
+    setRecoverySuccess(false);
   };
 
   return (
@@ -103,9 +172,16 @@ const Login = () => {
                   {activeTab === 'manager' ? 'Senha' : 'CPF (Senha)'}
                 </Label>
                 {activeTab === 'manager' && (
-                  <a href="#" className="text-xs text-blue-200 hover:text-white hover:underline">
+                  <button 
+                    type="button"
+                    className="text-xs text-blue-200 hover:text-white hover:underline"
+                    onClick={() => {
+                      resetRecoveryState();
+                      setForgotPasswordOpen(true);
+                    }}
+                  >
                     Esqueceu a senha?
-                  </a>
+                  </button>
                 )}
               </div>
               <div className="relative">
@@ -205,6 +281,80 @@ const Login = () => {
           </div>
         </div>
       </div>
+      
+      {/* Password Recovery Dialog */}
+      <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Recuperação de Senha</DialogTitle>
+            <DialogDescription>
+              {recoverySuccess 
+                ? 'Email de recuperação enviado com sucesso!'
+                : 'Insira seu email ou matrícula para recuperar sua senha.'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!recoverySuccess ? (
+            <form onSubmit={handleRecoverySubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="recovery-email" className="text-foreground">
+                  Email ou Matrícula
+                </Label>
+                <Input
+                  id="recovery-email"
+                  type="text"
+                  placeholder="seu@email.com ou matrícula"
+                  value={recoveryEmail}
+                  onChange={(e) => setRecoveryEmail(e.target.value)}
+                  disabled={recoverySending}
+                  required
+                />
+              </div>
+              
+              {recoveryError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{recoveryError}</AlertDescription>
+                </Alert>
+              )}
+              
+              <DialogFooter className="sm:justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setForgotPasswordOpen(false)}
+                  disabled={recoverySending}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={recoverySending}>
+                  {recoverySending ? 'Enviando...' : 'Recuperar Senha'}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Sucesso!</AlertTitle>
+                <AlertDescription>
+                  Um email com sua senha foi enviado para o endereço associado à sua conta.
+                </AlertDescription>
+              </Alert>
+              
+              <DialogFooter>
+                <Button
+                  type="button"
+                  onClick={() => setForgotPasswordOpen(false)}
+                  className="w-full"
+                >
+                  Fechar
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
