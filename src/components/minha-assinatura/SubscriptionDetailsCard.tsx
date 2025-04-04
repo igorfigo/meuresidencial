@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +17,7 @@ interface SubscriptionDetailsCardProps {
   formatCurrencyDisplay: (value: string | null | undefined) => string;
   getCurrentPlanDetails: () => { name: string; value: string };
   pixDueDate?: string;
+  onPlanUpdate?: (updatedData: any) => void;
 }
 
 export const SubscriptionDetailsCard = ({ 
@@ -23,7 +25,8 @@ export const SubscriptionDetailsCard = ({
   user, 
   formatCurrencyDisplay,
   getCurrentPlanDetails,
-  pixDueDate
+  pixDueDate,
+  onPlanUpdate
 }: SubscriptionDetailsCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [localCondominiumData, setLocalCondominiumData] = useState(condominiumData);
@@ -48,10 +51,17 @@ export const SubscriptionDetailsCard = ({
         throw error;
       }
       
-      setLocalCondominiumData({
+      const updatedData = {
         ...localCondominiumData,
         tipodocumento: value
-      });
+      };
+      
+      setLocalCondominiumData(updatedData);
+      
+      // If onPlanUpdate callback exists, call it to update parent component
+      if (onPlanUpdate) {
+        onPlanUpdate(updatedData);
+      }
       
       await supabase.from('condominium_change_logs').insert({
         matricula: user.matricula,
@@ -72,6 +82,11 @@ export const SubscriptionDetailsCard = ({
   
   const handlePlanUpgrade = (updatedData: any) => {
     setLocalCondominiumData(updatedData);
+    
+    // If onPlanUpdate callback exists, call it to update parent component
+    if (onPlanUpdate) {
+      onPlanUpdate(updatedData);
+    }
   };
   
   const navigateToContactPage = () => {

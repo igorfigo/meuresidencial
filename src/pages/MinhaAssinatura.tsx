@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -61,6 +62,11 @@ const MinhaAssinatura = () => {
   
   const getPlanDetails = () => {
     return getCurrentPlanDetails(condominiumData, plans);
+  };
+
+  // Function to handle plan update from the SubscriptionDetailsCard
+  const handlePlanUpdate = (updatedData: any) => {
+    setCondominiumData(updatedData);
   };
 
   // Check if the user is a manager (not admin and not resident)
@@ -127,6 +133,7 @@ const MinhaAssinatura = () => {
             formatCurrencyDisplay={formatCurrencyDisplay}
             getCurrentPlanDetails={getPlanDetails}
             pixDueDate={pixDueDate}
+            onPlanUpdate={handlePlanUpdate}
           />
         )}
       </div>
