@@ -473,7 +473,7 @@ const Dashboard = () => {
 
   const renderAdminDashboard = () => (
     <>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Status dos Gestores</CardTitle>
@@ -546,12 +546,12 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md md:col-span-2">
+        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Condomínios Ativos por Tipo de Plano</CardTitle>
+            <CardTitle className="text-sm font-medium">Condomínios Ativos por Plano</CardTitle>
             <PieChart className="h-4 w-4 text-purple-600" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-2">
             <PlanDistributionChart 
               data={planDistribution} 
               isLoading={isLoadingPlanData} 
