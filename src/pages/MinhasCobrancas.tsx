@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -13,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle, CreditCard } from 'lucide-react';
 import { PixDialog } from '@/components/pix/PixDialog';
 import { Button } from '@/components/ui/button';
+import { useOverdueCharges } from '@/hooks/use-overdue-charges';
 import {
   Table,
   TableBody,
@@ -123,6 +125,7 @@ const MinhasCobrancas = () => {
   const [activeTab, setActiveTab] = useState<string>('pending');
   const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
   const [isPixDialogOpen, setIsPixDialogOpen] = useState(false);
+  const { overdueCount } = useOverdueCharges();
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
