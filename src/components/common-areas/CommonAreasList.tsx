@@ -8,7 +8,8 @@ import {
   Users, 
   Clock,
   CalendarPlus,
-  DollarSign 
+  DollarSign,
+  Info
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -37,6 +38,7 @@ import {
 } from '@/components/ui/card';
 import { CommonAreaReservationDialog } from './CommonAreaReservationDialog';
 import { formatCurrency, BRLToNumber } from '@/utils/currency';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CommonArea {
   id: string;
@@ -97,6 +99,7 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
   const [loading, setLoading] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isReservationOpen, setIsReservationOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   const handleViewReservations = async (area: CommonArea) => {
     setSelectedArea(area);
@@ -116,6 +119,11 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
   const handleReservationClick = (area: CommonArea) => {
     setSelectedArea(area);
     setIsReservationOpen(true);
+  };
+
+  const handleViewDetails = (area: CommonArea) => {
+    setSelectedArea(area);
+    setIsDetailsOpen(true);
   };
 
   const formatWeekdays = (weekdays?: string[]) => {
@@ -199,17 +207,17 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead className="text-center">Capacidade</TableHead>
-            <TableHead className="hidden md:table-cell text-center">Disponibilidade</TableHead>
-            <TableHead className="hidden md:table-cell text-center">Horário</TableHead>
-            <TableHead className="text-center">Valor</TableHead>
+            {!isMobile && <TableHead className="text-center">Capacidade</TableHead>}
+            {!isMobile && <TableHead className="hidden md:table-cell text-center">Disponibilidade</TableHead>}
+            {!isMobile && <TableHead className="hidden md:table-cell text-center">Horário</TableHead>}
+            {!isMobile && <TableHead className="text-center">Valor</TableHead>}
             <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {commonAreas.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={isMobile ? 2 : 6} className="text-center py-8 text-muted-foreground">
                 Nenhuma área comum cadastrada
               </TableCell>
             </TableRow>
@@ -217,27 +225,39 @@ export const CommonAreasList: React.FC<CommonAreasListProps> = ({
             commonAreas.map((area) => (
               <TableRow key={area.id}>
                 <TableCell className="font-medium">{area.name}</TableCell>
-                <TableCell className="text-center">{area.capacity || 'Não definido'}</TableCell>
-                <TableCell className="hidden md:table-cell text-center">
+                {!isMobile && <TableCell className="text-center">{area.capacity || 'Não definido'}</TableCell>}
+                {!isMobile && <TableCell className="hidden md:table-cell text-center">
                   {formatWeekdays(area.weekdays)}
-                </TableCell>
-                <TableCell className="hidden md:table-cell text-center">
+                </TableCell>}
+                {!isMobile && <TableCell className="hidden md:table-cell text-center">
                   {formatHours(area.opening_time, area.closing_time)}
-                </TableCell>
-                <TableCell className="text-center">
+                </TableCell>}
+                {!isMobile && <TableCell className="text-center">
                   {getValueDisplay(area.valor)}
-                </TableCell>
+                </TableCell>}
                 <TableCell className="text-center">
                   <div className="flex justify-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
-                      onClick={() => handleViewReservations(area)}
-                      title="Ver reservas"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                    {isMobile ? (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                        onClick={() => handleViewDetails(area)}
+                        title="Ver detalhes"
+                      >
+                        <Info className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-purple-500 hover:bg-purple-50 hover:text-purple-600"
+                        onClick={() => handleViewReservations(area)}
+                        title="Ver reservas"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    )}
                     
                     {showReservationButton && (
                       <Button

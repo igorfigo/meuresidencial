@@ -1,11 +1,13 @@
+
 import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Home, Trash2, User } from 'lucide-react';
+import { Home, Trash2, User, Calendar, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Card,
   CardContent,
@@ -31,6 +33,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -53,6 +61,7 @@ export const ReservationsCalendar: React.FC = () => {
   const { user } = useApp();
   const matricula = user?.selectedCondominium || user?.matricula || '';
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   
   const [reservationToDelete, setReservationToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -157,6 +166,16 @@ export const ReservationsCalendar: React.FC = () => {
     }
   };
 
+  // Group reservations by date for mobile view
+  const reservationsByDate = reservations.reduce<Record<string, Reservation[]>>((acc, reservation) => {
+    const date = reservation.reservation_date;
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(reservation);
+    return acc;
+  }, {});
+
   return (
     <Card className="border-t-4 border-t-brand-600">
       <CardHeader>
@@ -178,7 +197,68 @@ export const ReservationsCalendar: React.FC = () => {
           <div className="py-10 text-center text-muted-foreground">
             Não há reservas agendadas
           </div>
+        ) : isMobile ? (
+          // Mobile view - Accordion by date
+          <Accordion type="single" collapsible className="w-full">
+            {Object.entries(reservationsByDate).map(([date, dateReservations]) => (
+              <AccordionItem key={date} value={date}>
+                <AccordionTrigger className="py-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>
+                      {format(parseISO(date), "dd/MM/yyyy", { locale: ptBR })}
+                    </span>
+                    <Badge className="ml-2 bg-brand-600">
+                      {dateReservations.length}
+                    </Badge>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3">
+                    {dateReservations.map((reservation) => (
+                      <Card key={reservation.id} className="p-3">
+                        <div className="flex flex-col gap-2">
+                          <div className="font-medium">{reservation.common_area.name}</div>
+                          
+                          {!isResident && (
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Home className="h-3.5 w-3.5 mr-1" />
+                              {reservation.residents.unidade}
+                            </div>
+                          )}
+                          
+                          {isResident && (
+                            <Badge 
+                              variant={isUserReservation(reservation) ? "default" : "outline"}
+                              className={isUserReservation(reservation) ? "bg-brand-600 mt-1 mb-1" : "mt-1 mb-1"}
+                            >
+                              {isUserReservation(reservation) ? "Minha Reserva" : "Outro Morador"}
+                            </Badge>
+                          )}
+                          
+                          <div className="flex justify-end">
+                            {canDeleteReservation(reservation) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                                onClick={() => handleDeleteClick(reservation.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Cancelar
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         ) : (
+          // Desktop view - Table
           <Table>
             <TableHeader>
               <TableRow>

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useCommonAreas } from '@/hooks/use-common-areas';
 import { CommonAreaForm } from '@/components/common-areas/CommonAreaForm';
 import { CommonAreasList } from '@/components/common-areas/CommonAreasList';
@@ -24,6 +25,8 @@ import { useQueryClient } from '@tanstack/react-query';
 const AreasComuns = () => {
   const { user } = useApp();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
+  
   const { 
     form, 
     commonAreas, 
@@ -86,9 +89,9 @@ const AreasComuns = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className={`flex flex-col ${isMobile ? '' : 'md:flex-row md:items-center'} justify-between gap-4`}>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Áreas Comuns</h1>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold tracking-tight`}>Áreas Comuns</h1>
             <p className="text-muted-foreground">
               {isManager 
                 ? "Gerencie as áreas comuns do seu condomínio"
@@ -99,7 +102,7 @@ const AreasComuns = () => {
           {isManager && !showForm && (
             <Button onClick={handleNewArea} className="bg-brand-600 hover:bg-brand-700">
               <Plus className="mr-2 h-4 w-4" />
-              Nova Área Comum
+              {isMobile ? "Nova Área" : "Nova Área Comum"}
             </Button>
           )}
         </div>
@@ -146,7 +149,7 @@ const AreasComuns = () => {
       </div>
 
       <AlertDialog open={!!areaToDelete} onOpenChange={(open) => !open && setAreaToDelete(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className={isMobile ? "max-w-[95vw] p-4" : ""}>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
             <AlertDialogDescription>
