@@ -41,7 +41,6 @@ const CadastroGestor = () => {
   };
 
   const handleMatriculaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow numbers
     const numericValue = e.target.value.replace(/\D/g, '');
     setMatriculaSearch(numericValue);
   };
