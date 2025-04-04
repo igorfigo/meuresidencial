@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { format, parse, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -7,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileDown } from 'lucide-react';
+import { FileDown, ChevronRight, ChevronDown } from 'lucide-react';
 import { useFinances } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { useApp } from '@/contexts/AppContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import jsPDF from 'jspdf';
 
 const getLast12Months = () => {
@@ -100,6 +102,9 @@ export const AccountingReport = () => {
   const [startBalance, setStartBalance] = useState('0,00');
   const [endBalance, setEndBalance] = useState('0,00');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showIncomes, setShowIncomes] = useState(true);
+  const [showExpenses, setShowExpenses] = useState(true);
+  const isMobile = useIsMobile();
   
   const months = getLast12Months();
   
@@ -459,165 +464,200 @@ export const AccountingReport = () => {
   
   return (
     <Card className="mb-8 border-t-4 border-t-brand-600">
-      <CardContent className="pt-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-          <div className="w-full sm:w-64 mb-4 sm:mb-0">
-            <Label htmlFor="month" className="mb-1 block">Mês de Referência</Label>
-            <Select value={selectedMonth} onValueChange={handleMonthChange}>
-              <SelectTrigger id="month">
-                <SelectValue placeholder="Selecione o mês" />
-              </SelectTrigger>
-              <SelectContent>
-                {months.map(month => (
-                  <SelectItem key={month.value} value={month.value}>
-                    {month.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <CardContent className={`${isMobile ? 'p-2' : 'pt-6'}`}>
+        <div className="flex flex-col space-y-4 mb-4">
+          <div className="w-full">
+            <Label htmlFor="month" className={`mb-1 block ${isMobile ? 'text-sm' : ''}`}>Mês de Referência</Label>
+            <div className="flex gap-2">
+              <Select value={selectedMonth} onValueChange={handleMonthChange} className="flex-1">
+                <SelectTrigger id="month" className={isMobile ? "h-8 text-sm" : ""}>
+                  <SelectValue placeholder="Selecione o mês" />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map(month => (
+                    <SelectItem key={month.value} value={month.value}>
+                      {month.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Button 
+                onClick={generatePDF} 
+                disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
+                className={`flex items-center gap-2 ${isMobile ? 'h-8 text-xs px-2 py-1' : ''}`}
+                variant="outline"
+              >
+                <FileDown size={isMobile ? 14 : 16} />
+                {isGenerating ? 'Gerando...' : isMobile ? 'PDF' : 'Baixar Relatório PDF'}
+              </Button>
+            </div>
           </div>
-          
-          <Button 
-            onClick={generatePDF} 
-            disabled={isGenerating || (monthlyIncomes.length === 0 && monthlyExpenses.length === 0)}
-            className="flex items-center gap-2"
-          >
-            <FileDown size={16} />
-            {isGenerating ? 'Gerando...' : 'Baixar Relatório PDF'}
-          </Button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 gap-3 mb-4">
           <Card>
-            <CardContent className="pt-4">
-              <h3 className="font-medium text-lg mb-2">Resumo do Mês</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Saldo Inicial (Estimado):</span>
-                  <span className="font-medium">R$ {startBalance}</span>
+            <CardContent className={`${isMobile ? 'p-2 pt-3' : 'pt-4'}`}>
+              <h3 className={`font-medium ${isMobile ? 'text-base' : 'text-lg'} mb-2`}>Resumo do Mês</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
+                  <div className="flex flex-col py-1 border-b">
+                    <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>Saldo Inicial:</span>
+                    <span className={`font-medium ${isMobile ? 'text-sm' : ''}`}>R$ {startBalance}</span>
+                  </div>
+                  <div className="flex flex-col py-1 border-b">
+                    <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>Total Receitas:</span>
+                    <span className={`font-medium text-green-600 ${isMobile ? 'text-sm' : ''}`}>
+                      + R$ {formatToBRL(getTotalIncome())}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Total de Receitas:</span>
-                  <span className="font-medium text-green-600">+ R$ {formatToBRL(getTotalIncome())}</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Total de Despesas:</span>
-                  <span className="font-medium text-red-600">- R$ {formatToBRL(getTotalExpense())}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-sm text-gray-600">Saldo Final:</span>
-                  <span className="font-bold text-brand-600">R$ {endBalance}</span>
+                
+                <div className="space-y-2">
+                  <div className="flex flex-col py-1 border-b">
+                    <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>Saldo Final:</span>
+                    <span className={`font-bold text-brand-600 ${isMobile ? 'text-sm' : ''}`}>R$ {endBalance}</span>
+                  </div>
+                  <div className="flex flex-col py-1 border-b">
+                    <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>Total Despesas:</span>
+                    <span className={`font-medium text-red-600 ${isMobile ? 'text-sm' : ''}`}>
+                      - R$ {formatToBRL(getTotalExpense())}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-4">
-              <h3 className="font-medium text-lg mb-2">Detalhes</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Mês de Referência:</span>
-                  <span className="font-medium">{format(parse(selectedMonth + '-01', 'yyyy-MM-dd', new Date()), 'MMMM yyyy', { locale: ptBR })}</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Receitas Registradas:</span>
-                  <span className="font-medium">{monthlyIncomes.length}</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b">
-                  <span className="text-sm text-gray-600">Despesas Registradas:</span>
-                  <span className="font-medium">{monthlyExpenses.length}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-sm text-gray-600">Resultado do Mês:</span>
-                  <span className={`font-medium ${getTotalIncome() - getTotalExpense() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    R$ {formatToBRL(getTotalIncome() - getTotalExpense())}
-                  </span>
-                </div>
+              
+              <div className={`flex justify-between items-center pt-3 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                <span className="text-gray-600">Resultado do Mês:</span>
+                <span className={`font-medium ${getTotalIncome() - getTotalExpense() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  R$ {formatToBRL(getTotalIncome() - getTotalExpense())}
+                </span>
               </div>
             </CardContent>
           </Card>
         </div>
         
-        <div className="space-y-8">
-          <div>
-            <h3 className="font-medium text-lg mb-4">Receitas do Mês</h3>
-            {monthlyIncomes.length > 0 ? (
-              <div className="rounded-md border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Mês Referência</TableHead>
-                      <TableHead>Data de Recebimento</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {monthlyIncomes.map(income => (
-                      <TableRow key={income.id}>
-                        <TableCell className="font-medium">{getCategoryName(income.category)}</TableCell>
-                        <TableCell>{income.unit || '-'}</TableCell>
-                        <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>
-                        <TableCell>{formatDateToBR(income.payment_date) || '-'}</TableCell>
-                        <TableCell className="text-right text-green-600">R$ {income.amount}</TableCell>
-                      </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell colSpan={4} className="font-bold">Total</TableCell>
-                      <TableCell className="text-right font-bold text-green-600">
-                        R$ {formatToBRL(getTotalIncome())}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-md border">
-                <p className="text-gray-500">Nenhuma receita registrada para este mês</p>
+        <div className="space-y-4">
+          {/* Receitas Section with collapsible header */}
+          <div className="border rounded-lg overflow-hidden">
+            <div 
+              className={`flex justify-between items-center p-3 bg-gray-50 cursor-pointer ${isMobile ? 'text-sm' : ''}`}
+              onClick={() => setShowIncomes(!showIncomes)}
+            >
+              <h3 className="font-medium flex items-center">
+                {showIncomes ? <ChevronDown size={16} className="mr-1" /> : <ChevronRight size={16} className="mr-1" />}
+                Receitas do Mês
+              </h3>
+              <span className="text-green-600 font-medium">R$ {formatToBRL(getTotalIncome())}</span>
+            </div>
+            
+            {showIncomes && (
+              <div>
+                {monthlyIncomes.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className={isMobile ? "text-xs" : ""}>Categoria</TableHead>
+                          {!isMobile && <TableHead>Unidade</TableHead>}
+                          {!isMobile && <TableHead>Mês Ref.</TableHead>}
+                          <TableHead className={isMobile ? "text-xs" : ""}>Data</TableHead>
+                          <TableHead className={`text-right ${isMobile ? "text-xs" : ""}`}>Valor</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {monthlyIncomes.map(income => (
+                          <TableRow key={income.id}>
+                            <TableCell className={`font-medium ${isMobile ? "text-xs py-1 whitespace-nowrap" : ""}`}>
+                              {getCategoryName(income.category)}
+                            </TableCell>
+                            {!isMobile && <TableCell>{income.unit || '-'}</TableCell>}
+                            {!isMobile && <TableCell>{formatReferenceMonth(income.reference_month) || '-'}</TableCell>}
+                            <TableCell className={isMobile ? "text-xs py-1" : ""}>
+                              {formatDateToBR(income.payment_date) || '-'}
+                            </TableCell>
+                            <TableCell className={`text-right text-green-600 ${isMobile ? "text-xs py-1" : ""}`}>
+                              R$ {income.amount}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell colSpan={isMobile ? 2 : 4} className={`font-bold ${isMobile ? "text-xs" : ""}`}>Total</TableCell>
+                          <TableCell className={`text-right font-bold text-green-600 ${isMobile ? "text-xs" : ""}`}>
+                            R$ {formatToBRL(getTotalIncome())}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className={`text-center py-4 bg-gray-50 ${isMobile ? "text-xs" : ""}`}>
+                    <p className="text-gray-500">Nenhuma receita registrada para este mês</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
           
-          <div>
-            <h3 className="font-medium text-lg mb-4">Despesas do Mês</h3>
-            {monthlyExpenses.length > 0 ? (
-              <div className="rounded-md border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Mês Referência</TableHead>
-                      <TableHead>Vencimento</TableHead>
-                      <TableHead>Data de Pagamento</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {monthlyExpenses.map(expense => (
-                      <TableRow key={expense.id}>
-                        <TableCell className="font-medium">{getCategoryName(expense.category)}</TableCell>
-                        <TableCell>{expense.unit || '-'}</TableCell>
-                        <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>
-                        <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>
-                        <TableCell>{formatDateToBR(expense.payment_date) || '-'}</TableCell>
-                        <TableCell className="text-right text-red-600">R$ {expense.amount}</TableCell>
-                      </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell colSpan={5} className="font-bold">Total</TableCell>
-                      <TableCell className="text-right font-bold text-red-600">
-                        R$ {formatToBRL(getTotalExpense())}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-md border">
-                <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
+          {/* Despesas Section with collapsible header */}
+          <div className="border rounded-lg overflow-hidden">
+            <div 
+              className={`flex justify-between items-center p-3 bg-gray-50 cursor-pointer ${isMobile ? 'text-sm' : ''}`}
+              onClick={() => setShowExpenses(!showExpenses)}
+            >
+              <h3 className="font-medium flex items-center">
+                {showExpenses ? <ChevronDown size={16} className="mr-1" /> : <ChevronRight size={16} className="mr-1" />}
+                Despesas do Mês
+              </h3>
+              <span className="text-red-600 font-medium">R$ {formatToBRL(getTotalExpense())}</span>
+            </div>
+            
+            {showExpenses && (
+              <div>
+                {monthlyExpenses.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className={isMobile ? "text-xs" : ""}>Categoria</TableHead>
+                          {!isMobile && <TableHead>Unidade</TableHead>}
+                          {!isMobile && <TableHead>Mês Ref.</TableHead>}
+                          {!isMobile && <TableHead>Vencimento</TableHead>}
+                          <TableHead className={isMobile ? "text-xs" : ""}>Pagamento</TableHead>
+                          <TableHead className={`text-right ${isMobile ? "text-xs" : ""}`}>Valor</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {monthlyExpenses.map(expense => (
+                          <TableRow key={expense.id}>
+                            <TableCell className={`font-medium ${isMobile ? "text-xs py-1 whitespace-nowrap" : ""}`}>
+                              {getCategoryName(expense.category)}
+                            </TableCell>
+                            {!isMobile && <TableCell>{expense.unit || '-'}</TableCell>}
+                            {!isMobile && <TableCell>{formatReferenceMonth(expense.reference_month) || '-'}</TableCell>}
+                            {!isMobile && <TableCell>{formatDateToBR(expense.due_date) || '-'}</TableCell>}
+                            <TableCell className={isMobile ? "text-xs py-1" : ""}>
+                              {formatDateToBR(expense.payment_date) || '-'}
+                            </TableCell>
+                            <TableCell className={`text-right text-red-600 ${isMobile ? "text-xs py-1" : ""}`}>
+                              R$ {expense.amount}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell colSpan={isMobile ? 2 : 5} className={`font-bold ${isMobile ? "text-xs" : ""}`}>Total</TableCell>
+                          <TableCell className={`text-right font-bold text-red-600 ${isMobile ? "text-xs" : ""}`}>
+                            R$ {formatToBRL(getTotalExpense())}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className={`text-center py-4 bg-gray-50 ${isMobile ? "text-xs" : ""}`}>
+                    <p className="text-gray-500">Nenhuma despesa registrada para este mês</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
