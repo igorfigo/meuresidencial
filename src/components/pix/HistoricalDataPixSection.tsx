@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,10 +21,10 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
     queryKey: ['pix-settings-historical', matricula],
     queryFn: async () => {
       try {
+        // Changed from pix_receipt_settings to pix_key_meuresidencial
         const { data, error } = await supabase
-          .from('pix_receipt_settings')
+          .from('pix_key_meuresidencial')
           .select('tipochave, chavepix')
-          .eq('matricula', matricula)
           .single();
           
         if (error) {
