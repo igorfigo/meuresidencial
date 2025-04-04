@@ -557,20 +557,17 @@ const LandingPage = () => {
         </div>
       </section>
       
-      <section id="faq" className="py-16 bg-gradient-to-b from-[#EFEFEF] via-[#295AC3] to-[#2151B9] text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <section id="faq" className="py-16 bg-gradient-to-b from-brand-700 to-brand-800 relative">
+        <div className="absolute -top-1 left-0 right-0 transform rotate-180">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
+            <path fill="white" fillOpacity="1" d="M0,32L48,26.7C96,21,192,11,288,10.7C384,11,480,21,576,32C672,43,768,53,864,53.3C960,53,1056,43,1152,37.3C1248,32,1344,32,1392,32L1440,32L1440,80L1392,80C1344,80,1248,80,1152,80C1056,80,960,80,864,80C768,80,672,80,576,80C480,80,384,80,288,80C192,80,96,80,48,80L0,80Z"></path>
+          </svg>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 relative z-10">
           <FadeInSection>
             <div className="text-center mb-12">
-              <div className="inline-block mb-4 px-6 py-2 rounded-full bg-white/20 text-white backdrop-blur-sm">
-                <div className="flex items-center space-x-2">
-                  <HelpCircle className="h-5 w-5" />
-                  <span className="font-semibold text-[#295AC3]">Perguntas Frequentes</span>
-                </div>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#295AC3] mb-4">
-                Perguntas Frequentes
-              </h2>
-              <p className="text-xl text-[#295AC3] max-w-3xl mx-auto mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Perguntas Frequentes</h2>
+              <p className="text-xl text-white/80 max-w-3xl mx-auto">
                 Encontre respostas para as dúvidas mais comuns sobre nossos serviços
               </p>
             </div>
@@ -592,6 +589,11 @@ const LandingPage = () => {
               </Accordion>
             </FadeInSection>
           </div>
+        </div>
+        <div className="absolute -bottom-1 left-0 right-0">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
+            <path fill="white" fillOpacity="1" d="M0,32L48,26.7C96,21,192,11,288,10.7C384,11,480,21,576,32C672,43,768,53,864,53.3C960,53,1056,43,1152,37.3C1248,32,1344,32,1392,32L1440,32L1440,80L1392,80C1344,80,1248,80,1152,80C1056,80,960,80,864,80C768,80,672,80,576,80C480,80,384,80,288,80C192,80,96,80,48,80L0,80Z"></path>
+          </svg>
         </div>
       </section>
       
