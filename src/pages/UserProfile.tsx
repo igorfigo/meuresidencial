@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -9,14 +10,11 @@ import { toast } from 'sonner';
 import { ProfileCondominiumInfo } from '@/components/profile/ProfileCondominiumInfo';
 import { ProfileRepresentativeInfo } from '@/components/profile/ProfileRepresentativeInfo';
 import { AlertCircle } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import ResidentMobileMenu from '@/components/resident/ResidentMobileMenu';
 
 const UserProfile = () => {
   const { user, isAuthenticated } = useApp();
   const [isLoading, setIsLoading] = useState(false);
   const [condominiumData, setCondominiumData] = useState<any>(null);
-  const isMobile = useIsMobile();
   
   const fetchCondominiumData = async (matricula: string) => {
     setIsLoading(true);
@@ -46,18 +44,12 @@ const UserProfile = () => {
     }
   }, [user]);
 
+  // Show restricted access message for residents
   if (isAuthenticated && user?.isResident) {
     return (
       <DashboardLayout>
         <div className="container mx-auto py-6">
           <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
-          
-          {isMobile && (
-            <div className="mb-6">
-              <ResidentMobileMenu />
-            </div>
-          )}
-          
           <Card className="p-6 border-l-4 border-l-amber-500 border-t-4 border-t-brand-600">
             <div className="flex items-start gap-4">
               <AlertCircle className="h-6 w-6 text-amber-500 flex-shrink-0 mt-1" />
