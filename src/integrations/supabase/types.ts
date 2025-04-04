@@ -1096,33 +1096,6 @@ export type Database = {
           },
         ]
       }
-      user_notification_views: {
-        Row: {
-          created_at: string
-          id: string
-          last_viewed_at: string
-          matricula: string
-          notification_type: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          last_viewed_at?: string
-          matricula: string
-          notification_type: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          last_viewed_at?: string
-          matricula?: string
-          notification_type?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           created_at: string
