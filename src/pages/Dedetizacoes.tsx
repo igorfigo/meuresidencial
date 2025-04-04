@@ -8,6 +8,7 @@ import { PestControlForm } from '@/components/pest-control/PestControlForm';
 import { PestControlsList } from '@/components/pest-control/PestControlsList';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -43,6 +44,7 @@ const Dedetizacoes = () => {
   const [showForm, setShowForm] = useState(false);
   const [pestControlToDelete, setPestControlToDelete] = useState<string | null>(null);
   const itemsPerPage = 6;
+  const isMobile = useIsMobile();
 
   const fetchAttachments = async (pestControlId: string) => {
     const { data } = await supabase
@@ -89,16 +91,16 @@ const Dedetizacoes = () => {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dedetizações</h1>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold tracking-tight`}>Dedetizações</h1>
             <p className="text-muted-foreground">
               Gerencie as dedetizações do seu condomínio
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {!showForm && (
-              <Button onClick={handleNewPestControl} className="bg-brand-600 hover:bg-brand-700">
+              <Button onClick={handleNewPestControl} className="bg-brand-600 hover:bg-brand-700 w-full md:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
-                Nova Dedetização
+                {isMobile ? "Nova" : "Nova Dedetização"}
               </Button>
             )}
           </div>
@@ -106,7 +108,7 @@ const Dedetizacoes = () => {
 
         <div className="border-t pt-6">
           {showForm ? (
-            <Card className="border-t-4 border-t-brand-600 shadow-md">
+            <Card className="border-t-4 border-t-brand-600 shadow-md p-4">
               <PestControlForm
                 form={form}
                 onSubmit={handleFormSubmit}
@@ -138,7 +140,7 @@ const Dedetizacoes = () => {
       </div>
 
       <AlertDialog open={!!pestControlToDelete} onOpenChange={(open) => !open && setPestControlToDelete(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className={isMobile ? "max-w-[95vw] p-4" : ""}>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
             <AlertDialogDescription>

@@ -25,6 +25,13 @@ import { PestControl, PestControlAttachment } from '@/hooks/use-pest-control';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
 import {
   Pagination,
   PaginationContent,
@@ -57,6 +64,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
   const [attachments, setAttachments] = useState<PestControlAttachment[]>([]);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const isMobile = useIsMobile();
 
   // Calculate pagination
   const totalPages = Math.ceil(pestControls.length / itemsPerPage);
@@ -99,7 +107,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
 
   const renderFinalidades = (finalidades: string[]) => {
     return (
-      <div className="flex items-center space-x-1">
+      <div className="flex flex-wrap items-center gap-1">
         {finalidades.includes('insetos') && (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
             <Bug className="h-3 w-3 mr-1" /> Insetos
@@ -119,6 +127,107 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
     );
   };
 
+  // Mobile view - Card list
+  const renderMobileList = () => {
+    return (
+      <div className="space-y-3">
+        {currentItems.map(pestControl => (
+          <Card key={pestControl.id} className="p-3 border-l-4 border-l-brand-600">
+            <div className="flex justify-between items-center">
+              <div className="font-medium">{pestControl.empresa}</div>
+              <div className="flex items-center space-x-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => handleViewDetails(pestControl)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => onEdit(pestControl)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => onDelete(pestControl.id!)}
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
+            </div>
+            <div className="flex items-center justify-between mt-2 text-sm">
+              <div className="flex items-center text-muted-foreground">
+                <Calendar className="h-4 w-4 mr-1" />
+                {formatDate(pestControl.data)}
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  // Desktop view - Table
+  const renderDesktopTable = () => {
+    return (
+      <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Empresa</TableHead>
+              <TableHead className="text-center">Data</TableHead>
+              <TableHead>Finalidade</TableHead>
+              <TableHead className="text-center w-[100px]">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {currentItems.map((pestControl) => (
+              <TableRow key={pestControl.id}>
+                <TableCell className="font-medium">{pestControl.empresa}</TableCell>
+                <TableCell className="text-center">{formatDate(pestControl.data)}</TableCell>
+                <TableCell>{renderFinalidades(pestControl.finalidade)}</TableCell>
+                <TableCell className="text-center">
+                  <div className="flex justify-center space-x-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleViewDetails(pestControl)}
+                      title="Ver detalhes"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => onEdit(pestControl)}
+                      title="Editar"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => onDelete(pestControl.id!)}
+                      disabled={isDeleting}
+                      title="Excluir"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    );
+  };
+
   return (
     <>
       {pestControls.length === 0 ? (
@@ -131,56 +240,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Empresa</TableHead>
-                  <TableHead className="text-center">Data</TableHead>
-                  <TableHead>Finalidade</TableHead>
-                  <TableHead className="text-center w-[100px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentItems.map((pestControl) => (
-                  <TableRow key={pestControl.id}>
-                    <TableCell className="font-medium">{pestControl.empresa}</TableCell>
-                    <TableCell className="text-center">{formatDate(pestControl.data)}</TableCell>
-                    <TableCell>{renderFinalidades(pestControl.finalidade)}</TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex justify-center space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleViewDetails(pestControl)}
-                          title="Ver detalhes"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => onEdit(pestControl)}
-                          title="Editar"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => onDelete(pestControl.id!)}
-                          disabled={isDeleting}
-                          title="Excluir"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+          {isMobile ? renderMobileList() : renderDesktopTable()}
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -198,7 +258,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
                   )}
                 </PaginationItem>
                 
-                {Array.from({ length: totalPages }).map((_, i) => (
+                {!isMobile && Array.from({ length: totalPages }).map((_, i) => (
                   <PaginationItem key={i}>
                     <PaginationLink
                       onClick={() => setCurrentPage(i + 1)}
@@ -228,7 +288,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
 
       {/* Details dialog */}
       <Dialog open={!!detailView} onOpenChange={(open) => !open && setDetailView(null)}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className={isMobile ? "max-w-[95vw] p-4" : "sm:max-w-lg"}>
           <DialogHeader>
             <DialogTitle>Detalhes da Dedetização</DialogTitle>
           </DialogHeader>
@@ -275,7 +335,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
                       >
                         <div className="flex items-center space-x-2">
                           <FileBadge className="h-4 w-4 text-blue-500" />
-                          <span className="text-sm truncate max-w-[300px]">
+                          <span className="text-sm truncate max-w-[200px] md:max-w-[300px]">
                             {attachment.file_name}
                           </span>
                         </div>
@@ -286,7 +346,7 @@ export const PestControlsList: React.FC<PestControlsListProps> = ({
                           className="h-8"
                         >
                           <Download className="h-4 w-4 mr-1" />
-                          Baixar
+                          {!isMobile && "Baixar"}
                         </Button>
                       </li>
                     ))}
