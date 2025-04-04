@@ -20,7 +20,7 @@ export const SearchMatricula = ({
   isSearching
 }: SearchMatriculaProps) => {
   return (
-    <Card className="mb-6 p-4">
+    <Card className="mb-6 p-4 border-t-4 border-t-brand-600 shadow-md">
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1">
           <Label htmlFor="matriculaSearch">Buscar por Matrícula</Label>
