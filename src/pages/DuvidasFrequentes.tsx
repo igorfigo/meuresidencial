@@ -152,7 +152,7 @@ const DuvidasFrequentes = () => {
   
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-b from-[#EFEFEF] via-[#295AC3] to-[#103381] py-6">
+      <div className="min-h-screen bg-gradient-to-b from-[#EFEFEF] to-[#103381] py-6">
         <div className="container mx-auto">
           <h1 className="text-3xl font-bold mb-2 text-white">Dúvidas Frequentes</h1>
           <Separator className="mb-6 bg-white/30" />
