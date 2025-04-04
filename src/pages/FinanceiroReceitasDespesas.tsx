@@ -246,11 +246,15 @@ const FinanceiroReceitasDespesas = () => {
           </TabsList>
           
           <TabsContent value="income" className="mt-6">
-            <IncomeForm onSubmit={handleIncomeSubmit} />
+            <div className="border-t-4 border-t-brand-600">
+              <IncomeForm onSubmit={handleIncomeSubmit} />
+            </div>
           </TabsContent>
           
           <TabsContent value="expense" className="mt-6">
-            <ExpenseForm onSubmit={handleExpenseSubmit} />
+            <div className="border-t-4 border-t-brand-600">
+              <ExpenseForm onSubmit={handleExpenseSubmit} />
+            </div>
           </TabsContent>
         </Tabs>
         
