@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -99,8 +100,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const contentWidth = pageWidth - (margin * 2);
       const innerMargin = 10; // Internal margin for content box
       
-      // Header with purple background
-      doc.setFillColor(155, 135, 245);
+      // Header with blue background - updated color to #2151B9
+      doc.setFillColor(33, 81, 185);
       doc.rect(0, 0, 210, 40, 'F');
       
       // Header text - updated to font size 22
@@ -120,8 +121,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const contentYStart = 60;
       const footerY = 250;
       
-      // Content box with rounded corners and border
-      doc.setDrawColor(155, 135, 245);
+      // Content box with rounded corners and border - updated border color to #2151B9
+      doc.setDrawColor(33, 81, 185);
       doc.setLineWidth(1);
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, footerY - (contentYStart - 5), 3, 3, 'FD');
@@ -156,9 +157,9 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       doc.setFont("helvetica", "italic");
       doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 105, footerY + 30, { align: "center" });
       
-      // Footer website
+      // Footer website - updated text color to #2151B9
       doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
+      doc.setTextColor(33, 81, 185);
       doc.text("www.meuresidencial.com", 105, footerY + 37, { align: "center" });
       
       // Define safe filename
