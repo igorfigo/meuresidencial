@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,18 +9,13 @@ import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [sendingPassword, setSendingPassword] = useState(false);
   const [inactiveAccount, setInactiveAccount] = useState(false);
-  const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
-  const [forgotPasswordIdentifier, setForgotPasswordIdentifier] = useState('');
   const { login } = useApp();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('manager');
@@ -42,41 +38,6 @@ const Login = () => {
     }
     
     setLoading(false);
-  };
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!forgotPasswordIdentifier) {
-      toast.error('Por favor, insira seu email ou matrícula');
-      return;
-    }
-
-    setSendingPassword(true);
-    try {
-      const response = await fetch('https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-manager-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          identifier: forgotPasswordIdentifier
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao enviar senha');
-      }
-
-      toast.success('Senha enviada para seu email com sucesso!');
-      setShowForgotPasswordDialog(false);
-      setForgotPasswordIdentifier('');
-    } catch (error: any) {
-      toast.error(`Erro: ${error.message}`);
-    } finally {
-      setSendingPassword(false);
-    }
   };
 
   return (
@@ -142,13 +103,9 @@ const Login = () => {
                   {activeTab === 'manager' ? 'Senha' : 'CPF (Senha)'}
                 </Label>
                 {activeTab === 'manager' && (
-                  <button 
-                    type="button" 
-                    className="text-xs text-blue-200 hover:text-white hover:underline"
-                    onClick={() => setShowForgotPasswordDialog(true)}
-                  >
+                  <a href="#" className="text-xs text-blue-200 hover:text-white hover:underline">
                     Esqueceu a senha?
-                  </button>
+                  </a>
                 )}
               </div>
               <div className="relative">
@@ -200,41 +157,6 @@ const Login = () => {
           </div>
         </div>
       </div>
-
-      {/* Forgot Password Dialog */}
-      <Dialog open={showForgotPasswordDialog} onOpenChange={setShowForgotPasswordDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Recuperar senha</DialogTitle>
-            <DialogDescription>
-              Informe seu email ou matrícula para receber sua senha atual por email.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleForgotPassword} className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="forgotPasswordIdentifier">Email ou Matrícula</Label>
-              <Input
-                id="forgotPasswordIdentifier"
-                placeholder="seu@email.com ou matrícula"
-                value={forgotPasswordIdentifier}
-                onChange={(e) => setForgotPasswordIdentifier(e.target.value)}
-              />
-            </div>
-            <DialogFooter className="sm:justify-start">
-              <Button type="submit" disabled={sendingPassword}>
-                {sendingPassword ? 'Enviando...' : 'Enviar senha por email'}
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setShowForgotPasswordDialog(false)}
-              >
-                Cancelar
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
       
       <div className="hidden sm:flex sm:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden">
         <div className="relative z-10 max-w-lg text-center">
