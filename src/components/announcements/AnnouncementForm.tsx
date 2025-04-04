@@ -171,7 +171,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
           <Button 
             onClick={onSave} 
             disabled={isSaving}
-            className="gap-2 bg-blue-500 hover:bg-blue-600"
+            className="gap-2 bg-[#2151B9] hover:bg-[#103381] text-white"
           >
             <Send className="h-4 w-4" />
             Enviar Comunicado

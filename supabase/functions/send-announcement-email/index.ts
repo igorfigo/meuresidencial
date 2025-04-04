@@ -106,8 +106,14 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
-    // Email template for announcements with condominium name included
-    const emailTemplate = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.header h2{color:white;margin:8px 0 0;font-size:18px;font-weight:normal}.content{padding:20px;background-color:#fff}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666;border-top:1px solid #e0e0e0}</style></head><body><div class="container"><div class="header"><h1>${title}</h1><h2>${condominiumName}</h2></div><div class="content"><div class="message-box">${htmlContent}</div></div><div class="footer">Este é um comunicado oficial do seu condomínio.<br>© ${new Date().getFullYear()} Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
+    // Updated email template with the specified brand colors
+    // #2151B9 (primary blue) - Used for header background
+    // #EFEFEF (light gray) - Used for background and content box
+    // #103381 (dark blue) - Used for title text
+    // #295AC3 (medium blue) - Not specifically used in this template but could be for highlights
+    // #FFFFFF (white) - Used for text on dark backgrounds
+    // #000000 (black) - Used for content text
+    const emailTemplate = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#000000;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#2151B9;padding:20px;text-align:center}.header h1{color:#FFFFFF;margin:0;font-size:24px}.header h2{color:#FFFFFF;margin:8px 0 0;font-size:18px;font-weight:normal}.content{padding:20px;background-color:#FFFFFF}.message-box{background-color:#EFEFEF;padding:15px;border-radius:6px;margin-top:10px}.footer{background-color:#EFEFEF;padding:15px;text-align:center;font-size:12px;color:#103381;border-top:1px solid #e0e0e0}</style></head><body><div class="container"><div class="header"><h1>${title}</h1><h2>${condominiumName}</h2></div><div class="content"><div class="message-box">${htmlContent}</div></div><div class="footer">Este é um comunicado oficial do seu condomínio.<br>© ${new Date().getFullYear()} Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
 
     // Send email to each resident
     const emailPromises = residents.map(async (resident) => {
