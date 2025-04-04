@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -241,7 +240,7 @@ const GerenciarAvisos = () => {
         <Separator className="mb-6" />
 
         <div className="space-y-4">
-          <Card className="border-t-4 border-t-brand-500">
+          <Card className="border-t-4 border-t-brand-600">
             <CardHeader>
               <CardTitle>{isEditing ? 'Editar Novidade' : 'Nova Novidade'}</CardTitle>
               <CardDescription>
@@ -327,7 +326,7 @@ const GerenciarAvisos = () => {
             </CardContent>
           </Card>
           
-          <Card className="border-t-4 border-t-brand-500">
+          <Card className="border-t-4 border-t-brand-600">
             <CardHeader>
               <CardTitle>Histórico de Novidades</CardTitle>
               <CardDescription>

@@ -85,7 +85,7 @@ const UserProfile = () => {
         <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
         
         {isLoading ? (
-          <Card className="p-6 mb-6">
+          <Card className="p-6 mb-6 border-t-4 border-t-brand-600">
             <div className="animate-pulse">
               <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
               <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
@@ -99,7 +99,7 @@ const UserProfile = () => {
             <PasswordChangeSection userMatricula={user.matricula} />
           </>
         ) : (
-          <Card className="p-6 mb-6">
+          <Card className="p-6 mb-6 border-t-4 border-t-brand-600">
             <p>Nenhuma informação disponível</p>
           </Card>
         )}
