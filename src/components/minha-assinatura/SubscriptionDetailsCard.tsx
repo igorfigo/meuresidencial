@@ -10,7 +10,6 @@ import { PlanUpgradeDialog } from './PlanUpgradeDialog';
 import { CancelSubscriptionDialog } from './CancelSubscriptionDialog';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { FileText } from 'lucide-react';
 
 interface SubscriptionDetailsCardProps {
   condominiumData: any;
@@ -99,13 +98,10 @@ export const SubscriptionDetailsCard = ({
   const dueDate = pixDueDate || localCondominiumData.vencimento || '';
 
   return (
-    <Card className="border-t-4 border-t-brand-600 shadow-md p-6">
-      <div className="flex items-center mb-4">
-        <FileText className="h-5 w-5 mr-2 text-brand-600" />
-        <h2 className="text-xl font-semibold">Plano / Contrato</h2>
-      </div>
+    <Card className="border-t-4 border-t-brand-600 shadow-md p-6 mb-6">
+      <h2 className="text-xl font-semibold mb-4">Plano / Contrato</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="planoContratado">Plano Contratado</Label>
           <Input
@@ -166,7 +162,7 @@ export const SubscriptionDetailsCard = ({
           />
         </div>
         
-        <div className="space-y-2 md:col-span-2 lg:col-span-3">
+        <div className="space-y-2">
           <Label htmlFor="tipoDocumento">Nota Fiscal / Recibo</Label>
           <Select 
             value={isCnpjEmpty ? 'recibo' : (localCondominiumData.tipodocumento || '')}
@@ -204,18 +200,22 @@ export const SubscriptionDetailsCard = ({
         </div>
       </div>
       
-      <div className="mt-6 flex flex-wrap gap-4 justify-end">
-        <PlanUpgradeDialog 
-          condominiumData={localCondominiumData}
-          userMatricula={user.matricula}
-          userEmail={user.email}
-          onPlanUpgrade={handlePlanUpgrade}
-          formatCurrencyDisplay={formatCurrencyDisplay}
-        />
-        <CancelSubscriptionDialog 
-          condominiumMatricula={user.matricula}
-          userEmail={user.email}
-        />
+      <div className="mt-6 flex flex-col md:flex-row md:justify-end gap-4">
+        <div>
+          <PlanUpgradeDialog 
+            condominiumData={localCondominiumData}
+            userMatricula={user.matricula}
+            userEmail={user.email}
+            onPlanUpgrade={handlePlanUpgrade}
+            formatCurrencyDisplay={formatCurrencyDisplay}
+          />
+        </div>
+        <div>
+          <CancelSubscriptionDialog 
+            condominiumMatricula={user.matricula}
+            userEmail={user.email}
+          />
+        </div>
       </div>
     </Card>
   );
