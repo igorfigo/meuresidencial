@@ -73,6 +73,7 @@ const DadosHistoricos = () => {
       setIsSubmitting(true);
       
       const typeText = formData.type === 'inclusao' ? 'Solicitação de Inclusão de Históricos' : 'Solicitação de Download de Históricos';
+      const formattedSubject = `${typeText}: ${formData.subject}`;
       
       const { error } = await supabase.functions.invoke('send-contact-email', {
         body: {
@@ -80,7 +81,7 @@ const DadosHistoricos = () => {
           email: user?.email || 'Email não informado',
           matricula: user?.matricula || 'N/A',
           nomeCondominio: user?.nomeCondominio || 'N/A',
-          subject: `[${typeText}] ${formData.subject}`,
+          subject: formattedSubject,
           message: formData.message
         }
       });

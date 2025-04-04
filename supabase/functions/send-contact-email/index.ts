@@ -41,82 +41,36 @@ serve(async (req) => {
       },
     });
 
-    // Determine if this is a historical data request
-    const isHistoricalData = subject.includes('Históricos') || subject.includes('históricos') || subject.includes('Historicos') || subject.includes('historicos');
+    // Determine if this is a historical data request more accurately
+    const isHistoricalData = subject.toLowerCase().includes('histórico') || 
+                            subject.toLowerCase().includes('historico') || 
+                            (subject.startsWith('[') && 
+                             (subject.toLowerCase().includes('inclusão de históricos') || 
+                              subject.toLowerCase().includes('inclusao de historicos') ||
+                              subject.toLowerCase().includes('download de históricos') || 
+                              subject.toLowerCase().includes('download de historicos')));
     
-    // Email template for regular contact
-    const regularEmailContent = `<!DOCTYPE html>
+    // Email template for regular contact - simplified structure
+    const regularEmailContent = `
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova mensagem de contato</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .container {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            background-color: #4A6CF7;
-            padding: 20px;
-            text-align: center;
-        }
-        .header h1 {
-            color: white;
-            margin: 0;
-            font-size: 24px;
-        }
-        .content {
-            padding: 20px;
-            background-color: #fff;
-        }
-        .section {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 15px;
-        }
-        .section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-        .section h2 {
-            color: #4A6CF7;
-            font-size: 18px;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        .info-item {
-            margin-bottom: 8px;
-        }
-        .info-label {
-            font-weight: bold;
-        }
-        .message-box {
-            background-color: #f7f7f7;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            white-space: pre-wrap;
-        }
-        .footer {
-            background-color: #f7f7f7;
-            padding: 15px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-        }
-        .logo {
-            margin-bottom: 10px;
-        }
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+    .container { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header { background-color: #4A6CF7; padding: 20px; text-align: center; }
+    .header h1 { color: white; margin: 0; font-size: 24px; }
+    .content { padding: 20px; background-color: #fff; }
+    .section { margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
+    .section:last-child { border-bottom: none; margin-bottom: 0; }
+    .section h2 { color: #4A6CF7; font-size: 18px; margin-top: 0; margin-bottom: 15px; }
+    .info-item { margin-bottom: 8px; }
+    .info-label { font-weight: bold; }
+    .message-box { background-color: #f7f7f7; padding: 15px; border-radius: 6px; margin-top: 10px; white-space: pre-wrap; }
+    .footer { background-color: #f7f7f7; padding: 15px; text-align: center; font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
@@ -146,79 +100,27 @@ serve(async (req) => {
 </body>
 </html>`;
 
-    // Email template for historical data requests - fixed formatting
-    const historicalDataEmailContent = `<!DOCTYPE html>
+    // Email template for historical data requests - simplified structure
+    const historicalDataEmailContent = `
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitação de Dados Históricos</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .container {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            background-color: #4A6CF7;
-            padding: 20px;
-            text-align: center;
-        }
-        .header h1 {
-            color: white;
-            margin: 0;
-            font-size: 24px;
-        }
-        .content {
-            padding: 20px;
-            background-color: #fff;
-        }
-        .section {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 15px;
-        }
-        .section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-        .section h2 {
-            color: #4A6CF7;
-            font-size: 18px;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        .info-item {
-            margin-bottom: 8px;
-        }
-        .info-label {
-            font-weight: bold;
-        }
-        .message-box {
-            background-color: #f7f7f7;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            white-space: pre-wrap;
-        }
-        .footer {
-            background-color: #f7f7f7;
-            padding: 15px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-        }
-        .logo {
-            margin-bottom: 10px;
-        }
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+    .container { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header { background-color: #4A6CF7; padding: 20px; text-align: center; }
+    .header h1 { color: white; margin: 0; font-size: 24px; }
+    .content { padding: 20px; background-color: #fff; }
+    .section { margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
+    .section:last-child { border-bottom: none; margin-bottom: 0; }
+    .section h2 { color: #4A6CF7; font-size: 18px; margin-top: 0; margin-bottom: 15px; }
+    .info-item { margin-bottom: 8px; }
+    .info-label { font-weight: bold; }
+    .message-box { background-color: #f7f7f7; padding: 15px; border-radius: 6px; margin-top: 10px; white-space: pre-wrap; }
+    .footer { background-color: #f7f7f7; padding: 15px; text-align: center; font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
@@ -248,79 +150,27 @@ serve(async (req) => {
 </body>
 </html>`;
 
-    // Email template for resident complaints or suggestions
-    const complaintEmailContent = `<!DOCTYPE html>
+    // Email template for resident complaints or suggestions - simplified structure
+    const complaintEmailContent = `
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova ${subject.includes('Sugestão') ? 'sugestão' : 'reclamação'} de morador</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .container {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            background-color: #4A6CF7;
-            padding: 20px;
-            text-align: center;
-        }
-        .header h1 {
-            color: white;
-            margin: 0;
-            font-size: 24px;
-        }
-        .content {
-            padding: 20px;
-            background-color: #fff;
-        }
-        .section {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 15px;
-        }
-        .section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-        .section h2 {
-            color: #4A6CF7;
-            font-size: 18px;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        .info-item {
-            margin-bottom: 8px;
-        }
-        .info-label {
-            font-weight: bold;
-        }
-        .message-box {
-            background-color: #f7f7f7;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            white-space: pre-wrap;
-        }
-        .footer {
-            background-color: #f7f7f7;
-            padding: 15px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-        }
-        .logo {
-            margin-bottom: 10px;
-        }
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+    .container { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header { background-color: #4A6CF7; padding: 20px; text-align: center; }
+    .header h1 { color: white; margin: 0; font-size: 24px; }
+    .content { padding: 20px; background-color: #fff; }
+    .section { margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
+    .section:last-child { border-bottom: none; margin-bottom: 0; }
+    .section h2 { color: #4A6CF7; font-size: 18px; margin-top: 0; margin-bottom: 15px; }
+    .info-item { margin-bottom: 8px; }
+    .info-label { font-weight: bold; }
+    .message-box { background-color: #f7f7f7; padding: 15px; border-radius: 6px; margin-top: 10px; white-space: pre-wrap; }
+    .footer { background-color: #f7f7f7; padding: 15px; text-align: center; font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
@@ -350,68 +200,23 @@ serve(async (req) => {
 </body>
 </html>`;
 
-    // Confirmation email template - fixed formatting
-    const confirmationEmailContent = `<!DOCTYPE html>
+    // Confirmation email template - simplified structure
+    const confirmationEmailContent = `
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recebemos sua mensagem</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .container {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            background-color: #4A6CF7;
-            padding: 20px;
-            text-align: center;
-        }
-        .header h1 {
-            color: white;
-            margin: 0;
-            font-size: 24px;
-        }
-        .content {
-            padding: 20px 30px;
-            background-color: #fff;
-        }
-        .message-details {
-            background-color: #f7f7f7;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
-        }
-        .highlight {
-            font-weight: bold;
-            color: #4A6CF7;
-        }
-        .footer {
-            background-color: #f7f7f7;
-            padding: 15px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-            border-top: 1px solid #e0e0e0;
-        }
-        .button {
-            display: inline-block;
-            background-color: #4A6CF7;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            margin-top: 20px;
-        }
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+    .container { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header { background-color: #4A6CF7; padding: 20px; text-align: center; }
+    .header h1 { color: white; margin: 0; font-size: 24px; }
+    .content { padding: 20px 30px; background-color: #fff; }
+    .message-details { background-color: #f7f7f7; padding: 15px; border-radius: 6px; margin: 15px 0; }
+    .highlight { font-weight: bold; color: #4A6CF7; }
+    .footer { background-color: #f7f7f7; padding: 15px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
     </style>
 </head>
 <body>
@@ -460,6 +265,13 @@ serve(async (req) => {
       recipient = "contato@meuresidencial.com";
     }
 
+    // Set specific email headers to improve deliverability and formatting
+    const emailHeaders = {
+      "MIME-Version": "1.0",
+      "Content-Type": "text/html; charset=UTF-8",
+      "Content-Transfer-Encoding": "quoted-printable"
+    };
+
     // Envio do email com o alias e assunto corrigidos
     await client.send({
       from: fromEmail,
@@ -467,6 +279,7 @@ serve(async (req) => {
       subject: emailSubject,
       html: emailContent,
       replyTo: email,
+      headers: emailHeaders
     });
 
     // Envio de confirmação para o gestor ou morador
@@ -480,6 +293,7 @@ serve(async (req) => {
               (isHistoricalData ? "Recebemos sua solicitação de Dados Históricos - Meu Residencial" : 
               "Recebemos sua mensagem - Meu Residencial"),
       html: confirmationEmailContent,
+      headers: emailHeaders
     });
 
     await client.close();
