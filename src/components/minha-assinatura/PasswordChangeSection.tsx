@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { KeyRound } from 'lucide-react';
+import { KeyRound, Eye, EyeOff } from 'lucide-react';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'A senha atual é obrigatória'),
@@ -28,6 +28,9 @@ interface PasswordChangeSectionProps {
 
 export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ userMatricula }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
@@ -42,20 +45,29 @@ export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ us
     setIsLoading(true);
     
     try {
-      // Authenticate with current password
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: `${userMatricula}@temp.com`, // Using matricula as email
-        password: data.currentPassword,
-      });
+      // First, check if the current password matches what's in the condominiums table
+      const { data: condominiumData, error: fetchError } = await supabase
+        .from('condominiums')
+        .select('senha')
+        .eq('matricula', userMatricula)
+        .single();
       
-      if (signInError) {
+      if (fetchError) {
+        throw new Error('Erro ao verificar senha atual');
+      }
+      
+      if (!condominiumData || condominiumData.senha !== data.currentPassword) {
         throw new Error('Senha atual incorreta');
       }
       
-      // Update password
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: data.newPassword,
-      });
+      // Update the password in the condominiums table
+      const { error: updateError } = await supabase
+        .from('condominiums')
+        .update({
+          senha: data.newPassword,
+          confirmarsenha: data.newPassword // Update confirmarsenha field as well
+        })
+        .eq('matricula', userMatricula);
       
       if (updateError) {
         throw updateError;
@@ -93,11 +105,25 @@ export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ us
                 <FormItem>
                   <FormLabel>Senha Atual</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="password"
-                      placeholder="Digite sua senha atual"
-                    />
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type={showCurrentPassword ? "text" : "password"}
+                        placeholder="Digite sua senha atual"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center pr-3"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      >
+                        {showCurrentPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,11 +137,25 @@ export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ us
                 <FormItem>
                   <FormLabel>Nova Senha</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="password"
-                      placeholder="Digite sua nova senha"
-                    />
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type={showNewPassword ? "text" : "password"}
+                        placeholder="Digite sua nova senha"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center pr-3"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,11 +169,25 @@ export const PasswordChangeSection: React.FC<PasswordChangeSectionProps> = ({ us
                 <FormItem>
                   <FormLabel>Confirmar Nova Senha</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="password"
-                      placeholder="Confirme sua nova senha"
-                    />
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirme sua nova senha"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center pr-3"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
