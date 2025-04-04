@@ -187,8 +187,20 @@ ${message.replace(/\n/g, '<br>')}
       headers: emailHeaders
     });
 
-    // Send confirmation email to the sender ONLY if not a historical data request
-    if (!isHistoricalData) {
+    // For historical data requests, send confirmation to the manager (sender)
+    if (isHistoricalData) {
+      const historicalConfirmationSubject = "Recebemos sua solicitação de Dados Históricos - Meu Residencial";
+      
+      await client.send({
+        from: "Dados Históricos <noreply@meuresidencial.com>",
+        to: email,
+        subject: historicalConfirmationSubject,
+        html: confirmationEmailContent,
+        headers: emailHeaders
+      });
+    } 
+    // For non-historical data requests, follow the previous logic
+    else if (!isHistoricalData) {
       const confirmationSubject = isComplaint ? 
                 `Recebemos sua ${subject.includes('Sugestão') ? 'sugestão' : 'reclamação'} - Meu Residencial` : 
                 "Recebemos sua mensagem - Meu Residencial";

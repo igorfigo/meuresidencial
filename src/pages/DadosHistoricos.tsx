@@ -115,7 +115,7 @@ const DadosHistoricos = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl text-brand-700">Envie sua solicitação</CardTitle>
             <CardDescription className="text-gray-600">
-              Sua solicitação será enviada diretamente para a nossa equipe, sem enviar confirmação para o gestor.
+              Sua solicitação será enviada diretamente para a nossa equipe e você receberá uma confirmação por e-mail.
             </CardDescription>
           </CardHeader>
           
