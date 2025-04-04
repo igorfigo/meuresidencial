@@ -22,6 +22,8 @@ import {
   TooltipTrigger 
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
+import ResidentMobileMenu from '@/components/resident/ResidentMobileMenu';
 
 interface LocationStats {
   states: [string, number][];
@@ -53,6 +55,8 @@ interface RecentItem {
 
 const Dashboard = () => {
   const { user } = useApp();
+  const isMobile = useIsMobile();
+  
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [isStateDetailOpen, setIsStateDetailOpen] = useState(false);
   const [latestNews, setLatestNews] = useState<NewsItem | null>(null);
@@ -503,6 +507,12 @@ const Dashboard = () => {
 
   const renderResidentDashboard = () => (
     <>
+      {isMobile && (
+        <div className="mb-6">
+          <ResidentMobileMenu />
+        </div>
+      )}
+      
       <div className="grid gap-4">
         {latestNews && (
           <Card 
@@ -530,47 +540,49 @@ const Dashboard = () => {
           </Card>
         )}
         
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Bem-vindo ao Portal do Morador</CardTitle>
-            <Home className="h-4 w-4 text-brand-600" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-3">
-              Este é o seu acesso ao portal do condomínio. Aqui você pode:
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="flex items-start gap-2 bg-blue-50 p-3 rounded-md">
-                <BellRing className="h-5 w-5 text-blue-500 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-blue-700">Comunicados</h3>
-                  <p className="text-sm text-blue-600">Fique por dentro das notícias do condomínio</p>
+        {!isMobile && (
+          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Bem-vindo ao Portal do Morador</CardTitle>
+              <Home className="h-4 w-4 text-brand-600" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-3">
+                Este é o seu acesso ao portal do condomínio. Aqui você pode:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex items-start gap-2 bg-blue-50 p-3 rounded-md">
+                  <BellRing className="h-5 w-5 text-blue-500 mt-0.5" />
+                  <div>
+                    <h3 className="font-medium text-blue-700">Comunicados</h3>
+                    <p className="text-sm text-blue-600">Fique por dentro das notícias do condomínio</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-green-50 p-3 rounded-md">
+                  <FileText className="h-5 w-5 text-green-500 mt-0.5" />
+                  <div>
+                    <h3 className="font-medium text-green-700">Documentos</h3>
+                    <p className="text-sm text-green-600">Acesse regulamentos e atas</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-amber-50 p-3 rounded-md">
+                  <Home className="h-5 w-5 text-amber-500 mt-0.5" />
+                  <div>
+                    <h3 className="font-medium text-amber-700">Áreas Comuns</h3>
+                    <p className="text-sm text-amber-600">Agende o uso de áreas comuns</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-purple-50 p-3 rounded-md">
+                  <Bug className="h-5 w-5 text-purple-500 mt-0.5" />
+                  <div>
+                    <h3 className="font-medium text-purple-700">Dedetizações</h3>
+                    <p className="text-sm text-purple-600">Veja o calendário de dedetizações</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start gap-2 bg-green-50 p-3 rounded-md">
-                <FileText className="h-5 w-5 text-green-500 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-green-700">Documentos</h3>
-                  <p className="text-sm text-green-600">Acesse regulamentos e atas</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2 bg-amber-50 p-3 rounded-md">
-                <Home className="h-5 w-5 text-amber-500 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-amber-700">Áreas Comuns</h3>
-                  <p className="text-sm text-amber-600">Agende o uso de áreas comuns</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2 bg-purple-50 p-3 rounded-md">
-                <Bug className="h-5 w-5 text-purple-500 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-purple-700">Dedetizações</h3>
-                  <p className="text-sm text-purple-600">Veja o calendário de dedetizações</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );

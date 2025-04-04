@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -13,6 +12,7 @@ import { AlertTriangle, Loader2, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
+import ResidentMobileMenu from '@/components/resident/ResidentMobileMenu';
 
 const SugestaoReclamacao = () => {
   const { user } = useApp();
@@ -127,6 +127,12 @@ const SugestaoReclamacao = () => {
           Envie sugestões ou reclamações diretamente para o síndico do seu condomínio.
         </p>
         
+        {isMobile && (
+          <div className="mb-6">
+            <ResidentMobileMenu />
+          </div>
+        )}
+        
         <Card className="border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="pb-3">
             <CardTitle className="text-2xl text-brand-700">Envie sua mensagem</CardTitle>
@@ -160,7 +166,7 @@ const SugestaoReclamacao = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`grid grid-cols-1 ${!isMobile ? 'md:grid-cols-2' : ''} gap-4`}>
                   <div className="space-y-2">
                     <Label htmlFor="nome" className="font-medium">Nome</Label>
                     <Input 
@@ -182,7 +188,7 @@ const SugestaoReclamacao = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`grid grid-cols-1 ${!isMobile ? 'md:grid-cols-2' : ''} gap-4`}>
                   <div className="space-y-2">
                     <Label htmlFor="condominio" className="font-medium">Condomínio</Label>
                     <Input 
@@ -225,7 +231,7 @@ const SugestaoReclamacao = () => {
                     value={formData.message} 
                     onChange={handleChange} 
                     placeholder="Digite sua mensagem aqui..." 
-                    rows={6} 
+                    rows={isMobile ? 4 : 6} 
                     required 
                     className="border-gray-300 focus:border-brand-500 focus:ring-brand-500 resize-none"
                   />
