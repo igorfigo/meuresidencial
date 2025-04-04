@@ -110,15 +110,18 @@ export const useGarageListings = () => {
         throw error;
       }
       
-      // Notify all other users in the condominium about the new listing
-      await supabase
-        .from('notifications_channel')
-        .insert({
-          matricula: user.matricula,
-          message: `Nova vaga de garagem disponível na unidade ${user.unit}`,
-          type: 'garage_listing'
-        })
-        .select();
+      // Create a notification entry for all users in the condominium
+      try {
+        const unit = user.unit || 'Unidade não especificada';
+        await supabase.rpc('create_garage_notification', {
+          p_matricula: user.matricula,
+          p_message: `Nova vaga de garagem disponível na unidade ${unit}`,
+          p_type: 'garage_listing'
+        });
+      } catch (notifyError) {
+        console.error('Error creating notification:', notifyError);
+        // Continue execution even if notification fails
+      }
       
       return data;
     },
