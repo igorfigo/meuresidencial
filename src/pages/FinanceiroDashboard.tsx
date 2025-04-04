@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ExpenseEvolutionChart } from '@/components/financials/ExpenseEvolutionChart';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   BarChart,
   Bar,
@@ -50,8 +51,9 @@ const FinanceiroDashboard = () => {
   const [expensesDistributionData, setExpensesDistributionData] = useState<any[]>([]);
   const [pendingRevenueData, setPendingRevenueData] = useState<any>({});
   const [paymentStatusData, setPaymentStatusData] = useState<any[]>([]);
+  const isMobile = useIsMobile();
   
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a163be', '#61dafb', '#f97150', '#4db35e'];
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
   const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   
   const today = new Date();
@@ -404,9 +406,6 @@ const FinanceiroDashboard = () => {
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-2">Dashboard Financeiro</h1>
           <Separator className="mb-2" />
-          <p className="text-gray-600 mb-6">
-            Visualize a situação financeira atualizada do seu condomínio, incluindo receitas, despesas e status de pagamentos.
-          </p>
           <div className="flex items-center justify-center h-64">
             <div className="animate-pulse text-lg text-gray-500">Carregando dados financeiros...</div>
           </div>
@@ -418,11 +417,10 @@ const FinanceiroDashboard = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-2">Dashboard Financeiro</h1>
-        <Separator className="mb-2" />
-        <p className="text-gray-600 mb-6">
-          Visualize a situação financeira atualizada do seu condomínio, incluindo receitas, despesas e status de pagamentos.
-        </p>
+        <h1 className="text-3xl font-bold mb-2">
+          {isMobile ? 'Financeiro' : 'Dashboard Financeiro'}
+        </h1>
+        <Separator className="mb-4" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div>
