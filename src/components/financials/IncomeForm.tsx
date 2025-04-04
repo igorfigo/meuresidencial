@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -426,7 +427,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
               />
               
               <div className="flex justify-end pt-4">
-                <Button type="submit" variant="income" disabled={isSubmitting || !!dateError}>
+                <Button type="submit" variant="default" disabled={isSubmitting || !!dateError}>
                   {isSubmitting ? 'Salvando...' : initialData ? 'Atualizar' : 'Adicionar'}
                 </Button>
               </div>
