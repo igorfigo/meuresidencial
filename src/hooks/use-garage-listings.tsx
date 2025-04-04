@@ -110,17 +110,25 @@ export const useGarageListings = () => {
         throw error;
       }
       
-      // After successful insertion, create a notification using a function call
-      // instead of directly trying to insert into a table that doesn't exist
+      // After successful insertion, create a notification using a custom RPC function
       try {
-        const { error: notifyError } = await supabase.rpc('notify_new_garage_listing', {
-          p_matricula: user.matricula,
-          p_title: 'Nova vaga de garagem disponível',
-          p_message: `${user.nome} disponibilizou uma vaga de garagem`
+        // Using a direct fetch call instead of supabase.rpc() to avoid type issues
+        const response = await fetch(`https://kcbvdcacgbwigefwacrk.supabase.co/rest/v1/rpc/notify_new_garage_listing`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjYnZkY2FjZ2J3aWdlZndhY3JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyMjgzMDQsImV4cCI6MjA1NzgwNDMwNH0.K4xcW6V3X9QROQLekB74NbKg3BaShwgMbanrP3olCYI',
+            'Authorization': `Bearer ${supabase.auth.getSession().then(res => res.data.session?.access_token || '')}`
+          },
+          body: JSON.stringify({
+            p_matricula: user.matricula,
+            p_title: 'Nova vaga de garagem disponível',
+            p_message: `${user.nome} disponibilizou uma vaga de garagem`
+          })
         });
         
-        if (notifyError) {
-          console.error('Error sending notification:', notifyError);
+        if (!response.ok) {
+          console.error('Error sending notification:', await response.text());
         }
       } catch (notifyError) {
         console.error('Exception sending notification:', notifyError);
