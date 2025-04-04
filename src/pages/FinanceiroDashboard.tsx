@@ -631,7 +631,7 @@ const FinanceiroDashboard = () => {
               </div>
               
               <div className="h-64">
-                <ChartContainer config={{}}>
+                <ResponsiveContainer width="100%" height="100%">
                   <RechartsPie>
                     <Pie
                       data={expensesDistributionData}
@@ -647,6 +647,25 @@ const FinanceiroDashboard = () => {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
+                    <Legend 
+                      layout="horizontal"
+                      verticalAlign="bottom"
+                      align="center"
+                      iconType="circle"
+                      iconSize={8}
+                      wrapperStyle={{ 
+                        paddingTop: "15px",
+                        fontSize: "12px",
+                        width: "100%"
+                      }}
+                      formatter={(value, entry, index) => (
+                        <span className="text-xs capitalize">
+                          {value}: <span className="font-medium">
+                            R$ {formatToBRL(expensesDistributionData[index]?.value || 0)}
+                          </span>
+                        </span>
+                      )}
+                    />
                     <Tooltip 
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
@@ -666,7 +685,7 @@ const FinanceiroDashboard = () => {
                       }}
                     />
                   </RechartsPie>
-                </ChartContainer>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>

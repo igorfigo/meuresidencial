@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
@@ -48,9 +47,9 @@ const PlanDistributionChart: React.FC<PlanDistributionProps> = ({ data, isLoadin
   }
 
   return (
-    <div className="h-48">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="90%">
+        <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 10 }}>
           <Pie
             data={data}
             cx="50%"
@@ -60,11 +59,11 @@ const PlanDistributionChart: React.FC<PlanDistributionProps> = ({ data, isLoadin
             paddingAngle={2}
             dataKey="count"
             nameKey="name"
-            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
             labelLine={false}
             animationDuration={800}
             animationBegin={100}
             animationEasing="ease-out"
+            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
           >
             {data.map((entry, index) => (
               <Cell 
@@ -76,16 +75,23 @@ const PlanDistributionChart: React.FC<PlanDistributionProps> = ({ data, isLoadin
             ))}
           </Pie>
           <Legend 
-            layout="vertical" 
-            verticalAlign="middle" 
-            align="right"
+            layout="horizontal" 
+            verticalAlign="bottom" 
+            align="center"
+            iconType="circle"
+            iconSize={8}
+            wrapperStyle={{ 
+              paddingTop: "10px",
+              fontSize: "12px",
+              bottom: 0
+            }}
             formatter={(value, entry, index) => {
               return (
                 <span className="capitalize text-xs">
                   {value}: <span className="font-medium">{data[index].count}</span>
                 </span>
               );
-            }} 
+            }}
           />
           <Tooltip 
             formatter={(value) => [`${value} condomínios`, '']}
@@ -99,7 +105,7 @@ const PlanDistributionChart: React.FC<PlanDistributionProps> = ({ data, isLoadin
           />
         </PieChart>
       </ResponsiveContainer>
-      <div className="text-xs text-gray-500 text-center -mt-2">
+      <div className="text-xs text-gray-500 text-center">
         Total: {total} condomínios ativos
       </div>
     </div>
