@@ -602,7 +602,10 @@ const LandingPage = () => {
               </div>
               <p className="text-white/90 mb-2">Gestão eficiente para o seu condomínio</p>
               <p className="text-white/90 mb-1">CNPJ: 60.112.929/0001-34</p>
-              <p className="text-white/90">Gestão Eficiente Soluções Tecnológicas LTDA</p>
+              <p className="text-white/90 mb-4">Gestão Eficiente Soluções Tecnológicas LTDA</p>
+              <p className="text-white/70 text-sm">
+                © {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.
+              </p>
             </div>
             
             <div className="flex flex-col">
@@ -662,14 +665,6 @@ const LandingPage = () => {
                 </li>
               </ul>
             </div>
-          </div>
-          
-          <Separator className="h-px bg-white/20 w-full my-6" />
-          
-          <div className="text-center">
-            <p className="text-white/70 text-sm">
-              © {new Date().getFullYear()} MeuResidencial. Todos os direitos reservados.
-            </p>
           </div>
         </div>
       </footer>
