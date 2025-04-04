@@ -111,6 +111,7 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('condominiums')
         .select('planocontratado')
+        .eq('ativo', true)
         .not('planocontratado', 'is', null);
         
       if (error) throw error;
@@ -547,7 +548,7 @@ const Dashboard = () => {
 
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Condomínios por Tipo de Plano</CardTitle>
+            <CardTitle className="text-sm font-medium">Condomínios Ativos por Tipo de Plano</CardTitle>
             <PieChart className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>

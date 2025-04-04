@@ -60,13 +60,13 @@ const PlanDistributionChart: React.FC<PlanDistributionProps> = ({ data, isLoadin
             }} 
           />
           <Tooltip 
-            formatter={(value) => [`${value} condomínios`, '']}
+            formatter={(value) => [`${value} condomínios ativos`, '']}
             labelFormatter={(label) => `Plano ${label}`}
           />
         </PieChart>
       </ResponsiveContainer>
       <div className="text-xs text-gray-500 text-center mt-2">
-        Total: {total} condomínios
+        Total: {total} condomínios ativos
       </div>
     </div>
   );
