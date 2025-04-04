@@ -10,10 +10,13 @@ import { SubscriptionDetailsCard } from '@/components/minha-assinatura/Subscript
 import { PasswordChangeSection } from '@/components/minha-assinatura/PasswordChangeSection';
 import { AccountInfoSection } from '@/components/minha-assinatura/AccountInfoSection';
 import { formatCurrencyDisplay, getCurrentPlanDetails } from '@/utils/subscription-utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { CreditCard, Info } from 'lucide-react';
 
 const MinhaAssinatura = () => {
   const { user, isAuthenticated } = useApp();
   const { plans, isLoading: isLoadingPlans } = usePlans();
+  const isMobile = useIsMobile();
   
   const [isLoading, setIsLoading] = useState(false);
   const [condominiumData, setCondominiumData] = useState<any>(null);
@@ -77,13 +80,17 @@ const MinhaAssinatura = () => {
   if (!isAuthenticated || !user) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6 max-w-full">
-          <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
-          <Separator className="mb-2" />
-          <p className="text-gray-600 mb-6">
-            Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
-          </p>
-          <p>Você precisa estar autenticado para acessar esta página.</p>
+        <div className="container mx-auto py-4 px-3 max-w-full">
+          <div className="flex items-center gap-2 mb-2">
+            <CreditCard className="h-5 w-5 text-brand-600" />
+            <h1 className="text-xl font-bold">Minha Assinatura</h1>
+          </div>
+          <Separator className="mb-4" />
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <p className="text-gray-600">
+              Você precisa estar autenticado para acessar esta página.
+            </p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -92,13 +99,20 @@ const MinhaAssinatura = () => {
   if (user.isAdmin) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6 max-w-full">
-          <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
-          <Separator className="mb-2" />
-          <p className="text-gray-600 mb-6">
-            Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
-          </p>
-          <p>Esta página está disponível apenas para usuários de condomínios.</p>
+        <div className="container mx-auto py-4 px-3 max-w-full">
+          <div className="flex items-center gap-2 mb-2">
+            <CreditCard className="h-5 w-5 text-brand-600" />
+            <h1 className="text-xl font-bold">Minha Assinatura</h1>
+          </div>
+          <Separator className="mb-4" />
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="flex items-start gap-2">
+              <Info className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+              <p className="text-gray-600">
+                Esta página está disponível apenas para usuários de condomínios.
+              </p>
+            </div>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -107,13 +121,20 @@ const MinhaAssinatura = () => {
   if (user.isResident) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6 max-w-full">
-          <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
-          <Separator className="mb-2" />
-          <p className="text-gray-600 mb-6">
-            Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
-          </p>
-          <p>Esta página está disponível apenas para administradores de condomínios.</p>
+        <div className="container mx-auto py-4 px-3 max-w-full">
+          <div className="flex items-center gap-2 mb-2">
+            <CreditCard className="h-5 w-5 text-brand-600" />
+            <h1 className="text-xl font-bold">Minha Assinatura</h1>
+          </div>
+          <Separator className="mb-4" />
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="flex items-start gap-2">
+              <Info className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+              <p className="text-gray-600">
+                Esta página está disponível apenas para administradores de condomínios.
+              </p>
+            </div>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -121,15 +142,25 @@ const MinhaAssinatura = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6 max-w-full">
-        <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
-        <Separator className="mb-2" />
-        <p className="text-gray-600 mb-6">
-          Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
-        </p>
+      <div className="container mx-auto py-4 px-3 max-w-full">
+        <div className="flex items-center gap-2 mb-2">
+          <CreditCard className="h-5 w-5 text-brand-600" />
+          <h1 className="text-xl font-bold">Minha Assinatura</h1>
+        </div>
+        <Separator className="mb-4" />
         
-        {condominiumData && (
-          <div className="grid grid-cols-1 gap-6">
+        {isLoading ? (
+          <div className="p-8 flex justify-center">
+            <div className="animate-pulse flex flex-col gap-4 w-full">
+              <div className="h-24 bg-gray-200 rounded-md w-full"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="h-48 bg-gray-200 rounded-md w-full"></div>
+                <div className="h-48 bg-gray-200 rounded-md w-full"></div>
+              </div>
+            </div>
+          </div>
+        ) : condominiumData ? (
+          <div className="grid grid-cols-1 gap-4">
             <SubscriptionDetailsCard 
               condominiumData={condominiumData}
               user={{ matricula: user.matricula, email: user.email }}
@@ -137,9 +168,10 @@ const MinhaAssinatura = () => {
               getCurrentPlanDetails={getPlanDetails}
               pixDueDate={pixDueDate}
               onPlanUpdate={handlePlanUpdate}
+              isMobile={isMobile}
             />
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <AccountInfoSection 
                 condominiumData={condominiumData} 
                 userMatricula={user.matricula} 
@@ -148,6 +180,10 @@ const MinhaAssinatura = () => {
                 userMatricula={user.matricula} 
               />
             </div>
+          </div>
+        ) : (
+          <div className="text-center p-4">
+            <p>Carregando informações...</p>
           </div>
         )}
       </div>

@@ -10,7 +10,7 @@ import { PlanUpgradeDialog } from './PlanUpgradeDialog';
 import { CancelSubscriptionDialog } from './CancelSubscriptionDialog';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { FileText } from 'lucide-react';
+import { FileText, Calendar, CreditCard, Receipt, Percent, DollarSign, HelpCircle } from 'lucide-react';
 
 interface SubscriptionDetailsCardProps {
   condominiumData: any;
@@ -19,6 +19,7 @@ interface SubscriptionDetailsCardProps {
   getCurrentPlanDetails: () => { name: string; value: string };
   pixDueDate?: string;
   onPlanUpdate?: (updatedData: any) => void;
+  isMobile?: boolean;
 }
 
 export const SubscriptionDetailsCard = ({ 
@@ -27,7 +28,8 @@ export const SubscriptionDetailsCard = ({
   formatCurrencyDisplay,
   getCurrentPlanDetails,
   pixDueDate,
-  onPlanUpdate
+  onPlanUpdate,
+  isMobile = false
 }: SubscriptionDetailsCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [localCondominiumData, setLocalCondominiumData] = useState(condominiumData);
@@ -98,16 +100,23 @@ export const SubscriptionDetailsCard = ({
 
   const dueDate = pixDueDate || localCondominiumData.vencimento || '';
 
+  const fieldClasses = isMobile ? "space-y-2 w-full" : "";
+  const fieldLabelClasses = isMobile ? "flex items-center mb-1 text-sm font-medium" : "";
+  const fieldIconClasses = "h-4 w-4 mr-2 text-brand-600";
+
   return (
-    <Card className="border-t-4 border-t-brand-600 shadow-md p-6">
+    <Card className="border-t-4 border-t-brand-600 shadow-md p-4 md:p-6">
       <div className="flex items-center mb-4">
         <FileText className="h-5 w-5 mr-2 text-brand-600" />
         <h2 className="text-xl font-semibold">Plano / Contrato</h2>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="planoContratado">Plano Contratado</Label>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        <div className={fieldClasses}>
+          <Label htmlFor="planoContratado" className={fieldLabelClasses}>
+            {isMobile && <CreditCard className={fieldIconClasses} />}
+            Plano Contratado
+          </Label>
           <Input
             id="planoContratado"
             value={planDetails.name}
@@ -116,8 +125,11 @@ export const SubscriptionDetailsCard = ({
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="valorPlano">Valor do Plano (R$)</Label>
+        <div className={fieldClasses}>
+          <Label htmlFor="valorPlano" className={fieldLabelClasses}>
+            {isMobile && <DollarSign className={fieldIconClasses} />}
+            Valor do Plano (R$)
+          </Label>
           <Input
             id="valorPlano"
             value={planDetails.value}
@@ -126,8 +138,11 @@ export const SubscriptionDetailsCard = ({
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="formaPagamento">Forma de Pagamento</Label>
+        <div className={fieldClasses}>
+          <Label htmlFor="formaPagamento" className={fieldLabelClasses}>
+            {isMobile && <Receipt className={fieldIconClasses} />}
+            Forma de Pagamento
+          </Label>
           <Input
             id="formaPagamento"
             value={localCondominiumData.formapagamento || ''}
@@ -136,8 +151,11 @@ export const SubscriptionDetailsCard = ({
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="vencimento">Vencimento</Label>
+        <div className={fieldClasses}>
+          <Label htmlFor="vencimento" className={fieldLabelClasses}>
+            {isMobile && <Calendar className={fieldIconClasses} />}
+            Vencimento
+          </Label>
           <Input
             id="vencimento"
             value={dueDate}
@@ -146,8 +164,11 @@ export const SubscriptionDetailsCard = ({
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="desconto">Desconto (R$)</Label>
+        <div className={fieldClasses}>
+          <Label htmlFor="desconto" className={fieldLabelClasses}>
+            {isMobile && <Percent className={fieldIconClasses} />}
+            Desconto (R$)
+          </Label>
           <Input
             id="desconto"
             value={formatCurrencyDisplay(localCondominiumData.desconto)}
@@ -156,22 +177,28 @@ export const SubscriptionDetailsCard = ({
           />
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="valorMensal">Valor Mensal (R$)</Label>
+        <div className={fieldClasses}>
+          <Label htmlFor="valorMensal" className={fieldLabelClasses}>
+            {isMobile && <DollarSign className={fieldIconClasses} />}
+            Valor Mensal (R$)
+          </Label>
           <Input
             id="valorMensal"
             value={formatCurrencyDisplay(localCondominiumData.valormensal)}
             readOnly
-            className="bg-gray-100"
+            className="bg-gray-100 font-medium"
           />
         </div>
         
         <div className="space-y-2 md:col-span-2 lg:col-span-3">
-          <Label htmlFor="tipoDocumento">Nota Fiscal / Recibo</Label>
+          <Label htmlFor="tipoDocumento" className="flex items-center mb-1">
+            <HelpCircle className="h-4 w-4 mr-2 text-brand-600" />
+            Nota Fiscal / Recibo
+          </Label>
           <Select 
             value={isCnpjEmpty ? 'recibo' : (localCondominiumData.tipodocumento || '')}
             onValueChange={handleTipoDocumentoChange}
-            disabled={isCnpjEmpty}
+            disabled={isCnpjEmpty || isLoading}
           >
             <SelectTrigger id="tipoDocumento">
               <SelectValue placeholder="Selecione o tipo de documento" />
@@ -204,7 +231,7 @@ export const SubscriptionDetailsCard = ({
         </div>
       </div>
       
-      <div className="mt-6 flex flex-wrap gap-4 justify-end">
+      <div className="mt-6 flex flex-wrap gap-3 justify-end">
         <PlanUpgradeDialog 
           condominiumData={localCondominiumData}
           userMatricula={user.matricula}
