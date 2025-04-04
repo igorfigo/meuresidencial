@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 export function useNotifications() {
   const { user } = useApp();
@@ -34,6 +35,28 @@ export function useNotifications() {
         if (!error && data) {
           // Use type assertion to ensure TypeScript knows last_viewed_at exists
           return new Date((data as any).last_viewed_at).getTime();
+        }
+        
+        // If no record exists, create one with the current time
+        if (error && error.code === 'PGRST116') {
+          const now = new Date().toISOString();
+          
+          // Create a new record
+          const { error: insertError } = await supabase
+            .from('user_notification_views')
+            .insert({
+              user_id: userId,
+              matricula,
+              notification_type: type,
+              last_viewed_at: now
+            });
+            
+          if (insertError) {
+            console.error(`Error creating initial view record for ${type}:`, insertError);
+          }
+          
+          // Return current time as this is a new view
+          return new Date(now).getTime();
         }
       }
       
@@ -68,6 +91,11 @@ export function useNotifications() {
         
       if (error) {
         console.error(`Error updating last viewed time for ${type}:`, error);
+        toast({
+          title: "Erro ao atualizar notificações",
+          description: `Não foi possível marcar ${type === 'announcements' ? 'comunicados' : 'documentos'} como vistos.`,
+          variant: "destructive",
+        });
       }
     }
     
@@ -87,44 +115,53 @@ export function useNotifications() {
     
     // Fetch initial data
     const initializeNotifications = async () => {
-      lastViewedAnnouncements = await fetchLastViewedTime('announcements');
-      lastViewedDocuments = await fetchLastViewedTime('documents');
-      
-      // Function to fetch and count new items
-      const fetchNewItems = async () => {
-        try {
-          // Check for new announcements
-          const { data: announcements, error: announcementsError } = await supabase
-            .from('announcements')
-            .select('created_at')
-            .eq('matricula', matricula)
-            .gt('created_at', new Date(lastViewedAnnouncements).toISOString());
+      try {
+        lastViewedAnnouncements = await fetchLastViewedTime('announcements');
+        lastViewedDocuments = await fetchLastViewedTime('documents');
+        
+        console.log("Last viewed announcements:", new Date(lastViewedAnnouncements).toISOString());
+        console.log("Last viewed documents:", new Date(lastViewedDocuments).toISOString());
+        
+        // Function to fetch and count new items
+        const fetchNewItems = async () => {
+          try {
+            // Check for new announcements
+            const { data: announcements, error: announcementsError } = await supabase
+              .from('announcements')
+              .select('created_at')
+              .eq('matricula', matricula)
+              .gt('created_at', new Date(lastViewedAnnouncements).toISOString());
+              
+            if (announcementsError) {
+              console.error('Error fetching announcements:', announcementsError);
+            } else {
+              console.log("Unread announcements count:", announcements?.length || 0);
+              setUnreadAnnouncements(announcements?.length || 0);
+            }
             
-          if (announcementsError) {
-            console.error('Error fetching announcements:', announcementsError);
-          } else {
-            setUnreadAnnouncements(announcements?.length || 0);
+            // Check for new documents
+            const { data: documents, error: documentsError } = await supabase
+              .from('documents')
+              .select('created_at')
+              .eq('matricula', matricula)
+              .gt('created_at', new Date(lastViewedDocuments).toISOString());
+              
+            if (documentsError) {
+              console.error('Error fetching documents:', documentsError);
+            } else {
+              console.log("Unread documents count:", documents?.length || 0);
+              setUnreadDocuments(documents?.length || 0);
+            }
+          } catch (error) {
+            console.error('Error checking for new items:', error);
           }
-          
-          // Check for new documents
-          const { data: documents, error: documentsError } = await supabase
-            .from('documents')
-            .select('created_at')
-            .eq('matricula', matricula)
-            .gt('created_at', new Date(lastViewedDocuments).toISOString());
-            
-          if (documentsError) {
-            console.error('Error fetching documents:', documentsError);
-          } else {
-            setUnreadDocuments(documents?.length || 0);
-          }
-        } catch (error) {
-          console.error('Error checking for new items:', error);
-        }
-      };
+        };
 
-      // Initial fetch
-      await fetchNewItems();
+        // Initial fetch
+        await fetchNewItems();
+      } catch (error) {
+        console.error('Error initializing notifications:', error);
+      }
     };
     
     initializeNotifications();
@@ -140,10 +177,16 @@ export function useNotifications() {
           filter: `matricula=eq.${matricula}`
         }, 
         async (payload) => {
+          console.log("New announcement detected:", payload);
           const currentLastViewed = await fetchLastViewedTime('announcements');
           const payloadDate = new Date(payload.new.created_at).getTime();
           if (payloadDate > currentLastViewed) {
             setUnreadAnnouncements(prev => prev + 1);
+            toast({
+              title: "Novo comunicado",
+              description: "Um novo comunicado foi publicado.",
+              variant: "default",
+            });
           }
         }
       )
@@ -160,10 +203,16 @@ export function useNotifications() {
           filter: `matricula=eq.${matricula}`
         }, 
         async (payload) => {
+          console.log("New document detected:", payload);
           const currentLastViewed = await fetchLastViewedTime('documents');
           const payloadDate = new Date(payload.new.created_at).getTime();
           if (payloadDate > currentLastViewed) {
             setUnreadDocuments(prev => prev + 1);
+            toast({
+              title: "Novo documento",
+              description: "Um novo documento foi publicado.",
+              variant: "default",
+            });
           }
         }
       )
