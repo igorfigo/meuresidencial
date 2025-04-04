@@ -64,11 +64,15 @@ const Login = () => {
     setResetLoading(true);
     
     try {
+      // Update here: Using fetch with Authorization header that doesn't rely on session()
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token || '';
+      
       const response = await fetch('https://kcbvdcacgbwigefwacrk.supabase.co/functions/v1/send-password-reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.auth.session()?.access_token || ''}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ email: resetPasswordEmail }),
       });
