@@ -50,7 +50,7 @@ const UserProfile = () => {
   if (isAuthenticated && user?.isResident) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6">
+        <div className="container mx-auto py-6 px-4 md:px-6 w-full">
           <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
           <Card className="p-6 border-l-4 border-l-amber-500 border-t-4 border-t-brand-600">
             <div className="flex items-start gap-4">
@@ -73,7 +73,7 @@ const UserProfile = () => {
   if (!isAuthenticated || !user) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6">
+        <div className="container mx-auto py-6 px-4 md:px-6 w-full">
           <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
           <p>Esta página está disponível apenas para usuários autenticados.</p>
         </div>
@@ -83,28 +83,28 @@ const UserProfile = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6">
+      <div className="container mx-auto py-6 px-4 md:px-6 w-full">
         <div className="flex items-center gap-3 mb-6">
           <UserCog className="h-7 w-7 text-brand-600" />
           <h1 className="text-2xl font-bold">Meu Perfil</h1>
         </div>
         
         {isLoading ? (
-          <Card className="p-6 mb-6 border-t-4 border-t-brand-600">
-            <div className="animate-pulse">
+          <Card className="p-4 md:p-6 mb-6 border-t-4 border-t-brand-600 w-full">
+            <div className="animate-pulse w-full">
               <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
               <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
               <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
             </div>
           </Card>
         ) : condominiumData ? (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-6 w-full">
             <ProfileCondominiumInfo condominiumData={condominiumData} />
             <ProfileRepresentativeInfo condominiumData={condominiumData} />
             <PasswordChangeSection userMatricula={user.matricula} />
           </div>
         ) : (
-          <Card className="p-6 mb-6 border-t-4 border-t-brand-600">
+          <Card className="p-4 md:p-6 mb-6 border-t-4 border-t-brand-600 w-full">
             <p>Nenhuma informação disponível</p>
           </Card>
         )}
