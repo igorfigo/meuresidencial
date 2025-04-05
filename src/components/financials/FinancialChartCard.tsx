@@ -19,6 +19,7 @@ interface FinancialChartCardProps {
   periodLabel?: string;
   footerContent?: ReactNode;
   onClick?: () => void;
+  fullWidth?: boolean;
 }
 
 export const FinancialChartCard: React.FC<FinancialChartCardProps> = ({
@@ -29,12 +30,14 @@ export const FinancialChartCard: React.FC<FinancialChartCardProps> = ({
   tooltip,
   periodLabel,
   footerContent,
-  onClick
+  onClick,
+  fullWidth = false
 }) => {
   return (
     <Card 
       className={cn(
-        "overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600 w-full", 
+        "overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600", 
+        fullWidth ? "w-full" : "w-full",
         onClick && "hover:border-blue-400 hover:shadow-lg transition-all duration-200",
         className
       )}
