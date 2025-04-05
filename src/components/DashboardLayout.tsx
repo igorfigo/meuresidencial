@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -386,17 +385,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             <Menu className="h-5 w-5" />
           </button>
+          <NavLink to="/dashboard" className="p-2 hover:bg-sidebar-accent/50 rounded-md mr-3">
+            <Home className="h-5 w-5" />
+          </NavLink>
+        </div>
+        
+        {!user?.isAdmin && user?.nomeCondominio && (
+          <div className="absolute left-1/2 transform -translate-x-1/2 text-center max-w-[50%]">
+            <h1 className="text-base font-semibold truncate">
+              {user.nomeCondominio}
+            </h1>
+          </div>
+        )}
+        
+        {!user?.nomeCondominio && (
           <h1 className="text-xl font-semibold truncate max-w-[200px]">
             {getCurrentPageName()}
           </h1>
-        </div>
+        )}
+        
         <div className="flex items-center space-x-2">
-          <NavLink to="/perfil" className="p-2 hover:bg-sidebar-accent/50 rounded-md">
-            <Settings className="h-5 w-5" />
-          </NavLink>
-          <div className="h-8 w-8 rounded-full bg-sidebar-accent flex items-center justify-center text-white">
-            {user?.nome?.charAt(0) || 'U'}
-          </div>
+          {/* Settings and profile initial removed */}
         </div>
       </div>
 
