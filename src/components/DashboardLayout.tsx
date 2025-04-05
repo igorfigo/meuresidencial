@@ -385,9 +385,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <NavLink to="/dashboard" className="p-2 hover:bg-sidebar-accent/50 rounded-md mr-3">
-            <Home className="h-5 w-5" />
-          </NavLink>
         </div>
         
         {!user?.isAdmin && user?.nomeCondominio && (
@@ -404,8 +401,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </h1>
         )}
         
-        <div className="flex items-center space-x-2">
-          {/* Settings and profile initial removed */}
+        <div className="flex items-center">
+          <NavLink to="/dashboard" className="p-2 hover:bg-sidebar-accent/50 rounded-md">
+            <Home className="h-5 w-5" />
+          </NavLink>
         </div>
       </div>
 

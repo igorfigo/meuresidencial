@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
@@ -178,7 +177,7 @@ const Comunicados: React.FC = () => {
               className="bg-brand-600 hover:bg-brand-700 w-full md:w-auto"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
-              {isMobile ? "Novo" : "Novo Comunicado"}
+              Novo Comunicado
             </Button>
           )}
         </div>

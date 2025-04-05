@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -12,6 +11,7 @@ import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Separator } from '@/components/ui/separator';
 
 const FinanceiroReceitasDespesas = () => {
   const { user } = useApp();
@@ -230,6 +230,8 @@ const FinanceiroReceitasDespesas = () => {
             />
           </div>
         </div>
+        
+        <Separator className="mb-6" />
         
         <Tabs defaultValue="income" value={activeTab} onValueChange={setActiveTab} className="mb-8">
           <TabsList className="grid w-full md:w-[500px] grid-cols-3">
