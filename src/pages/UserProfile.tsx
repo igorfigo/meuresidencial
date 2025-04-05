@@ -9,12 +9,14 @@ import { PasswordChangeSection } from '@/components/minha-assinatura/PasswordCha
 import { toast } from 'sonner';
 import { ProfileCondominiumInfo } from '@/components/profile/ProfileCondominiumInfo';
 import { ProfileRepresentativeInfo } from '@/components/profile/ProfileRepresentativeInfo';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, UserCog } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const UserProfile = () => {
   const { user, isAuthenticated } = useApp();
   const [isLoading, setIsLoading] = useState(false);
   const [condominiumData, setCondominiumData] = useState<any>(null);
+  const isMobile = useIsMobile();
   
   const fetchCondominiumData = async (matricula: string) => {
     setIsLoading(true);
@@ -82,7 +84,10 @@ const UserProfile = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
+        <div className="flex items-center gap-3 mb-6">
+          <UserCog className="h-7 w-7 text-brand-600" />
+          <h1 className="text-2xl font-bold">Meu Perfil</h1>
+        </div>
         
         {isLoading ? (
           <Card className="p-6 mb-6 border-t-4 border-t-brand-600">
@@ -93,11 +98,11 @@ const UserProfile = () => {
             </div>
           </Card>
         ) : condominiumData ? (
-          <>
+          <div className="grid grid-cols-1 gap-6">
             <ProfileCondominiumInfo condominiumData={condominiumData} />
             <ProfileRepresentativeInfo condominiumData={condominiumData} />
             <PasswordChangeSection userMatricula={user.matricula} />
-          </>
+          </div>
         ) : (
           <Card className="p-6 mb-6 border-t-4 border-t-brand-600">
             <p>Nenhuma informação disponível</p>
