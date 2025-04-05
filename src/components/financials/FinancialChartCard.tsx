@@ -8,6 +8,7 @@ import {
   TooltipTrigger 
 } from '@/components/ui/tooltip';
 import { InfoIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FinancialChartCardProps {
   title: string;
@@ -17,6 +18,7 @@ interface FinancialChartCardProps {
   tooltip?: string;
   periodLabel?: string;
   footerContent?: ReactNode;
+  onClick?: () => void;
 }
 
 export const FinancialChartCard: React.FC<FinancialChartCardProps> = ({
@@ -26,10 +28,18 @@ export const FinancialChartCard: React.FC<FinancialChartCardProps> = ({
   className = "",
   tooltip,
   periodLabel,
-  footerContent
+  footerContent,
+  onClick
 }) => {
   return (
-    <Card className={`overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600 ${className}`}>
+    <Card 
+      className={cn(
+        "overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600", 
+        onClick && "hover:border-blue-400 hover:shadow-lg transition-all duration-200",
+        className
+      )}
+      onClick={onClick}
+    >
       <CardContent className="p-3 md:p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="text-blue-500">{icon}</div>

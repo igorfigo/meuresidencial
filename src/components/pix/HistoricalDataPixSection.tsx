@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Info, BadgeInfo } from 'lucide-react';
-import { generatePixCode, generatePixQRCode } from '@/utils/pixGenerator';
 import { PixDialog } from './PixDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { FinancialChartCard } from '@/components/financials/FinancialChartCard';
 
 interface HistoricalDataPixSectionProps {
   matricula: string;
@@ -80,49 +80,40 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
   
   return (
     <>
-      <Card className={`${isMobile ? 'mb-4' : 'mb-6'} border-t-4 border-t-brand-600 shadow-md`}>
-        <CardHeader className={`bg-blue-50 ${isMobile ? 'pb-2 pt-3' : 'pb-3'}`}>
-          <CardTitle className={`flex items-center text-blue-800 ${isMobile ? 'text-base' : 'text-lg'}`}>
-            <BadgeInfo className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} mr-2 text-blue-600`} />
-            Pagamento para Dados Históricos
-          </CardTitle>
-        </CardHeader>
-        
-        <CardContent className={isMobile ? "px-3 py-3" : "pt-4"}>
-          <div className={`text-sm text-gray-600 space-y-${isMobile ? '1.5' : '2'}`}>
-            {!isMobile ? (
-              <>
-                <p>
-                  O serviço de dados históricos permite tanto a inclusão quanto o download
-                  do histórico do seu condomínio no sistema.
-                </p>
-                <p>
-                  Após o pagamento, nossa equipe entrará em contato para processar sua solicitação
-                  e disponibilizar os dados em até 3 dias úteis.
-                </p>
-              </>
-            ) : (
-              <p>
-                Este serviço permite inclusão/download do histórico do seu condomínio.
-                Após pagamento, processaremos em até 3 dias úteis.
-              </p>
-            )}
-            
-            <div className={`flex items-start mt-${isMobile ? '2' : '3'} bg-amber-50 ${isMobile ? 'p-2' : 'p-3'} rounded-md border border-amber-200`}>
-              <Info className={`${isMobile ? 'h-4 w-4 mt-0' : 'h-5 w-5 mt-0.5'} text-amber-600 flex-shrink-0`} />
-              <div className={`ml-2 text-amber-800 ${isMobile ? 'text-xs' : 'text-xs'}`}>
-                <p className="font-medium mb-1">Valor único: R$ 249,00</p>
-                <p>Este é um serviço avulso cobrado uma única vez para todos os dados históricos do condomínio.</p>
-              </div>
+      <FinancialChartCard
+        title="Pagamento para Dados Históricos"
+        icon={<BadgeInfo className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-600`} />}
+        className={`${isMobile ? 'mb-4' : 'mb-6'} shadow-md`}
+      >
+        <div className={`text-sm text-gray-600 space-y-${isMobile ? '2' : '3'}`}>
+          {!isMobile ? (
+            <p>
+              O serviço de dados históricos permite tanto a inclusão quanto o download
+              do histórico do seu condomínio no sistema.
+              Após o pagamento, nossa equipe entrará em contato para processar sua solicitação
+              e disponibilizar os dados em até 3 dias úteis.
+            </p>
+          ) : (
+            <p>
+              Este serviço permite inclusão/download do histórico do seu condomínio.
+              Após pagamento, processaremos em até 3 dias úteis.
+            </p>
+          )}
+          
+          <div className={`flex items-start mt-${isMobile ? '2' : '3'} bg-amber-50 ${isMobile ? 'p-2' : 'p-3'} rounded-md border border-amber-200`}>
+            <Info className={`${isMobile ? 'h-4 w-4 mt-0' : 'h-5 w-5 mt-0.5'} text-amber-600 flex-shrink-0`} />
+            <div className={`ml-2 text-amber-800 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+              <p className="font-medium mb-1">Valor único: R$ 249,00</p>
+              <p>Este é um serviço avulso cobrado uma única vez para todos os dados históricos do condomínio.</p>
             </div>
           </div>
-        </CardContent>
+        </div>
         
-        <Separator />
+        <Separator className="my-3" />
         
-        <CardFooter className={`bg-gray-50 ${isMobile ? 'p-3' : 'p-4'}`}>
+        <div className={`${isMobile ? 'p-0' : 'p-1'}`}>
           {isLoading ? (
-            <div className="flex items-center justify-center w-full">
+            <div className="flex items-center justify-center w-full py-2">
               <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
               <span className="ml-2 text-sm text-gray-500">Carregando...</span>
             </div>
@@ -130,8 +121,9 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
             <Button 
               onClick={openPixDialog} 
               variant="default" 
-              className="w-full bg-brand-600 hover:bg-brand-700"
+              className="w-full bg-brand-600 hover:bg-brand-700 flex items-center justify-center"
             >
+              <BadgeInfo className="mr-2 h-4 w-4" />
               Gerar PIX para Pagamento
             </Button>
           ) : (
@@ -139,8 +131,8 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
               Chave PIX não configurada pelo condomínio
             </div>
           )}
-        </CardFooter>
-      </Card>
+        </div>
+      </FinancialChartCard>
       
       {isPixDialogOpen && pixSettings && condominiumData && (
         <PixDialog
