@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Search, Info } from 'lucide-react';
 import { useDocuments } from '@/hooks/use-documents';
 import { DocumentForm } from '@/components/documents/DocumentForm';
 import { DocumentsList } from '@/components/documents/DocumentsList';
@@ -20,6 +20,8 @@ import {
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Input } from '@/components/ui/input';
+import { FinancialChartCard } from '@/components/financials/FinancialChartCard';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -48,6 +50,7 @@ const Documentos = () => {
   const [showForm, setShowForm] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const { user } = useApp();
   const { markAsViewed } = useNotifications();
   const isMobile = useIsMobile();
@@ -61,8 +64,18 @@ const Documentos = () => {
     }
   }, [isResident, markAsViewed]);
 
-  const totalPages = documents ? Math.ceil(documents.length / ITEMS_PER_PAGE) : 1;
-  const paginatedDocuments = documents ? documents.slice(
+  // Filter documents based on search term
+  const filteredDocuments = documents ? documents.filter(doc => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      (doc.tipo || "").toLowerCase().includes(searchLower) ||
+      (doc.observacoes || "").toLowerCase().includes(searchLower) ||
+      (new Date(doc.data_cadastro).toLocaleDateString() || "").toLowerCase().includes(searchLower)
+    );
+  }) : [];
+
+  const totalPages = filteredDocuments ? Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE) : 1;
+  const paginatedDocuments = filteredDocuments ? filteredDocuments.slice(
     (currentPage - 1) * ITEMS_PER_PAGE, 
     currentPage * ITEMS_PER_PAGE
   ) : [];
@@ -126,6 +139,32 @@ const Documentos = () => {
           )}
         </div>
 
+        {/* Search Bar */}
+        {!showForm && (
+          <div className="mb-2">
+            <FinancialChartCard
+              title="Pesquisar Documentos"
+              icon={<Search className="h-4 w-4" />}
+              tooltip="Pesquise por tipo ou observações"
+            >
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Pesquisar documentos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              {!isMobile && (
+                <div className="mt-2 text-xs text-gray-500 flex items-center">
+                  <Info className="h-3 w-3 mr-1" />
+                  <span>{filteredDocuments?.length || 0} {filteredDocuments?.length === 1 ? 'documento encontrado' : 'documentos encontrados'}</span>
+                </div>
+              )}
+            </FinancialChartCard>
+          </div>
+        )}
+
         <div className="border-t pt-4 md:pt-6">
           {isLoading ? (
             <div className="flex justify-center items-center py-12">
@@ -161,6 +200,7 @@ const Documentos = () => {
               totalPages={totalPages}
               onPageChange={handlePageChange}
               isResident={isResident}
+              searchTerm={searchTerm}
             />
           )}
         </div>

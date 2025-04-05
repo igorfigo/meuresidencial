@@ -1,8 +1,9 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Search, Info } from 'lucide-react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import AnnouncementForm from '@/components/announcements/AnnouncementForm';
 import { useApp } from '@/contexts/AppContext';
@@ -13,6 +14,8 @@ import { Card } from '@/components/ui/card';
 import { useState, useEffect } from 'react';
 import { useNotifications } from '@/hooks/use-notifications';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Input } from '@/components/ui/input';
+import { FinancialChartCard } from '@/components/financials/FinancialChartCard';
 
 const Comunicados: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -25,8 +28,9 @@ const Comunicados: React.FC = () => {
   const [sendWhatsapp, setSendWhatsapp] = useState(false);
   const [formErrors, setFormErrors] = useState<{title?: string; content?: string; date?: string}>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   
-  const { createAnnouncement, updateAnnouncement } = useAnnouncements();
+  const { createAnnouncement, updateAnnouncement, announcements } = useAnnouncements();
   const { user } = useApp();
   const { markAsViewed } = useNotifications();
   const isMobile = useIsMobile();
@@ -181,6 +185,32 @@ const Comunicados: React.FC = () => {
             </Button>
           )}
         </div>
+
+        {/* Search Bar - Display only when not showing the form */}
+        {!showForm && (
+          <div className="mb-4">
+            <FinancialChartCard
+              title="Pesquisar Comunicados"
+              icon={<Search className="h-4 w-4" />}
+              tooltip="Pesquise por título ou conteúdo"
+            >
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Pesquisar comunicados..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              {!isMobile && (
+                <div className="mt-2 text-xs text-gray-500 flex items-center">
+                  <Info className="h-3 w-3 mr-1" />
+                  <span>Encontre comunicados por título ou conteúdo</span>
+                </div>
+              )}
+            </FinancialChartCard>
+          </div>
+        )}
         
         <div className="border-t pt-4 md:pt-6 -mx-2 sm:mx-0">
           {!isResident && showForm ? (
@@ -208,6 +238,7 @@ const Comunicados: React.FC = () => {
             <AnnouncementsList 
               onEdit={!isResident ? handleEditAnnouncement : undefined}
               isResident={isResident}
+              searchTerm={searchTerm}
             />
           )}
         </div>

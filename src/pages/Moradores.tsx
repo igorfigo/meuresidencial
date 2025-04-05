@@ -5,10 +5,16 @@ import { useResidents } from '@/hooks/use-residents';
 import { ResidentForm } from '@/components/resident/ResidentForm';
 import { ResidentsList } from '@/components/resident/ResidentsList';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { FinancialChartCard } from '@/components/financials/FinancialChartCard';
+import { Info } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Moradores = () => {
   const { 
@@ -29,6 +35,20 @@ const Moradores = () => {
   
   const [showForm, setShowForm] = useState(false);
   const [residentToDelete, setResidentToDelete] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const isMobile = useIsMobile();
+
+  // Filter residents based on search term
+  const filteredResidents = residents?.filter(resident => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      (resident.nome_completo || "").toLowerCase().includes(searchLower) ||
+      (resident.unidade || "").toLowerCase().includes(searchLower) ||
+      (resident.cpf || "").toLowerCase().includes(searchLower) ||
+      (resident.email || "").toLowerCase().includes(searchLower) ||
+      (resident.telefone || "").toLowerCase().includes(searchLower)
+    );
+  });
 
   const handleNewResident = () => {
     resetForm();
@@ -83,6 +103,32 @@ const Moradores = () => {
           )}
         </div>
 
+        {/* Search Bar */}
+        {!showForm && (
+          <div className="mb-4">
+            <FinancialChartCard
+              title="Pesquisar Moradores"
+              icon={<Search className="h-4 w-4" />}
+              tooltip="Pesquise por nome, unidade, CPF, email ou telefone"
+            >
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Pesquisar moradores..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              {!isMobile && (
+                <div className="mt-2 text-xs text-gray-500 flex items-center">
+                  <Info className="h-3 w-3 mr-1" />
+                  <span>{filteredResidents?.length || 0} {filteredResidents?.length === 1 ? 'morador encontrado' : 'moradores encontrados'}</span>
+                </div>
+              )}
+            </FinancialChartCard>
+          </div>
+        )}
+
         {planLimitError && !editingResident && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
@@ -109,7 +155,7 @@ const Moradores = () => {
                 </div>
               ) : (
                 <ResidentsList
-                  residents={residents || []}
+                  residents={filteredResidents || []}
                   onEdit={handleEditResident}
                   onDelete={handleDeleteClick}
                   onToggleActive={handleToggleActive}

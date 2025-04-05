@@ -46,6 +46,7 @@ interface DocumentsListProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   isResident?: boolean;
+  searchTerm?: string;
 }
 
 const getDocumentTypeLabel = (tipo: string) => {
@@ -71,7 +72,8 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
   currentPage,
   totalPages,
   onPageChange,
-  isResident = false
+  isResident = false,
+  searchTerm = ""
 }) => {
   const [detailView, setDetailView] = useState<Document | null>(null);
   const [attachments, setAttachments] = useState<DocumentAttachment[]>([]);
@@ -195,11 +197,13 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
       {documents.length === 0 ? (
         <div className="text-center py-8 bg-white rounded-md">
           <FileText className="h-10 w-10 mx-auto text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum documento encontrado</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            {searchTerm ? "Nenhum documento encontrado para esta pesquisa" : "Nenhum documento encontrado"}
+          </h3>
           <p className="mt-1 text-sm text-gray-500">
             {isResident 
               ? "Não há documentos disponíveis para o seu condomínio."
-              : "Comece adicionando um novo documento."
+              : searchTerm ? "Tente outro termo de pesquisa." : "Comece adicionando um novo documento."
             }
           </p>
         </div>
