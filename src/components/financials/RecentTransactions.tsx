@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -22,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { PaymentStatusLegend } from './PaymentStatusLegend';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface Transaction {
@@ -193,7 +191,6 @@ export const RecentTransactions = ({
     );
   };
   
-  // Get unique months for the month filter
   const getUniqueMonths = () => {
     const uniqueMonthsMap = new Map();
     
@@ -205,7 +202,6 @@ export const RecentTransactions = ({
       value,
       label
     })).sort((a, b) => {
-      // Sort descending (newest first)
       return b.value.localeCompare(a.value);
     });
   };
@@ -482,12 +478,10 @@ export const RecentTransactions = ({
                   />
                 </PaginationItem>
                 
-                {/* On mobile, show fewer page numbers */}
                 {Array.from({ length: totalPages })
                   .map((_, index) => {
                     const pageNum = index + 1;
                     
-                    // On mobile, only show current page, first, last, and 1 before/after current
                     if (isMobile) {
                       const showFirstPage = pageNum === 1;
                       const showLastPage = pageNum === totalPages;
@@ -537,4 +531,3 @@ export const RecentTransactions = ({
     </Card>
   );
 };
-
