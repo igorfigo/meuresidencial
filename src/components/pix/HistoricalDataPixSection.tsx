@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
@@ -82,53 +81,47 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
     <>
       <FinancialChartCard
         title="Pagamento para Dados Históricos"
-        icon={<BadgeInfo className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-600`} />}
-        className={`${isMobile ? 'mb-4' : 'mb-6'} shadow-md`}
+        icon={<BadgeInfo className="h-5 w-5 text-blue-600" />}
+        className="shadow-lg mb-6"
       >
-        <div className={`text-sm text-gray-600 space-y-${isMobile ? '2' : '3'}`}>
-          {!isMobile ? (
-            <p>
-              O serviço de dados históricos permite tanto a inclusão quanto o download
-              do histórico do seu condomínio no sistema.
-              Após o pagamento, nossa equipe entrará em contato para processar sua solicitação
-              e disponibilizar os dados em até 3 dias úteis.
-            </p>
-          ) : (
-            <p>
-              Este serviço permite inclusão/download do histórico do seu condomínio.
-              Após pagamento, processaremos em até 3 dias úteis.
-            </p>
-          )}
+        <div className="text-base text-gray-700 space-y-4">
+          <p>
+            O serviço de dados históricos permite tanto a inclusão quanto o download
+            do histórico do seu condomínio no sistema.
+            Após o pagamento, nossa equipe entrará em contato para processar sua solicitação
+            e disponibilizar os dados em até 3 dias úteis.
+          </p>
           
-          <div className={`flex items-start mt-${isMobile ? '2' : '3'} bg-amber-50 ${isMobile ? 'p-2' : 'p-3'} rounded-md border border-amber-200`}>
-            <Info className={`${isMobile ? 'h-4 w-4 mt-0' : 'h-5 w-5 mt-0.5'} text-amber-600 flex-shrink-0`} />
-            <div className={`ml-2 text-amber-800 ${isMobile ? 'text-xs' : 'text-sm'}`}>
-              <p className="font-medium mb-1">Valor único: R$ 249,00</p>
-              <p>Este é um serviço avulso cobrado uma única vez para todos os dados históricos do condomínio.</p>
+          <div className="flex items-start mt-4 bg-amber-50 p-4 rounded-md border border-amber-200">
+            <Info className="h-5 w-5 mt-0.5 text-amber-600 flex-shrink-0" />
+            <div className="ml-3 text-amber-800">
+              <p className="font-medium mb-1 text-lg">Valor único: R$ 249,00</p>
+              <p className="text-base">Este é um serviço avulso cobrado uma única vez para todos os dados históricos do condomínio.</p>
             </div>
           </div>
         </div>
         
-        <Separator className="my-3" />
+        <Separator className="my-4" />
         
-        <div className={`${isMobile ? 'p-0' : 'p-1'}`}>
+        <div className="p-2">
           {isLoading ? (
-            <div className="flex items-center justify-center w-full py-2">
-              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-              <span className="ml-2 text-sm text-gray-500">Carregando...</span>
+            <div className="flex items-center justify-center w-full py-3">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              <span className="ml-2 text-base text-gray-500">Carregando opções de pagamento...</span>
             </div>
           ) : hasPixSettings ? (
             <Button 
               onClick={openPixDialog} 
               variant="default" 
-              className="w-full bg-brand-600 hover:bg-brand-700 flex items-center justify-center"
+              size="lg"
+              className="w-full bg-brand-600 hover:bg-brand-700 flex items-center justify-center py-6 text-lg"
             >
-              <BadgeInfo className="mr-2 h-4 w-4" />
+              <BadgeInfo className="mr-2 h-5 w-5" />
               Gerar PIX para Pagamento
             </Button>
           ) : (
-            <div className="w-full text-center text-sm text-gray-500 py-1">
-              Chave PIX não configurada pelo condomínio
+            <div className="w-full text-center text-base text-gray-600 py-3 bg-gray-50 rounded-md">
+              Chave PIX não configurada pelo condomínio. Entre em contato com o administrador.
             </div>
           )}
         </div>

@@ -33,8 +33,8 @@ const DadosHistoricos = () => {
   if (user?.isAdmin || user?.isResident) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-4 max-w-3xl">
-          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold mb-2`}>Dados Históricos</h1>
+        <div className="container mx-auto py-4 max-w-4xl">
+          <h1 className="text-3xl font-bold mb-2">Dados Históricos</h1>
           <Separator className="mb-4" />
           <Card className="border-t-4 border-t-amber-500 shadow-md">
             <CardContent className="pt-6">
@@ -101,9 +101,9 @@ const DadosHistoricos = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-4 max-w-3xl">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>Dados Históricos</h1>
+      <div className="container mx-auto py-6 max-w-5xl">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-3xl font-bold">Dados Históricos</h1>
           <Button 
             variant="ghost" 
             size="sm" 
@@ -113,46 +113,48 @@ const DadosHistoricos = () => {
             <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
           </Button>
         </div>
-        <Separator className="mb-4" />
+        <Separator className="mb-6" />
         
         {/* Short explanation section */}
         <FinancialChartCard
           title="Sobre os Dados Históricos"
-          icon={<Info className="h-4 w-4" />}
-          className="mb-4"
+          icon={<Info className="h-5 w-5" />}
+          className="mb-6 shadow-md"
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-base text-gray-700 leading-relaxed">
             Solicite a inclusão de dados anteriores ou o download de dados existentes do seu condomínio.
             Após o pagamento, nossa equipe processará sua solicitação em até 3 dias úteis.
+            Este serviço permite enriquecer o sistema com informações históricas do seu condomínio.
           </p>
         </FinancialChartCard>
         
         {/* PIX Payment Section */}
         {user?.matricula && (
-          <div className="mb-4">
+          <div className="mb-6">
             <HistoricalDataPixSection matricula={user.matricula} />
           </div>
         )}
         
         {/* Request cards */}
-        <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-2 gap-4'} mb-4`}>
+        <div className="grid grid-cols-2 gap-6 mb-6">
           <FinancialChartCard
             title="Inclusão de Dados"
-            icon={<Upload className="h-4 w-4" />}
+            icon={<Upload className="h-5 w-5" />}
             tooltip="Solicite a inclusão de dados históricos ao sistema"
-            className={`cursor-pointer transition-all ${formData.type === 'inclusao' ? 'border-l-4 border-l-brand-600' : ''}`}
+            className={`cursor-pointer transition-all ${formData.type === 'inclusao' ? 'border-l-4 border-l-brand-600 shadow-lg' : 'shadow-md'}`}
             onClick={() => handleTypeChange('inclusao')}
           >
-            <div className="p-2 text-center">
-              <p className="text-sm text-gray-600 mb-2">
-                Inclua dados anteriores do seu condomínio no sistema
+            <div className="p-4 text-center">
+              <p className="text-base text-gray-700 mb-4">
+                Inclua dados anteriores do seu condomínio no sistema para ter um histórico completo
               </p>
               <Button 
                 variant={formData.type === 'inclusao' ? "default" : "outline"}
-                className={`w-full ${formData.type === 'inclusao' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
+                size="lg"
+                className={`w-3/4 ${formData.type === 'inclusao' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
                 onClick={() => handleTypeChange('inclusao')}
               >
-                <Upload className="mr-2 h-4 w-4" />
+                <Upload className="mr-2 h-5 w-5" />
                 Solicitar Inclusão
               </Button>
             </div>
@@ -160,33 +162,34 @@ const DadosHistoricos = () => {
           
           <FinancialChartCard
             title="Download de Dados"
-            icon={<Download className="h-4 w-4" />}
+            icon={<Download className="h-5 w-5" />}
             tooltip="Solicite o download de dados históricos do sistema"
-            className={`cursor-pointer transition-all ${formData.type === 'download' ? 'border-l-4 border-l-brand-600' : ''}`}
+            className={`cursor-pointer transition-all ${formData.type === 'download' ? 'border-l-4 border-l-brand-600 shadow-lg' : 'shadow-md'}`}
             onClick={() => handleTypeChange('download')}
           >
-            <div className="p-2 text-center">
-              <p className="text-sm text-gray-600 mb-2">
-                Faça o download de dados existentes do seu condomínio
+            <div className="p-4 text-center">
+              <p className="text-base text-gray-700 mb-4">
+                Faça o download de dados existentes do seu condomínio para análise ou backup
               </p>
               <Button 
                 variant={formData.type === 'download' ? "default" : "outline"}
-                className={`w-full ${formData.type === 'download' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
+                size="lg"
+                className={`w-3/4 ${formData.type === 'download' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
                 onClick={() => handleTypeChange('download')}
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-5 w-5" />
                 Solicitar Download
               </Button>
             </div>
           </FinancialChartCard>
         </div>
         
-        <Card className="border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className={isMobile ? "pb-2" : "pb-3"}>
-            <CardTitle className={`${isMobile ? 'text-xl' : 'text-2xl'} text-brand-700`}>
+        <Card className="border-t-4 border-t-brand-600 shadow-md mb-6">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-2xl text-brand-700">
               {formData.type === 'inclusao' ? 'Incluir Dados Históricos' : 'Solicitar Download de Dados'}
             </CardTitle>
-            <CardDescription className="text-gray-600 text-sm">
+            <CardDescription className="text-gray-600 text-base">
               {formData.type === 'inclusao' 
                 ? "Preencha o formulário abaixo para solicitar a inclusão de dados históricos do seu condomínio."
                 : "Preencha o formulário abaixo para solicitar o download de dados históricos do seu condomínio."}
@@ -194,11 +197,11 @@ const DadosHistoricos = () => {
           </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className={`space-y-${isMobile ? '3' : '4'}`}>
-              <div className="space-y-3">
-                <div className={`${isMobile ? '' : 'grid grid-cols-1 md:grid-cols-2'} gap-4`}>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="nome" className="font-medium text-sm">Nome</Label>
+                    <Label htmlFor="nome" className="font-medium">Nome</Label>
                     <Input 
                       id="nome" 
                       value={user?.nome || 'Não informado'} 
@@ -208,7 +211,7 @@ const DadosHistoricos = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="font-medium text-sm">Email</Label>
+                    <Label htmlFor="email" className="font-medium">Email</Label>
                     <Input 
                       id="email" 
                       value={user?.email || 'Não informado'} 
@@ -218,9 +221,9 @@ const DadosHistoricos = () => {
                   </div>
                 </div>
                 
-                <div className={`${isMobile ? '' : 'grid grid-cols-1 md:grid-cols-2'} gap-4`}>
+                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="matricula" className="font-medium text-sm">Matrícula</Label>
+                    <Label htmlFor="matricula" className="font-medium">Matrícula</Label>
                     <Input 
                       id="matricula" 
                       value={user?.matricula || 'N/A'} 
@@ -230,7 +233,7 @@ const DadosHistoricos = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="condominio" className="font-medium text-sm">Condomínio</Label>
+                    <Label htmlFor="condominio" className="font-medium">Condomínio</Label>
                     <Input 
                       id="condominio" 
                       value={user?.nomeCondominio || 'N/A'} 
@@ -241,7 +244,7 @@ const DadosHistoricos = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="subject" className="font-medium text-sm" required>Assunto</Label>
+                  <Label htmlFor="subject" className="font-medium" required>Assunto</Label>
                   <Input 
                     id="subject" 
                     name="subject" 
@@ -254,16 +257,16 @@ const DadosHistoricos = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="message" className="font-medium text-sm" required>Mensagem</Label>
+                  <Label htmlFor="message" className="font-medium" required>Mensagem</Label>
                   <Textarea 
                     id="message" 
                     name="message" 
                     value={formData.message} 
                     onChange={handleChange} 
                     placeholder={formData.type === 'inclusao' 
-                      ? "Descreva os dados históricos que deseja incluir no sistema..." 
-                      : "Descreva os dados históricos que deseja baixar do sistema..."} 
-                    rows={isMobile ? 4 : 6} 
+                      ? "Descreva os dados históricos que deseja incluir no sistema, incluindo o período e os tipos de informações necessárias..." 
+                      : "Descreva os dados históricos que deseja baixar do sistema, incluindo o período desejado e o formato preferido..."} 
+                    rows={6} 
                     required 
                     className="border-gray-300 focus:border-brand-500 focus:ring-brand-500 resize-none"
                   />
@@ -272,11 +275,18 @@ const DadosHistoricos = () => {
             </form>
           </CardContent>
           
-          <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-end gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg`}>
+          <CardFooter className="flex justify-end gap-4 pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg">
+            <Button 
+              variant="outline"
+              onClick={() => setFormData({ subject: '', message: '', type: formData.type })}
+              className="px-6"
+            >
+              Limpar
+            </Button>
             <Button 
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`${isMobile ? 'w-full' : ''} bg-brand-600 hover:bg-brand-700 transition-colors`}
+              className="px-6 bg-brand-600 hover:bg-brand-700 transition-colors"
             >
               {isSubmitting ? (
                 <>
