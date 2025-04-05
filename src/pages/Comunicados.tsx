@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
@@ -186,7 +185,8 @@ const Comunicados: React.FC = () => {
           )}
         </div>
 
-        {/* Search Bar - Display only when not showing the form */}
+        <div className="border-t pt-4 md:pt-6 -mx-2 sm:mx-0"></div>
+
         {!showForm && (
           <div className="mb-4">
             <FinancialChartCard
@@ -212,7 +212,7 @@ const Comunicados: React.FC = () => {
           </div>
         )}
         
-        <div className="border-t pt-4 md:pt-6 -mx-2 sm:mx-0">
+        <div className="pt-4 md:pt-6 mx-2 sm:mx-0">
           {!isResident && showForm ? (
             <Card className="border-t-4 border-t-brand-600 shadow-md mx-2 sm:mx-0">
               <AnnouncementForm

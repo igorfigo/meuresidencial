@@ -139,6 +139,9 @@ const Documentos = () => {
           )}
         </div>
 
+        {/* Add the border-t before the search field */}
+        <div className="border-t pt-4"></div>
+
         {/* Search Bar */}
         {!showForm && (
           <div className="mb-2">
@@ -165,7 +168,7 @@ const Documentos = () => {
           </div>
         )}
 
-        <div className="border-t pt-4 md:pt-6">
+        <div className="pt-4 md:pt-6">
           {isLoading ? (
             <div className="flex justify-center items-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
