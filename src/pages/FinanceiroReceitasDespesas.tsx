@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -5,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { IncomeForm } from '@/components/financials/IncomeForm';
 import { ExpenseForm } from '@/components/financials/ExpenseForm';
 import { BalanceDisplay } from '@/components/financials/BalanceDisplay';
+import { RecentTransactions } from '@/components/financials/RecentTransactions';
 import { useFinances, FinancialIncome, FinancialExpense } from '@/hooks/use-finances';
 import { BRLToNumber, formatToBRL } from '@/utils/currency';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,7 +19,8 @@ const FinanceiroReceitasDespesas = () => {
   const { 
     incomes, 
     expenses, 
-    balance, 
+    balance,
+    recentTransactions,
     addIncome,
     editIncome,
     removeIncome,
@@ -229,7 +232,7 @@ const FinanceiroReceitasDespesas = () => {
         </div>
         
         <Tabs defaultValue="income" value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid w-full md:w-[400px] grid-cols-2">
+          <TabsList className="grid w-full md:w-[500px] grid-cols-3">
             <TabsTrigger 
               value="income" 
               className="text-sm md:text-base font-medium data-[state=active]:bg-green-500 data-[state=active]:text-white"
@@ -242,6 +245,12 @@ const FinanceiroReceitasDespesas = () => {
             >
               Despesas
             </TabsTrigger>
+            <TabsTrigger 
+              value="history" 
+              className="text-sm md:text-base font-medium data-[state=active]:bg-purple-500 data-[state=active]:text-white"
+            >
+              Histórico
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="income" className="mt-6">
@@ -250,6 +259,14 @@ const FinanceiroReceitasDespesas = () => {
           
           <TabsContent value="expense" className="mt-6">
             <ExpenseForm onSubmit={handleExpenseSubmit} />
+          </TabsContent>
+          
+          <TabsContent value="history" className="mt-6">
+            <RecentTransactions 
+              transactions={recentTransactions}
+              onDeleteIncome={handleDeleteIncome}
+              onDeleteExpense={handleDeleteExpense}
+            />
           </TabsContent>
         </Tabs>
       </div>

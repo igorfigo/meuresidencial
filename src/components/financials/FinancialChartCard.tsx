@@ -16,6 +16,7 @@ interface FinancialChartCardProps {
   className?: string;
   tooltip?: string;
   periodLabel?: string;
+  footerContent?: ReactNode;
 }
 
 export const FinancialChartCard: React.FC<FinancialChartCardProps> = ({
@@ -24,7 +25,8 @@ export const FinancialChartCard: React.FC<FinancialChartCardProps> = ({
   children,
   className = "",
   tooltip,
-  periodLabel
+  periodLabel,
+  footerContent
 }) => {
   return (
     <Card className={`overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600 ${className}`}>
@@ -56,6 +58,12 @@ export const FinancialChartCard: React.FC<FinancialChartCardProps> = ({
         </div>
         
         {children}
+        
+        {footerContent && (
+          <div className="mt-3 pt-2 border-t border-gray-100">
+            {footerContent}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
