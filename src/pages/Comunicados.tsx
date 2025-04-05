@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
@@ -12,6 +13,7 @@ import { ANNOUNCEMENT_TEMPLATES } from '@/components/announcements/AnnouncementT
 import { Card } from '@/components/ui/card';
 import { useState, useEffect } from 'react';
 import { useNotifications } from '@/hooks/use-notifications';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Comunicados: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -28,6 +30,7 @@ const Comunicados: React.FC = () => {
   const { createAnnouncement, updateAnnouncement } = useAnnouncements();
   const { user } = useApp();
   const { markAsViewed } = useNotifications();
+  const isMobile = useIsMobile();
   
   const isResident = user?.isResident === true;
   
@@ -158,10 +161,10 @@ const Comunicados: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 px-2 sm:px-4 md:px-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Comunicados</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Comunicados</h1>
             <p className="text-muted-foreground">
               {isResident 
                 ? "Veja todos os comunicados do seu condomínio."
@@ -170,16 +173,19 @@ const Comunicados: React.FC = () => {
             </p>
           </div>
           {!isResident && !showForm && (
-            <Button onClick={handleNewAnnouncement} className="bg-brand-600 hover:bg-brand-700">
+            <Button 
+              onClick={handleNewAnnouncement} 
+              className="bg-brand-600 hover:bg-brand-700 w-full md:w-auto"
+            >
               <PlusCircle className="mr-2 h-4 w-4" />
-              Novo Comunicado
+              {isMobile ? "Novo" : "Novo Comunicado"}
             </Button>
           )}
         </div>
         
-        <div className="border-t pt-6">
+        <div className="border-t pt-4 md:pt-6 -mx-2 sm:mx-0">
           {!isResident && showForm ? (
-            <Card className="border-t-4 border-t-brand-600 shadow-md">
+            <Card className="border-t-4 border-t-brand-600 shadow-md mx-2 sm:mx-0">
               <AnnouncementForm
                 isNewAnnouncement={!selectedAnnouncement?.id}
                 title={title}

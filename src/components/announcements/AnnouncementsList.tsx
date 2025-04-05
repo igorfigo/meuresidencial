@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
-import { Eye, Trash2, Mail, Printer } from 'lucide-react';
+import { Eye, Trash2, Mail, Printer, MessageCircle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +24,7 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Pagination,
@@ -43,6 +44,80 @@ interface AnnouncementsListProps {
 }
 
 const ITEMS_PER_PAGE = 6;
+
+const AnnouncementCard = ({ 
+  announcement, 
+  isResident,
+  onView,
+  onEdit,
+  onDelete,
+  onPrint
+}: { 
+  announcement: Announcement;
+  isResident: boolean;
+  onView: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onPrint: () => void;
+}) => {
+  return (
+    <Card className="mb-4 hover:shadow-md transition-shadow">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-medium line-clamp-1">{announcement.title}</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {announcement.created_at ? format(new Date(announcement.created_at), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
+        </p>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="flex justify-end gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onView}
+            title="Visualizar"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onPrint}
+            title="Imprimir"
+          >
+            <Printer className="h-4 w-4 text-blue-500" />
+          </Button>
+          
+          {!isResident && (
+            <>
+              {onEdit && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={onEdit}
+                  title="Editar"
+                >
+                  <MessageCircle className="h-4 w-4 text-amber-500" />
+                </Button>
+              )}
+              
+              {onDelete && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={onDelete}
+                  title="Excluir"
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResident = false }) => {
   const { 
@@ -212,23 +287,35 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
         </div>
       ) : (
         <div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Título</TableHead>
-                <TableHead className="text-center">Data</TableHead>
-                {!isMobile && (
-                  <TableHead className="text-center">Enviado por</TableHead>
-                )}
-                <TableHead className="text-center w-[100px]">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          {isMobile ? (
+            <div className="grid grid-cols-1 gap-2 p-4">
               {paginatedAnnouncements.map((announcement) => (
-                <TableRow key={announcement.id}>
-                  <TableCell className="font-medium">{announcement.title}</TableCell>
-                  <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
-                  {!isMobile && (
+                <AnnouncementCard
+                  key={announcement.id}
+                  announcement={announcement}
+                  isResident={isResident}
+                  onView={() => announcement.id && handleViewAnnouncement(announcement.id)}
+                  onEdit={onEdit ? () => onEdit(announcement) : undefined}
+                  onDelete={announcement.id ? () => handleDeleteClick(announcement.id as string) : undefined}
+                  onPrint={() => announcement.id && handlePrintAnnouncement(announcement.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Título</TableHead>
+                  <TableHead className="text-center">Data</TableHead>
+                  <TableHead className="text-center">Enviado por</TableHead>
+                  <TableHead className="text-center w-[100px]">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedAnnouncements.map((announcement) => (
+                  <TableRow key={announcement.id}>
+                    <TableCell className="font-medium">{announcement.title}</TableCell>
+                    <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex justify-center">
                         <TooltipProvider>
@@ -245,10 +332,8 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                         </TooltipProvider>
                       </div>
                     </TableCell>
-                  )}
-                  <TableCell className="text-center">
-                    <div className="flex justify-center space-x-1">
-                      {!isMobile && (
+                    <TableCell className="text-center">
+                      <div className="flex justify-center space-x-1">
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -256,19 +341,27 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                      )}
-                      
-                      {!isResident && (
-                        <>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => announcement.id && handlePrintAnnouncement(announcement.id)}
-                          >
-                            <Printer className="h-4 w-4 text-blue-500" />
-                          </Button>
-                          
-                          {onEdit && (
+                        
+                        {!isResident && (
+                          <>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => announcement.id && handlePrintAnnouncement(announcement.id)}
+                            >
+                              <Printer className="h-4 w-4 text-blue-500" />
+                            </Button>
+                            
+                            {onEdit && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => onEdit(announcement)}
+                              >
+                                <MessageCircle className="h-4 w-4 text-amber-500" />
+                              </Button>
+                            )}
+                            
                             <Button 
                               variant="ghost" 
                               size="icon" 
@@ -276,15 +369,15 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                             >
                               <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
           
           {totalPages > 1 && (
             <div className="py-4 border-t">
@@ -339,31 +432,27 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
                 <p className="text-sm whitespace-pre-line">{detailView.content}</p>
               </div>
               
-              {!isMobile && (
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Enviado via</h4>
-                  <div className="flex mt-1">
-                    <div className="flex items-center">
-                      <Mail className={`h-4 w-4 mr-2 ${detailView.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} />
-                      <span>{detailView.sent_by_email ? 'E-mail' : 'Não enviado por e-mail'}</span>
-                    </div>
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground">Enviado via</h4>
+                <div className="flex mt-1">
+                  <div className="flex items-center">
+                    <Mail className={`h-4 w-4 mr-2 ${detailView.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} />
+                    <span>{detailView.sent_by_email ? 'E-mail' : 'Não enviado por e-mail'}</span>
                   </div>
                 </div>
-              )}
+              </div>
               
-              {!isResident && (
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => detailView.id && handlePrintAnnouncement(detailView.id)}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <Printer className="h-4 w-4" />
-                    Imprimir
-                  </Button>
-                </div>
-              )}
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => detailView.id && handlePrintAnnouncement(detailView.id)}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Printer className="h-4 w-4" />
+                  Imprimir
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
