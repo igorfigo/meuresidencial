@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +9,7 @@ import { PlanUpgradeDialog } from './PlanUpgradeDialog';
 import { CancelSubscriptionDialog } from './CancelSubscriptionDialog';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Receipt, Calendar, Tag, Percent, FileText } from 'lucide-react';
+import { CreditCard, Receipt, Calendar, Tag, Percent, FileText, LifeBuoy } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface SubscriptionDetailsCardProps {
@@ -60,7 +59,6 @@ export const SubscriptionDetailsCard = ({
       
       setLocalCondominiumData(updatedData);
       
-      // If onPlanUpdate callback exists, call it to update parent component
       if (onPlanUpdate) {
         onPlanUpdate(updatedData);
       }
@@ -85,7 +83,6 @@ export const SubscriptionDetailsCard = ({
   const handlePlanUpgrade = (updatedData: any) => {
     setLocalCondominiumData(updatedData);
     
-    // If onPlanUpdate callback exists, call it to update parent component
     if (onPlanUpdate) {
       onPlanUpdate(updatedData);
     }
