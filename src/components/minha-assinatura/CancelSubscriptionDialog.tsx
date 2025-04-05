@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useApp } from '@/contexts/AppContext';
@@ -72,18 +72,29 @@ export const CancelSubscriptionDialog = ({ condominiumMatricula, userEmail }: Ca
       <Button 
         variant="destructive" 
         onClick={() => setIsOpen(true)}
+        className="w-full"
       >
-        <X className="mr-2 h-4 w-4" /> Cancelar Assinatura
+        <AlertTriangle className="mr-2 h-4 w-4" /> Cancelar Assinatura
       </Button>
       
       <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmação de Cancelamento</AlertDialogTitle>
-            <AlertDialogDescription>
-              Você tem certeza que deseja cancelar sua assinatura? Essa ação desativará sua conta e de todos moradores.
-              <p className="mt-2 font-medium text-destructive">
-                Essa operação não poderá ser desfeita. Para reativar sua conta, será necessário entrar em contato com o administrador do sistema.
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Confirmação de Cancelamento
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                Você tem certeza que deseja cancelar sua assinatura? Esta ação:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                <li>Desativará sua conta de administrador</li>
+                <li>Desativará todas as contas de moradores</li>
+                <li>Interromperá o acesso ao sistema</li>
+              </ul>
+              <p className="mt-2 font-medium text-destructive border-l-4 border-destructive pl-3 py-1 bg-destructive/10">
+                Esta operação não poderá ser desfeita. Para reativar sua conta, será necessário entrar em contato com o administrador do sistema.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -94,7 +105,14 @@ export const CancelSubscriptionDialog = ({ condominiumMatricula, userEmail }: Ca
               onClick={handleCancelSubscription}
               disabled={isLoading}
             >
-              {isLoading ? 'Cancelando...' : 'Sim, cancelar assinatura'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Cancelando...
+                </>
+              ) : (
+                'Sim, cancelar assinatura'
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
