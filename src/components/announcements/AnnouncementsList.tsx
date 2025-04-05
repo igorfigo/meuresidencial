@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -41,6 +40,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 interface AnnouncementsListProps {
   onEdit?: (announcement: Announcement) => void;
   isResident?: boolean;
+  searchTerm?: string;
 }
 
 const ITEMS_PER_PAGE = 6;
@@ -119,7 +119,7 @@ const AnnouncementCard = ({
   );
 }
 
-const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResident = false }) => {
+const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResident = false, searchTerm = "" }) => {
   const { 
     announcements, 
     isLoading, 
@@ -176,39 +176,32 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const contentWidth = pageWidth - (margin * 2);
       const innerMargin = 10; // Internal margin for content box
       
-      // Header with blue background - updated color to #2151B9
       doc.setFillColor(33, 81, 185);
       doc.rect(0, 0, 210, 40, 'F');
       
-      // Header text - updated to font size 22
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
       doc.text("COMUNICADO OFICIAL", 105, 20, { align: "center" });
       
-      // Condominium name
       doc.setFontSize(14);
       doc.text(user?.nomeCondominio?.toUpperCase() || "CONDOMÍNIO", 105, 30, { align: "center" });
       
-      // Reset text color for content
       doc.setTextColor(0, 0, 0);
       doc.setFont("helvetica", "normal");
       
       const contentYStart = 60;
       const footerY = 250;
       
-      // Content box with rounded corners and border - updated border color to #2151B9
       doc.setDrawColor(33, 81, 185);
       doc.setLineWidth(1);
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(margin - 5, contentYStart - 5, contentWidth + 10, footerY - (contentYStart - 5), 3, 3, 'FD');
       
-      // Title - updated to font size 22
       doc.setFontSize(22);
       doc.setFont("helvetica", "bold");
       doc.text(announcement.title.toUpperCase(), 105, contentYStart + 10, { align: "center" });
       
-      // Content - set to font size 14
       doc.setFontSize(14);
       doc.setFont("helvetica", "normal");
       
@@ -216,29 +209,23 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       const textY = contentYStart + 30;
       const textWidth = contentWidth - (innerMargin * 2);
       
-      // Split text into lines respecting the content width with inner margins
       const contentLines = doc.splitTextToSize(announcement.content, textWidth);
       doc.text(contentLines, textX, textY);
       
-      // Footer signature
       doc.setFontSize(14);
       doc.text("Administração do Condomínio", 105, footerY + 10, { align: "center" });
       
-      // Signature line
       doc.setLineWidth(0.2);
       doc.line(65, footerY + 20, 145, footerY + 20);
       
-      // Generation date
       doc.setFontSize(10);
       doc.setFont("helvetica", "italic");
       doc.text(`Documento gerado em ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 105, footerY + 30, { align: "center" });
       
-      // Footer website - updated text color to #2151B9
       doc.setFontSize(8);
       doc.setTextColor(33, 81, 185);
       doc.text("www.meuresidencial.com", 105, footerY + 37, { align: "center" });
       
-      // Define safe filename
       const safeTitle = announcement.title
         .replace(/\s+/g, '_')
         .replace(/[^a-zA-Z0-9_]/g, '')
@@ -247,8 +234,15 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     }
   };
 
-  const totalPages = Math.ceil(announcements.length / ITEMS_PER_PAGE);
-  const paginatedAnnouncements = announcements.slice(
+  const filteredAnnouncements = searchTerm
+    ? announcements.filter(announcement => 
+        announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        announcement.content.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : announcements;
+
+  const totalPages = Math.ceil(filteredAnnouncements.length / ITEMS_PER_PAGE);
+  const paginatedAnnouncements = filteredAnnouncements.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -281,9 +275,11 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   
   return (
     <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
-      {announcements.length === 0 ? (
+      {filteredAnnouncements.length === 0 ? (
         <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center">
-          <p className="text-muted-foreground mb-4">Nenhum comunicado encontrado.</p>
+          <p className="text-muted-foreground mb-4">
+            {searchTerm ? "Nenhum comunicado encontrado para a pesquisa." : "Nenhum comunicado encontrado."}
+          </p>
         </div>
       ) : (
         <div>
