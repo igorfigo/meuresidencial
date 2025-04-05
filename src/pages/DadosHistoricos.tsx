@@ -17,6 +17,7 @@ import { HistoricalDataPixSection } from '@/components/pix/HistoricalDataPixSect
 
 const DadosHistoricos = () => {
   const { user } = useApp();
+  // Initialize navigate even if we don't use it right now
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
