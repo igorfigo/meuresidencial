@@ -445,8 +445,6 @@ export const RecentTransactions = ({
             </Badge>
           )}
         </div>
-        
-        <PaymentStatusLegend compact className="mt-2 mb-0" />
       </CardHeader>
       
       <CardContent>
