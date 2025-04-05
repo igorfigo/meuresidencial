@@ -102,7 +102,7 @@ const AreasComuns = () => {
           {isManager && !showForm && (
             <Button onClick={handleNewArea} className="bg-brand-600 hover:bg-brand-700">
               <Plus className="mr-2 h-4 w-4" />
-              {isMobile ? "Nova Área" : "Nova Área Comum"}
+              Nova Área Comum
             </Button>
           )}
         </div>

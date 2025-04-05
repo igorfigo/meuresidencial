@@ -250,6 +250,8 @@ const FinanceiroRecebimentoPix = () => {
           </div>
         </div>
         
+        <Separator className="mb-6" />
+        
         <Card className="bg-white shadow-md border-t-4 border-t-brand-600">
           <CardHeader className={`bg-blue-50 border-b border-blue-100 ${isMobile ? 'px-3 py-3' : 'p-4'}`}>
             <div className="flex justify-between items-center">

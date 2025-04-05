@@ -100,7 +100,7 @@ const Dedetizacoes = () => {
             {!showForm && (
               <Button onClick={handleNewPestControl} className="bg-brand-600 hover:bg-brand-700 w-full md:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
-                {isMobile ? "Nova" : "Nova Dedetização"}
+                Nova Dedetização
               </Button>
             )}
           </div>
