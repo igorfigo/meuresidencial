@@ -9,12 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Send, History, ChevronLeft, Download, Upload, Info } from 'lucide-react';
+import { Loader2, Send, History, ChevronLeft, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { HistoricalDataPixSection } from '@/components/pix/HistoricalDataPixSection';
-import { FinancialChartCard } from '@/components/financials/FinancialChartCard';
 
 const DadosHistoricos = () => {
   const { user } = useApp();
@@ -33,7 +32,7 @@ const DadosHistoricos = () => {
   if (user?.isAdmin || user?.isResident) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-4 max-w-3xl">
+        <div className="container mx-auto py-4 max-w-5xl">
           <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold mb-2`}>Dados Históricos</h1>
           <Separator className="mb-4" />
           <Card className="border-t-4 border-t-amber-500 shadow-md">
@@ -57,10 +56,6 @@ const DadosHistoricos = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleTypeChange = (type: 'inclusao' | 'download') => {
-    setFormData(prev => ({ ...prev, type }));
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,7 +96,7 @@ const DadosHistoricos = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-4 max-w-3xl">
+      <div className="container mx-auto py-4 max-w-5xl">
         <div className="flex items-center justify-between mb-2">
           <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>Dados Históricos</h1>
           <Button 
@@ -115,88 +110,30 @@ const DadosHistoricos = () => {
         </div>
         <Separator className="mb-4" />
         
-        {/* Short explanation section */}
-        <FinancialChartCard
-          title="Sobre os Dados Históricos"
-          icon={<Info className="h-4 w-4" />}
-          className="mb-4"
-        >
-          <p className="text-sm text-gray-600">
-            Solicite a inclusão de dados anteriores ou o download de dados existentes do seu condomínio.
-            Após o pagamento, nossa equipe processará sua solicitação em até 3 dias úteis.
-          </p>
-        </FinancialChartCard>
-        
-        {/* PIX Payment Section */}
+        {/* PIX Payment Section - Full width */}
         {user?.matricula && (
-          <div className="mb-4">
-            <HistoricalDataPixSection matricula={user.matricula} />
+          <div className="mb-6 w-full">
+            <HistoricalDataPixSection 
+              matricula={user.matricula}
+              className="w-full"
+            />
           </div>
         )}
         
-        {/* Request cards */}
-        <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-2 gap-4'} mb-4`}>
-          <FinancialChartCard
-            title="Inclusão de Dados"
-            icon={<Upload className="h-4 w-4" />}
-            tooltip="Solicite a inclusão de dados históricos ao sistema"
-            className={`cursor-pointer transition-all ${formData.type === 'inclusao' ? 'border-l-4 border-l-brand-600' : ''}`}
-            onClick={() => handleTypeChange('inclusao')}
-          >
-            <div className="p-2 text-center">
-              <p className="text-sm text-gray-600 mb-2">
-                Inclua dados anteriores do seu condomínio no sistema
-              </p>
-              <Button 
-                variant={formData.type === 'inclusao' ? "default" : "outline"}
-                className={`w-full ${formData.type === 'inclusao' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
-                onClick={() => handleTypeChange('inclusao')}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Solicitar Inclusão
-              </Button>
-            </div>
-          </FinancialChartCard>
-          
-          <FinancialChartCard
-            title="Download de Dados"
-            icon={<Download className="h-4 w-4" />}
-            tooltip="Solicite o download de dados históricos do sistema"
-            className={`cursor-pointer transition-all ${formData.type === 'download' ? 'border-l-4 border-l-brand-600' : ''}`}
-            onClick={() => handleTypeChange('download')}
-          >
-            <div className="p-2 text-center">
-              <p className="text-sm text-gray-600 mb-2">
-                Faça o download de dados existentes do seu condomínio
-              </p>
-              <Button 
-                variant={formData.type === 'download' ? "default" : "outline"}
-                className={`w-full ${formData.type === 'download' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
-                onClick={() => handleTypeChange('download')}
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Solicitar Download
-              </Button>
-            </div>
-          </FinancialChartCard>
-        </div>
-        
-        <Card className="border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className={isMobile ? "pb-2" : "pb-3"}>
-            <CardTitle className={`${isMobile ? 'text-xl' : 'text-2xl'} text-brand-700`}>
-              {formData.type === 'inclusao' ? 'Incluir Dados Históricos' : 'Solicitar Download de Dados'}
+        <Card className="border-t-4 border-t-brand-600 shadow-md w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl text-brand-700">
+              Solicitar Dados Históricos
             </CardTitle>
-            <CardDescription className="text-gray-600 text-sm">
-              {formData.type === 'inclusao' 
-                ? "Preencha o formulário abaixo para solicitar a inclusão de dados históricos do seu condomínio."
-                : "Preencha o formulário abaixo para solicitar o download de dados históricos do seu condomínio."}
+            <CardDescription className="text-gray-600">
+              Preencha o formulário abaixo para solicitar a inclusão ou download de dados históricos do seu condomínio.
             </CardDescription>
           </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className={`space-y-${isMobile ? '3' : '4'}`}>
-              <div className="space-y-3">
-                <div className={`${isMobile ? '' : 'grid grid-cols-1 md:grid-cols-2'} gap-4`}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="nome" className="font-medium text-sm">Nome</Label>
                     <Input 
@@ -218,7 +155,7 @@ const DadosHistoricos = () => {
                   </div>
                 </div>
                 
-                <div className={`${isMobile ? '' : 'grid grid-cols-1 md:grid-cols-2'} gap-4`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="matricula" className="font-medium text-sm">Matrícula</Label>
                     <Input 
@@ -260,23 +197,34 @@ const DadosHistoricos = () => {
                     name="message" 
                     value={formData.message} 
                     onChange={handleChange} 
-                    placeholder={formData.type === 'inclusao' 
-                      ? "Descreva os dados históricos que deseja incluir no sistema..." 
-                      : "Descreva os dados históricos que deseja baixar do sistema..."} 
-                    rows={isMobile ? 4 : 6} 
+                    placeholder="Descreva os dados históricos que deseja incluir ou baixar do sistema..." 
+                    rows={6}
                     required 
                     className="border-gray-300 focus:border-brand-500 focus:ring-brand-500 resize-none"
                   />
+                </div>
+                
+                <div className="bg-blue-50 border border-blue-200 rounded p-4">
+                  <div className="flex items-start">
+                    <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="ml-3">
+                      <h4 className="text-sm font-medium text-blue-800">Informações Importantes</h4>
+                      <p className="mt-1 text-sm text-blue-700">
+                        Após o pagamento, nossa equipe processará sua solicitação de dados históricos em até 3 dias úteis.
+                        O serviço tem valor único de R$ 249,00.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </form>
           </CardContent>
           
-          <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-end gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg`}>
+          <CardFooter className="flex justify-end pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg">
             <Button 
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`${isMobile ? 'w-full' : ''} bg-brand-600 hover:bg-brand-700 transition-colors`}
+              className="bg-brand-600 hover:bg-brand-700 transition-colors"
             >
               {isSubmitting ? (
                 <>

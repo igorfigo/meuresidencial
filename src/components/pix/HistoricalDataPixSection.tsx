@@ -9,13 +9,15 @@ import { Loader2, Info, BadgeInfo } from 'lucide-react';
 import { PixDialog } from './PixDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FinancialChartCard } from '@/components/financials/FinancialChartCard';
+import { cn } from '@/lib/utils';
 
 interface HistoricalDataPixSectionProps {
   matricula: string;
   unit?: string;
+  className?: string;
 }
 
-export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixSectionProps) => {
+export const HistoricalDataPixSection = ({ matricula, unit, className }: HistoricalDataPixSectionProps) => {
   const [isPixDialogOpen, setIsPixDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   
@@ -83,22 +85,15 @@ export const HistoricalDataPixSection = ({ matricula, unit }: HistoricalDataPixS
       <FinancialChartCard
         title="Pagamento para Dados Históricos"
         icon={<BadgeInfo className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-600`} />}
-        className={`${isMobile ? 'mb-4' : 'mb-6'} shadow-md`}
+        className={cn(`${isMobile ? 'mb-4' : 'mb-6'} shadow-md`, className)}
       >
         <div className={`text-sm text-gray-600 space-y-${isMobile ? '2' : '3'}`}>
-          {!isMobile ? (
-            <p>
-              O serviço de dados históricos permite tanto a inclusão quanto o download
-              do histórico do seu condomínio no sistema.
-              Após o pagamento, nossa equipe entrará em contato para processar sua solicitação
-              e disponibilizar os dados em até 3 dias úteis.
-            </p>
-          ) : (
-            <p>
-              Este serviço permite inclusão/download do histórico do seu condomínio.
-              Após pagamento, processaremos em até 3 dias úteis.
-            </p>
-          )}
+          <p>
+            O serviço de dados históricos permite tanto a inclusão quanto o download
+            do histórico do seu condomínio no sistema.
+            Após o pagamento, nossa equipe entrará em contato para processar sua solicitação
+            e disponibilizar os dados em até 3 dias úteis.
+          </p>
           
           <div className={`flex items-start mt-${isMobile ? '2' : '3'} bg-amber-50 ${isMobile ? 'p-2' : 'p-3'} rounded-md border border-amber-200`}>
             <Info className={`${isMobile ? 'h-4 w-4 mt-0' : 'h-5 w-5 mt-0.5'} text-amber-600 flex-shrink-0`} />

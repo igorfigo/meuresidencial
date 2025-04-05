@@ -34,13 +34,13 @@ export const FinancialChartCard: React.FC<FinancialChartCardProps> = ({
   return (
     <Card 
       className={cn(
-        "overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600", 
+        "overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600 w-full", 
         onClick && "hover:border-blue-400 hover:shadow-lg transition-all duration-200",
         className
       )}
       onClick={onClick}
     >
-      <CardContent className="p-3 md:p-4">
+      <CardContent className="p-4 md:p-5">
         <div className="flex items-center gap-2 mb-3">
           <div className="text-blue-500">{icon}</div>
           <h3 className="font-semibold text-gray-800 text-sm md:text-base">{title}</h3>
