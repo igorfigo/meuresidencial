@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -8,14 +7,11 @@ import { usePlans } from '@/hooks/use-plans';
 import { Separator } from '@/components/ui/separator';
 import { SubscriptionDetailsCard } from '@/components/minha-assinatura/SubscriptionDetailsCard';
 import { formatCurrencyDisplay, getCurrentPlanDetails } from '@/utils/subscription-utils';
-import { CreditCard, LifeBuoy } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { CreditCard } from 'lucide-react';
 
 const MinhaAssinatura = () => {
   const { user, isAuthenticated } = useApp();
   const { plans, isLoading: isLoadingPlans } = usePlans();
-  const navigate = useNavigate();
   
   const [isLoading, setIsLoading] = useState(false);
   const [condominiumData, setCondominiumData] = useState<any>(null);
@@ -36,7 +32,6 @@ const MinhaAssinatura = () => {
       
       setCondominiumData(data);
       
-      // Fetch PIX key information
       const { data: pixData, error: pixError } = await supabase
         .from('pix_key_meuresidencial')
         .select('diavencimento')
@@ -68,12 +63,10 @@ const MinhaAssinatura = () => {
     return getCurrentPlanDetails(condominiumData, plans);
   };
 
-  // Function to handle plan update from the SubscriptionDetailsCard
   const handlePlanUpdate = (updatedData: any) => {
     setCondominiumData(updatedData);
   };
 
-  // Check if the user is a manager (not admin and not resident)
   const isManager = isAuthenticated && user && !user.isAdmin && !user.isResident;
 
   if (!isAuthenticated || !user) {
@@ -129,14 +122,6 @@ const MinhaAssinatura = () => {
             <CreditCard className="h-6 w-6 text-brand-600" />
             <h1 className="text-2xl font-bold">Minha Assinatura</h1>
           </div>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2 border-brand-200 hover:bg-brand-50 hover:border-brand-300"
-            onClick={() => navigate('/contato')}
-          >
-            <LifeBuoy className="h-4 w-4 text-brand-600" />
-            <span>Suporte</span>
-          </Button>
         </div>
         <Separator className="mb-2" />
         

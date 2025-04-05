@@ -261,23 +261,6 @@ export const SubscriptionDetailsCard = ({
                   userEmail={user.email}
                 />
               </div>
-              
-              <Separator />
-              
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-1">Precisa de ajuda?</h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  Entre em contato com nosso time de suporte para qualquer dúvida ou assistência.
-                </p>
-                <Button 
-                  variant="outline" 
-                  className="w-full flex items-center gap-2 border-brand-200 hover:bg-brand-50"
-                  onClick={navigateToContactPage}
-                >
-                  <LifeBuoy className="h-4 w-4 text-brand-600" />
-                  <span>Fale com o Suporte</span>
-                </Button>
-              </div>
             </div>
           </div>
         </div>
