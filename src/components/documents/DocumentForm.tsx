@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DocumentFormProps {
   form: ReturnType<typeof useForm<DocumentFormValues>>;
@@ -78,6 +79,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
   isUploading
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   const openFileSelector = () => {
     if (fileInputRef.current) {
@@ -96,7 +98,11 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+        <div className="text-lg font-semibold mb-4">
+          {isEditing ? "Editar Documento" : "Novo Documento"}
+        </div>
+
         <FormField
           control={form.control}
           name="tipo"
@@ -179,16 +185,18 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                   size="sm"
                   onClick={openFileSelector}
                   disabled={isUploading}
+                  className="w-full sm:w-auto"
                 >
                   <Paperclip className="h-4 w-4 mr-2" />
                   Selecionar arquivos
                 </Button>
-                <span className="text-sm text-muted-foreground">
-                  {attachments.length > 0
-                    ? `${attachments.length} arquivo(s) selecionado(s)`
-                    : "Nenhum arquivo selecionado"}
-                </span>
               </div>
+
+              <span className="text-sm text-muted-foreground">
+                {attachments.length > 0
+                  ? `${attachments.length} arquivo(s) selecionado(s)`
+                  : "Nenhum arquivo selecionado"}
+              </span>
 
               {isUploading && (
                 <div className="w-full space-y-2">
@@ -208,12 +216,12 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                         key={index} 
                         className="flex items-center justify-between p-2 bg-slate-50 rounded-md"
                       >
-                        <div className="flex items-center gap-2">
-                          <File className="h-4 w-4 text-blue-500" />
-                          <span className="text-sm truncate max-w-[200px]">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <File className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                          <span className="text-sm truncate max-w-[140px] sm:max-w-[200px]">
                             {file.name}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
                             ({(file.size / 1024).toFixed(0)} KB)
                           </span>
                         </div>
@@ -221,6 +229,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                           variant="ghost" 
                           size="icon" 
                           onClick={() => removeFile(index)}
+                          className="flex-shrink-0"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -239,13 +248,13 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                         key={attachment.id} 
                         className="flex items-center justify-between p-2 bg-slate-50 rounded-md"
                       >
-                        <div className="flex items-center gap-2">
-                          <File className="h-4 w-4 text-blue-500" />
-                          <span className="text-sm truncate max-w-[200px]">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <File className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                          <span className="text-sm truncate max-w-[140px] sm:max-w-[200px]">
                             {attachment.file_name}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-shrink-0">
                           <Button 
                             variant="ghost" 
                             size="icon" 
@@ -272,12 +281,13 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-center gap-2">
+        <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
           <Button 
             type="button" 
             variant="outline" 
             onClick={onCancel}
             disabled={isSubmitting}
+            className="w-full sm:w-auto order-2 sm:order-1"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Cancelar
@@ -285,7 +295,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
           <Button 
             type="submit" 
             disabled={isSubmitting || isUploading} 
-            className="bg-brand-600 hover:bg-brand-700"
+            className="bg-brand-600 hover:bg-brand-700 w-full sm:w-auto order-1 sm:order-2"
           >
             {isSubmitting ? (
               <>
@@ -295,7 +305,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                {isEditing ? "Atualizar Documento" : "Salvar Documento"}
+                {isEditing ? "Atualizar" : "Salvar"}
               </>
             )}
           </Button>

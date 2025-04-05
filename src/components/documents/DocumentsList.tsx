@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/pagination";
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { DocumentCard } from './DocumentCard';
 
 interface DocumentsListProps {
   documents: Document[];
@@ -112,7 +113,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
 
   const generatePaginationItems = () => {
     const items = [];
-    const maxVisiblePages = 5;
+    const maxVisiblePages = isMobile ? 3 : 5;
 
     items.push(
       <PaginationItem key="first">
@@ -202,13 +203,60 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
             }
           </p>
         </div>
+      ) : isMobile ? (
+        <div className="space-y-3">
+          {documents.map((document) => (
+            <DocumentCard
+              key={document.id}
+              document={document}
+              onView={handleViewDetails}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              isResident={isResident}
+            />
+          ))}
+          
+          {totalPages > 1 && (
+            <div className="py-3 flex justify-center">
+              <Pagination>
+                <PaginationContent className="gap-1">
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage > 1) {
+                          onPageChange(currentPage - 1);
+                        }
+                      }}
+                    />
+                  </PaginationItem>
+                  
+                  {generatePaginationItems()}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage < totalPages) {
+                          onPageChange(currentPage + 1);
+                        }
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </div>
       ) : (
         <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Tipo</TableHead>
-                {!isMobile && <TableHead className="text-center">Data de Cadastro</TableHead>}
+                <TableHead className="text-center">Data de Cadastro</TableHead>
                 <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -218,7 +266,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
                   <TableCell className="font-medium">
                     {getDocumentTypeLabel(document.tipo)}
                   </TableCell>
-                  {!isMobile && <TableCell className="text-center">{formatDate(document.data_cadastro)}</TableCell>}
+                  <TableCell className="text-center">{formatDate(document.data_cadastro)}</TableCell>
                   <TableCell className="text-center">
                     <div className="flex justify-center space-x-1">
                       <Button 
@@ -296,14 +344,14 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
       )}
 
       <Dialog open={!!detailView} onOpenChange={(open) => !open && setDetailView(null)}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-w-[95%]">
           <DialogHeader>
             <DialogTitle>Detalhes do Documento</DialogTitle>
           </DialogHeader>
           
           {detailView && (
             <div className="space-y-4 mt-2">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground">Tipo</h4>
                   <p>{getDocumentTypeLabel(detailView.tipo)}</p>
@@ -337,8 +385,8 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
                         className="flex items-center justify-between p-2 bg-slate-50 rounded-md"
                       >
                         <div className="flex items-center space-x-2">
-                          <FileBadge className="h-4 w-4 text-blue-500" />
-                          <span className="text-sm truncate max-w-[300px]">
+                          <FileBadge className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                          <span className="text-sm truncate max-w-[160px] sm:max-w-[300px]">
                             {attachment.file_name}
                           </span>
                         </div>
@@ -346,7 +394,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
                           variant="ghost" 
                           size="sm" 
                           onClick={() => handleDownload(attachment)}
-                          className="h-8"
+                          className="h-8 flex-shrink-0"
                         >
                           <Download className="h-4 w-4 mr-1" />
                           Baixar

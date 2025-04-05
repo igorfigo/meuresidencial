@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { useDocuments } from '@/hooks/use-documents';
 import { DocumentForm } from '@/components/documents/DocumentForm';
 import { DocumentsList } from '@/components/documents/DocumentsList';
@@ -18,6 +19,7 @@ import {
   AlertDialogHeader, 
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -48,6 +50,7 @@ const Documentos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { user } = useApp();
   const { markAsViewed } = useNotifications();
+  const isMobile = useIsMobile();
   
   // Check if the user is a resident
   const isResident = user?.isResident === true;
@@ -101,11 +104,11 @@ const Documentos = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="space-y-4 px-2 sm:px-0">
+        <div className="flex flex-col gap-3">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Documentos Úteis</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl md:text-3xl font-bold">Documentos Úteis</h1>
+            <p className="text-muted-foreground text-sm md:text-base">
               {isResident 
                 ? "Veja todos os documentos úteis do seu condomínio." 
                 : "Gerencie os documentos úteis do seu condomínio"
@@ -113,15 +116,22 @@ const Documentos = () => {
             </p>
           </div>
           {!showForm && !isResident && (
-            <Button onClick={handleNewDocument} className="bg-brand-600 hover:bg-brand-700">
+            <Button 
+              onClick={handleNewDocument} 
+              className="bg-brand-600 hover:bg-brand-700 w-full sm:w-auto"
+            >
               <Plus className="mr-2 h-4 w-4" />
-              Novo Documento
+              {isMobile ? "Novo Documento" : "Novo Documento"}
             </Button>
           )}
         </div>
 
-        <div className="border-t pt-6">
-          {showForm && !isResident ? (
+        <div className="border-t pt-4 md:pt-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+            </div>
+          ) : showForm && !isResident ? (
             <Card className="border-t-4 border-t-brand-600 shadow-md">
               <DocumentForm
                 form={form}
@@ -158,15 +168,15 @@ const Documentos = () => {
 
       {!isResident && (
         <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-[90%] sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Confirmação de Exclusão</AlertDialogTitle>
               <AlertDialogDescription>
                 Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+              <AlertDialogCancel className="mt-0">Cancelar</AlertDialogCancel>
               <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
                 Excluir
               </AlertDialogAction>
