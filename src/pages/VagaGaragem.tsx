@@ -28,6 +28,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from '@/components/ui/input';
 import { FinancialChartCard } from '@/components/financials/FinancialChartCard';
 import { useState } from 'react';
+import { Separator } from '@/components/ui/separator';
 
 export default function VagaGaragem() {
   const { user } = useApp();
@@ -78,6 +79,8 @@ export default function VagaGaragem() {
             Visualize as vagas de garagem disponíveis no condomínio.
           </p>
         </div>
+
+        <Separator className="mb-4" />
 
         <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-1 lg:grid-cols-3 gap-4'}`}>
           {/* Search and filter card */}

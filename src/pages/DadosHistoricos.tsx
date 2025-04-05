@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -9,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Send, History, ChevronLeft, Info } from 'lucide-react';
+import { Loader2, Send, History, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,17 +96,7 @@ const DadosHistoricos = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-4 px-2 max-w-7xl">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>Dados Históricos</h1>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate(-1)} 
-            className="flex items-center text-gray-500"
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
-          </Button>
-        </div>
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold mb-2`}>Dados Históricos</h1>
         <Separator className="mb-4" />
         
         <div className="grid grid-cols-1 gap-6">
