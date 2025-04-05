@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -55,7 +54,6 @@ const Documentos = () => {
   const { markAsViewed } = useNotifications();
   const isMobile = useIsMobile();
   
-  // Check if the user is a resident
   const isResident = user?.isResident === true;
 
   useEffect(() => {
@@ -64,7 +62,6 @@ const Documentos = () => {
     }
   }, [isResident, markAsViewed]);
 
-  // Filter documents based on search term
   const filteredDocuments = documents ? documents.filter(doc => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -118,7 +115,7 @@ const Documentos = () => {
   return (
     <DashboardLayout>
       <div className="space-y-4 px-2 sm:px-0">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Documentos Úteis</h1>
             <p className="text-muted-foreground text-sm md:text-base">
@@ -139,10 +136,8 @@ const Documentos = () => {
           )}
         </div>
 
-        {/* Add the border-t before the search field */}
         <div className="border-t pt-4"></div>
 
-        {/* Search Bar */}
         {!showForm && (
           <div className="mb-2">
             <FinancialChartCard

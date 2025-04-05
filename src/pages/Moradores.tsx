@@ -103,6 +103,9 @@ const Moradores = () => {
           )}
         </div>
 
+        {/* Add border-t divider above the search field */}
+        <div className="border-t pt-4"></div>
+
         {/* Search Bar */}
         {!showForm && (
           <div className="mb-4">
@@ -138,7 +141,7 @@ const Moradores = () => {
           </Alert>
         )}
 
-        <div className="border-t pt-6">
+        <div className="pt-6">
           {showForm ? (
             <ResidentForm
               form={form}
