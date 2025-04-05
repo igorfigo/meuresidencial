@@ -7,8 +7,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Loader2 } from 'lucide-react';
 import { formatToBRL, BRLToNumber } from '@/utils/currency';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ExpenseCategory {
   category: string;
@@ -25,6 +26,7 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [chartData, setChartData] = useState<ExpenseData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   // Define category mapping for display names
   const categoryLabels: Record<string, string> = {
@@ -150,18 +152,18 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
 
   return (
     <Card className="overflow-hidden border-blue-300 shadow-md border-t-4 border-t-brand-600">
-      <CardContent className="p-4">
+      <CardContent className="p-3 md:p-4">
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="h-5 w-5 text-blue-500" />
-          <h3 className="font-semibold text-gray-800">Evolução de Despesas</h3>
+          <h3 className="font-semibold text-gray-800 text-sm md:text-base">Evolução de Despesas</h3>
           
           <div className="flex-grow flex justify-center">
             <Select 
               value={selectedCategory} 
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="w-[180px] h-8 text-xs">
-                <SelectValue placeholder="Selecione uma categoria" />
+              <SelectTrigger className={`${isMobile ? 'w-[140px]' : 'w-[180px]'} h-8 text-xs`}>
+                <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
@@ -174,39 +176,49 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
           </div>
         </div>
         
-        <div className="h-64">
+        <div className={isMobile ? "h-52" : "h-64"}>
           {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-pulse text-lg text-gray-500">Carregando dados...</div>
+            <div className="flex flex-col items-center justify-center h-full">
+              <Loader2 className="h-6 w-6 text-gray-500 animate-spin mb-2" />
+              <div className="text-sm text-gray-500">Carregando dados...</div>
             </div>
           ) : chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+                margin={{ 
+                  top: 10, 
+                  right: isMobile ? 10 : 30, 
+                  left: isMobile ? 0 : 0, 
+                  bottom: isMobile ? 20 : 5 
+                }}
                 barCategoryGap={5}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="month" 
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: isMobile ? 9 : 12 }}
                   axisLine={{ stroke: '#e5e7eb' }}
                   tickLine={{ stroke: '#e5e7eb' }}
+                  angle={isMobile ? -45 : 0}
+                  textAnchor={isMobile ? "end" : "middle"}
+                  height={isMobile ? 40 : 30}
                 />
                 <YAxis 
                   tickFormatter={formatTooltipValue} 
-                  tick={{ fontSize: 11 }}
+                  tick={{ fontSize: isMobile ? 9 : 11 }}
                   domain={[0, 'auto']}
                   axisLine={{ stroke: '#e5e7eb' }}
                   tickLine={{ stroke: '#e5e7eb' }}
+                  width={isMobile ? 50 : undefined}
                 />
                 <Tooltip 
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
-                        <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
-                          <p className="text-sm font-medium">{payload[0].payload.month}</p>
-                          <p className="text-sm" style={{ color: '#f97150' }}>
+                        <div className="bg-white p-2 border border-gray-200 shadow-md rounded text-xs md:text-sm">
+                          <p className="font-medium">{payload[0].payload.month}</p>
+                          <p style={{ color: '#f97150' }}>
                             {categoryLabels[selectedCategory] || selectedCategory}: {formatToBRL(payload[0].value as number)}
                           </p>
                         </div>
@@ -220,14 +232,14 @@ export const ExpenseEvolutionChart = ({ matricula }: { matricula: string }) => {
                   dataKey="value" 
                   fill="#f97150" 
                   name={categoryLabels[selectedCategory] || selectedCategory}
-                  barSize={30}
+                  barSize={isMobile ? 20 : 30}
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">Nenhum dado disponível para esta categoria nos últimos 6 meses.</p>
+              <p className="text-gray-500 text-sm">Nenhum dado disponível para esta categoria nos últimos 6 meses.</p>
             </div>
           )}
         </div>
