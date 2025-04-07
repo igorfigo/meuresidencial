@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -287,15 +288,15 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   return (
     <>
       {filteredAnnouncements.length === 0 ? (
-        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center w-full mx-4">
+        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center w-full mx-0 px-0">
           <p className="text-muted-foreground mb-4">
             {searchTerm ? "Nenhum comunicado encontrado para a pesquisa." : "Nenhum comunicado encontrado."}
           </p>
         </div>
       ) : (
-        <div className="w-full mx-0">
+        <div className="w-full mx-0 px-0">
           {isMobile ? (
-            <div className="grid grid-cols-1 gap-2 mx-4">
+            <div className="grid grid-cols-1 gap-2 mx-4 sm:mx-6">
               {paginatedAnnouncements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}
@@ -309,7 +310,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
               ))}
             </div>
           ) : (
-            <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md bg-white w-full mx-4 rounded-none sm:rounded-lg">
+            <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md bg-white w-full mx-4 sm:mx-6 rounded-none sm:rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -389,7 +390,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
           )}
           
           {totalPages > 1 && (
-            <div className="py-2 border-t mx-4">
+            <div className="py-2 border-t mx-4 sm:mx-6">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
