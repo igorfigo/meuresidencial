@@ -134,6 +134,10 @@ const GaragemLivre = () => {
                 <CarIcon className="h-5 w-5 text-brand-600 mr-2" />
                 <h1 className="text-xl sm:text-2xl font-bold">Garagem Livre</h1>
               </div>
+              {/* Added brief description for mobile */}
+              <p className="text-sm text-muted-foreground mb-3">
+                Compartilhe vagas de garagem que não estão em uso e encontre vagas disponibilizadas por outros moradores do condomínio.
+              </p>
               <Button onClick={() => setIsDialogOpen(true)} className="w-full mb-2">
                 <PlusCircleIcon className="h-4 w-4 mr-1" />
                 Disponibilizar Vaga
@@ -146,6 +150,10 @@ const GaragemLivre = () => {
                   <CarIcon className="h-5 w-5 text-brand-600 mr-2" />
                   <h1 className="text-xl sm:text-2xl font-bold">Garagem Livre</h1>
                 </div>
+                {/* Added brief description for desktop */}
+                <p className="text-sm text-muted-foreground mt-1">
+                  Compartilhe vagas de garagem que não estão em uso e encontre vagas disponibilizadas por outros moradores do condomínio.
+                </p>
               </div>
               <Button onClick={() => setIsDialogOpen(true)} className="whitespace-nowrap">
                 <PlusCircleIcon className="h-4 w-4 mr-1" />
