@@ -26,6 +26,11 @@ const expenseCategories = [
   { value: 'produtos', label: 'Produtos' },
   { value: 'imposto', label: 'Imposto' },
   { value: 'seguranca', label: 'Segurança' },
+  { value: 'internet_telefonia', label: 'Internet / Telefonia' },
+  { value: 'seguro', label: 'Seguro' },
+  { value: 'honorarios_sindico', label: 'Honorários Síndico' },
+  { value: 'jardinagem', label: 'Jardinagem' },
+  { value: 'eventos', label: 'Eventos' },
   { value: 'sistema_condominio', label: 'Sistema Condomínio' },
   { value: 'outros', label: 'Outros' }
 ];
