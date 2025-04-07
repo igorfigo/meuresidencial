@@ -128,18 +128,31 @@ const GaragemLivre = () => {
     <DashboardLayout>
       <div className="container mx-auto py-4 px-4">
         <div className="mb-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="flex items-center">
+          {isMobile ? (
+            <div className="flex flex-col">
+              <div className="flex items-center mb-3">
                 <CarIcon className="h-5 w-5 text-brand-600 mr-2" />
                 <h1 className="text-xl sm:text-2xl font-bold">Garagem Livre</h1>
               </div>
+              <Button onClick={() => setIsDialogOpen(true)} className="w-full mb-2">
+                <PlusCircleIcon className="h-4 w-4 mr-1" />
+                Disponibilizar Vaga
+              </Button>
             </div>
-            <Button onClick={() => setIsDialogOpen(true)} className="whitespace-nowrap" size={isMobile ? "sm" : "default"}>
-              <PlusCircleIcon className="h-4 w-4 mr-1" />
-              {!isMobile ? 'Disponibilizar Vaga' : 'Disponibilizar'}
-            </Button>
-          </div>
+          ) : (
+            <div className="flex justify-between items-center">
+              <div>
+                <div className="flex items-center">
+                  <CarIcon className="h-5 w-5 text-brand-600 mr-2" />
+                  <h1 className="text-xl sm:text-2xl font-bold">Garagem Livre</h1>
+                </div>
+              </div>
+              <Button onClick={() => setIsDialogOpen(true)} className="whitespace-nowrap">
+                <PlusCircleIcon className="h-4 w-4 mr-1" />
+                Disponibilizar Vaga
+              </Button>
+            </div>
+          )}
           <Separator className="mt-4" />
         </div>
 
