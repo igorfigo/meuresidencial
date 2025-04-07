@@ -4,7 +4,7 @@ import { useApp } from '@/contexts/AppContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PasswordChangeSection } from '@/components/minha-assinatura/PasswordChangeSection';
 import { toast } from 'sonner';
 import { ProfileCondominiumInfo } from '@/components/profile/ProfileCondominiumInfo';
@@ -50,17 +50,22 @@ const UserProfile = () => {
   if (isAuthenticated && user?.isResident) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6 px-4 md:px-6 w-full">
-          <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
-          <Card className="p-6 border-l-4 border-l-amber-500 border-t-4 border-t-brand-600">
-            <div className="flex items-start gap-4">
-              <AlertCircle className="h-6 w-6 text-amber-500 flex-shrink-0 mt-1" />
+        <div className="container mx-auto py-4 px-4 w-full">
+          <div className="flex items-center gap-2 mb-4">
+            <UserCog className="h-5 w-5 text-brand-600" />
+            <h1 className="text-xl sm:text-2xl font-bold">Meu Perfil</h1>
+          </div>
+          
+          <div className="border-t pt-3 mb-4"></div>
+          
+          <Card className="p-4 border-l-4 border-l-amber-500 border-t-4 border-t-brand-600 shadow-sm">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-medium text-lg mb-2">Acesso Restrito</h3>
-                <p className="text-gray-600">
-                  Esta página não está disponível para o perfil de Morador. 
-                  Caso precise atualizar suas informações de perfil, 
-                  por favor entre em contato com o administrador do seu condomínio.
+                <h3 className="font-medium text-base mb-1.5">Acesso Restrito</h3>
+                <p className="text-gray-600 text-sm">
+                  Para atualizar suas informações de perfil, 
+                  entre em contato com o administrador do seu condomínio.
                 </p>
               </div>
             </div>
@@ -73,9 +78,9 @@ const UserProfile = () => {
   if (!isAuthenticated || !user) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-6 px-4 md:px-6 w-full">
-          <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
-          <p>Esta página está disponível apenas para usuários autenticados.</p>
+        <div className="container mx-auto py-4 px-4 w-full">
+          <h1 className="text-xl sm:text-2xl font-bold mb-4">Meu Perfil</h1>
+          <p className="text-sm">Esta página está disponível apenas para usuários autenticados.</p>
         </div>
       </DashboardLayout>
     );
@@ -83,14 +88,16 @@ const UserProfile = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6 px-4 md:px-6 w-full">
-        <div className="flex items-center gap-3 mb-6">
-          <UserCog className="h-7 w-7 text-brand-600" />
-          <h1 className="text-2xl font-bold">Meu Perfil</h1>
+      <div className="container mx-auto py-4 px-4 w-full">
+        <div className="flex items-center gap-2 mb-4">
+          <UserCog className="h-5 w-5 text-brand-600" />
+          <h1 className="text-xl sm:text-2xl font-bold">Meu Perfil</h1>
         </div>
         
+        <div className="border-t pt-3 mb-4"></div>
+        
         {isLoading ? (
-          <Card className="p-4 md:p-6 mb-6 border-t-4 border-t-brand-600 w-full">
+          <Card className="p-4 mb-4 border-t-4 border-t-brand-600 shadow-sm w-full">
             <div className="animate-pulse w-full">
               <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
               <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
@@ -98,14 +105,14 @@ const UserProfile = () => {
             </div>
           </Card>
         ) : condominiumData ? (
-          <div className="grid grid-cols-1 gap-6 w-full">
+          <div className="grid grid-cols-1 gap-4 w-full">
             <ProfileCondominiumInfo condominiumData={condominiumData} />
             <ProfileRepresentativeInfo condominiumData={condominiumData} />
             <PasswordChangeSection userMatricula={user.matricula} />
           </div>
         ) : (
-          <Card className="p-4 md:p-6 mb-6 border-t-4 border-t-brand-600 w-full">
-            <p>Nenhuma informação disponível</p>
+          <Card className="p-4 mb-4 border-t-4 border-t-brand-600 shadow-sm w-full">
+            <p className="text-sm">Nenhuma informação disponível</p>
           </Card>
         )}
       </div>

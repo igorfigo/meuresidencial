@@ -10,10 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, BRLToNumber } from '@/utils/currency';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle, CreditCard } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, Clock, XCircle, CreditCard, Wallet } from 'lucide-react';
 import { PixDialog } from '@/components/pix/PixDialog';
 import { Button } from '@/components/ui/button';
 import { useOverdueCharges } from '@/hooks/use-overdue-charges';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Table,
   TableBody,
@@ -125,6 +126,7 @@ const MinhasCobrancas = () => {
   const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
   const [isPixDialogOpen, setIsPixDialogOpen] = useState(false);
   const { overdueCount } = useOverdueCharges();
+  const isMobile = useIsMobile();
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
@@ -364,110 +366,172 @@ const MinhasCobrancas = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Minhas Cobranças</h1>
-          <p className="text-muted-foreground">
-            Acompanhe suas cobranças de condomínio
-            {overdueCount > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {overdueCount} em atraso
-              </Badge>
-            )}
-          </p>
+      <div className="space-y-4 px-2 sm:px-0">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-brand-600 flex-shrink-0" />
+            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Cobranças</h1>
+          </div>
+          {overdueCount > 0 && (
+            <Badge variant="destructive" className="text-xs">
+              {overdueCount} em atraso
+            </Badge>
+          )}
         </div>
         
-        <Card className="border-t-4 border-t-brand-600">
-          <CardHeader>
-            <CardTitle>Histórico de Cobranças</CardTitle>
-            <CardDescription>
-              Visualize e gerencie suas cobranças de condomínio
-            </CardDescription>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-              <TabsList>
-                <TabsTrigger value="pending">Pendentes</TabsTrigger>
-                <TabsTrigger value="paid">Pagas</TabsTrigger>
-              </TabsList>
-            </Tabs>
+        <div className="border-t pt-3"></div>
+        
+        <Card className="border-t-4 border-t-brand-600 shadow-sm">
+          <CardHeader className={isMobile ? "px-3 py-3" : "px-6 py-4"}>
+            <div className="flex flex-col gap-2">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full grid grid-cols-2">
+                  <TabsTrigger value="pending">Pendentes</TabsTrigger>
+                  <TabsTrigger value="paid">Pagas</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className={isMobile ? "px-3 py-3 pt-0" : "px-6"}>
             {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
-                <span className="ml-2 text-lg text-muted-foreground">Carregando cobranças...</span>
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
+                <span className="ml-2 text-muted-foreground">Carregando...</span>
               </div>
             ) : sortedCharges.length === 0 ? (
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
-                <AlertTitle>Nenhuma cobrança encontrada</AlertTitle>
+                <AlertTitle>Nenhuma cobrança {activeTab === 'paid' ? "paga" : "pendente"}</AlertTitle>
                 <AlertDescription>
-                  Não existem cobranças {activeTab === 'paid' ? "pagas" : "pendentes"} registradas para a sua unidade.
+                  Não existem cobranças {activeTab === 'paid' ? "pagas" : "pendentes"} para sua unidade.
                 </AlertDescription>
               </Alert>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-left">Competência</TableHead>
-                      <TableHead className="text-center">Unidade</TableHead>
-                      <TableHead className="text-center">Valor</TableHead>
-                      {activeTab === 'pending' && (
-                        <TableHead className="text-center">Vencimento</TableHead>
-                      )}
-                      {activeTab === 'paid' && (
-                        <TableHead className="text-center">Pagamento</TableHead>
-                      )}
-                      <TableHead className="text-center">Status</TableHead>
-                      {activeTab === 'pending' && (
-                        <TableHead className="text-center">Ações</TableHead>
-                      )}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedCharges.map((charge) => (
-                      <TableRow key={charge.id}>
-                        <TableCell className="font-medium text-left">
-                          {formatMonthYear(charge.month, charge.year)}
-                        </TableCell>
-                        <TableCell className="text-center">{charge.unit}</TableCell>
-                        <TableCell className="text-center">
-                          {formatCurrency(BRLToNumber(charge.amount))}
-                        </TableCell>
-                        {activeTab === 'pending' && (
-                          <TableCell className="text-center">{formatDate(charge.due_date)}</TableCell>
-                        )}
-                        {activeTab === 'paid' && (
-                          <TableCell className="text-center">{formatDate(charge.payment_date)}</TableCell>
-                        )}
-                        <TableCell className="text-center">
+              isMobile ? (
+                <div className="space-y-3 pb-1">
+                  {sortedCharges.map((charge) => (
+                    <Card key={charge.id} className="border shadow-sm">
+                      <CardContent className="p-3 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <div className="font-medium">
+                            {formatMonthYear(charge.month, charge.year)}
+                          </div>
                           <Badge 
-                            className={`flex items-center justify-center mx-auto ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
+                            className={`flex items-center ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
                             variant="outline"
                           >
                             {statusColors[charge.status].icon}
-                            {statusColors[charge.status].label}
+                            <span className="text-xs">{statusColors[charge.status].label}</span>
                           </Badge>
-                        </TableCell>
+                        </div>
+                        
+                        <div className="text-sm grid grid-cols-2 gap-x-2 gap-y-1">
+                          <span className="text-gray-500">Unidade:</span>
+                          <span className="text-right">{charge.unit}</span>
+                          
+                          <span className="text-gray-500">Valor:</span>
+                          <span className="text-right font-medium">
+                            {formatCurrency(BRLToNumber(charge.amount))}
+                          </span>
+                          
+                          {activeTab === 'pending' && (
+                            <>
+                              <span className="text-gray-500">Vencimento:</span>
+                              <span className="text-right">{formatDate(charge.due_date)}</span>
+                            </>
+                          )}
+                          
+                          {activeTab === 'paid' && (
+                            <>
+                              <span className="text-gray-500">Pagamento:</span>
+                              <span className="text-right">{formatDate(charge.payment_date)}</span>
+                            </>
+                          )}
+                        </div>
+                        
                         {activeTab === 'pending' && (
-                          <TableCell className="text-center">
+                          <div className="pt-1">
                             <Button 
-                              variant="ghost" 
+                              variant="outline" 
                               size="sm"
                               onClick={() => handleOpenPixDialog(charge)}
-                              className="h-8 gap-1 text-brand-600 mx-auto"
+                              className="w-full h-8 gap-1 text-brand-600 border-brand-600"
                               disabled={!pixSettings?.chavepix}
                             >
                               <CreditCard className="h-4 w-4" />
-                              <span>PIX</span>
+                              <span>Pagar com PIX</span>
                             </Button>
-                          </TableCell>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-left">Competência</TableHead>
+                        <TableHead className="text-center">Unidade</TableHead>
+                        <TableHead className="text-center">Valor</TableHead>
+                        {activeTab === 'pending' && (
+                          <TableHead className="text-center">Vencimento</TableHead>
+                        )}
+                        {activeTab === 'paid' && (
+                          <TableHead className="text-center">Pagamento</TableHead>
+                        )}
+                        <TableHead className="text-center">Status</TableHead>
+                        {activeTab === 'pending' && (
+                          <TableHead className="text-center">Ações</TableHead>
                         )}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedCharges.map((charge) => (
+                        <TableRow key={charge.id}>
+                          <TableCell className="font-medium text-left">
+                            {formatMonthYear(charge.month, charge.year)}
+                          </TableCell>
+                          <TableCell className="text-center">{charge.unit}</TableCell>
+                          <TableCell className="text-center">
+                            {formatCurrency(BRLToNumber(charge.amount))}
+                          </TableCell>
+                          {activeTab === 'pending' && (
+                            <TableCell className="text-center">{formatDate(charge.due_date)}</TableCell>
+                          )}
+                          {activeTab === 'paid' && (
+                            <TableCell className="text-center">{formatDate(charge.payment_date)}</TableCell>
+                          )}
+                          <TableCell className="text-center">
+                            <Badge 
+                              className={`flex items-center justify-center mx-auto ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
+                              variant="outline"
+                            >
+                              {statusColors[charge.status].icon}
+                              {statusColors[charge.status].label}
+                            </Badge>
+                          </TableCell>
+                          {activeTab === 'pending' && (
+                            <TableCell className="text-center">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleOpenPixDialog(charge)}
+                                className="h-8 gap-1 text-brand-600 mx-auto"
+                                disabled={!pixSettings?.chavepix}
+                              >
+                                <CreditCard className="h-4 w-4" />
+                                <span>PIX</span>
+                              </Button>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )
             )}
           </CardContent>
         </Card>
