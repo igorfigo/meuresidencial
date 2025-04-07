@@ -61,58 +61,69 @@ const AnnouncementCard = ({
   onPrint: () => void;
 }) => {
   return (
-    <Card className="mb-4 hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium line-clamp-1">{announcement.title}</CardTitle>
-        <p className="text-xs text-muted-foreground">
-          {announcement.created_at ? format(new Date(announcement.created_at), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
-        </p>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex justify-end gap-1">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onView}
-            title="Visualizar"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
+    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-medium text-base line-clamp-1">
+                {announcement.title}
+              </h3>
+              <div className="flex items-center text-sm text-muted-foreground mt-1">
+                <span>{announcement.created_at ? format(new Date(announcement.created_at), 'dd/MM/yyyy', { locale: ptBR }) : '-'}</span>
+              </div>
+            </div>
+          </div>
           
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onPrint}
-            title="Imprimir"
-          >
-            <Printer className="h-4 w-4 text-blue-500" />
-          </Button>
-          
-          {!isResident && (
-            <>
-              {onEdit && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={onEdit}
-                  title="Editar"
-                >
-                  <MessageCircle className="h-4 w-4 text-amber-500" />
-                </Button>
-              )}
-              
-              {onDelete && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={onDelete}
-                  title="Excluir"
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              )}
-            </>
-          )}
+          <div className="flex mt-2 gap-1 justify-end">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onView}
+              title="Ver detalhes"
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              <span className="text-xs">Detalhes</span>
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onPrint}
+              title="Imprimir"
+            >
+              <Printer className="h-4 w-4 mr-1" />
+              <span className="text-xs">Imprimir</span>
+            </Button>
+            
+            {!isResident && (
+              <>
+                {onEdit && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={onEdit}
+                    title="Editar"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1 text-amber-500" />
+                    <span className="text-xs">Editar</span>
+                  </Button>
+                )}
+                
+                {onDelete && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={onDelete}
+                    title="Excluir"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1 text-red-500" />
+                    <span className="text-xs text-red-500">Excluir</span>
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -284,7 +295,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       ) : (
         <div>
           {isMobile ? (
-            <div className="grid grid-cols-1 gap-2 p-4">
+            <div className="grid grid-cols-1 gap-3 p-4">
               {paginatedAnnouncements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}
