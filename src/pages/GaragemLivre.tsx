@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CarIcon, PlusCircleIcon, Trash2Icon } from 'lucide-react';
+import { CarIcon, PlusCircleIcon, Trash2Icon, InfoIcon } from 'lucide-react';
 import { useGarageListings } from '@/hooks/use-garage-listings';
 import { useApp } from '@/contexts/AppContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -63,11 +62,13 @@ const GaragemLivre = () => {
 
   // Mobile card for listings
   const GarageListingCard = ({ listing, isMyListing = false }) => (
-    <Card key={listing.id} className="mb-3">
-      <CardContent className="pt-4">
+    <Card key={listing.id} className={`mb-3 ${isMyListing ? 'border-l-4 border-l-brand-600' : ''}`}>
+      <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <CarIcon className="h-5 w-5 text-blue-500 mr-2" />
+            <div className="bg-blue-100 p-2 rounded-full mr-2">
+              <CarIcon className="h-4 w-4 text-blue-600" />
+            </div>
             <span className="font-medium">
               {isMyListing ? `Unidade ${user.unit}` : `Unidade ${listing.residents?.unidade}`}
             </span>
@@ -83,12 +84,12 @@ const GaragemLivre = () => {
           )}
         </div>
         
-        <div className="mt-2 text-sm text-gray-600">
+        <div className="mt-3 p-3 bg-gray-50 rounded-md text-sm text-gray-700">
           {listing.description || "Sem descrição adicional"}
         </div>
         
         {isMyListing && (
-          <div className="mt-2">
+          <div className="mt-3 flex items-center">
             <Badge className="bg-green-500 hover:bg-green-600">
               Disponível
             </Badge>
@@ -96,14 +97,27 @@ const GaragemLivre = () => {
         )}
         
         {!isMyListing && (
-          <div className="mt-3 pt-2 border-t text-sm">
-            <div className="font-medium text-gray-700 mb-1">{listing.residents?.nome_completo}</div>
-            {listing.residents?.telefone && (
-              <div className="mb-1">{listing.residents.telefone}</div>
-            )}
-            {listing.residents?.email && (
-              <div className="text-blue-600">{listing.residents.email}</div>
-            )}
+          <div className="mt-3 pt-3 border-t">
+            <p className="font-medium text-sm mb-2">Informações de contato:</p>
+            <div className="space-y-1.5 bg-blue-50 p-3 rounded-md">
+              <div className="font-medium text-blue-900">{listing.residents?.nome_completo}</div>
+              {listing.residents?.telefone && (
+                <div className="flex items-center text-sm text-blue-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  {listing.residents.telefone}
+                </div>
+              )}
+              {listing.residents?.email && (
+                <div className="flex items-center text-sm text-blue-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span className="truncate">{listing.residents.email}</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
@@ -112,34 +126,40 @@ const GaragemLivre = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6">
-        <div className="mb-6">
+      <div className="container mx-auto py-4 px-4">
+        <div className="mb-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold">Garagem Livre</h1>
-              <p className="text-gray-600 mt-2">
+              <div className="flex items-center">
+                <CarIcon className="h-5 w-5 text-brand-600 mr-2" />
+                <h1 className="text-xl sm:text-2xl font-bold">Garagem Livre</h1>
+              </div>
+              <p className="text-gray-600 mt-2 text-sm">
                 Sistema de compartilhamento de vagas de garagem.
               </p>
             </div>
-            <Button onClick={() => setIsDialogOpen(true)}>
-              <PlusCircleIcon className="h-4 w-4 mr-2" />
+            <Button onClick={() => setIsDialogOpen(true)} className="whitespace-nowrap" size={isMobile ? "sm" : "default"}>
+              <PlusCircleIcon className="h-4 w-4 mr-1" />
               {!isMobile ? 'Cadastrar Vaga' : 'Cadastrar'}
             </Button>
           </div>
           <Separator className="mt-4" />
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Card className="border-t-4 border-t-brand-600">
-            <CardHeader>
-              <CardTitle>Minhas Vagas Cadastradas</CardTitle>
-              <CardDescription>
-                Gerencie as vagas de garagem que você disponibilizou.
+            <CardHeader className={isMobile ? "p-3" : undefined}>
+              <CardTitle className={isMobile ? "text-lg" : undefined}>Minhas Vagas</CardTitle>
+              <CardDescription className={isMobile ? "text-xs" : undefined}>
+                Gerencie as vagas que você disponibilizou.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className={isMobile ? "p-3 pt-0" : undefined}>
               {isLoading ? (
-                <div className="text-center py-6">Carregando...</div>
+                <div className="animate-pulse space-y-2">
+                  <div className="h-16 bg-gray-200 rounded"></div>
+                  <div className="h-16 bg-gray-200 rounded"></div>
+                </div>
               ) : myGarageListings && myGarageListings.length > 0 ? (
                 isMobile ? (
                   <div>
@@ -189,26 +209,32 @@ const GaragemLivre = () => {
                   </Table>
                 )
               ) : (
-                <div className="text-center py-8 bg-gray-50 border border-dashed rounded-lg">
-                  <CarIcon className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-1">
-                    Você ainda não cadastrou vagas de garagem
+                <div className="text-center py-6 bg-gray-50 border border-dashed rounded-lg">
+                  <CarIcon className="h-10 w-10 mx-auto text-gray-400 mb-2" />
+                  <h3 className={`${isMobile ? "text-base" : "text-lg"} font-medium text-gray-600 mb-1`}>
+                    Você ainda não cadastrou vagas
                   </h3>
+                  <p className={`${isMobile ? "text-xs" : "text-sm"} text-gray-500 max-w-xs mx-auto`}>
+                    Cadastre suas vagas disponíveis para que outros moradores possam utilizar.
+                  </p>
                 </div>
               )}
             </CardContent>
           </Card>
           
           <Card className="border-t-4 border-t-brand-600">
-            <CardHeader>
-              <CardTitle>Vagas Disponíveis no Condomínio</CardTitle>
-              <CardDescription>
-                Veja as vagas de garagem disponíveis e entre em contato.
+            <CardHeader className={isMobile ? "p-3" : undefined}>
+              <CardTitle className={isMobile ? "text-lg" : undefined}>Vagas Disponíveis</CardTitle>
+              <CardDescription className={isMobile ? "text-xs" : undefined}>
+                Veja as vagas disponíveis no condomínio.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className={isMobile ? "p-3 pt-0" : undefined}>
               {isLoading ? (
-                <div className="text-center py-6">Carregando...</div>
+                <div className="animate-pulse space-y-2">
+                  <div className="h-16 bg-gray-200 rounded"></div>
+                  <div className="h-16 bg-gray-200 rounded"></div>
+                </div>
               ) : garageListings && garageListings.length > 0 ? (
                 isMobile ? (
                   <div>
@@ -257,13 +283,13 @@ const GaragemLivre = () => {
                   </Table>
                 )
               ) : (
-                <div className="text-center py-8 bg-gray-50 border border-dashed rounded-lg">
-                  <CarIcon className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-                  <h3 className="text-lg font-medium text-gray-600">
-                    Não há vagas disponíveis no momento
+                <div className="text-center py-6 bg-gray-50 border border-dashed rounded-lg">
+                  <CarIcon className="h-10 w-10 mx-auto text-gray-400 mb-2" />
+                  <h3 className={`${isMobile ? "text-base" : "text-lg"} font-medium text-gray-600`}>
+                    Nenhuma vaga disponível
                   </h3>
-                  <p className="text-gray-500 max-w-md mx-auto">
-                    Quando outros moradores cadastrarem vagas disponíveis, elas aparecerão aqui.
+                  <p className={`${isMobile ? "text-xs" : "text-sm"} text-gray-500 max-w-xs mx-auto`}>
+                    Quando outros moradores cadastrarem vagas, elas aparecerão aqui.
                   </p>
                 </div>
               )}
@@ -279,8 +305,8 @@ const GaragemLivre = () => {
                 Informe os detalhes da vaga que deseja disponibilizar.
               </DialogDescription>
             </DialogHeader>
-            <div className="py-4">
-              <div className="mb-4">
+            <div className="py-2">
+              <div className="mb-3">
                 <label className="block text-sm font-medium mb-1">
                   Descrição da Vaga
                 </label>
@@ -292,14 +318,15 @@ const GaragemLivre = () => {
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
-              <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-800 mb-4">
+              <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-800 flex gap-2">
+                <InfoIcon className="h-5 w-5 flex-shrink-0 text-blue-600" />
                 <p>
-                  <strong>Nota:</strong> Seus dados de contato (nome, unidade, telefone e e-mail) serão 
+                  Seus dados de contato (nome, unidade, telefone e e-mail) serão 
                   exibidos para os moradores interessados.
                 </p>
               </div>
             </div>
-            <DialogFooter className={isMobile ? "flex-col space-y-2" : undefined}>
+            <DialogFooter className={isMobile ? "flex-col space-y-2 mt-2" : undefined}>
               <Button 
                 variant="outline" 
                 onClick={() => setIsDialogOpen(false)}
