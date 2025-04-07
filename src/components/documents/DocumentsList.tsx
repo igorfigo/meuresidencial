@@ -212,7 +212,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           </p>
         </div>
       ) : isMobile ? (
-        <div className={`space-y-0 ${isUserResident ? 'mx-0' : 'mx-4'}`}>
+        <div className={isUserResident ? 'space-y-0 divide-y divide-gray-100' : 'space-y-4 mx-4'}>
           {documents.map((document) => (
             <DocumentCard
               key={document.id}

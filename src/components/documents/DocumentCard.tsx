@@ -53,7 +53,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
 
   return (
     <Card 
-      className={`overflow-hidden ${isUserResident && isMobile ? 'rounded-none shadow-sm border-x-0 border-t border-b-0' : 'border-l-4 border-l-brand-600'}`}
+      className={`overflow-hidden ${isUserResident && isMobile ? 'rounded-none shadow-none border-x-0 border-t border-b-0 mb-0.5' : 'border-l-4 border-l-brand-600'}`}
     >
       <CardContent className="p-4">
         <div className="flex flex-col gap-2">
