@@ -38,6 +38,7 @@ import { jsPDF } from 'jspdf';
 import { useApp } from '@/contexts/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+// Define ITEMS_PER_PAGE constant
 const ITEMS_PER_PAGE = 10;
 
 interface AnnouncementsListProps {
