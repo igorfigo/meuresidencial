@@ -127,10 +127,10 @@ const GaragemLivre = () => {
 
   return (
     <DashboardLayout>
-      <div className="w-full py-4 px-2 sm:px-4">
+      <div className="w-full py-4 px-1 sm:px-4">
         <div className="mb-4">
           {isMobile ? (
-            <div className="flex flex-col px-2">
+            <div className="flex flex-col px-0">
               <div className="flex items-center mb-3">
                 <CarIcon className="h-5 w-5 text-brand-600 mr-2" />
                 <h1 className="text-xl sm:text-2xl font-bold">Garagem Livre</h1>
@@ -165,7 +165,7 @@ const GaragemLivre = () => {
           <Separator className="mt-4" />
         </div>
 
-        <div className="space-y-4 px-2">
+        <div className="space-y-4 px-0">
           <Card className="border-t-4 border-t-brand-600 w-full">
             <CardHeader className={isMobile ? "p-3" : undefined}>
               <CardTitle className={isMobile ? "text-lg" : undefined}>Minhas Vagas</CardTitle>
