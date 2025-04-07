@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -114,8 +115,8 @@ const Documentos = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 px-2 sm:px-0">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className={`space-y-4 ${isResident && isMobile ? 'px-0' : 'px-2 sm:px-0'}`}>
+        <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 ${isResident && isMobile ? 'px-4' : ''}`}>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Documentos Úteis</h1>
             <p className="text-muted-foreground text-sm md:text-base">
@@ -136,10 +137,10 @@ const Documentos = () => {
           )}
         </div>
 
-        <div className="border-t pt-4"></div>
+        <div className={`border-t pt-4 ${isResident && isMobile ? 'mx-4' : ''}`}></div>
 
         {!showForm && (
-          <div className="mb-2">
+          <div className={`mb-2 ${isResident && isMobile ? 'mx-4' : ''}`}>
             <FinancialChartCard
               title="Pesquisar Documentos"
               icon={<Search className="h-4 w-4" />}
@@ -163,7 +164,7 @@ const Documentos = () => {
           </div>
         )}
 
-        <div className="pt-4 md:pt-6">
+        <div className={`pt-4 md:pt-6 ${isResident && isMobile ? 'px-0' : ''}`}>
           {isLoading ? (
             <div className="flex justify-center items-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
