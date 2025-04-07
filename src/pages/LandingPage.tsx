@@ -532,6 +532,18 @@ const LandingPage = () => {
             </div>
           </FadeInSection>
           
+          <FadeInSection delay={50} className="mb-12">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl px-8 py-6 shadow-sm border border-gray-100 text-center">
+              <div className="flex flex-col items-center justify-center">
+                <div className="text-5xl font-bold text-custom-primary mb-2">350+</div>
+                <div className="text-xl text-gray-700 font-medium">Condomínios já utilizam nossa plataforma</div>
+                <div className="mt-3 text-gray-600">
+                  Junte-se a uma comunidade crescente de síndicos satisfeitos
+                </div>
+              </div>
+            </div>
+          </FadeInSection>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <TestimonialCard 
               author="Ricardo Pereira"
