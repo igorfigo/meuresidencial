@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -285,7 +286,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   }
   
   return (
-    <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
+    <>
       {filteredAnnouncements.length === 0 ? (
         <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center">
           <p className="text-muted-foreground mb-4">
@@ -295,7 +296,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       ) : (
         <div>
           {isMobile ? (
-            <div className="grid grid-cols-1 gap-3 p-4">
+            <div className="grid grid-cols-1 gap-3">
               {paginatedAnnouncements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}
@@ -481,7 +482,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </>
   );
 };
 
