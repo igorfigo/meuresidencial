@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -33,7 +32,7 @@ const SugestaoReclamacao = () => {
   if (!user?.isResident) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-4 px-2 sm:py-6 sm:px-6 max-w-3xl">
+        <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-6 max-w-3xl">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">Sugestão/Reclamação</h1>
           <Separator className="mb-4" />
           <Card className="border-t-4 shadow-md" style={{ borderTopColor: '#2151B9' }}>
@@ -122,24 +121,22 @@ const SugestaoReclamacao = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-4 px-0 sm:py-6 sm:px-6 max-w-3xl">
-        <div className="px-4 sm:px-0">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Sugestão/Reclamação</h1>
-          <Separator className="mb-2" />
-          <p className="text-sm sm:text-base text-gray-600 mb-4">
-            Envie sugestões ou reclamações diretamente para o síndico do seu condomínio.
-          </p>
-        </div>
+      <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-0 max-w-3xl">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Sugestão/Reclamação</h1>
+        <Separator className="mb-2" />
+        <p className="text-sm sm:text-base text-gray-600 mb-4">
+          Envie sugestões ou reclamações diretamente para o síndico do seu condomínio.
+        </p>
         
-        <Card className="border-t-4 border-t-brand-600 shadow-md mx-0 rounded-none sm:rounded-lg sm:mx-auto">
-          <CardHeader className="pb-2 pt-4 px-4 sm:pb-3 sm:pt-6 sm:px-6">
+        <Card className="border-t-4 border-t-brand-600 shadow-md">
+          <CardHeader className={`pb-2 sm:pb-3 ${isMobile ? 'px-4' : ''}`}>
             <CardTitle className="text-xl sm:text-2xl text-brand-700">Envie sua mensagem</CardTitle>
             <CardDescription className="text-gray-600 text-sm sm:text-base">
               Use este formulário para enviar sua mensagem ao síndico.
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="px-4 pt-2 sm:px-6">
+          <CardContent className={isMobile ? 'px-4 pt-2' : ''}>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-3">
                 <div>
@@ -183,7 +180,7 @@ const SugestaoReclamacao = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
                       <div>
                         <p className="text-xs text-gray-500 mb-1">Condomínio</p>
                         <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm truncate">
@@ -236,11 +233,11 @@ const SugestaoReclamacao = () => {
             </form>
           </CardContent>
           
-          <CardFooter className="flex flex-col gap-3 pt-2 border-t border-gray-100 bg-gray-50 rounded-b-none sm:rounded-b-lg p-4">
+          <CardFooter className={`flex ${isMobile ? 'flex-col' : 'justify-end'} gap-3 pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg p-4`}>
             <Button 
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="w-full bg-brand-600 hover:bg-brand-700 transition-colors h-10"
+              className={`${isMobile ? 'w-full' : ''} bg-brand-600 hover:bg-brand-700 transition-colors h-10`}
             >
               {isSubmitting ? (
                 <>
