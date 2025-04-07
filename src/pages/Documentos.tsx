@@ -163,9 +163,9 @@ const Documentos = () => {
           </div>
         )}
 
-        <div className={`pt-4 md:pt-6 ${isResident && isMobile ? 'px-0' : ''}`}>
+        <div className="pt-4 md:pt-6">
           {isLoading ? (
-            <div className="flex justify-center items-center py-12">
+            <div className={`flex justify-center items-center py-12 ${isResident && isMobile ? 'mx-4' : ''}`}>
               <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
             </div>
           ) : showForm && !isResident ? (

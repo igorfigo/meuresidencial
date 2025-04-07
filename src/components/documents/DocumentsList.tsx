@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -211,7 +212,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           </p>
         </div>
       ) : isMobile ? (
-        <div className={`space-y-3 ${isUserResident ? '-mx-4' : ''}`}>
+        <div className={`space-y-3 ${isUserResident ? 'mx-4' : ''}`}>
           {documents.map((document) => (
             <DocumentCard
               key={document.id}
@@ -224,7 +225,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           ))}
           
           {totalPages > 1 && (
-            <div className={`py-3 flex justify-center ${isUserResident ? 'mx-4' : ''}`}>
+            <div className={`py-3 flex justify-center`}>
               <Pagination>
                 <PaginationContent className="gap-1">
                   <PaginationItem>
