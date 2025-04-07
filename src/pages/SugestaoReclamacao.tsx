@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Loader2, MessageSquare } from 'lucide-react';
+import { AlertTriangle, Loader2, MessageCircle, Home, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -51,6 +51,21 @@ const SugestaoReclamacao = () => {
       </DashboardLayout>
     );
   }
+
+  // Custom top bar content for mobile
+  const mobileTopBarContent = (
+    <div className="flex items-center">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="mr-2"
+        onClick={() => navigate('/dashboard')}
+      >
+        <Home className="h-5 w-5" />
+      </Button>
+      <h1 className="text-xl font-semibold truncate">Sugestão/Reclamação</h1>
+    </div>
+  );
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -75,7 +90,7 @@ const SugestaoReclamacao = () => {
       // Get manager's email from the user's condominium data
       const { data: condominiumData, error: condoError } = await supabase
         .from('condominiums')
-        .select('emaillegal') // Changed from 'email_representante' to 'emaillegal'
+        .select('emaillegal') 
         .eq('matricula', user.matricula)
         .single();
       
@@ -83,7 +98,7 @@ const SugestaoReclamacao = () => {
         throw new Error('Não foi possível encontrar o email do síndico');
       }
       
-      const managerEmail = condominiumData.emaillegal; // Changed from 'email_representante' to 'emaillegal'
+      const managerEmail = condominiumData.emaillegal;
       
       if (!managerEmail) {
         throw new Error('Email do síndico não cadastrado');
@@ -119,90 +134,121 @@ const SugestaoReclamacao = () => {
   };
   
   return (
-    <DashboardLayout>
-      <div className="container mx-auto py-6 max-w-3xl">
-        <h1 className="text-3xl font-bold mb-2">Sugestão/Reclamação</h1>
-        <Separator className="mb-2" />
-        <p className="text-gray-600 mb-6">
-          Envie sugestões ou reclamações diretamente para o síndico do seu condomínio.
-        </p>
+    <DashboardLayout mobileTopBarContent={isMobile ? mobileTopBarContent : undefined}>
+      <div className={`container mx-auto py-${isMobile ? '4' : '6'} ${isMobile ? 'px-2' : 'max-w-3xl'}`}>
+        {!isMobile && (
+          <>
+            <h1 className="text-3xl font-bold mb-2">Sugestão/Reclamação</h1>
+            <Separator className="mb-2" />
+            <p className="text-gray-600 mb-6">
+              Envie sugestões ou reclamações diretamente para o síndico do seu condomínio.
+            </p>
+          </>
+        )}
         
-        <Card className="border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-2xl text-brand-700">Envie sua mensagem</CardTitle>
-            <CardDescription className="text-gray-600">
-              Use este formulário para enviar sugestões ou reclamações para o síndico do seu condomínio.
-            </CardDescription>
-          </CardHeader>
+        <Card className={`border-t-4 border-t-brand-600 shadow-md ${isMobile ? 'mx-0' : ''}`}>
+          {!isMobile && (
+            <CardHeader className="pb-3">
+              <CardTitle className="text-2xl text-brand-700">Envie sua mensagem</CardTitle>
+              <CardDescription className="text-gray-600">
+                Use este formulário para enviar sugestões ou reclamações para o síndico do seu condomínio.
+              </CardDescription>
+            </CardHeader>
+          )}
           
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-4">
+          <CardContent className={isMobile ? "pt-4 px-3" : ""}>
+            <form onSubmit={handleSubmit} className={`space-y-${isMobile ? '4' : '6'}`}>
+              <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
                 <div>
                   <Label htmlFor="type" className="font-medium">Tipo</Label>
-                  <div className="flex space-x-4 mt-2">
+                  <div className="flex space-x-2 mt-2">
                     <Button
                       type="button"
                       variant={formData.type === 'sugestao' ? 'default' : 'outline'}
-                      className={formData.type === 'sugestao' ? 'bg-brand-600 hover:bg-brand-700' : ''}
+                      className={`flex-1 ${formData.type === 'sugestao' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
                       onClick={() => handleTypeChange('sugestao')}
                     >
+                      <ThumbsUp className="mr-2 h-4 w-4" />
                       Sugestão
                     </Button>
                     <Button
                       type="button"
                       variant={formData.type === 'reclamacao' ? 'default' : 'outline'}
-                      className={formData.type === 'reclamacao' ? 'bg-brand-600 hover:bg-brand-700' : ''}
+                      className={`flex-1 ${formData.type === 'reclamacao' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
                       onClick={() => handleTypeChange('reclamacao')}
                     >
+                      <ThumbsDown className="mr-2 h-4 w-4" />
                       Reclamação
                     </Button>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="nome" className="font-medium">Nome</Label>
-                    <Input 
-                      id="nome" 
-                      value={user?.nome || 'Não informado'} 
-                      disabled 
-                      className="bg-gray-50"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="font-medium">Email</Label>
-                    <Input 
-                      id="email" 
-                      value={user?.email || 'Não informado'} 
-                      disabled 
-                      className="bg-gray-50"
-                    />
-                  </div>
-                </div>
+                {!isMobile && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="nome" className="font-medium">Nome</Label>
+                        <Input 
+                          id="nome" 
+                          value={user?.nome || 'Não informado'} 
+                          disabled 
+                          className="bg-gray-50"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="font-medium">Email</Label>
+                        <Input 
+                          id="email" 
+                          value={user?.email || 'Não informado'} 
+                          disabled 
+                          className="bg-gray-50"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="condominio" className="font-medium">Condomínio</Label>
+                        <Input 
+                          id="condominio" 
+                          value={user?.nomeCondominio || 'N/A'} 
+                          disabled 
+                          className="bg-gray-50"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="unidade" className="font-medium">Unidade</Label>
+                        <Input 
+                          id="unidade" 
+                          value={user?.unit || 'N/A'} 
+                          disabled 
+                          className="bg-gray-50"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="condominio" className="font-medium">Condomínio</Label>
-                    <Input 
-                      id="condominio" 
-                      value={user?.nomeCondominio || 'N/A'} 
-                      disabled 
-                      className="bg-gray-50"
-                    />
+                {isMobile && (
+                  <div className="p-3 bg-gray-50 rounded-md shadow-sm border border-gray-100">
+                    <div className="text-sm">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gray-500">Nome:</span>
+                        <span className="font-medium">{user?.nome || 'Não informado'}</span>
+                      </div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gray-500">Unidade:</span>
+                        <span className="font-medium">{user?.unit || 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Condomínio:</span>
+                        <span className="font-medium">{user?.nomeCondominio || 'N/A'}</span>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="unidade" className="font-medium">Unidade</Label>
-                    <Input 
-                      id="unidade" 
-                      value={user?.unit || 'N/A'} 
-                      disabled 
-                      className="bg-gray-50"
-                    />
-                  </div>
-                </div>
+                )}
                 
                 <div className="space-y-2">
                   <Label htmlFor="subject" className="font-medium" required>Assunto</Label>
@@ -225,7 +271,7 @@ const SugestaoReclamacao = () => {
                     value={formData.message} 
                     onChange={handleChange} 
                     placeholder="Digite sua mensagem aqui..." 
-                    rows={6} 
+                    rows={isMobile ? 4 : 6} 
                     required 
                     className="border-gray-300 focus:border-brand-500 focus:ring-brand-500 resize-none"
                   />
@@ -234,7 +280,7 @@ const SugestaoReclamacao = () => {
             </form>
           </CardContent>
           
-          <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-end gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg`}>
+          <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-end gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg ${isMobile ? 'px-3 pb-3' : ''}`}>
             <Button 
               onClick={handleSubmit}
               disabled={isSubmitting}
