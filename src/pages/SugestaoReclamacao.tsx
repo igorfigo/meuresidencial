@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -32,10 +33,10 @@ const SugestaoReclamacao = () => {
   if (!user?.isResident) {
     return (
       <DashboardLayout>
-        <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-6 max-w-3xl">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Sugestão/Reclamação</h1>
+        <div className="w-full p-0 sm:p-6">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 px-4 sm:px-0">Sugestão/Reclamação</h1>
           <Separator className="mb-4" />
-          <Card className="border-t-4 shadow-md" style={{ borderTopColor: '#2151B9' }}>
+          <Card className="border-t-4 shadow-md mx-0" style={{ borderTopColor: '#2151B9' }}>
             <CardContent className="pt-6">
               <div className="flex items-start space-x-4">
                 <AlertTriangle className="h-6 w-6 text-amber-500 mt-1 flex-shrink-0" />
@@ -121,24 +122,26 @@ const SugestaoReclamacao = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-0 max-w-3xl">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Sugestão/Reclamação</h1>
-        <Separator className="mb-2" />
-        <p className="text-sm sm:text-base text-gray-600 mb-4">
-          Envie sugestões ou reclamações diretamente para o síndico do seu condomínio.
-        </p>
+      <div className="w-full p-0 sm:p-6">
+        <div className="px-4 sm:px-0">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Sugestão/Reclamação</h1>
+          <Separator className="mb-2" />
+          <p className="text-sm sm:text-base text-gray-600 mb-4">
+            Envie sugestões ou reclamações diretamente para o síndico do seu condomínio.
+          </p>
+        </div>
         
-        <Card className="border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className={`pb-2 sm:pb-3 ${isMobile ? 'px-4' : ''}`}>
+        <Card className="border-t-4 border-t-brand-600 shadow-md mx-0">
+          <CardHeader className="pb-2 sm:pb-3 px-4 sm:px-6">
             <CardTitle className="text-xl sm:text-2xl text-brand-700">Envie sua mensagem</CardTitle>
             <CardDescription className="text-gray-600 text-sm sm:text-base">
               Use este formulário para enviar sua mensagem ao síndico.
             </CardDescription>
           </CardHeader>
           
-          <CardContent className={isMobile ? 'px-4 pt-2' : ''}>
+          <CardContent className="p-4 sm:p-6 pt-2">
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div>
                   <Label htmlFor="type" className="font-medium mb-2 block">Tipo de mensagem</Label>
                   <div className="grid grid-cols-2 gap-2">
@@ -164,7 +167,7 @@ const SugestaoReclamacao = () => {
                 </div>
                 
                 <div className="pt-1">
-                  <Label htmlFor="nome" className="font-medium block mb-1">Seus dados</Label>
+                  <Label htmlFor="nome" className="font-medium block mb-2">Seus dados</Label>
                   <div className="space-y-2">
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Nome</p>
@@ -180,7 +183,7 @@ const SugestaoReclamacao = () => {
                       </div>
                     </div>
 
-                    <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
+                    <div className="grid grid-cols-2 gap-2">
                       <div>
                         <p className="text-xs text-gray-500 mb-1">Condomínio</p>
                         <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm truncate">
@@ -233,11 +236,11 @@ const SugestaoReclamacao = () => {
             </form>
           </CardContent>
           
-          <CardFooter className={`flex ${isMobile ? 'flex-col' : 'justify-end'} gap-3 pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg p-4`}>
+          <CardFooter className="flex justify-end gap-3 pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg p-4">
             <Button 
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`${isMobile ? 'w-full' : ''} bg-brand-600 hover:bg-brand-700 transition-colors h-10`}
+              className="w-full bg-brand-600 hover:bg-brand-700 transition-colors h-10"
             >
               {isSubmitting ? (
                 <>
