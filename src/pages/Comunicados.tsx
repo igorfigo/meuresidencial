@@ -212,7 +212,7 @@ const Comunicados: React.FC = () => {
           </div>
         )}
         
-        <div className="pt-4 md:pt-6 mx-2 sm:mx-0">
+        <div className={`pt-4 md:pt-6 ${isMobile && isResident ? "-mx-6" : "mx-2 sm:mx-0"}`}>
           {!isResident && showForm ? (
             <Card className="border-t-4 border-t-brand-600 shadow-md mx-2 sm:mx-0">
               <AnnouncementForm
