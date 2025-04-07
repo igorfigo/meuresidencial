@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Building, Eye, EyeOff, Lock, Mail, Users, Wallet, Calendar, Bell, AlertCircle } from 'lucide-react';
+import { Building, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Dialog, 
   DialogContent, 
@@ -18,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 
 const SUPABASE_URL = "https://kcbvdcacgbwigefwacrk.supabase.co";
+const REMEMBER_EMAIL_KEY = "login_remembered_email";
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
@@ -28,6 +31,7 @@ const Login = () => {
   const { login } = useApp();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('manager');
+  const [rememberEmail, setRememberEmail] = useState(false);
   
   // Password recovery states
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
@@ -36,11 +40,27 @@ const Login = () => {
   const [recoverySuccess, setRecoverySuccess] = useState(false);
   const [recoveryError, setRecoveryError] = useState('');
 
+  // Check for remembered email on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
+    if (savedEmail) {
+      setIdentifier(savedEmail);
+      setRememberEmail(true);
+    }
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier || !password) {
       toast.error('Por favor, preencha todos os campos');
       return;
+    }
+    
+    // Save email if remember is checked
+    if (rememberEmail) {
+      localStorage.setItem(REMEMBER_EMAIL_KEY, identifier);
+    } else {
+      localStorage.removeItem(REMEMBER_EMAIL_KEY);
     }
     
     setLoading(true);
@@ -109,19 +129,19 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col sm:flex-row bg-gradient-to-br from-blue-50 to-indigo-100 h-screen w-screen">
+    <div className="min-h-screen flex flex-col sm:flex-row bg-white">
       <div className="sm:w-1/2 flex flex-col justify-center items-center p-8 sm:p-16 animate-fade-in bg-brand-700 text-white h-full">
         <div className="max-w-md w-full">
           <div className="mb-8 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start mb-4">
-              <Building className="h-8 w-8 text-white" />
-              <h1 className="text-3xl font-bold text-white ml-2 font-display">MeuResidencial</h1>
+              <Building className="h-7 w-7 text-white" />
+              <h1 className="text-2xl font-bold text-white ml-2 font-display">MeuResidencial</h1>
             </div>
-            <h2 className="text-2xl font-semibold text-white mb-1">Seja bem-vindo!</h2>
+            <h2 className="text-xl font-medium text-white/90 mb-6">Seja bem-vindo!</h2>
           </div>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
-            <TabsList className="grid w-full grid-cols-2 bg-brand-800/40">
+            <TabsList className="grid w-full grid-cols-2 bg-brand-800/30">
               <TabsTrigger value="manager" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Síndico</TabsTrigger>
               <TabsTrigger value="resident" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Morador</TabsTrigger>
             </TabsList>
@@ -129,7 +149,6 @@ const Login = () => {
             <TabsContent value="manager">
               {inactiveAccount && (
                 <Alert variant="destructive" className="mb-4">
-                  <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Conta desativada</AlertTitle>
                   <AlertDescription>
                     Sua conta de síndico está desativada. Por favor, entre em contato com a administração do sistema para reativá-la.
@@ -145,16 +164,16 @@ const Login = () => {
           
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="identifier" className="text-white">
+              <Label htmlFor="identifier" className="text-white/90 text-sm font-normal">
                 {activeTab === 'manager' ? 'Email ou Matrícula' : 'Email'}
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-brand-800" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-brand-800/70" />
                 <Input
                   id="identifier"
                   type="text"
                   placeholder={activeTab === 'manager' ? "seu@email.com ou matrícula" : "seu@email.com"}
-                  className="pl-9 bg-white/90 text-gray-800"
+                  className="pl-9 bg-white/95 text-gray-800 border-0"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   required
@@ -165,7 +184,7 @@ const Login = () => {
             
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-white">
+                <Label htmlFor="password" className="text-white/90 text-sm font-normal">
                   {activeTab === 'manager' ? 'Senha' : 'CPF (Senha)'}
                 </Label>
                 {activeTab === 'manager' && (
@@ -182,12 +201,12 @@ const Login = () => {
                 )}
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-brand-800" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-brand-800/70" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder={activeTab === 'manager' ? "Sua senha" : "Seu CPF (apenas números)"}
-                  className="pl-9 bg-white/90 text-gray-800"
+                  className="pl-9 bg-white/95 text-gray-800 border-0"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -197,7 +216,7 @@ const Login = () => {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-3 text-gray-600 hover:text-gray-800"
+                  className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex={3}
                 >
@@ -210,9 +229,20 @@ const Login = () => {
               </div>
             </div>
             
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="remember" 
+                checked={rememberEmail} 
+                onCheckedChange={(checked) => setRememberEmail(checked === true)}
+              />
+              <Label htmlFor="remember" className="text-sm text-white/90">
+                Lembrar e-mail
+              </Label>
+            </div>
+            
             <Button
               type="submit"
-              className="w-full bg-white hover:bg-gray-100 text-brand-700 hover:text-brand-800"
+              className="w-full bg-white hover:bg-gray-100 text-brand-700 hover:text-brand-800 border-0 shadow-sm"
               disabled={loading}
               tabIndex={4}
             >
@@ -222,48 +252,48 @@ const Login = () => {
         </div>
       </div>
       
-      <div className="hidden sm:flex sm:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
+      <div className="hidden sm:flex sm:w-1/2 bg-gray-50 text-gray-800 flex-col justify-center items-center p-16 relative h-full">
         <div className="relative z-10 max-w-lg text-center">
-          <h2 className="text-4xl font-bold mb-6 font-display text-brand-800">Gerencie seu condomínio com facilidade</h2>
-          <p className="text-lg text-brand-700 mb-8">
+          <h2 className="text-3xl font-bold mb-6 font-display text-brand-800">Gerencie seu condomínio com facilidade</h2>
+          <p className="text-lg text-brand-700/80 mb-8">
             Uma plataforma completa para síndicos profissionais administrarem 
             condomínios de forma eficiente e moderna.
           </p>
           <div className="grid grid-cols-2 gap-4 text-left">
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
-                <Users className="h-4 w-4 text-brand-700" />
+              <div className="mt-1 rounded-full bg-brand-600/10 p-1">
+                <Mail className="h-4 w-4 text-brand-700" />
               </div>
               <div>
                 <h3 className="font-medium text-brand-800">Gestão de moradores</h3>
-                <p className="text-sm text-brand-600">Cadastro e comunicação eficiente</p>
+                <p className="text-sm text-brand-600/80">Cadastro e comunicação eficiente</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
-                <Wallet className="h-4 w-4 text-brand-700" />
+              <div className="mt-1 rounded-full bg-brand-600/10 p-1">
+                <Mail className="h-4 w-4 text-brand-700" />
               </div>
               <div>
                 <h3 className="font-medium text-brand-800">Controle financeiro</h3>
-                <p className="text-sm text-brand-600">Gestão de despesas e receitas</p>
+                <p className="text-sm text-brand-600/80">Gestão de despesas e receitas</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
-                <Calendar className="h-4 w-4 text-brand-700" />
+              <div className="mt-1 rounded-full bg-brand-600/10 p-1">
+                <Mail className="h-4 w-4 text-brand-700" />
               </div>
               <div>
                 <h3 className="font-medium text-brand-800">Agendamentos</h3>
-                <p className="text-sm text-brand-600">Áreas comuns e manutenções</p>
+                <p className="text-sm text-brand-600/80">Áreas comuns e manutenções</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
-                <Bell className="h-4 w-4 text-brand-700" />
+              <div className="mt-1 rounded-full bg-brand-600/10 p-1">
+                <Mail className="h-4 w-4 text-brand-700" />
               </div>
               <div>
                 <h3 className="font-medium text-brand-800">Notificações</h3>
-                <p className="text-sm text-brand-600">Avisos e comunicados</p>
+                <p className="text-sm text-brand-600/80">Avisos e comunicados</p>
               </div>
             </div>
           </div>
@@ -300,7 +330,6 @@ const Login = () => {
               
               {recoveryError && (
                 <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{recoveryError}</AlertDescription>
                 </Alert>
               )}
@@ -322,7 +351,6 @@ const Login = () => {
           ) : (
             <div className="space-y-4">
               <Alert>
-                <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Sucesso!</AlertTitle>
                 <AlertDescription>
                   Um email com sua senha foi enviado para o endereço associado à sua conta.
