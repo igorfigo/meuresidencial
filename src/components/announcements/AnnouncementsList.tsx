@@ -63,7 +63,7 @@ const AnnouncementCard = ({
   onPrint: () => void;
 }) => {
   return (
-    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow bg-white w-full">
+    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow bg-white w-full mx-0">
       <CardContent className="p-4">
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">
@@ -277,7 +277,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-4 text-center w-full">
+      <div className="bg-red-50 border border-red-200 rounded-md p-4 text-center w-full mx-0">
         <p className="text-red-600">{error}</p>
         <Button className="mt-4" variant="outline" onClick={() => window.location.reload()}>
           Tentar novamente
@@ -289,15 +289,15 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   return (
     <>
       {filteredAnnouncements.length === 0 ? (
-        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center w-full">
+        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center w-full mx-0">
           <p className="text-muted-foreground mb-4">
             {searchTerm ? "Nenhum comunicado encontrado para a pesquisa." : "Nenhum comunicado encontrado."}
           </p>
         </div>
       ) : (
-        <div className="w-full">
+        <div className="w-full mx-0">
           {isMobile ? (
-            <div className="grid grid-cols-1 gap-3 w-full">
+            <div className="grid grid-cols-1 gap-3 w-full mx-0">
               {paginatedAnnouncements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}
@@ -311,7 +311,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
               ))}
             </div>
           ) : (
-            <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md bg-white w-full">
+            <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md bg-white w-full mx-0">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -391,7 +391,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
           )}
           
           {totalPages > 1 && (
-            <div className="py-4 border-t w-full">
+            <div className="py-4 border-t w-full mx-0">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>

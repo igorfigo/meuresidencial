@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
@@ -186,7 +187,7 @@ const Comunicados: React.FC = () => {
         </div>
 
         {!showForm && (
-          <div className="mb-4 px-4 sm:px-0 w-full">
+          <div className="mb-4 px-4 sm:px-0 mx-0 w-full">
             <FinancialChartCard
               title="Pesquisar Comunicados"
               icon={<Search className="h-4 w-4" />}
@@ -210,9 +211,9 @@ const Comunicados: React.FC = () => {
           </div>
         )}
         
-        <div className="w-full px-4 sm:px-0">
+        <div className="w-full px-4 sm:px-0 mx-0">
           {!isResident && showForm ? (
-            <Card className="border-t-4 border-t-brand-600 shadow-md bg-white w-full">
+            <Card className="border-t-4 border-t-brand-600 shadow-md bg-white w-full mx-0">
               <AnnouncementForm
                 isNewAnnouncement={!selectedAnnouncement?.id}
                 title={title}
@@ -233,7 +234,7 @@ const Comunicados: React.FC = () => {
               />
             </Card>
           ) : (
-            <div className="w-full">
+            <div className="w-full mx-0">
               <AnnouncementsList 
                 onEdit={!isResident ? handleEditAnnouncement : undefined}
                 isResident={isResident}
