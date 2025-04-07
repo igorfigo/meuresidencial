@@ -60,7 +60,6 @@ const GaragemLivre = () => {
     );
   }
 
-  // Mobile card for listings
   const GarageListingCard = ({ listing, isMyListing = false }) => (
     <Card key={listing.id} className={`mb-3 ${isMyListing ? 'border-l-4 border-l-brand-600' : ''}`}>
       <CardContent className="p-4">
@@ -134,9 +133,6 @@ const GaragemLivre = () => {
                 <CarIcon className="h-5 w-5 text-brand-600 mr-2" />
                 <h1 className="text-xl sm:text-2xl font-bold">Garagem Livre</h1>
               </div>
-              <p className="text-gray-600 mt-2 text-sm">
-                Sistema de compartilhamento de vagas de garagem.
-              </p>
             </div>
             <Button onClick={() => setIsDialogOpen(true)} className="whitespace-nowrap" size={isMobile ? "sm" : "default"}>
               <PlusCircleIcon className="h-4 w-4 mr-1" />
