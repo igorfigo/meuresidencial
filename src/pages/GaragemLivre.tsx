@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,7 +62,7 @@ const GaragemLivre = () => {
   }
 
   const GarageListingCard = ({ listing, isMyListing = false }) => (
-    <Card key={listing.id} className={`mb-3 ${isMyListing ? 'border-l-4 border-l-brand-600' : ''}`}>
+    <Card key={listing.id} className={`mb-3 w-full ${isMyListing ? 'border-l-4 border-l-brand-600' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -136,14 +137,14 @@ const GaragemLivre = () => {
             </div>
             <Button onClick={() => setIsDialogOpen(true)} className="whitespace-nowrap" size={isMobile ? "sm" : "default"}>
               <PlusCircleIcon className="h-4 w-4 mr-1" />
-              {!isMobile ? 'Cadastrar Vaga' : 'Cadastrar'}
+              {!isMobile ? 'Disponibilizar Vaga' : 'Disponibilizar'}
             </Button>
           </div>
           <Separator className="mt-4" />
         </div>
 
         <div className="space-y-4">
-          <Card className="border-t-4 border-t-brand-600">
+          <Card className="border-t-4 border-t-brand-600 w-full">
             <CardHeader className={isMobile ? "p-3" : undefined}>
               <CardTitle className={isMobile ? "text-lg" : undefined}>Minhas Vagas</CardTitle>
               <CardDescription className={isMobile ? "text-xs" : undefined}>
@@ -152,13 +153,13 @@ const GaragemLivre = () => {
             </CardHeader>
             <CardContent className={isMobile ? "p-3 pt-0" : undefined}>
               {isLoading ? (
-                <div className="animate-pulse space-y-2">
-                  <div className="h-16 bg-gray-200 rounded"></div>
-                  <div className="h-16 bg-gray-200 rounded"></div>
+                <div className="animate-pulse space-y-2 w-full">
+                  <div className="h-16 bg-gray-200 rounded w-full"></div>
+                  <div className="h-16 bg-gray-200 rounded w-full"></div>
                 </div>
               ) : myGarageListings && myGarageListings.length > 0 ? (
                 isMobile ? (
-                  <div>
+                  <div className="w-full">
                     {myGarageListings.map((listing) => (
                       <GarageListingCard key={listing.id} listing={listing} isMyListing={true} />
                     ))}
@@ -205,7 +206,7 @@ const GaragemLivre = () => {
                   </Table>
                 )
               ) : (
-                <div className="text-center py-6 bg-gray-50 border border-dashed rounded-lg">
+                <div className="text-center py-6 bg-gray-50 border border-dashed rounded-lg w-full">
                   <CarIcon className="h-10 w-10 mx-auto text-gray-400 mb-2" />
                   <h3 className={`${isMobile ? "text-base" : "text-lg"} font-medium text-gray-600 mb-1`}>
                     Você ainda não cadastrou vagas
@@ -218,7 +219,7 @@ const GaragemLivre = () => {
             </CardContent>
           </Card>
           
-          <Card className="border-t-4 border-t-brand-600">
+          <Card className="border-t-4 border-t-brand-600 w-full">
             <CardHeader className={isMobile ? "p-3" : undefined}>
               <CardTitle className={isMobile ? "text-lg" : undefined}>Vagas Disponíveis</CardTitle>
               <CardDescription className={isMobile ? "text-xs" : undefined}>
@@ -227,13 +228,13 @@ const GaragemLivre = () => {
             </CardHeader>
             <CardContent className={isMobile ? "p-3 pt-0" : undefined}>
               {isLoading ? (
-                <div className="animate-pulse space-y-2">
-                  <div className="h-16 bg-gray-200 rounded"></div>
-                  <div className="h-16 bg-gray-200 rounded"></div>
+                <div className="animate-pulse space-y-2 w-full">
+                  <div className="h-16 bg-gray-200 rounded w-full"></div>
+                  <div className="h-16 bg-gray-200 rounded w-full"></div>
                 </div>
               ) : garageListings && garageListings.length > 0 ? (
                 isMobile ? (
-                  <div>
+                  <div className="w-full">
                     {garageListings.map((listing) => (
                       <GarageListingCard key={listing.id} listing={listing} />
                     ))}
@@ -279,7 +280,7 @@ const GaragemLivre = () => {
                   </Table>
                 )
               ) : (
-                <div className="text-center py-6 bg-gray-50 border border-dashed rounded-lg">
+                <div className="text-center py-6 bg-gray-50 border border-dashed rounded-lg w-full">
                   <CarIcon className="h-10 w-10 mx-auto text-gray-400 mb-2" />
                   <h3 className={`${isMobile ? "text-base" : "text-lg"} font-medium text-gray-600`}>
                     Nenhuma vaga disponível
@@ -296,7 +297,7 @@ const GaragemLivre = () => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className={isMobile ? "max-w-[95vw] p-4" : undefined}>
             <DialogHeader>
-              <DialogTitle>Cadastrar Vaga de Garagem</DialogTitle>
+              <DialogTitle>Disponibilizar Vaga de Garagem</DialogTitle>
               <DialogDescription>
                 Informe os detalhes da vaga que deseja disponibilizar.
               </DialogDescription>
@@ -335,7 +336,7 @@ const GaragemLivre = () => {
                 disabled={!description.trim() || addGarageListing.isPending}
                 className={isMobile ? "w-full" : undefined}
               >
-                {addGarageListing.isPending ? 'Cadastrando...' : 'Cadastrar Vaga'}
+                {addGarageListing.isPending ? 'Cadastrando...' : 'Disponibilizar Vaga'}
               </Button>
             </DialogFooter>
           </DialogContent>
