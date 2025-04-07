@@ -165,7 +165,7 @@ const Comunicados: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="w-full p-0 sm:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0 mb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-4 sm:px-0 mb-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Comunicados</h1>
             <p className="text-muted-foreground">
@@ -187,11 +187,13 @@ const Comunicados: React.FC = () => {
         </div>
 
         {!showForm && (
-          <div className="mb-4 px-4 sm:px-0 mx-0 w-full">
+          <div className="mb-3 px-4 sm:px-0 mx-0 w-full">
             <FinancialChartCard
               title="Pesquisar Comunicados"
               icon={<Search className="h-4 w-4" />}
               tooltip="Pesquise por título ou conteúdo"
+              fullWidth
+              className="mb-0"
             >
               <div className="flex items-center gap-2 w-full">
                 <Input
@@ -213,7 +215,7 @@ const Comunicados: React.FC = () => {
         
         <div className="w-full px-4 sm:px-0 mx-0">
           {!isResident && showForm ? (
-            <Card className="border-t-4 border-t-brand-600 shadow-md bg-white w-full mx-0">
+            <Card className="border-t-4 border-t-brand-600 shadow-md bg-white w-full mx-0 max-w-none">
               <AnnouncementForm
                 isNewAnnouncement={!selectedAnnouncement?.id}
                 title={title}
