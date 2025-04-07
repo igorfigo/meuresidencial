@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -24,6 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Charge {
   id: string;
@@ -128,6 +136,9 @@ const MinhasCobrancas = () => {
   const [isPixDialogOpen, setIsPixDialogOpen] = useState(false);
   const { overdueCount } = useOverdueCharges();
   const isMobile = useIsMobile();
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
   
   const residentId = user?.residentId;
   const matricula = user?.matricula;
@@ -354,6 +365,15 @@ const MinhasCobrancas = () => {
     }
     return 0;
   });
+  
+  const totalPages = Math.ceil(sortedCharges.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCharges = sortedCharges.slice(indexOfFirstItem, indexOfLastItem);
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleOpenPixDialog = (charge: Charge) => {
     setSelectedCharge(charge);
@@ -364,6 +384,10 @@ const MinhasCobrancas = () => {
     setIsPixDialogOpen(false);
     setSelectedCharge(null);
   };
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   return (
     <DashboardLayout>
@@ -405,7 +429,7 @@ const MinhasCobrancas = () => {
                 <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
                 <span className="ml-2 text-muted-foreground">Carregando...</span>
               </div>
-            ) : sortedCharges.length === 0 ? (
+            ) : currentCharges.length === 0 ? (
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertTitle>Nenhuma cobrança {activeTab === 'paid' ? "paga" : "pendente"}</AlertTitle>
@@ -416,7 +440,7 @@ const MinhasCobrancas = () => {
             ) : (
               isMobile ? (
                 <div className="space-y-2 pb-1 w-full">
-                  {sortedCharges.map((charge) => (
+                  {currentCharges.map((charge) => (
                     <Card key={charge.id} className="border shadow-sm w-full">
                       <CardContent className="p-3 space-y-2">
                         <div className="flex justify-between items-center">
@@ -473,71 +497,149 @@ const MinhasCobrancas = () => {
                       </CardContent>
                     </Card>
                   ))}
+                  
+                  {totalPages > 1 && (
+                    <div className="py-2">
+                      <Pagination className="mt-4">
+                        <PaginationContent>
+                          {currentPage > 1 && (
+                            <PaginationItem>
+                              <PaginationPrevious
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                className="cursor-pointer"
+                              />
+                            </PaginationItem>
+                          )}
+                          
+                          {[...Array(totalPages)].map((_, i) => (
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                onClick={() => handlePageChange(i + 1)}
+                                isActive={currentPage === i + 1}
+                                className="cursor-pointer"
+                              >
+                                {i + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          
+                          {currentPage < totalPages && (
+                            <PaginationItem>
+                              <PaginationNext
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                className="cursor-pointer"
+                              />
+                            </PaginationItem>
+                          )}
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-left">Competência</TableHead>
-                        <TableHead className="text-center">Unidade</TableHead>
-                        <TableHead className="text-center">Valor</TableHead>
-                        {activeTab === 'pending' && (
-                          <TableHead className="text-center">Vencimento</TableHead>
-                        )}
-                        {activeTab === 'paid' && (
-                          <TableHead className="text-center">Pagamento</TableHead>
-                        )}
-                        <TableHead className="text-center">Status</TableHead>
-                        {activeTab === 'pending' && (
-                          <TableHead className="text-center">Ações</TableHead>
-                        )}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortedCharges.map((charge) => (
-                        <TableRow key={charge.id}>
-                          <TableCell className="font-medium text-left">
-                            {formatMonthYear(charge.month, charge.year)}
-                          </TableCell>
-                          <TableCell className="text-center">{charge.unit}</TableCell>
-                          <TableCell className="text-center">
-                            {formatCurrency(BRLToNumber(charge.amount))}
-                          </TableCell>
+                <>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-left">Competência</TableHead>
+                          <TableHead className="text-center">Unidade</TableHead>
+                          <TableHead className="text-center">Valor</TableHead>
                           {activeTab === 'pending' && (
-                            <TableCell className="text-center">{formatDate(charge.due_date)}</TableCell>
+                            <TableHead className="text-center">Vencimento</TableHead>
                           )}
                           {activeTab === 'paid' && (
-                            <TableCell className="text-center">{formatDate(charge.payment_date)}</TableCell>
+                            <TableHead className="text-center">Pagamento</TableHead>
                           )}
-                          <TableCell className="text-center">
-                            <Badge 
-                              className={`flex items-center justify-center mx-auto ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
-                              variant="outline"
-                            >
-                              {statusColors[charge.status].icon}
-                              {statusColors[charge.status].label}
-                            </Badge>
-                          </TableCell>
+                          <TableHead className="text-center">Status</TableHead>
                           {activeTab === 'pending' && (
-                            <TableCell className="text-center">
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleOpenPixDialog(charge)}
-                                className="h-8 gap-1 text-brand-600 mx-auto"
-                                disabled={!pixSettings?.chavepix}
-                              >
-                                <CreditCard className="h-4 w-4" />
-                                <span>PIX</span>
-                              </Button>
-                            </TableCell>
+                            <TableHead className="text-center">Ações</TableHead>
                           )}
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      </TableHeader>
+                      <TableBody>
+                        {currentCharges.map((charge) => (
+                          <TableRow key={charge.id}>
+                            <TableCell className="font-medium text-left">
+                              {formatMonthYear(charge.month, charge.year)}
+                            </TableCell>
+                            <TableCell className="text-center">{charge.unit}</TableCell>
+                            <TableCell className="text-center">
+                              {formatCurrency(BRLToNumber(charge.amount))}
+                            </TableCell>
+                            {activeTab === 'pending' && (
+                              <TableCell className="text-center">{formatDate(charge.due_date)}</TableCell>
+                            )}
+                            {activeTab === 'paid' && (
+                              <TableCell className="text-center">{formatDate(charge.payment_date)}</TableCell>
+                            )}
+                            <TableCell className="text-center">
+                              <Badge 
+                                className={`flex items-center justify-center mx-auto ${statusColors[charge.status].background} ${statusColors[charge.status].text} ${statusColors[charge.status].border} border`}
+                                variant="outline"
+                              >
+                                {statusColors[charge.status].icon}
+                                {statusColors[charge.status].label}
+                              </Badge>
+                            </TableCell>
+                            {activeTab === 'pending' && (
+                              <TableCell className="text-center">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleOpenPixDialog(charge)}
+                                  className="h-8 gap-1 text-brand-600 mx-auto"
+                                  disabled={!pixSettings?.chavepix}
+                                >
+                                  <CreditCard className="h-4 w-4" />
+                                  <span>PIX</span>
+                                </Button>
+                              </TableCell>
+                            )}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  
+                  {totalPages > 1 && (
+                    <div className="py-2">
+                      <Pagination className="mt-4">
+                        <PaginationContent>
+                          {currentPage > 1 && (
+                            <PaginationItem>
+                              <PaginationPrevious
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                className="cursor-pointer"
+                              />
+                            </PaginationItem>
+                          )}
+                          
+                          {[...Array(totalPages)].map((_, i) => (
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                onClick={() => handlePageChange(i + 1)}
+                                isActive={currentPage === i + 1}
+                                className="cursor-pointer"
+                              >
+                                {i + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          
+                          {currentPage < totalPages && (
+                            <PaginationItem>
+                              <PaginationNext
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                className="cursor-pointer"
+                              />
+                            </PaginationItem>
+                          )}
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
+                </>
               )
             )}
           </CardContent>
