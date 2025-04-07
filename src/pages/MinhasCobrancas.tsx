@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -366,8 +367,8 @@ const MinhasCobrancas = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 px-2 sm:px-0">
-        <div className="flex items-center justify-between gap-2 mb-2">
+      <div className="space-y-4 px-0">
+        <div className="flex items-center justify-between gap-2 mb-2 px-1 sm:px-0">
           <div className="flex items-center gap-2">
             <Wallet className="h-5 w-5 text-brand-600 flex-shrink-0" />
             <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Cobranças</h1>
@@ -379,9 +380,9 @@ const MinhasCobrancas = () => {
           )}
         </div>
         
-        <div className="border-t pt-3"></div>
+        <div className="border-t pt-3 mx-1 sm:mx-0"></div>
         
-        <Card className="border-t-4 border-t-brand-600 shadow-sm">
+        <Card className="border-t-4 border-t-brand-600 shadow-sm w-full">
           <CardHeader className={isMobile ? "px-3 py-3" : "px-6 py-4"}>
             <div className="flex flex-col gap-2">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -408,9 +409,9 @@ const MinhasCobrancas = () => {
               </Alert>
             ) : (
               isMobile ? (
-                <div className="space-y-3 pb-1">
+                <div className="space-y-2 pb-1 w-full">
                   {sortedCharges.map((charge) => (
-                    <Card key={charge.id} className="border shadow-sm">
+                    <Card key={charge.id} className="border shadow-sm w-full">
                       <CardContent className="p-3 space-y-2">
                         <div className="flex justify-between items-center">
                           <div className="font-medium">
