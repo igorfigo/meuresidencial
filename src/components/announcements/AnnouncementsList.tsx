@@ -44,8 +44,6 @@ interface AnnouncementsListProps {
   searchTerm?: string;
 }
 
-const ITEMS_PER_PAGE = 6;
-
 const AnnouncementCard = ({ 
   announcement, 
   isResident,
@@ -62,7 +60,7 @@ const AnnouncementCard = ({
   onPrint: () => void;
 }) => {
   return (
-    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow bg-white">
       <CardContent className="p-4">
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">
@@ -288,13 +286,13 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   return (
     <>
       {filteredAnnouncements.length === 0 ? (
-        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center">
+        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center w-full">
           <p className="text-muted-foreground mb-4">
             {searchTerm ? "Nenhum comunicado encontrado para a pesquisa." : "Nenhum comunicado encontrado."}
           </p>
         </div>
       ) : (
-        <div>
+        <div className="w-full">
           {isMobile ? (
             <div className="grid grid-cols-1 gap-3">
               {paginatedAnnouncements.map((announcement) => (
@@ -310,81 +308,83 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
               ))}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Título</TableHead>
-                  <TableHead className="text-center">Data</TableHead>
-                  <TableHead className="text-center">Enviado por</TableHead>
-                  <TableHead className="text-center w-[100px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedAnnouncements.map((announcement) => (
-                  <TableRow key={announcement.id}>
-                    <TableCell className="font-medium">{announcement.title}</TableCell>
-                    <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex justify-center">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Mail 
-                                className={`h-4 w-4 ${announcement.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} 
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {announcement.sent_by_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex justify-center space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => announcement.id && handleViewAnnouncement(announcement.id)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        
-                        {!isResident && (
-                          <>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => announcement.id && handlePrintAnnouncement(announcement.id)}
-                            >
-                              <Printer className="h-4 w-4 text-blue-500" />
-                            </Button>
-                            
-                            {onEdit && (
+            <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md bg-white w-full">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Título</TableHead>
+                    <TableHead className="text-center">Data</TableHead>
+                    <TableHead className="text-center">Enviado por</TableHead>
+                    <TableHead className="text-center w-[100px]">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedAnnouncements.map((announcement) => (
+                    <TableRow key={announcement.id}>
+                      <TableCell className="font-medium">{announcement.title}</TableCell>
+                      <TableCell className="text-center">{announcement.created_at ? formatDate(announcement.created_at) : '-'}</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Mail 
+                                  className={`h-4 w-4 ${announcement.sent_by_email ? 'text-green-500' : 'text-gray-300'}`} 
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {announcement.sent_by_email ? "Enviado por e-mail" : "Não enviado por e-mail"}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => announcement.id && handleViewAnnouncement(announcement.id)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          
+                          {!isResident && (
+                            <>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                onClick={() => onEdit(announcement)}
+                                onClick={() => announcement.id && handlePrintAnnouncement(announcement.id)}
                               >
-                                <MessageCircle className="h-4 w-4 text-amber-500" />
+                                <Printer className="h-4 w-4 text-blue-500" />
                               </Button>
-                            )}
-                            
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => announcement.id && handleDeleteClick(announcement.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                              
+                              {onEdit && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => onEdit(announcement)}
+                                >
+                                  <MessageCircle className="h-4 w-4 text-amber-500" />
+                                </Button>
+                              )}
+                              
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => announcement.id && handleDeleteClick(announcement.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
           )}
           
           {totalPages > 1 && (
