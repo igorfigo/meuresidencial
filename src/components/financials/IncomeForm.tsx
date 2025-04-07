@@ -31,11 +31,6 @@ const incomeCategories = [
   { value: 'taxa_condominio', label: 'Taxa de Condomínio' },
   { value: 'reserva_area_comum', label: 'Reserva Área Comum' },
   { value: 'taxa_extra', label: 'Taxa Extra' },
-  { value: 'internet_telefonia', label: 'Internet / Telefonia' },
-  { value: 'seguro', label: 'Seguro' },
-  { value: 'honorarios_sindico', label: 'Honorários Síndico' },
-  { value: 'jardinagem', label: 'Jardinagem' },
-  { value: 'eventos', label: 'Eventos' },
   { value: 'outros', label: 'Outros' }
 ];
 
