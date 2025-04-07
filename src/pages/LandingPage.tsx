@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
@@ -92,22 +93,52 @@ const PlanCard = ({ plan, featured = false, delay }) => {
     "Suporte técnico"
   ];
 
-  const topBorderClass = plan.codigo === "BASICO" || plan.codigo === "PREMIUM" 
-    ? "border-t-4 border-t-custom-secondary" 
-    : featured ? "border-t-4 border-t-custom-primary" : "";
+  // Check if this is the Essencial plan
+  const isEssencial = plan.codigo === "ESSENCIAL" || plan.nome?.toLowerCase().includes("essencial");
+  
+  // Customize border styles based on plan type
+  const topBorderClass = isEssencial
+    ? "border-t-4 border-t-purple-500" // Purple highlight for Essencial
+    : plan.codigo === "BASICO" || plan.codigo === "PREMIUM" 
+      ? "border-t-4 border-t-custom-secondary" 
+      : featured ? "border-t-4 border-t-custom-primary" : "";
+  
+  // Special background for Essencial plan
+  const headerBgClass = isEssencial
+    ? "bg-gradient-to-r from-purple-700 to-purple-500 text-white"
+    : featured ? 'bg-gradient-to-r from-custom-dark to-custom-primary text-custom-white' 
+    : 'bg-custom-white text-gray-800';
+  
+  // Apply a scale transform and shadow for Essencial plan
+  const cardClass = `rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${topBorderClass} ${
+    isEssencial
+      ? 'border-2 border-purple-500 transform scale-105 md:transform md:scale-105 relative z-20'
+      : featured ? 'border-2 border-custom-primary transform scale-105 md:transform md:scale-105' 
+      : 'border border-gray-200'
+  }`;
+  
+  // Add a ribbon for Essencial plan
+  const ribbon = isEssencial ? (
+    <div className="absolute -top-1 -right-1 z-30">
+      <div className="bg-purple-600 text-white text-xs px-3 py-1 rounded-br-lg font-bold shadow-md transform rotate-0">
+        RECOMENDADO
+      </div>
+    </div>
+  ) : null;
 
   return (
-    <FadeInSection delay={delay} className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${topBorderClass} ${featured ? 'border-2 border-custom-primary transform scale-105 md:transform md:scale-105' : 'border border-gray-200'}`}>
-      <div className={`p-6 ${featured ? 'bg-gradient-to-r from-custom-dark to-custom-primary text-custom-white' : 'bg-custom-white text-gray-800'}`}>
+    <FadeInSection delay={delay} className={cardClass}>
+      {ribbon}
+      <div className={`p-6 ${headerBgClass}`}>
         <h3 className="text-xl font-bold mb-2">{plan.nome}</h3>
         <div className="text-3xl font-bold mb-4">{plan.valor}</div>
       </div>
-      <div className="bg-custom-white p-6">
+      <div className={`bg-custom-white p-6 ${isEssencial ? 'bg-purple-50/30' : ''}`}>
         <ul className="space-y-3">
           <li className="flex items-start">
-            <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+            <CheckCircle2 className={`h-5 w-5 ${isEssencial ? 'text-purple-500' : 'text-green-500'} mr-2 flex-shrink-0`} />
             <div className="flex">
-              <span className="font-bold px-3 py-1 bg-custom-primary/10 text-custom-dark rounded-full">
+              <span className={`font-bold px-3 py-1 ${isEssencial ? 'bg-purple-500/10 text-purple-800' : 'bg-custom-primary/10 text-custom-dark'} rounded-full`}>
                 {plan.codigo === "PREMIUM" 
                   ? "Até 50 moradores" 
                   : plan.codigo === "PADRAO" 
@@ -119,13 +150,19 @@ const PlanCard = ({ plan, featured = false, delay }) => {
           
           {commonFeatures.map((feature, index) => (
             <li key={index} className="flex items-start">
-              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+              <CheckCircle2 className={`h-5 w-5 ${isEssencial ? 'text-purple-500' : 'text-green-500'} mr-2 flex-shrink-0`} />
               <span>{feature}</span>
             </li>
           ))}
         </ul>
         <Link to="/login" className="w-full">
-          <Button className={`w-full mt-6 ${featured ? 'bg-custom-primary hover:bg-custom-dark' : 'bg-custom-light text-custom-dark hover:bg-custom-light/80'}`}>
+          <Button className={`w-full mt-6 ${
+            isEssencial 
+              ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+              : featured 
+                ? 'bg-custom-primary hover:bg-custom-dark' 
+                : 'bg-custom-light text-custom-dark hover:bg-custom-light/80'
+          }`}>
             Escolher Plano
           </Button>
         </Link>
@@ -215,8 +252,8 @@ const LandingPage = () => {
           },
           {
             id: "2",
-            codigo: "PADRAO",
-            nome: "Plano Padrão",
+            codigo: "ESSENCIAL",
+            nome: "Plano Essencial",
             valor: "R$ 199,90",
             max_moradores: 50
           },
@@ -500,7 +537,7 @@ const LandingPage = () => {
               <PlanCard 
                 key={plan.id} 
                 plan={plan} 
-                featured={index === 1} 
+                featured={index === 1 && plan.codigo !== "ESSENCIAL"} 
                 delay={index * 200}
               />
             ))}
