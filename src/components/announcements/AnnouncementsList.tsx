@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -61,8 +62,8 @@ const AnnouncementCard = ({
   onPrint: () => void;
 }) => {
   return (
-    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow bg-white">
-      <CardContent className="p-4">
+    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow bg-white w-full">
+      <CardContent className="p-3">
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">
             <div>
@@ -295,7 +296,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       ) : (
         <div className="w-full">
           {isMobile ? (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-2 w-full">
               {paginatedAnnouncements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}
@@ -389,7 +390,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
           )}
           
           {totalPages > 1 && (
-            <div className="py-4 border-t">
+            <div className="py-4 border-t w-full">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>

@@ -165,7 +165,7 @@ const Comunicados: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="w-full p-0 sm:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-1 sm:px-0">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Comunicados</h1>
             <p className="text-muted-foreground">
@@ -186,10 +186,10 @@ const Comunicados: React.FC = () => {
           )}
         </div>
 
-        <div className="border-t pt-4 md:pt-6 mx-4 sm:mx-0"></div>
+        <div className="border-t pt-4 md:pt-6 mx-1 sm:mx-0"></div>
 
         {!showForm && (
-          <div className="mb-4 px-4 sm:px-0">
+          <div className="mb-4 px-0 sm:px-0">
             <FinancialChartCard
               title="Pesquisar Comunicados"
               icon={<Search className="h-4 w-4" />}
@@ -215,7 +215,7 @@ const Comunicados: React.FC = () => {
         
         <div className="pt-4 md:pt-6">
           {!isResident && showForm ? (
-            <Card className="border-t-4 border-t-brand-600 shadow-md mx-4 sm:mx-0">
+            <Card className="border-t-4 border-t-brand-600 shadow-md mx-1 sm:mx-0">
               <AnnouncementForm
                 isNewAnnouncement={!selectedAnnouncement?.id}
                 title={title}
@@ -236,7 +236,7 @@ const Comunicados: React.FC = () => {
               />
             </Card>
           ) : (
-            <div className="px-4 sm:px-0">
+            <div className="px-0 sm:px-0">
               <AnnouncementsList 
                 onEdit={!isResident ? handleEditAnnouncement : undefined}
                 isResident={isResident}
