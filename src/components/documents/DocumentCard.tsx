@@ -52,7 +52,9 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   const isUserResident = isResident || (user?.isResident === true);
 
   return (
-    <Card className={`overflow-hidden border-l-4 border-l-brand-600 ${isUserResident && isMobile ? 'rounded-none border-x-0' : ''}`}>
+    <Card 
+      className={`overflow-hidden ${isUserResident && isMobile ? 'rounded-none shadow-sm border-x-0 border-t border-b-0' : 'border-l-4 border-l-brand-600'}`}
+    >
       <CardContent className="p-4">
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">

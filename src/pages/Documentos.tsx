@@ -114,7 +114,7 @@ const Documentos = () => {
 
   return (
     <DashboardLayout>
-      <div className={`space-y-6 ${isResident && isMobile ? 'px-0' : 'px-2 sm:px-0'}`}>
+      <div className={`space-y-6 ${isResident && isMobile ? 'px-0' : 'px-2 sm:px-4 md:px-6'}`}>
         <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 ${isResident && isMobile ? 'px-4' : ''}`}>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Documentos Úteis</h1>
@@ -136,7 +136,7 @@ const Documentos = () => {
           )}
         </div>
 
-        <div className={`border-t pt-4 ${isResident && isMobile ? 'mx-4 -mt-2' : ''}`}></div>
+        <div className={`border-t pt-4 ${isResident && isMobile ? 'mx-4 -mt-2' : '-mx-2 sm:mx-0'}`}></div>
 
         {!showForm && (
           <div className={`mb-4 ${isResident && isMobile ? 'mx-4' : ''}`}>
@@ -163,13 +163,13 @@ const Documentos = () => {
           </div>
         )}
 
-        <div className="pt-4 md:pt-6">
+        <div className={`pt-4 md:pt-6 ${isResident && isMobile ? 'px-0' : 'mx-2 sm:mx-0'}`}>
           {isLoading ? (
             <div className={`flex justify-center items-center py-12 ${isResident && isMobile ? 'mx-4' : ''}`}>
               <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
             </div>
           ) : showForm && !isResident ? (
-            <Card className="border-t-4 border-t-brand-600 shadow-md">
+            <Card className="border-t-4 border-t-brand-600 shadow-md mx-2 sm:mx-0">
               <DocumentForm
                 form={form}
                 onSubmit={handleFormSubmit}

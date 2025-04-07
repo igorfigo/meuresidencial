@@ -212,7 +212,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           </p>
         </div>
       ) : isMobile ? (
-        <div className={`space-y-3 ${isUserResident ? 'mx-4' : ''}`}>
+        <div className={`space-y-0 ${isUserResident ? 'mx-0' : 'mx-4'}`}>
           {documents.map((document) => (
             <DocumentCard
               key={document.id}
@@ -225,7 +225,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           ))}
           
           {totalPages > 1 && (
-            <div className={`py-3 flex justify-center`}>
+            <div className={`py-3 flex justify-center ${isUserResident ? 'bg-white pt-4 border-t' : ''}`}>
               <Pagination>
                 <PaginationContent className="gap-1">
                   <PaginationItem>
