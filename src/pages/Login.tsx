@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Building, Eye, EyeOff, Lock, Mail, Users, Wallet, Calendar, Bell, AlertCircle } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
@@ -18,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 
 const SUPABASE_URL = "https://kcbvdcacgbwigefwacrk.supabase.co";
+const EMAIL_STORAGE_KEY = "meuResidencial_remembered_email";
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
@@ -25,6 +28,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [inactiveAccount, setInactiveAccount] = useState(false);
+  const [rememberEmail, setRememberEmail] = useState(false);
   const { login } = useApp();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('manager');
@@ -36,11 +40,27 @@ const Login = () => {
   const [recoverySuccess, setRecoverySuccess] = useState(false);
   const [recoveryError, setRecoveryError] = useState('');
 
+  // Load remembered email on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
+    if (savedEmail) {
+      setIdentifier(savedEmail);
+      setRememberEmail(true);
+    }
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier || !password) {
       toast.error('Por favor, preencha todos os campos');
       return;
+    }
+    
+    // Save or remove email from local storage based on remember choice
+    if (rememberEmail) {
+      localStorage.setItem(EMAIL_STORAGE_KEY, identifier);
+    } else {
+      localStorage.removeItem(EMAIL_STORAGE_KEY);
     }
     
     setLoading(true);
@@ -208,6 +228,17 @@ const Login = () => {
                   )}
                 </button>
               </div>
+            </div>
+            
+            {/* Remember Email Checkbox */}
+            <div className="flex items-center mt-4">
+              <Checkbox 
+                id="rememberEmail" 
+                checked={rememberEmail}
+                onCheckedChange={(checked) => setRememberEmail(checked as boolean)}
+                label="Lembrar e-mail"
+                className="text-brand-600 border-gray-300"
+              />
             </div>
             
             <Button
