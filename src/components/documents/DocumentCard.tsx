@@ -6,8 +6,6 @@ import { Eye, Edit, Trash2, Calendar, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Document } from '@/hooks/use-documents';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useApp } from '@/contexts/AppContext';
 
 interface DocumentCardProps {
   document: Document;
@@ -44,17 +42,9 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
       return dateString;
     }
   };
-  
-  const isMobile = useIsMobile();
-  const { user } = useApp();
-
-  // Determine if user is resident for edge-to-edge styling
-  const isUserResident = isResident || (user?.isResident === true);
 
   return (
-    <Card 
-      className={`overflow-hidden ${isUserResident && isMobile ? 'rounded-none shadow-none border-x-0 border-t border-b-0 mb-0.5' : 'border-l-4 border-l-brand-600'}`}
-    >
+    <Card className="overflow-hidden border-l-4 border-l-brand-600">
       <CardContent className="p-4">
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">

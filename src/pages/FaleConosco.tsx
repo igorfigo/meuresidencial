@@ -114,77 +114,48 @@ const FaleConosco = () => {
           
           <CardContent className={isMobile ? "pt-4 px-3" : ""}>
             <form onSubmit={handleSubmit} className={`space-y-${isMobile ? '4' : '6'}`}>
-              {!isMobile ? (
-                <>
-                  <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'}`}>
-                    <div className="space-y-2">
-                      <Label htmlFor="nome" className="font-medium">Nome</Label>
-                      <Input 
-                        id="nome" 
-                        value={user?.nome || 'Não informado'} 
-                        disabled 
-                        className="bg-gray-50"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="font-medium">Email</Label>
-                      <Input 
-                        id="email" 
-                        value={user?.email || 'Não informado'} 
-                        disabled 
-                        className="bg-gray-50"
-                      />
-                    </div>
+              <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'}`}>
+                <div className="space-y-2">
+                  <Label htmlFor="nome" className="font-medium">Nome</Label>
+                  <Input 
+                    id="nome" 
+                    value={user?.nome || 'Não informado'} 
+                    disabled 
+                    className="bg-gray-50"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="font-medium">Email</Label>
+                  <Input 
+                    id="email" 
+                    value={user?.email || 'Não informado'} 
+                    disabled 
+                    className="bg-gray-50"
+                  />
+                </div>
+              </div>
+              
+              {user && !user.isAdmin && (
+                <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'}`}>
+                  <div className="space-y-2">
+                    <Label htmlFor="matricula" className="font-medium">Matrícula</Label>
+                    <Input 
+                      id="matricula" 
+                      value={user?.matricula || 'N/A'} 
+                      disabled 
+                      className="bg-gray-50"
+                    />
                   </div>
                   
-                  {user && !user.isAdmin && (
-                    <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'}`}>
-                      <div className="space-y-2">
-                        <Label htmlFor="matricula" className="font-medium">Matrícula</Label>
-                        <Input 
-                          id="matricula" 
-                          value={user?.matricula || 'N/A'} 
-                          disabled 
-                          className="bg-gray-50"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="condominio" className="font-medium">Condomínio</Label>
-                        <Input 
-                          id="condominio" 
-                          value={user?.nomeCondominio || 'N/A'} 
-                          disabled 
-                          className="bg-gray-50"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="p-3 bg-gray-50 rounded-md shadow-sm border border-gray-100">
-                  <div className="text-sm">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-gray-500">Nome:</span>
-                      <span className="font-medium">{user?.nome || 'Não informado'}</span>
-                    </div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-gray-500">Email:</span>
-                      <span className="font-medium truncate" style={{maxWidth: "200px"}}>{user?.email || 'Não informado'}</span>
-                    </div>
-                    {user && !user.isAdmin && (
-                      <>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-gray-500">Matrícula:</span>
-                          <span className="font-medium">{user?.matricula || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-500">Condomínio:</span>
-                          <span className="font-medium truncate" style={{maxWidth: "180px"}}>{user?.nomeCondominio || 'N/A'}</span>
-                        </div>
-                      </>
-                    )}
+                  <div className="space-y-2">
+                    <Label htmlFor="condominio" className="font-medium">Condomínio</Label>
+                    <Input 
+                      id="condominio" 
+                      value={user?.nomeCondominio || 'N/A'} 
+                      disabled 
+                      className="bg-gray-50"
+                    />
                   </div>
                 </div>
               )}

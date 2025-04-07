@@ -34,7 +34,6 @@ import {
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { DocumentCard } from './DocumentCard';
-import { useApp } from '@/contexts/AppContext';
 
 interface DocumentsListProps {
   documents: Document[];
@@ -80,7 +79,6 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
   const [attachments, setAttachments] = useState<DocumentAttachment[]>([]);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
   const isMobile = useIsMobile();
-  const { user } = useApp();
 
   const formatDate = (dateString: string) => {
     try {
@@ -194,12 +192,10 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
     return items;
   };
 
-  const isUserResident = isResident || (user?.isResident === true);
-
   return (
     <>
       {documents.length === 0 ? (
-        <div className={`text-center py-8 bg-white rounded-md ${isUserResident && isMobile ? 'mx-4' : ''}`}>
+        <div className="text-center py-8 bg-white rounded-md">
           <FileText className="h-10 w-10 mx-auto text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">
             {searchTerm ? "Nenhum documento encontrado para esta pesquisa" : "Nenhum documento encontrado"}
@@ -212,7 +208,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           </p>
         </div>
       ) : isMobile ? (
-        <div className={isUserResident ? 'space-y-0 divide-y divide-gray-100' : 'space-y-4 mx-4'}>
+        <div className="space-y-3">
           {documents.map((document) => (
             <DocumentCard
               key={document.id}
@@ -225,7 +221,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           ))}
           
           {totalPages > 1 && (
-            <div className={`py-3 flex justify-center ${isUserResident ? 'bg-white pt-4 border-t' : ''}`}>
+            <div className="py-3 flex justify-center">
               <Pagination>
                 <PaginationContent className="gap-1">
                   <PaginationItem>

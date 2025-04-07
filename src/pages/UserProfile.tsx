@@ -46,21 +46,19 @@ const UserProfile = () => {
     }
   }, [user]);
 
-  const isResident = user?.isResident === true;
-
   // Show restricted access message for residents
-  if (isAuthenticated && isResident) {
+  if (isAuthenticated && user?.isResident) {
     return (
       <DashboardLayout>
-        <div className={`container mx-auto py-4 ${isMobile ? 'px-0' : 'px-4'} w-full`}>
-          <div className={`flex items-center gap-2 mb-4 ${isMobile ? 'px-4' : ''}`}>
+        <div className="container mx-auto py-4 px-4 w-full">
+          <div className="flex items-center gap-2 mb-4">
             <UserCog className="h-5 w-5 text-brand-600" />
             <h1 className="text-xl sm:text-2xl font-bold">Meu Perfil</h1>
           </div>
           
-          <div className={`border-t pt-3 mb-4 ${isMobile ? 'mx-4' : ''}`}></div>
+          <div className="border-t pt-3 mb-4"></div>
           
-          <Card className={`p-4 border-l-4 border-l-amber-500 border-t-4 border-t-brand-600 shadow-sm ${isMobile ? 'mx-4 rounded-none border-x-0' : ''}`}>
+          <Card className="p-4 border-l-4 border-l-amber-500 border-t-4 border-t-brand-600 shadow-sm">
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
               <div>
