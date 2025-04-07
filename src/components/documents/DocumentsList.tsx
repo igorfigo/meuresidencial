@@ -195,7 +195,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
   return (
     <>
       {documents.length === 0 ? (
-        <div className="text-center py-8 bg-white rounded-md">
+        <div className="text-center py-8 bg-white rounded-md w-full">
           <FileText className="h-10 w-10 mx-auto text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">
             {searchTerm ? "Nenhum documento encontrado para esta pesquisa" : "Nenhum documento encontrado"}
@@ -208,7 +208,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           </p>
         </div>
       ) : isMobile ? (
-        <div className="space-y-3">
+        <div className="space-y-2 w-full px-0">
           {documents.map((document) => (
             <DocumentCard
               key={document.id}
@@ -221,7 +221,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           ))}
           
           {totalPages > 1 && (
-            <div className="py-3 flex justify-center">
+            <div className="py-3 flex justify-center w-full">
               <Pagination>
                 <PaginationContent className="gap-1">
                   <PaginationItem>
@@ -255,7 +255,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           )}
         </div>
       ) : (
-        <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
+        <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md w-full">
           <Table>
             <TableHeader>
               <TableRow>
@@ -312,7 +312,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({
           </Table>
           
           {totalPages > 1 && (
-            <div className="py-4">
+            <div className="py-4 w-full">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>

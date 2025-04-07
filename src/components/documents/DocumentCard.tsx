@@ -44,8 +44,8 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   };
 
   return (
-    <Card className="overflow-hidden border-l-4 border-l-brand-600">
-      <CardContent className="p-4">
+    <Card className="overflow-hidden border-l-4 border-l-brand-600 w-full">
+      <CardContent className="p-3">
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">
             <div>
