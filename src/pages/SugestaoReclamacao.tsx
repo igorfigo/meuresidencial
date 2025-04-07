@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -130,78 +129,76 @@ const SugestaoReclamacao = () => {
         </p>
         
         <Card className="border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="pb-2 sm:pb-3">
+          <CardHeader className={`pb-2 sm:pb-3 ${isMobile ? 'px-4' : ''}`}>
             <CardTitle className="text-xl sm:text-2xl text-brand-700">Envie sua mensagem</CardTitle>
             <CardDescription className="text-gray-600 text-sm sm:text-base">
               Use este formulário para enviar sua mensagem ao síndico.
             </CardDescription>
           </CardHeader>
           
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              <div className="space-y-3 sm:space-y-4">
+          <CardContent className={isMobile ? 'px-4 pt-2' : ''}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-3">
                 <div>
                   <Label htmlFor="type" className="font-medium mb-2 block">Tipo de mensagem</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     <Button
                       type="button"
                       variant={formData.type === 'sugestao' ? 'default' : 'outline'}
-                      className={`flex items-center justify-center h-12 ${formData.type === 'sugestao' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
+                      className={`flex items-center justify-center h-10 ${formData.type === 'sugestao' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
                       onClick={() => handleTypeChange('sugestao')}
                     >
-                      <ThumbsUp className="mr-2 h-5 w-5" />
+                      <ThumbsUp className="mr-2 h-4 w-4" />
                       <span>Sugestão</span>
                     </Button>
                     <Button
                       type="button"
                       variant={formData.type === 'reclamacao' ? 'default' : 'outline'}
-                      className={`flex items-center justify-center h-12 ${formData.type === 'reclamacao' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
+                      className={`flex items-center justify-center h-10 ${formData.type === 'reclamacao' ? 'bg-brand-600 hover:bg-brand-700' : ''}`}
                       onClick={() => handleTypeChange('reclamacao')}
                     >
-                      <ThumbsDown className="mr-2 h-5 w-5" />
+                      <ThumbsDown className="mr-2 h-4 w-4" />
                       <span>Reclamação</span>
                     </Button>
                   </div>
                 </div>
                 
-                <div className="pt-2">
+                <div className="pt-1">
                   <Label htmlFor="nome" className="font-medium block mb-1">Seus dados</Label>
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Nome</p>
+                      <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm">
+                        {user?.nome || 'Não informado'}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Email</p>
+                      <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm">
+                        {user?.email || 'Não informado'}
+                      </div>
+                    </div>
+
+                    <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Nome</p>
-                        <div className="bg-gray-50 p-2.5 rounded-md border border-gray-200 text-sm">
-                          {user?.nome || 'Não informado'}
+                        <p className="text-xs text-gray-500 mb-1">Condomínio</p>
+                        <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm truncate">
+                          {user?.nomeCondominio || 'N/A'}
                         </div>
                       </div>
                       
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Email</p>
-                        <div className="bg-gray-50 p-2.5 rounded-md border border-gray-200 text-sm">
-                          {user?.email || 'Não informado'}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">Condomínio</p>
-                          <div className="bg-gray-50 p-2.5 rounded-md border border-gray-200 text-sm truncate">
-                            {user?.nomeCondominio || 'N/A'}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">Unidade</p>
-                          <div className="bg-gray-50 p-2.5 rounded-md border border-gray-200 text-sm">
-                            {user?.unit || 'N/A'}
-                          </div>
+                        <p className="text-xs text-gray-500 mb-1">Unidade</p>
+                        <div className="bg-gray-50 p-2 rounded-md border border-gray-200 text-sm">
+                          {user?.unit || 'N/A'}
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="space-y-1 pt-2">
+                <div className="space-y-1 pt-1">
                   <Label htmlFor="subject" className="font-medium" required>Assunto</Label>
                   <Input 
                     id="subject" 
@@ -223,7 +220,7 @@ const SugestaoReclamacao = () => {
                     value={formData.message} 
                     onChange={handleChange} 
                     placeholder="Digite sua mensagem detalhadamente..." 
-                    rows={5} 
+                    rows={4} 
                     required 
                     className="border-gray-300 focus:border-brand-500 focus:ring-brand-500 resize-none"
                     maxLength={1000}
@@ -236,11 +233,11 @@ const SugestaoReclamacao = () => {
             </form>
           </CardContent>
           
-          <CardFooter className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-end gap-4'} pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg p-4`}>
+          <CardFooter className={`flex ${isMobile ? 'flex-col' : 'justify-end'} gap-3 pt-2 border-t border-gray-100 bg-gray-50 rounded-b-lg p-4`}>
             <Button 
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`${isMobile ? 'w-full' : ''} bg-brand-600 hover:bg-brand-700 transition-colors h-11`}
+              className={`${isMobile ? 'w-full' : ''} bg-brand-600 hover:bg-brand-700 transition-colors h-10`}
             >
               {isSubmitting ? (
                 <>
