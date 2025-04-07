@@ -371,13 +371,19 @@ const MinhasCobrancas = () => {
         <div className="flex items-center justify-between gap-2 mb-2 px-1 sm:px-0">
           <div className="flex items-center gap-2">
             <Wallet className="h-5 w-5 text-brand-600 flex-shrink-0" />
-            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Cobranças</h1>
+            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Minhas Cobranças</h1>
           </div>
           {overdueCount > 0 && (
             <Badge variant="destructive" className="text-xs">
               {overdueCount} em atraso
             </Badge>
           )}
+        </div>
+        
+        <div className="px-1 sm:px-0">
+          <p className="text-sm text-muted-foreground">
+            Acompanhe todas as suas cobranças mensais, visualize pagamentos já realizados e gere códigos PIX para pagamentos pendentes.
+          </p>
         </div>
         
         <div className="border-t pt-3 mx-1 sm:mx-0"></div>
