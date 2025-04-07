@@ -61,11 +61,11 @@ const AnnouncementCard = ({
   onPrint: () => void;
 }) => {
   return (
-    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow bg-white w-full mx-0">
-      <CardContent className="p-3 sm:p-4">
+    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow bg-white">
+      <CardContent className="p-4">
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">
-            <div className="w-full">
+            <div>
               <h3 className="font-medium text-base line-clamp-1">
                 {announcement.title}
               </h3>
@@ -264,7 +264,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64 w-full max-w-none">
+      <div className="flex justify-center items-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary m-auto"></div>
           <p className="mt-4 text-gray-500">Carregando comunicados...</p>
@@ -275,7 +275,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-4 text-center w-full mx-0 max-w-none">
+      <div className="bg-red-50 border border-red-200 rounded-md p-4 text-center">
         <p className="text-red-600">{error}</p>
         <Button className="mt-4" variant="outline" onClick={() => window.location.reload()}>
           Tentar novamente
@@ -287,15 +287,15 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   return (
     <>
       {filteredAnnouncements.length === 0 ? (
-        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center w-full mx-0 max-w-none">
+        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center w-full">
           <p className="text-muted-foreground mb-4">
             {searchTerm ? "Nenhum comunicado encontrado para a pesquisa." : "Nenhum comunicado encontrado."}
           </p>
         </div>
       ) : (
-        <div className="w-full mx-0 max-w-none">
+        <div className="w-full">
           {isMobile ? (
-            <div className="grid grid-cols-1 gap-2 w-full mx-0 max-w-none">
+            <div className="grid grid-cols-1 gap-3">
               {paginatedAnnouncements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}
@@ -309,14 +309,14 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
               ))}
             </div>
           ) : (
-            <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md bg-white w-full mx-0 max-w-none">
+            <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md bg-white w-full">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-1/2 md:w-auto">Título</TableHead>
-                    <TableHead className="text-center w-24">Data</TableHead>
-                    <TableHead className="text-center w-24">Enviado por</TableHead>
-                    <TableHead className="text-center w-[120px]">Ações</TableHead>
+                    <TableHead>Título</TableHead>
+                    <TableHead className="text-center">Data</TableHead>
+                    <TableHead className="text-center">Enviado por</TableHead>
+                    <TableHead className="text-center w-[100px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -389,7 +389,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
           )}
           
           {totalPages > 1 && (
-            <div className="py-4 border-t w-full mx-0 max-w-none">
+            <div className="py-4 border-t">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
