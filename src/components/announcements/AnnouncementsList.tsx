@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import { Button } from '@/components/ui/button';
@@ -61,11 +62,11 @@ const AnnouncementCard = ({
   onPrint: () => void;
 }) => {
   return (
-    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow bg-white">
+    <Card className="overflow-hidden border-l-4 border-l-brand-600 hover:shadow-md transition-shadow bg-white w-full">
       <CardContent className="p-4">
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">
-            <div>
+            <div className="w-full">
               <h3 className="font-medium text-base line-clamp-1">
                 {announcement.title}
               </h3>
@@ -287,15 +288,15 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   return (
     <>
       {filteredAnnouncements.length === 0 ? (
-        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center w-full">
+        <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center w-full mx-0 px-0">
           <p className="text-muted-foreground mb-4">
             {searchTerm ? "Nenhum comunicado encontrado para a pesquisa." : "Nenhum comunicado encontrado."}
           </p>
         </div>
       ) : (
-        <div className="w-full">
+        <div className="w-full mx-0 px-0">
           {isMobile ? (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-2 mx-4 sm:mx-6">
               {paginatedAnnouncements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}
@@ -309,14 +310,14 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
               ))}
             </div>
           ) : (
-            <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md bg-white w-full">
+            <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md bg-white w-full mx-4 sm:mx-6 rounded-none sm:rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Título</TableHead>
                     <TableHead className="text-center">Data</TableHead>
                     <TableHead className="text-center">Enviado por</TableHead>
-                    <TableHead className="text-center w-[100px]">Ações</TableHead>
+                    <TableHead className="text-center w-[120px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -389,7 +390,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
           )}
           
           {totalPages > 1 && (
-            <div className="py-4 border-t">
+            <div className="py-2 border-t mx-4 sm:mx-6">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
