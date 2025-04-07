@@ -164,9 +164,9 @@ const Comunicados: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="w-full p-0 max-w-none">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-0 sm:px-0 mx-0 sm:mx-0">
-          <div className="px-4 sm:px-6">
+      <div className="w-full p-0 sm:p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0">
+          <div>
             <h1 className="text-2xl md:text-3xl font-bold">Comunicados</h1>
             <p className="text-muted-foreground">
               {isResident 
@@ -176,28 +176,26 @@ const Comunicados: React.FC = () => {
             </p>
           </div>
           {!isResident && !showForm && (
-            <div className="px-4 sm:px-6">
-              <Button 
-                onClick={handleNewAnnouncement} 
-                className="bg-brand-600 hover:bg-brand-700 w-full md:w-auto"
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Novo Comunicado
-              </Button>
-            </div>
+            <Button 
+              onClick={handleNewAnnouncement} 
+              className="bg-brand-600 hover:bg-brand-700 w-full md:w-auto"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Novo Comunicado
+            </Button>
           )}
         </div>
 
-        <div className="border-t pt-4 md:pt-4 mx-0 px-0"></div>
+        <div className="border-t pt-4 md:pt-6 mx-4 sm:mx-0"></div>
 
         {!showForm && (
-          <div className="mb-2 px-4 sm:px-6 mx-0">
+          <div className="mb-4 px-4 sm:px-0">
             <FinancialChartCard
               title="Pesquisar Comunicados"
               icon={<Search className="h-4 w-4" />}
               tooltip="Pesquise por título ou conteúdo"
             >
-              <div className="flex items-center gap-2 w-full">
+              <div className="flex items-center gap-2">
                 <Input
                   placeholder="Pesquisar comunicados..."
                   value={searchTerm}
@@ -215,9 +213,9 @@ const Comunicados: React.FC = () => {
           </div>
         )}
         
-        <div className="pt-2 md:pt-4 mx-0 px-0 w-full">
+        <div className="pt-4 md:pt-6">
           {!isResident && showForm ? (
-            <Card className="border-t-4 border-t-brand-600 shadow-md mx-0 sm:mx-6 px-0">
+            <Card className="border-t-4 border-t-brand-600 shadow-md mx-4 sm:mx-0">
               <AnnouncementForm
                 isNewAnnouncement={!selectedAnnouncement?.id}
                 title={title}
@@ -238,7 +236,7 @@ const Comunicados: React.FC = () => {
               />
             </Card>
           ) : (
-            <div className="px-0 sm:px-0 mx-0 w-full">
+            <div className="px-4 sm:px-0">
               <AnnouncementsList 
                 onEdit={!isResident ? handleEditAnnouncement : undefined}
                 isResident={isResident}
