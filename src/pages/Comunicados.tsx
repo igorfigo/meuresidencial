@@ -163,8 +163,8 @@ const Comunicados: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className={`space-y-6 ${isResident && isMobile ? 'px-0' : 'px-2 sm:px-4 md:px-6'}`}>
-        <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 ${isResident && isMobile ? 'px-4' : ''}`}>
+      <div className="space-y-6 px-2 sm:px-4 md:px-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Comunicados</h1>
             <p className="text-muted-foreground">
@@ -185,10 +185,10 @@ const Comunicados: React.FC = () => {
           )}
         </div>
 
-        <div className={`border-t pt-4 md:pt-6 ${isResident && isMobile ? '-mx-0' : '-mx-2 sm:mx-0'}`}></div>
+        <div className="border-t pt-4 md:pt-6 -mx-2 sm:mx-0"></div>
 
         {!showForm && (
-          <div className={`mb-4 ${isResident && isMobile ? 'px-4' : ''}`}>
+          <div className="mb-4">
             <FinancialChartCard
               title="Pesquisar Comunicados"
               icon={<Search className="h-4 w-4" />}
@@ -212,7 +212,7 @@ const Comunicados: React.FC = () => {
           </div>
         )}
         
-        <div className="pt-4 md:pt-6">
+        <div className="pt-4 md:pt-6 mx-2 sm:mx-0">
           {!isResident && showForm ? (
             <Card className="border-t-4 border-t-brand-600 shadow-md mx-2 sm:mx-0">
               <AnnouncementForm

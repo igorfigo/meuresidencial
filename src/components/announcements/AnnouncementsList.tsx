@@ -60,10 +60,8 @@ const AnnouncementCard = ({
   onDelete?: () => void;
   onPrint: () => void;
 }) => {
-  const isMobile = useIsMobile();
-  
   return (
-    <Card className={`mb-4 hover:shadow-md transition-shadow ${isMobile && isResident ? 'rounded-none border-x-0 shadow-none' : ''}`}>
+    <Card className="mb-4 hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-medium line-clamp-1">{announcement.title}</CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -276,7 +274,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
   }
   
   return (
-    <Card className={`overflow-hidden border-t-4 border-t-brand-600 shadow-md ${isMobile && isResident ? 'rounded-none border-x-0 shadow-none' : ''}`}>
+    <Card className="overflow-hidden border-t-4 border-t-brand-600 shadow-md">
       {filteredAnnouncements.length === 0 ? (
         <div className="bg-muted/30 border border-muted rounded-lg p-8 text-center">
           <p className="text-muted-foreground mb-4">
@@ -286,7 +284,7 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
       ) : (
         <div>
           {isMobile ? (
-            <div className={`grid grid-cols-1 gap-2 ${isResident ? 'p-0' : 'p-4'}`}>
+            <div className="grid grid-cols-1 gap-2 p-4">
               {paginatedAnnouncements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}
