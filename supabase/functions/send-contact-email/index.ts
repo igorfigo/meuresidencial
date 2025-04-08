@@ -23,10 +23,11 @@ serve(async (req) => {
       subject, 
       message,
       isComplaint,
-      managerEmail 
+      managerEmail,
+      isHistoricalData 
     } = await req.json();
 
-    console.log(`Recebendo solicitação de ${isComplaint ? 'sugestão/reclamação' : 'contato'} de: ${email}`);
+    console.log(`Recebendo solicitação de ${isComplaint ? 'sugestão/reclamação' : (isHistoricalData ? 'dados históricos' : 'contato')} de: ${email}`);
 
     // Configuração do cliente SMTP
     const client = new SMTPClient({
@@ -40,123 +41,18 @@ serve(async (req) => {
         },
       },
     });
-
-    // Determine if this is a historical data request
-    const isHistoricalData = subject.includes('Históricos') || subject.includes('históricos');
     
-    // Email template for regular contact
+    // Email template for regular contact - this one works correctly
     const regularEmailContent = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nova mensagem de contato</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.content{padding:20px;background-color:#fff}.section{margin-bottom:20px;border-bottom:1px solid #f0f0f0;padding-bottom:15px}.section:last-child{border-bottom:none;margin-bottom:0}.section h2{color:#4A6CF7;font-size:18px;margin-top:0;margin-bottom:15px}.info-item{margin-bottom:8px}.info-label{font-weight:bold}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px;white-space:pre-wrap}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666}.logo{margin-bottom:10px}</style></head><body><div class="container"><div class="header"><h1>Nova mensagem de contato</h1></div><div class="content"><div class="section"><h2>Dados do Gestor</h2><div class="info-item"><span class="info-label">Nome:</span> ${name}</div><div class="info-item"><span class="info-label">E-mail:</span> ${email}</div><div class="info-item"><span class="info-label">Matrícula:</span> ${matricula || 'N/A'}</div><div class="info-item"><span class="info-label">Condomínio:</span> ${nomeCondominio || 'N/A'}</div></div><div class="section"><h2>Mensagem</h2><div class="info-item"><span class="info-label">Assunto:</span> ${subject}</div><div class="message-box">${message.replace(/\n/g, '<br>')}</div></div></div><div class="footer">Esta mensagem foi enviada através do formulário de contato do Meu Residencial.<br>© 2024 Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
 
-    // Email template for historical data requests - Fixed and simplified to prevent encoding issues
-    const historicalDataEmailContent = `
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitação de Dados Históricos</title>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
-        .container { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header { background-color: #4A6CF7; padding: 20px; text-align: center; }
-        .header h1 { color: white; margin: 0; font-size: 24px; }
-        .content { padding: 20px; background-color: #fff; }
-        .section { margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
-        .section:last-child { border-bottom: none; margin-bottom: 0; }
-        .section h2 { color: #4A6CF7; font-size: 18px; margin-top: 0; margin-bottom: 15px; }
-        .info-item { margin-bottom: 8px; }
-        .info-label { font-weight: bold; }
-        .message-box { background-color: #f7f7f7; padding: 15px; border-radius: 6px; margin-top: 10px; white-space: pre-wrap; }
-        .price-info { background-color: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 6px; margin-top: 15px; }
-        .footer { background-color: #f7f7f7; padding: 15px; text-align: center; font-size: 12px; color: #666; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Solicitação de Dados Históricos</h1>
-        </div>
-        <div class="content">
-            <div class="section">
-                <h2>Dados do Gestor</h2>
-                <div class="info-item"><span class="info-label">Nome:</span> ${name}</div>
-                <div class="info-item"><span class="info-label">E-mail:</span> ${email}</div>
-                <div class="info-item"><span class="info-label">Matrícula:</span> ${matricula || 'N/A'}</div>
-                <div class="info-item"><span class="info-label">Condomínio:</span> ${nomeCondominio || 'N/A'}</div>
-            </div>
-            <div class="section">
-                <h2>Mensagem</h2>
-                <div class="info-item"><span class="info-label">Assunto:</span> ${subject}</div>
-                <div class="message-box">${message.replace(/\n/g, '<br>')}</div>
-                <div class="price-info">
-                    <p><strong>Valor do serviço:</strong> R$ 249,00</p>
-                    <p><strong>Prazo de implementação:</strong> Até 3 dias úteis após confirmação do pagamento</p>
-                </div>
-            </div>
-        </div>
-        <div class="footer">
-            Esta mensagem foi enviada através do formulário de Dados Históricos do Meu Residencial.<br>
-            © 2024 Meu Residencial. Todos os direitos reservados.
-        </div>
-    </div>
-</body>
-</html>`;
+    // Using the SAME format from the working regularEmailContent for historical data emails
+    const historicalDataEmailContent = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Solicitação de Dados Históricos</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.content{padding:20px;background-color:#fff}.section{margin-bottom:20px;border-bottom:1px solid #f0f0f0;padding-bottom:15px}.section:last-child{border-bottom:none;margin-bottom:0}.section h2{color:#4A6CF7;font-size:18px;margin-top:0;margin-bottom:15px}.info-item{margin-bottom:8px}.info-label{font-weight:bold}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px;white-space:pre-wrap}.price-info{background-color:#fff8e1;border:1px solid #ffe082;padding:15px;border-radius:6px;margin-top:15px}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666}.logo{margin-bottom:10px}</style></head><body><div class="container"><div class="header"><h1>Solicitação de Dados Históricos</h1></div><div class="content"><div class="section"><h2>Dados do Gestor</h2><div class="info-item"><span class="info-label">Nome:</span> ${name}</div><div class="info-item"><span class="info-label">E-mail:</span> ${email}</div><div class="info-item"><span class="info-label">Matrícula:</span> ${matricula || 'N/A'}</div><div class="info-item"><span class="info-label">Condomínio:</span> ${nomeCondominio || 'N/A'}</div></div><div class="section"><h2>Mensagem</h2><div class="info-item"><span class="info-label">Assunto:</span> ${subject}</div><div class="message-box">${message.replace(/\n/g, '<br>')}</div><div class="price-info"><p><strong>Valor do serviço:</strong> R$ 249,00</p><p><strong>Prazo de implementação:</strong> Até 3 dias úteis após confirmação do pagamento</p></div></div></div><div class="footer">Esta mensagem foi enviada através do formulário de Dados Históricos do Meu Residencial.<br>© 2024 Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
 
     // Email template for resident complaints or suggestions
     const complaintEmailContent = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nova ${subject.includes('Sugestão') ? 'sugestão' : 'reclamação'} de morador</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.content{padding:20px;background-color:#fff}.section{margin-bottom:20px;border-bottom:1px solid #f0f0f0;padding-bottom:15px}.section:last-child{border-bottom:none;margin-bottom:0}.section h2{color:#4A6CF7;font-size:18px;margin-top:0;margin-bottom:15px}.info-item{margin-bottom:8px}.info-label{font-weight:bold}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px;white-space:pre-wrap}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666}.logo{margin-bottom:10px}</style></head><body><div class="container"><div class="header"><h1>Nova ${subject.includes('Sugestão') ? 'sugestão' : 'reclamação'} de morador</h1></div><div class="content"><div class="section"><h2>Dados do Morador</h2><div class="info-item"><span class="info-label">Nome:</span> ${name}</div><div class="info-item"><span class="info-label">E-mail:</span> ${email}</div><div class="info-item"><span class="info-label">Condomínio:</span> ${nomeCondominio || 'N/A'}</div><div class="info-item"><span class="info-label">Unidade:</span> ${unit || 'N/A'}</div></div><div class="section"><h2>Mensagem</h2><div class="info-item"><span class="info-label">Assunto:</span> ${subject}</div><div class="message-box">${message.replace(/\n/g, '<br>')}</div></div></div><div class="footer">Esta mensagem foi enviada através do formulário de Sugestão/Reclamação do Meu Residencial.<br>© 2024 Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
 
-    // Template de confirmação - Simplified to prevent encoding issues
-    const confirmationEmailContent = `
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recebemos sua mensagem</title>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
-        .container { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header { background-color: #4A6CF7; padding: 20px; text-align: center; }
-        .header h1 { color: white; margin: 0; font-size: 24px; }
-        .content { padding: 20px; background-color: #fff; }
-        .message-details { background-color: #f7f7f7; padding: 15px; border-radius: 6px; margin: 15px 0; }
-        .highlight { font-weight: bold; color: #4A6CF7; }
-        .footer { background-color: #f7f7f7; padding: 15px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
-        .price-info { background-color: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 6px; margin-top: 15px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Recebemos sua mensagem!</h1>
-        </div>
-        <div class="content">
-            <p>Olá, <span class="highlight">${name}</span>!</p>
-            <p>Agradecemos por entrar em contato conosco. Sua mensagem foi recebida com sucesso e será analisada pela nossa equipe.</p>
-            
-            <div class="message-details">
-                <p><strong>Assunto:</strong> ${subject}</p>
-                ${isHistoricalData ? `
-                <div class="price-info">
-                    <p><strong>Serviço:</strong> Solicitação de Dados Históricos</p>
-                    <p><strong>Valor:</strong> R$ 249,00</p>
-                </div>
-                ` : ''}
-            </div>
-            
-            <p>${isComplaint ? 'O síndico do seu condomínio responderá em breve.' : (isHistoricalData ? 'Nossa equipe responderá com uma cotação em até <span class="highlight">24 horas úteis</span>.' : 'Nossa equipe de suporte responderá em até <span class="highlight">24 horas úteis</span>.')}</p>
-            
-            <p>Se tiver dúvidas adicionais, sinta-se à vontade para enviar uma nova mensagem através do sistema.</p>
-            
-            <p>Atenciosamente,<br>${isComplaint ? 'Administração do Condomínio' : 'Equipe Meu Residencial'}</p>
-        </div>
-        <div class="footer">
-            © 2024 Meu Residencial. Todos os direitos reservados.<br>
-            Este é um e-mail automático, por favor não responda.
-        </div>
-    </div>
-</body>
-</html>`;
+    // Confirmation email - Using the same format as the working one
+    const confirmationEmailContent = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Recebemos sua mensagem</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.content{padding:20px;background-color:#fff}.message-details{background-color:#f7f7f7;padding:15px;border-radius:6px;margin:15px 0}.highlight{font-weight:bold;color:#4A6CF7}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666;border-top:1px solid #e0e0e0}.price-info{background-color:#fff8e1;border:1px solid #ffe082;padding:15px;border-radius:6px;margin-top:15px}</style></head><body><div class="container"><div class="header"><h1>Recebemos sua mensagem!</h1></div><div class="content"><p>Olá, <span class="highlight">${name}</span>!</p><p>Agradecemos por entrar em contato conosco. Sua mensagem foi recebida com sucesso e será analisada pela nossa equipe.</p><div class="message-details"><p><strong>Assunto:</strong> ${subject}</p>${isHistoricalData ? `<div class="price-info"><p><strong>Serviço:</strong> Solicitação de Dados Históricos</p><p><strong>Valor:</strong> R$ 249,00</p></div>` : ''}</div><p>${isComplaint ? 'O síndico do seu condomínio responderá em breve.' : (isHistoricalData ? 'Nossa equipe responderá com uma cotação em até <span class="highlight">24 horas úteis</span>.' : 'Nossa equipe de suporte responderá em até <span class="highlight">24 horas úteis</span>.')}</p><p>Se tiver dúvidas adicionais, sinta-se à vontade para enviar uma nova mensagem através do sistema.</p><p>Atenciosamente,<br>${isComplaint ? 'Administração do Condomínio' : 'Equipe Meu Residencial'}</p></div><div class="footer">© 2024 Meu Residencial. Todos os direitos reservados.<br>Este é um e-mail automático, por favor não responda.</div></div></body></html>`;
 
     // Determine the email content and recipient based on the request type
     let emailContent;
@@ -181,23 +77,16 @@ serve(async (req) => {
       recipient = "contato@meuresidencial.com";
     }
 
-    // Set email headers to ensure proper UTF-8 encoding
-    const emailHeaders = {
-      'Content-Type': 'text/html; charset=UTF-8',
-      'Content-Transfer-Encoding': 'base64'
-    };
-
-    // Envio do email com o alias e assunto corrigidos
+    // Envio do email com o alias e assunto corrigidos - without special content-type headers that might be causing problems
     await client.send({
       from: fromEmail,
       to: recipient,
       subject: emailSubject,
       html: emailContent,
-      headers: emailHeaders,
       replyTo: email,
     });
 
-    // Envio de confirmação para o gestor ou morador com headers adequados
+    // Envio de confirmação para o gestor ou morador - también sin headers especiales
     await client.send({
       from: isComplaint ? "Sugestões e Reclamações <noreply@meuresidencial.com>" : 
            (isHistoricalData ? "Dados Históricos <noreply@meuresidencial.com>" : 
@@ -208,7 +97,6 @@ serve(async (req) => {
               (isHistoricalData ? "Recebemos sua solicitação de Dados Históricos - Meu Residencial" : 
               "Recebemos sua mensagem - Meu Residencial"),
       html: confirmationEmailContent,
-      headers: emailHeaders,
     });
 
     await client.close();

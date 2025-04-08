@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -79,7 +80,7 @@ const DadosHistoricos = () => {
           nomeCondominio: user?.nomeCondominio || 'N/A',
           subject: `[${typeText}] ${formData.subject}`,
           message: formData.message,
-          isHistoricalData: true
+          isHistoricalData: true // Explicitly set the flag
         }
       });
       
