@@ -176,7 +176,8 @@ const TestimonialCard = ({ author, role, company, content, stars = 5, delay = 0 
 
 const WhatsAppButton = () => {
   const phoneNumber = "5511914420166"; // Format for WhatsApp API
-  const whatsappUrl = `https://wa.me/${phoneNumber}`;
+  const message = encodeURIComponent("Olá! Gostaria de saber mais sobre o Sistema.");
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
   
   return (
     <a 
