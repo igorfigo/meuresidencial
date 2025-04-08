@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
@@ -119,9 +120,12 @@ export default function Preventivas() {
         const { data, error } = await supabase.rpc('get_preventive_maintenance');
         
         if (error) {
+          console.error('Error fetching maintenance items:', error);
           throw error;
         }
         
+        // Log retrieved data for debugging
+        console.log('Retrieved maintenance items:', data);
         return data as MaintenanceItem[];
       } catch (error) {
         console.error('Error fetching maintenance items:', error);
@@ -153,6 +157,8 @@ export default function Preventivas() {
           throw error;
         }
 
+        // Log successful creation
+        console.log('Successfully added maintenance item with ID:', data);
         return data;
       } catch (error) {
         console.error('Error adding maintenance item:', error);
@@ -263,6 +269,13 @@ export default function Preventivas() {
     }
   };
 
+  // Force a refetch whenever the component mounts or dialog is closed
+  useEffect(() => {
+    if (!isDialogOpen && userMatricula) {
+      refetch();
+    }
+  }, [isDialogOpen, userMatricula, refetch]);
+
   const resetForm = () => {
     setNewItem({
       category: '',
@@ -290,6 +303,12 @@ export default function Preventivas() {
   ).sort();
 
   const hasAnyItems = maintenanceItems.length > 0;
+
+  // Log the current state for debugging
+  console.log('Current maintenance items:', maintenanceItems);
+  console.log('Items by category:', itemsByCategory);
+  console.log('Categories with pending items:', categoriesWithPendingItems);
+  console.log('Has any items:', hasAnyItems);
 
   return (
     <DashboardLayout>
@@ -324,7 +343,7 @@ export default function Preventivas() {
               <form onSubmit={handleAddItem} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Categoria *</Label>
-                  <Select value={newItem.category} onValueChange={handleCategoryChange} required>
+                  <Select value={newItem.category} onValueChange={(value) => setNewItem(prev => ({ ...prev, category: value }))} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione uma categoria" />
                     </SelectTrigger>
@@ -343,7 +362,7 @@ export default function Preventivas() {
                     id="title" 
                     name="title" 
                     value={newItem.title} 
-                    onChange={handleInputChange} 
+                    onChange={(e) => setNewItem(prev => ({ ...prev, [e.target.name]: e.target.value }))} 
                     placeholder="Ex: Vistoria de extintores"
                     required
                   />
@@ -354,7 +373,7 @@ export default function Preventivas() {
                     id="description" 
                     name="description" 
                     value={newItem.description} 
-                    onChange={handleInputChange}
+                    onChange={(e) => setNewItem(prev => ({ ...prev, [e.target.name]: e.target.value }))}
                     placeholder="Detalhes sobre a manutenção"
                     rows={3}
                   />
@@ -378,7 +397,7 @@ export default function Preventivas() {
                       <Calendar
                         mode="single"
                         selected={newItem.scheduled_date}
-                        onSelect={handleDateChange}
+                        onSelect={(date) => date && setNewItem(prev => ({ ...prev, scheduled_date: date }))}
                         disabled={(date) =>
                           date < new Date(new Date().setHours(0, 0, 0, 0))
                         }
