@@ -998,6 +998,42 @@ export type Database = {
         }
         Relationships: []
       }
+      preventive_maintenance: {
+        Row: {
+          category: string
+          completed: boolean | null
+          created_at: string
+          description: string | null
+          id: string
+          matricula: string
+          scheduled_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          completed?: boolean | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          matricula: string
+          scheduled_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          completed?: boolean | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          matricula?: string
+          scheduled_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       resident_charges: {
         Row: {
           amount: string
@@ -1128,9 +1164,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_preventive_maintenance: {
+        Args: {
+          p_category: string
+          p_title: string
+          p_description: string
+          p_scheduled_date: string
+        }
+        Returns: string
+      }
+      delete_preventive_maintenance: {
+        Args: { p_id: string }
+        Returns: boolean
+      }
       get_auth_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_preventive_maintenance: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+          completed: boolean | null
+          created_at: string
+          description: string | null
+          id: string
+          matricula: string
+          scheduled_date: string
+          title: string
+          updated_at: string
+        }[]
       }
       get_user_matricula: {
         Args: Record<PropertyKey, never>
@@ -1139,6 +1202,10 @@ export type Database = {
       get_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      toggle_preventive_maintenance_status: {
+        Args: { p_id: string }
+        Returns: boolean
       }
     }
     Enums: {
