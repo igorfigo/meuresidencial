@@ -114,10 +114,20 @@ export default function Preventivas() {
   }, [matriculaFromUser, user]);
 
   const { data: maintenanceItems = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['preventiveMaintenanceItems'],
+    queryKey: ['preventiveMaintenanceItems', userMatricula],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.rpc('get_preventive_maintenance');
+        if (!userMatricula) {
+          console.log('No user matricula available, skipping fetch');
+          return [];
+        }
+        
+        // Using direct query instead of RPC to debug the issue
+        const { data, error } = await supabase
+          .from('preventive_maintenance')
+          .select('*')
+          .eq('matricula', userMatricula)
+          .order('scheduled_date', { ascending: true });
         
         if (error) {
           console.error('Error fetching maintenance items:', error);
@@ -144,13 +154,17 @@ export default function Preventivas() {
 
         console.log('Adding maintenance with matricula:', userMatricula);
         
-        const { data, error } = await supabase.rpc('add_preventive_maintenance_with_matricula', {
-          p_matricula: userMatricula,
-          p_category: item.category,
-          p_title: item.title,
-          p_description: item.description || null,
-          p_scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd')
-        });
+        // Using direct insert instead of RPC to debug the issue
+        const { data, error } = await supabase
+          .from('preventive_maintenance')
+          .insert({
+            matricula: userMatricula,
+            category: item.category,
+            title: item.title,
+            description: item.description || null,
+            scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd')
+          })
+          .select();
 
         if (error) {
           console.error('Detailed error:', error);
@@ -166,10 +180,12 @@ export default function Preventivas() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['preventiveMaintenanceItems'] });
+      queryClient.invalidateQueries({ queryKey: ['preventiveMaintenanceItems', userMatricula] });
       toast.success('Item de manutenção preventiva adicionado com sucesso.');
       setIsDialogOpen(false);
       resetForm();
+      // Force an immediate refetch to update the UI
+      refetch();
     },
     onError: (error: any) => {
       console.error('Full error object:', error);
@@ -180,9 +196,20 @@ export default function Preventivas() {
   const toggleStatusMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        const { data, error } = await supabase.rpc('toggle_preventive_maintenance_status', {
-          p_id: id
-        });
+        // Find the current item to toggle its status
+        const item = maintenanceItems.find(item => item.id === id);
+        if (!item) throw new Error('Item não encontrado');
+
+        // Using direct update instead of RPC to debug the issue
+        const { data, error } = await supabase
+          .from('preventive_maintenance')
+          .update({ 
+            completed: !item.completed,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id)
+          .eq('matricula', userMatricula)
+          .select();
         
         if (error) {
           throw error;
@@ -195,8 +222,9 @@ export default function Preventivas() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['preventiveMaintenanceItems'] });
+      queryClient.invalidateQueries({ queryKey: ['preventiveMaintenanceItems', userMatricula] });
       toast.success('Status atualizado com sucesso.');
+      refetch();
     },
     onError: (error: any) => {
       toast.error(`Erro ao atualizar status: ${error.message || 'Erro desconhecido'}`);
@@ -206,9 +234,13 @@ export default function Preventivas() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        const { data, error } = await supabase.rpc('delete_preventive_maintenance', {
-          p_id: id
-        });
+        // Using direct delete instead of RPC to debug the issue
+        const { data, error } = await supabase
+          .from('preventive_maintenance')
+          .delete()
+          .eq('id', id)
+          .eq('matricula', userMatricula)
+          .select();
 
         if (error) {
           throw error;
@@ -221,61 +253,23 @@ export default function Preventivas() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['preventiveMaintenanceItems'] });
+      queryClient.invalidateQueries({ queryKey: ['preventiveMaintenanceItems', userMatricula] });
       toast.success('Item de manutenção excluído com sucesso.');
+      refetch();
     },
     onError: (error: any) => {
       toast.error(`Erro ao excluir item: ${error.message || 'Erro desconhecido'}`);
     }
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewItem(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCategoryChange = (value: string) => {
-    setNewItem(prev => ({ ...prev, category: value }));
-  };
-
-  const handleDateChange = (date: Date | undefined) => {
-    if (date) {
-      setNewItem(prev => ({ ...prev, scheduled_date: date }));
-    }
-  };
-
-  const handleAddItem = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newItem.category || !newItem.title || !newItem.scheduled_date) {
-      toast.error('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
-    
-    if (!userMatricula) {
-      toast.error('Matrícula do usuário não encontrada. Tente recarregar a página.');
-      return;
-    }
-    
-    addMutation.mutate(newItem);
-  };
-
-  const handleToggleStatus = (id: string) => {
-    toggleStatusMutation.mutate(id);
-  };
-
-  const handleDeleteItem = (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este item de manutenção preventiva?')) {
-      deleteMutation.mutate(id);
-    }
-  };
-
   // Force a refetch whenever the component mounts or dialog is closed
   useEffect(() => {
-    if (!isDialogOpen && userMatricula) {
+    if (userMatricula) {
+      console.log('Force refetching data with matricula:', userMatricula);
       refetch();
     }
-  }, [isDialogOpen, userMatricula, refetch]);
-
+  }, [userMatricula, refetch]);
+  
   const resetForm = () => {
     setNewItem({
       category: '',
