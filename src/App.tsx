@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -38,7 +37,6 @@ import VagaGaragem from './pages/VagaGaragem';
 import DuvidasFrequentes from './pages/DuvidasFrequentes';
 import LandingPage from './pages/LandingPage';
 import VpsOverview from './pages/VpsOverview';
-import Preventivas from './pages/Preventivas';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
@@ -77,7 +75,6 @@ function App() {
               <Route path="/comunicados" element={<AuthRequired><Comunicados /></AuthRequired>} />
               <Route path="/documentos" element={<AuthRequired><Documentos /></AuthRequired>} />
               <Route path="/areas-comuns" element={<AuthRequired><AreasComuns /></AuthRequired>} />
-              <Route path="/preventivas" element={<AuthRequired><Preventivas /></AuthRequired>} />
               <Route path="/dedetizacoes" element={<AuthRequired><Dedetizacoes /></AuthRequired>} />
               <Route path="/minha-assinatura" element={<AuthRequired><MinhaAssinatura /></AuthRequired>} />
               <Route path="/contato" element={<AuthRequired><FaleConosco /></AuthRequired>} />
