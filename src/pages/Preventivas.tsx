@@ -77,17 +77,21 @@ export default function Preventivas() {
       
       setIsLoadingMatricula(true);
       try {
-        const { data, error } = await supabase.rpc('get_user_matricula');
+        const { data: userRoleData, error: userRoleError } = await supabase
+          .from('user_roles')
+          .select('matricula')
+          .eq('user_id', user?.id)
+          .maybeSingle();
         
-        if (error) {
-          console.error('Error getting user matricula:', error);
+        if (userRoleError) {
+          console.error('Error getting user matricula:', userRoleError);
           toast.error('Não foi possível carregar sua matrícula. Tente novamente.');
           return;
         }
         
-        if (data) {
-          localStorage.setItem('userMatricula', data);
-          setUserMatricula(data);
+        if (userRoleData?.matricula) {
+          localStorage.setItem('userMatricula', userRoleData.matricula);
+          setUserMatricula(userRoleData.matricula);
         } else {
           toast.error('Não foi possível identificar sua matrícula. Entre em contato com o suporte.');
         }
@@ -100,13 +104,17 @@ export default function Preventivas() {
     };
 
     fetchUserMatricula();
-  }, [matriculaFromUser]);
+  }, [matriculaFromUser, user?.id]);
 
   const { data: maintenanceItems = [], isLoading, error, refetch } = useQuery({
     queryKey: ['preventiveMaintenanceItems'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.rpc('get_preventive_maintenance');
+        const { data, error } = await supabase
+          .from('preventive_maintenance')
+          .select('*')
+          .eq('matricula', userMatricula)
+          .order('scheduled_date', { ascending: true });
         
         if (error) {
           throw error;
@@ -118,6 +126,7 @@ export default function Preventivas() {
         throw error;
       }
     },
+    enabled: !!userMatricula,
   });
 
   const addMutation = useMutation({
@@ -164,9 +173,26 @@ export default function Preventivas() {
   const toggleStatusMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        const { data, error } = await supabase.rpc('toggle_preventive_maintenance_status', {
-          p_id: id
-        });
+        const { data: currentItem, error: fetchError } = await supabase
+          .from('preventive_maintenance')
+          .select('completed')
+          .eq('id', id)
+          .eq('matricula', userMatricula)
+          .single();
+        
+        if (fetchError) {
+          throw fetchError;
+        }
+        
+        const { data, error } = await supabase
+          .from('preventive_maintenance')
+          .update({ 
+            completed: !currentItem.completed,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id)
+          .eq('matricula', userMatricula)
+          .select();
 
         if (error) {
           throw error;
@@ -190,15 +216,17 @@ export default function Preventivas() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        const { data, error } = await supabase.rpc('delete_preventive_maintenance', {
-          p_id: id
-        });
+        const { error } = await supabase
+          .from('preventive_maintenance')
+          .delete()
+          .eq('id', id)
+          .eq('matricula', userMatricula);
 
         if (error) {
           throw error;
         }
 
-        return data;
+        return true;
       } catch (error) {
         console.error('Error deleting maintenance item:', error);
         throw error;
