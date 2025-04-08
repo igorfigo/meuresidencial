@@ -201,6 +201,48 @@ const LandingPage = () => {
   const isMobile = useIsMobile();
   
   useEffect(() => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      'gtm.start': new Date().getTime(),
+      event: 'gtm.js'
+    });
+
+    const createGTMScript = () => {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtm.js?id=GTM-T6M7TM3P`;
+      document.head.appendChild(script);
+    };
+    
+    const createGTMNoScript = () => {
+      const noscript = document.createElement('noscript');
+      const iframe = document.createElement('iframe');
+      iframe.src = "https://www.googletagmanager.com/ns.html?id=GTM-T6M7TM3P";
+      iframe.height = "0";
+      iframe.width = "0";
+      iframe.style.display = "none";
+      iframe.style.visibility = "hidden";
+      noscript.appendChild(iframe);
+      document.body.appendChild(noscript);
+    };
+    
+    createGTMScript();
+    createGTMNoScript();
+    
+    return () => {
+      const scripts = document.querySelectorAll('script[src*="googletagmanager.com/gtm.js"]');
+      scripts.forEach(script => script.remove());
+      
+      const noscripts = document.querySelectorAll('noscript');
+      noscripts.forEach(noscript => {
+        if (noscript.innerHTML.includes('googletagmanager.com/ns.html')) {
+          noscript.remove();
+        }
+      });
+    };
+  }, []);
+  
+  useEffect(() => {
     if (!isLoading) {
       if (plans.length > 0) {
         setActivePlans(plans);
