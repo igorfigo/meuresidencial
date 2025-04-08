@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -61,6 +60,7 @@ const documentTypes = [
   { id: 'planta', label: 'Planta do Edifício' },
   { id: 'apolice', label: 'Apólice de Seguro' },
   { id: 'vistoria', label: 'Auto de Vistoria do Corpo de Bombeiros' },
+  { id: 'contrato', label: 'Contrato' },
 ];
 
 export const DocumentForm: React.FC<DocumentFormProps> = ({
