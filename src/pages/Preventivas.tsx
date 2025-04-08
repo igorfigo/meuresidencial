@@ -53,6 +53,29 @@ export default function Preventivas() {
     scheduled_date: new Date(),
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [userMatricula, setUserMatricula] = useState<string | null>(localStorage.getItem('userMatricula'));
+
+  useEffect(() => {
+    const loadUserMatricula = async () => {
+      try {
+        const storedMatricula = localStorage.getItem('userMatricula');
+        if (storedMatricula) {
+          setUserMatricula(storedMatricula);
+          return;
+        }
+        
+        const { data, error } = await supabase.rpc('get_user_matricula');
+        if (!error && data) {
+          localStorage.setItem('userMatricula', data);
+          setUserMatricula(data);
+        }
+      } catch (err) {
+        console.error('Error loading user matricula:', err);
+      }
+    };
+
+    loadUserMatricula();
+  }, []);
 
   const { data: maintenanceItems = [], isLoading, error, refetch } = useQuery({
     queryKey: ['preventiveMaintenanceItems'],
@@ -78,20 +101,8 @@ export default function Preventivas() {
   const addMutation = useMutation({
     mutationFn: async (item: typeof newItem) => {
       try {
-        const { user } = useApp();
-        
-        let userMatricula = localStorage.getItem('userMatricula');
-        
         if (!userMatricula) {
-          const { data, error } = await supabase
-            .rpc('get_user_matricula');
-          
-          if (error) {
-            throw error;
-          }
-          
-          userMatricula = data;
-          localStorage.setItem('userMatricula', userMatricula);
+          throw new Error('Matrícula do usuário não encontrada');
         }
 
         const { data, error } = await supabase
@@ -191,21 +202,6 @@ export default function Preventivas() {
       toast.error(`Erro ao excluir item: ${error.message || 'Erro desconhecido'}`);
     }
   });
-
-  useEffect(() => {
-    const loadUserMatricula = async () => {
-      try {
-        const { data, error } = await supabase.rpc('get_user_matricula');
-        if (!error && data) {
-          localStorage.setItem('userMatricula', data);
-        }
-      } catch (err) {
-        console.error('Error loading user matricula:', err);
-      }
-    };
-
-    loadUserMatricula();
-  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
