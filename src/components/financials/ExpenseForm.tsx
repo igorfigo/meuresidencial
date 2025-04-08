@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -76,6 +75,8 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
       attachments: undefined
     }
   });
+
+  const sortedExpenseCategories = expenseCategories.sort((a, b) => a.label.localeCompare(b.label));
 
   useEffect(() => {
     const fetchLastBalanceAdjustmentDate = async () => {
@@ -276,7 +277,7 @@ export const ExpenseForm = ({ onSubmit, initialData }: ExpenseFormProps) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {expenseCategories.map(category => (
+                        {sortedExpenseCategories.map(category => (
                           <SelectItem key={category.value} value={category.value}>
                             {category.label}
                           </SelectItem>

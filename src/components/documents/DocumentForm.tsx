@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -56,14 +55,19 @@ interface DocumentFormProps {
 
 // Document types sorted alphabetically by label
 const documentTypes = [
-  { id: 'apolice', label: 'Apólice de Seguro' },
   { id: 'ata', label: 'Ata de Assembléia' },
+  { id: 'vistoria', label: 'Auto de Vistoria do Corpo de Bombeiros' },
   { id: 'contrato', label: 'Contrato' },
   { id: 'convenção', label: 'Convenção do Condomínio' },
   { id: 'planta', label: 'Planta do Edifício' },
+  { id: 'apolice', label: 'Apólice de Seguro' },
   { id: 'regulamento', label: 'Regulamento Interno' },
-  { id: 'vistoria', label: 'Auto de Vistoria do Corpo de Bombeiros' },
 ];
+
+// Sort document types alphabetically by label
+const sortedDocumentTypes = documentTypes.sort((a, b) => 
+  a.label.localeCompare(b.label)
+);
 
 export const DocumentForm: React.FC<DocumentFormProps> = ({
   form,
@@ -121,7 +125,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {documentTypes.map(type => (
+                  {sortedDocumentTypes.map(type => (
                     <SelectItem key={type.id} value={type.id}>
                       {type.label}
                     </SelectItem>
@@ -316,4 +320,3 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
     </Form>
   );
 };
-

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +32,11 @@ const incomeCategories = [
   { value: 'taxa_extra', label: 'Taxa Extra' },
   { value: 'outros', label: 'Outros' }
 ];
+
+// Sort income categories alphabetically by label
+const sortedIncomeCategories = incomeCategories.sort((a, b) => 
+  a.label.localeCompare(b.label)
+);
 
 let incomeSchemaCreator = (hasCondominiumValue: boolean) => {
   return z.object({
@@ -302,7 +306,7 @@ export const IncomeForm = ({ onSubmit, initialData }: IncomeFormProps) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {incomeCategories.map(category => (
+                        {sortedIncomeCategories.map(category => (
                           <SelectItem key={category.value} value={category.value}>
                             {category.label}
                           </SelectItem>
