@@ -47,83 +47,28 @@ serve(async (req) => {
     // Email template for regular contact
     const regularEmailContent = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nova mensagem de contato</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.content{padding:20px;background-color:#fff}.section{margin-bottom:20px;border-bottom:1px solid #f0f0f0;padding-bottom:15px}.section:last-child{border-bottom:none;margin-bottom:0}.section h2{color:#4A6CF7;font-size:18px;margin-top:0;margin-bottom:15px}.info-item{margin-bottom:8px}.info-label{font-weight:bold}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px;white-space:pre-wrap}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666}.logo{margin-bottom:10px}</style></head><body><div class="container"><div class="header"><h1>Nova mensagem de contato</h1></div><div class="content"><div class="section"><h2>Dados do Gestor</h2><div class="info-item"><span class="info-label">Nome:</span> ${name}</div><div class="info-item"><span class="info-label">E-mail:</span> ${email}</div><div class="info-item"><span class="info-label">Matrícula:</span> ${matricula || 'N/A'}</div><div class="info-item"><span class="info-label">Condomínio:</span> ${nomeCondominio || 'N/A'}</div></div><div class="section"><h2>Mensagem</h2><div class="info-item"><span class="info-label">Assunto:</span> ${subject}</div><div class="message-box">${message.replace(/\n/g, '<br>')}</div></div></div><div class="footer">Esta mensagem foi enviada através do formulário de contato do Meu Residencial.<br>© 2024 Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
 
-    // Email template for historical data requests - Fixed template with proper formatting
-    const historicalDataEmailContent = `<!DOCTYPE html>
+    // Email template for historical data requests - Fixed and simplified to prevent encoding issues
+    const historicalDataEmailContent = `
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitação de Dados Históricos</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .container {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            background-color: #4A6CF7;
-            padding: 20px;
-            text-align: center;
-        }
-        .header h1 {
-            color: white;
-            margin: 0;
-            font-size: 24px;
-        }
-        .content {
-            padding: 20px;
-            background-color: #fff;
-        }
-        .section {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 15px;
-        }
-        .section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-        .section h2 {
-            color: #4A6CF7;
-            font-size: 18px;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        .info-item {
-            margin-bottom: 8px;
-        }
-        .info-label {
-            font-weight: bold;
-        }
-        .message-box {
-            background-color: #f7f7f7;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-            white-space: pre-wrap;
-        }
-        .price-info {
-            background-color: #fff8e1;
-            border: 1px solid #ffe082;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-        }
-        .footer {
-            background-color: #f7f7f7;
-            padding: 15px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-        }
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+        .container { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background-color: #4A6CF7; padding: 20px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 24px; }
+        .content { padding: 20px; background-color: #fff; }
+        .section { margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
+        .section:last-child { border-bottom: none; margin-bottom: 0; }
+        .section h2 { color: #4A6CF7; font-size: 18px; margin-top: 0; margin-bottom: 15px; }
+        .info-item { margin-bottom: 8px; }
+        .info-label { font-weight: bold; }
+        .message-box { background-color: #f7f7f7; padding: 15px; border-radius: 6px; margin-top: 10px; white-space: pre-wrap; }
+        .price-info { background-color: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 6px; margin-top: 15px; }
+        .footer { background-color: #f7f7f7; padding: 15px; text-align: center; font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
@@ -160,75 +105,24 @@ serve(async (req) => {
     // Email template for resident complaints or suggestions
     const complaintEmailContent = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nova ${subject.includes('Sugestão') ? 'sugestão' : 'reclamação'} de morador</title><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto}.container{border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.1)}.header{background-color:#4A6CF7;padding:20px;text-align:center}.header h1{color:white;margin:0;font-size:24px}.content{padding:20px;background-color:#fff}.section{margin-bottom:20px;border-bottom:1px solid #f0f0f0;padding-bottom:15px}.section:last-child{border-bottom:none;margin-bottom:0}.section h2{color:#4A6CF7;font-size:18px;margin-top:0;margin-bottom:15px}.info-item{margin-bottom:8px}.info-label{font-weight:bold}.message-box{background-color:#f7f7f7;padding:15px;border-radius:6px;margin-top:10px;white-space:pre-wrap}.footer{background-color:#f7f7f7;padding:15px;text-align:center;font-size:12px;color:#666}.logo{margin-bottom:10px}</style></head><body><div class="container"><div class="header"><h1>Nova ${subject.includes('Sugestão') ? 'sugestão' : 'reclamação'} de morador</h1></div><div class="content"><div class="section"><h2>Dados do Morador</h2><div class="info-item"><span class="info-label">Nome:</span> ${name}</div><div class="info-item"><span class="info-label">E-mail:</span> ${email}</div><div class="info-item"><span class="info-label">Condomínio:</span> ${nomeCondominio || 'N/A'}</div><div class="info-item"><span class="info-label">Unidade:</span> ${unit || 'N/A'}</div></div><div class="section"><h2>Mensagem</h2><div class="info-item"><span class="info-label">Assunto:</span> ${subject}</div><div class="message-box">${message.replace(/\n/g, '<br>')}</div></div></div><div class="footer">Esta mensagem foi enviada através do formulário de Sugestão/Reclamação do Meu Residencial.<br>© 2024 Meu Residencial. Todos os direitos reservados.</div></div></body></html>`;
 
-    // Template de confirmação - Also improved the formatting
-    const confirmationEmailContent = `<!DOCTYPE html>
+    // Template de confirmação - Simplified to prevent encoding issues
+    const confirmationEmailContent = `
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recebemos sua mensagem</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .container {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            background-color: #4A6CF7;
-            padding: 20px;
-            text-align: center;
-        }
-        .header h1 {
-            color: white;
-            margin: 0;
-            font-size: 24px;
-        }
-        .content {
-            padding: 20px 30px;
-            background-color: #fff;
-        }
-        .message-details {
-            background-color: #f7f7f7;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
-        }
-        .highlight {
-            font-weight: bold;
-            color: #4A6CF7;
-        }
-        .footer {
-            background-color: #f7f7f7;
-            padding: 15px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-            border-top: 1px solid #e0e0e0;
-        }
-        .button {
-            display: inline-block;
-            background-color: #4A6CF7;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            margin-top: 20px;
-        }
-        .price-info {
-            background-color: #fff8e1;
-            border: 1px solid #ffe082;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-        }
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+        .container { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background-color: #4A6CF7; padding: 20px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 24px; }
+        .content { padding: 20px; background-color: #fff; }
+        .message-details { background-color: #f7f7f7; padding: 15px; border-radius: 6px; margin: 15px 0; }
+        .highlight { font-weight: bold; color: #4A6CF7; }
+        .footer { background-color: #f7f7f7; padding: 15px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+        .price-info { background-color: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 6px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -287,16 +181,23 @@ serve(async (req) => {
       recipient = "contato@meuresidencial.com";
     }
 
+    // Set email headers to ensure proper UTF-8 encoding
+    const emailHeaders = {
+      'Content-Type': 'text/html; charset=UTF-8',
+      'Content-Transfer-Encoding': 'base64'
+    };
+
     // Envio do email com o alias e assunto corrigidos
     await client.send({
       from: fromEmail,
       to: recipient,
       subject: emailSubject,
       html: emailContent,
+      headers: emailHeaders,
       replyTo: email,
     });
 
-    // Envio de confirmação para o gestor ou morador
+    // Envio de confirmação para o gestor ou morador com headers adequados
     await client.send({
       from: isComplaint ? "Sugestões e Reclamações <noreply@meuresidencial.com>" : 
            (isHistoricalData ? "Dados Históricos <noreply@meuresidencial.com>" : 
@@ -307,6 +208,7 @@ serve(async (req) => {
               (isHistoricalData ? "Recebemos sua solicitação de Dados Históricos - Meu Residencial" : 
               "Recebemos sua mensagem - Meu Residencial"),
       html: confirmationEmailContent,
+      headers: emailHeaders,
     });
 
     await client.close();
