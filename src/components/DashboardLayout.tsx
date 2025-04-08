@@ -157,7 +157,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Dados Históricos', icon: <History className="h-5 w-5" />, path: '/dados-historicos' },
     { name: 'Garagem Livre', icon: <Car className="h-5 w-5" />, path: '/vaga-garagem' },
     { name: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" />, path: '/minha-assinatura' },
-    { name: 'Dúvidas Frequentes', icon: <HelpCircle className="h-5 w-5" />, path: '/duvidas-frequentes' },
+    { name: 'Dúvidas/Contato', icon: <HelpCircle className="h-5 w-5" />, path: '/duvidas-frequentes' },
     { name: 'Fale Conosco', icon: <Mail className="h-5 w-5" />, path: '/contato' },
   ];
   
