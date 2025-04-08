@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Mail, Send } from 'lucide-react';
 import { 
   Accordion,
   AccordionContent,
@@ -11,6 +12,20 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion';
 import { useApp } from '@/contexts/AppContext';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 type FaqItem = {
   question: string;
@@ -18,9 +33,40 @@ type FaqItem = {
   category: string;
 };
 
+const contactFormSchema = z.object({
+  subject: z.string().min(3, { message: "Assunto deve ter pelo menos 3 caracteres" }),
+  message: z.string().min(10, { message: "Mensagem deve ter pelo menos 10 caracteres" }),
+});
+
+type ContactFormValues = z.infer<typeof contactFormSchema>;
+
 const DuvidasFrequentes = () => {
   const { user } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  
+  // Contact form setup
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      subject: '',
+      message: '',
+    },
+  });
+
+  const onSubmit = async (data: ContactFormValues) => {
+    setIsSending(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast.success("Mensagem enviada com sucesso!");
+      form.reset();
+    } catch (error) {
+      toast.error("Erro ao enviar mensagem. Tente novamente mais tarde.");
+    } finally {
+      setIsSending(false);
+    }
+  };
   
   // FAQs categorized by functionality
   const faqItems: FaqItem[] = [
@@ -154,10 +200,10 @@ const DuvidasFrequentes = () => {
       <div className="animate-fade-in space-y-6">
         <header className="mb-4">
           <div className="flex items-center">
-            <h1 className="text-3xl font-bold">Dúvidas Frequentes</h1>
+            <h1 className="text-3xl font-bold">Dúvidas/Contato</h1>
           </div>
           <p className="text-muted-foreground mt-1">
-            Encontre respostas para as perguntas mais comuns sobre o sistema.
+            Encontre respostas para as perguntas mais comuns sobre o sistema ou entre em contato conosco.
           </p>
           <Separator className="mt-4" />
         </header>
@@ -203,6 +249,68 @@ const DuvidasFrequentes = () => {
             </CardContent>
           </Card>
         )}
+        
+        {/* Contact Form Section (from Fale Conosco) */}
+        <Card className="mb-6 border-t-4 border-t-blue-600 shadow-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xl flex items-center">
+              <Mail className="mr-2 h-5 w-5" />
+              Fale Conosco
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-gray-600">
+              Não encontrou o que procurava? Entre em contato com nossa equipe preenchendo o formulário abaixo.
+            </p>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="subject"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assunto</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Dúvida sobre sistema" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mensagem</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Descreva sua dúvida ou solicitação em detalhes..." 
+                          className="min-h-[120px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    disabled={isSending}
+                    className="bg-brand-600 hover:bg-brand-700 flex items-center"
+                  >
+                    {isSending ? "Enviando..." : "Enviar Mensagem"}
+                    <Send className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

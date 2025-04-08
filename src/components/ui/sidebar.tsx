@@ -1,4 +1,3 @@
-
 import {
   Home,
   LayoutDashboard,
@@ -145,7 +144,6 @@ export function Sidebar() {
     { path: '/vaga-garagem', label: 'Garagem Livre', icon: <Car className="h-5 w-5" /> },
     { path: '/minha-assinatura', label: 'Minha Assinatura', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/duvidas-frequentes', label: 'Dúvidas/Contato', icon: <HelpCircle className="h-5 w-5" /> },
-    { path: '/contato', label: 'Fale Conosco', icon: <Mail className="h-5 w-5" /> },
   ];
   
   const residentMenuItems: MenuItem[] = [
