@@ -26,6 +26,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { supabase } from '@/integrations/supabase/client';
 
 type FaqItem = {
   question: string;
@@ -57,11 +58,27 @@ const DuvidasFrequentes = () => {
   const onSubmit = async (data: ContactFormValues) => {
     setIsSending(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Call the Supabase edge function to send the email
+      const { error } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          name: user?.nome || '',
+          email: user?.email || '',
+          matricula: user?.matricula || '',
+          nomeCondominio: user?.nomeCondominio || '',
+          subject: data.subject,
+          message: data.message,
+          isComplaint: false
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
       toast.success("Mensagem enviada com sucesso!");
       form.reset();
     } catch (error) {
+      console.error("Erro ao enviar mensagem:", error);
       toast.error("Erro ao enviar mensagem. Tente novamente mais tarde.");
     } finally {
       setIsSending(false);
