@@ -82,6 +82,9 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
     onContentChange(e);
   };
 
+  // Get sorted template titles
+  const sortedTemplateTitles = Object.keys(ANNOUNCEMENT_TEMPLATES).sort();
+
   return (
     <Card className="w-full border shadow-sm bg-white">
       <CardContent className="p-6 space-y-6">
@@ -93,7 +96,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
                 <SelectValue placeholder="Selecione um título" />
               </SelectTrigger>
               <SelectContent>
-                {Object.keys(ANNOUNCEMENT_TEMPLATES).map((templateTitle) => (
+                {sortedTemplateTitles.map((templateTitle) => (
                   <SelectItem key={templateTitle} value={templateTitle}>
                     {templateTitle}
                   </SelectItem>

@@ -1,25 +1,6 @@
 
-
+// Announcement templates sorted alphabetically by key
 export const ANNOUNCEMENT_TEMPLATES = {
-  "Convocação de Assembleia": `Prezados Condôminos,
-
-Convocamos todos para a assembleia geral ordinária.
-
-- Data: 10/04/2025
-- Horário: 19h
-- Local: Salão de Festas
-
-Pauta:
-- Aprovação do orçamento anual
-- Eleição de síndico
-- Outros assuntos
-
-Sua presença é fundamental para a tomada de decisões importantes.
-
-Agradecemos a compreensão e colaboração de todos.
-
-Atenciosamente,
-Administração do Condomínio`,
   "Aviso de Manutenção": `Prezados Condôminos,
 
 Informamos que haverá manutenção na área comum.
@@ -46,15 +27,33 @@ Agradecemos a compreensão e colaboração de todos.
 
 Atenciosamente,
 Administração do Condomínio`,
-  "Informações Financeiras": `Prezados Condôminos,
+  "Convocação de Assembleia": `Prezados Condôminos,
 
-Informamos que o boleto do condomínio vence em 05/04/2025.
+Convocamos todos para a assembleia geral ordinária.
 
-- Valor: R$ 350,00
+- Data: 10/04/2025
+- Horário: 19h
+- Local: Salão de Festas
 
-Evite multas e juros, efetue o pagamento até a data de vencimento.
+Pauta:
+- Aprovação do orçamento anual
+- Eleição de síndico
+- Outros assuntos
 
-Para dúvidas ou problemas com o boleto, entre em contato com a administração.
+Sua presença é fundamental para a tomada de decisões importantes.
+
+Agradecemos a compreensão e colaboração de todos.
+
+Atenciosamente,
+Administração do Condomínio`,
+  "Dedetização": `Prezados Condôminos,
+
+Informamos que haverá dedetização no condomínio.
+
+- Data: 13/04/2025
+- Horário: Das 09h às 17h
+
+Solicitamos que mantenham janelas fechadas durante o período.
 
 Agradecemos a compreensão e colaboração de todos.
 
@@ -76,17 +75,6 @@ Agradecemos a compreensão e colaboração de todos.
 
 Atenciosamente,
 Administração do Condomínio`,
-  "Regras e Regulamentos": `Prezados Condôminos,
-
-Lembramos que o silêncio deve ser mantido após as 22h.
-
-- Colabore para um ambiente tranquilo e respeitoso.
-- Evite barulhos altos e festas após este horário.
-
-Agradecemos a compreensão e colaboração de todos.
-
-Atenciosamente,
-Administração do Condomínio`,
   "Informações Administrativas": `Prezados Condôminos,
 
 Informamos que o escritório administrativo estará fechado.
@@ -102,18 +90,29 @@ Agradecemos a compreensão e colaboração de todos.
 
 Atenciosamente,
 Administração do Condomínio`,
-  "Dedetização": `Prezados Condôminos,
+  "Informações Financeiras": `Prezados Condôminos,
 
-Informamos que haverá dedetização no condomínio.
+Informamos que o boleto do condomínio vence em 05/04/2025.
 
-- Data: 13/04/2025
-- Horário: Das 09h às 17h
+- Valor: R$ 350,00
 
-Solicitamos que mantenham janelas fechadas durante o período.
+Evite multas e juros, efetue o pagamento até a data de vencimento.
+
+Para dúvidas ou problemas com o boleto, entre em contato com a administração.
 
 Agradecemos a compreensão e colaboração de todos.
 
 Atenciosamente,
-Administração do Condomínio`
-};
+Administração do Condomínio`,
+  "Regras e Regulamentos": `Prezados Condôminos,
 
+Lembramos que o silêncio deve ser mantido após as 22h.
+
+- Colabore para um ambiente tranquilo e respeitoso.
+- Evite barulhos altos e festas após este horário.
+
+Agradecemos a compreensão e colaboração de todos.
+
+Atenciosamente,
+Administração do Condomínio`,
+};

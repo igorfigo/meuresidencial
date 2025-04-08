@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -53,14 +54,15 @@ interface DocumentFormProps {
   isUploading: boolean;
 }
 
+// Document types sorted alphabetically by label
 const documentTypes = [
-  { id: 'convenção', label: 'Convenção do Condomínio' },
-  { id: 'regulamento', label: 'Regulamento Interno' },
-  { id: 'ata', label: 'Ata de Assembléia' },
-  { id: 'planta', label: 'Planta do Edifício' },
   { id: 'apolice', label: 'Apólice de Seguro' },
-  { id: 'vistoria', label: 'Auto de Vistoria do Corpo de Bombeiros' },
+  { id: 'ata', label: 'Ata de Assembléia' },
   { id: 'contrato', label: 'Contrato' },
+  { id: 'convenção', label: 'Convenção do Condomínio' },
+  { id: 'planta', label: 'Planta do Edifício' },
+  { id: 'regulamento', label: 'Regulamento Interno' },
+  { id: 'vistoria', label: 'Auto de Vistoria do Corpo de Bombeiros' },
 ];
 
 export const DocumentForm: React.FC<DocumentFormProps> = ({
@@ -314,3 +316,4 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
     </Form>
   );
 };
+
