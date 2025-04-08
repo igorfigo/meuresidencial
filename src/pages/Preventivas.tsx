@@ -53,6 +53,7 @@ export default function Preventivas() {
     scheduled_date: new Date(),
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoadingMatricula, setIsLoadingMatricula] = useState(false);
   
   const matriculaFromUser = user?.matricula || '';
   
@@ -61,34 +62,44 @@ export default function Preventivas() {
   );
 
   useEffect(() => {
-    if (matriculaFromUser) {
-      localStorage.setItem('userMatricula', matriculaFromUser);
-      setUserMatricula(matriculaFromUser);
-      return;
-    }
-    
-    const loadUserMatricula = async () => {
+    const fetchUserMatricula = async () => {
+      if (matriculaFromUser) {
+        localStorage.setItem('userMatricula', matriculaFromUser);
+        setUserMatricula(matriculaFromUser);
+        return;
+      }
+      
+      const storedMatricula = localStorage.getItem('userMatricula');
+      if (storedMatricula) {
+        setUserMatricula(storedMatricula);
+        return;
+      }
+      
+      setIsLoadingMatricula(true);
       try {
-        const storedMatricula = localStorage.getItem('userMatricula');
-        if (storedMatricula) {
-          setUserMatricula(storedMatricula);
+        const { data, error } = await supabase.rpc('get_user_matricula');
+        
+        if (error) {
+          console.error('Error getting user matricula:', error);
+          toast.error('Não foi possível carregar sua matrícula. Tente novamente.');
           return;
         }
         
-        const { data, error } = await supabase.rpc('get_user_matricula');
-        if (!error && data) {
+        if (data) {
           localStorage.setItem('userMatricula', data);
           setUserMatricula(data);
-        } else if (error) {
-          console.error('Error getting user matricula from RPC:', error);
-          toast.error('Não foi possível carregar sua matrícula. Tente recarregar a página.');
+        } else {
+          toast.error('Não foi possível identificar sua matrícula. Entre em contato com o suporte.');
         }
       } catch (err) {
-        console.error('Error loading user matricula:', err);
+        console.error('Error in fetchUserMatricula:', err);
+        toast.error('Erro ao buscar matrícula. Tente novamente mais tarde.');
+      } finally {
+        setIsLoadingMatricula(false);
       }
     };
 
-    loadUserMatricula();
+    fetchUserMatricula();
   }, [matriculaFromUser]);
 
   const { data: maintenanceItems = [], isLoading, error, refetch } = useQuery({
@@ -113,9 +124,11 @@ export default function Preventivas() {
     mutationFn: async (item: typeof newItem) => {
       try {
         if (!userMatricula) {
-          throw new Error('Matrícula do usuário não encontrada');
+          throw new Error('Matrícula do usuário não encontrada. Tente recarregar a página.');
         }
 
+        console.log('Adding maintenance with matricula:', userMatricula);
+        
         const { data, error } = await supabase.rpc('add_preventive_maintenance', {
           p_category: item.category,
           p_title: item.title,
@@ -276,9 +289,15 @@ export default function Preventivas() {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Adicionar Nova
+              <Button disabled={isLoadingMatricula || !userMatricula}>
+                {isLoadingMatricula ? (
+                  "Carregando..."
+                ) : (
+                  <>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Adicionar Nova
+                  </>
+                )}
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -358,7 +377,10 @@ export default function Preventivas() {
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancelar
                   </Button>
-                  <Button type="submit" disabled={addMutation.isPending}>
+                  <Button 
+                    type="submit" 
+                    disabled={addMutation.isPending || isLoadingMatricula || !userMatricula}
+                  >
                     {addMutation.isPending ? "Salvando..." : "Salvar"}
                   </Button>
                 </DialogFooter>
@@ -367,7 +389,7 @@ export default function Preventivas() {
           </Dialog>
         </div>
 
-        {isLoading && (
+        {(isLoading || isLoadingMatricula) && (
           <div className="flex justify-center p-8">
             <div className="animate-pulse">Carregando...</div>
           </div>
@@ -391,7 +413,25 @@ export default function Preventivas() {
           </Card>
         )}
 
-        {!isLoading && !error && !hasAnyItems && (
+        {!userMatricula && !isLoadingMatricula && (
+          <Card className="border-destructive bg-destructive/10">
+            <CardHeader>
+              <CardTitle className="text-destructive">Matrícula não encontrada</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Não foi possível identificar sua matrícula. Por favor, recarregue a página ou entre em contato com o suporte.</p>
+              <Button 
+                variant="outline" 
+                className="mt-4" 
+                onClick={() => window.location.reload()}
+              >
+                Recarregar página
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {!isLoading && !error && userMatricula && !hasAnyItems && (
           <Card>
             <CardContent className="flex flex-col items-center justify-center p-8 text-center">
               <Wrench className="h-12 w-12 text-muted-foreground mb-4" />
@@ -403,7 +443,7 @@ export default function Preventivas() {
           </Card>
         )}
 
-        {!isLoading && hasAnyItems && (
+        {!isLoading && hasAnyItems && userMatricula && (
           <>
             {categoriesWithPendingItems.length > 0 && (
               <div className="space-y-6">
