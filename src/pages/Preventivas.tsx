@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
@@ -122,7 +121,6 @@ export default function Preventivas() {
           return [];
         }
         
-        // Using direct query instead of RPC to debug the issue
         const { data, error } = await supabase
           .from('preventive_maintenance')
           .select('*')
@@ -134,7 +132,6 @@ export default function Preventivas() {
           throw error;
         }
         
-        // Log retrieved data for debugging
         console.log('Retrieved maintenance items:', data);
         return data as MaintenanceItem[];
       } catch (error) {
@@ -154,7 +151,6 @@ export default function Preventivas() {
 
         console.log('Adding maintenance with matricula:', userMatricula);
         
-        // Using direct insert instead of RPC to debug the issue
         const { data, error } = await supabase
           .from('preventive_maintenance')
           .insert({
@@ -171,7 +167,6 @@ export default function Preventivas() {
           throw error;
         }
 
-        // Log successful creation
         console.log('Successfully added maintenance item with ID:', data);
         return data;
       } catch (error) {
@@ -184,7 +179,6 @@ export default function Preventivas() {
       toast.success('Item de manutenção preventiva adicionado com sucesso.');
       setIsDialogOpen(false);
       resetForm();
-      // Force an immediate refetch to update the UI
       refetch();
     },
     onError: (error: any) => {
@@ -196,11 +190,9 @@ export default function Preventivas() {
   const toggleStatusMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        // Find the current item to toggle its status
         const item = maintenanceItems.find(item => item.id === id);
         if (!item) throw new Error('Item não encontrado');
 
-        // Using direct update instead of RPC to debug the issue
         const { data, error } = await supabase
           .from('preventive_maintenance')
           .update({ 
@@ -234,7 +226,6 @@ export default function Preventivas() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        // Using direct delete instead of RPC to debug the issue
         const { data, error } = await supabase
           .from('preventive_maintenance')
           .delete()
@@ -262,7 +253,6 @@ export default function Preventivas() {
     }
   });
 
-  // Force a refetch whenever the component mounts or dialog is closed
   useEffect(() => {
     if (userMatricula) {
       console.log('Force refetching data with matricula:', userMatricula);
@@ -277,6 +267,24 @@ export default function Preventivas() {
       description: '',
       scheduled_date: new Date(),
     });
+  };
+
+  const handleAddItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Adding new item:', newItem);
+    addMutation.mutate(newItem);
+  };
+
+  const handleToggleStatus = (id: string) => {
+    console.log('Toggling status for item with ID:', id);
+    toggleStatusMutation.mutate(id);
+  };
+
+  const handleDeleteItem = (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este item de manutenção?')) {
+      console.log('Deleting item with ID:', id);
+      deleteMutation.mutate(id);
+    }
   };
 
   const itemsByCategory = maintenanceItems.reduce((acc, item) => {
@@ -298,7 +306,6 @@ export default function Preventivas() {
 
   const hasAnyItems = maintenanceItems.length > 0;
 
-  // Log the current state for debugging
   console.log('Current maintenance items:', maintenanceItems);
   console.log('Items by category:', itemsByCategory);
   console.log('Categories with pending items:', categoriesWithPendingItems);
