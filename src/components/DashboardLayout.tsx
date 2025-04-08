@@ -38,8 +38,7 @@ import {
   History,
   Files,
   HelpCircle,
-  Server,
-  Wrench
+  Server
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -154,7 +153,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       ] 
     },
     { name: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" />, path: '/areas-comuns' },
-    { name: 'Preventivas', icon: <Wrench className="h-5 w-5" />, path: '/preventivas' },
     { name: 'Dedetizações', icon: <Bug className="h-5 w-5" />, path: '/dedetizacoes' },
     { name: 'Dados Históricos', icon: <History className="h-5 w-5" />, path: '/dados-historicos' },
     { name: 'Garagem Livre', icon: <Car className="h-5 w-5" />, path: '/vaga-garagem' },

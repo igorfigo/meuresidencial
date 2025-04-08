@@ -35,7 +35,6 @@ import {
   HelpCircle,
   Monitor,
   Server,
-  Wrench,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -140,7 +139,6 @@ export function Sidebar() {
       ] 
     },
     { path: '/areas-comuns', label: 'Áreas Comuns', icon: <CalendarDays className="h-5 w-5" /> },
-    { path: '/preventivas', label: 'Preventivas', icon: <Wrench className="h-5 w-5" /> },
     { path: '/dedetizacoes', label: 'Dedetizações', icon: <Bug className="h-5 w-5" /> },
     { path: '/dados-historicos', label: 'Dados Históricos', icon: <History className="h-5 w-5" /> },
     { path: '/vaga-garagem', label: 'Garagem Livre', icon: <Car className="h-5 w-5" /> },
