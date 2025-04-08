@@ -95,10 +95,7 @@ export default function Preventivas() {
     queryKey: ['preventiveMaintenanceItems'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
-          .from('preventive_maintenance')
-          .select('*')
-          .order('scheduled_date', { ascending: true });
+        const { data, error } = await supabase.rpc('get_preventive_maintenance');
         
         if (error) {
           throw error;
@@ -119,16 +116,12 @@ export default function Preventivas() {
           throw new Error('Matrícula do usuário não encontrada');
         }
 
-        const { data, error } = await supabase
-          .from('preventive_maintenance')
-          .insert({
-            category: item.category,
-            title: item.title,
-            description: item.description,
-            scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd'),
-            matricula: userMatricula,
-          })
-          .select();
+        const { data, error } = await supabase.rpc('add_preventive_maintenance', {
+          p_category: item.category,
+          p_title: item.title,
+          p_description: item.description || null,
+          p_scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd')
+        });
 
         if (error) {
           throw error;
@@ -154,22 +147,9 @@ export default function Preventivas() {
   const toggleStatusMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        const { data: currentItem } = await supabase
-          .from('preventive_maintenance')
-          .select('completed')
-          .eq('id', id)
-          .single();
-
-        if (!currentItem) throw new Error('Item não encontrado');
-
-        const { data, error } = await supabase
-          .from('preventive_maintenance')
-          .update({
-            completed: !currentItem.completed,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', id)
-          .select();
+        const { data, error } = await supabase.rpc('toggle_preventive_maintenance_status', {
+          p_id: id
+        });
 
         if (error) {
           throw error;
@@ -193,16 +173,15 @@ export default function Preventivas() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        const { error } = await supabase
-          .from('preventive_maintenance')
-          .delete()
-          .eq('id', id);
+        const { data, error } = await supabase.rpc('delete_preventive_maintenance', {
+          p_id: id
+        });
 
         if (error) {
           throw error;
         }
 
-        return true;
+        return data;
       } catch (error) {
         console.error('Error deleting maintenance item:', error);
         throw error;
