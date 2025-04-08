@@ -129,7 +129,8 @@ export default function Preventivas() {
 
         console.log('Adding maintenance with matricula:', userMatricula);
         
-        const { data, error } = await supabase.rpc('add_preventive_maintenance', {
+        const { data, error } = await supabase.rpc('add_preventive_maintenance_with_matricula', {
+          p_matricula: userMatricula,
           p_category: item.category,
           p_title: item.title,
           p_description: item.description || null,
