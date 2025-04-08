@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
@@ -20,7 +19,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { CalendarIcon, Check, Wrench, PlusCircle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Define the maintenance item type
 interface MaintenanceItem {
   id: string;
   category: string;
@@ -32,7 +30,6 @@ interface MaintenanceItem {
   updated_at: string;
 }
 
-// Maintenance category options
 const MAINTENANCE_CATEGORIES = [
   'Inspeção Estrutural',
   'Sistema Hidráulico',
@@ -57,12 +54,10 @@ export default function Preventivas() {
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Fetch maintenance items
   const { data: maintenanceItems = [], isLoading, error, refetch } = useQuery({
     queryKey: ['preventiveMaintenanceItems'],
     queryFn: async () => {
       try {
-        // Use a direct query instead of rpc function
         const { data, error } = await supabase
           .from('preventive_maintenance')
           .select('*')
@@ -80,10 +75,25 @@ export default function Preventivas() {
     },
   });
 
-  // Add new maintenance item
   const addMutation = useMutation({
     mutationFn: async (item: typeof newItem) => {
       try {
+        const { user } = useApp();
+        
+        let userMatricula = localStorage.getItem('userMatricula');
+        
+        if (!userMatricula) {
+          const { data, error } = await supabase
+            .rpc('get_user_matricula');
+          
+          if (error) {
+            throw error;
+          }
+          
+          userMatricula = data;
+          localStorage.setItem('userMatricula', userMatricula);
+        }
+
         const { data, error } = await supabase
           .from('preventive_maintenance')
           .insert({
@@ -91,7 +101,7 @@ export default function Preventivas() {
             title: item.title,
             description: item.description,
             scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd'),
-            matricula: await getUserMatricula(),
+            matricula: userMatricula,
           })
           .select();
 
@@ -116,11 +126,9 @@ export default function Preventivas() {
     }
   });
 
-  // Toggle maintenance item status
   const toggleStatusMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        // Get the current item to toggle its status
         const { data: currentItem } = await supabase
           .from('preventive_maintenance')
           .select('completed')
@@ -129,7 +137,6 @@ export default function Preventivas() {
 
         if (!currentItem) throw new Error('Item não encontrado');
 
-        // Update the status
         const { data, error } = await supabase
           .from('preventive_maintenance')
           .update({
@@ -158,7 +165,6 @@ export default function Preventivas() {
     }
   });
 
-  // Delete maintenance item
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
@@ -186,18 +192,20 @@ export default function Preventivas() {
     }
   });
 
-  // Helper function to get the user's matricula
-  const getUserMatricula = async (): Promise<string> => {
-    const { data, error } = await supabase
-      .rpc('get_user_matricula');
-    
-    if (error) {
-      console.error('Error getting user matricula:', error);
-      throw error;
-    }
-    
-    return data;
-  };
+  useEffect(() => {
+    const loadUserMatricula = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_user_matricula');
+        if (!error && data) {
+          localStorage.setItem('userMatricula', data);
+        }
+      } catch (err) {
+        console.error('Error loading user matricula:', err);
+      }
+    };
+
+    loadUserMatricula();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -242,7 +250,6 @@ export default function Preventivas() {
     });
   };
 
-  // Group items by category
   const itemsByCategory = maintenanceItems.reduce((acc, item) => {
     const category = item.category;
     if (!acc[category]) {
