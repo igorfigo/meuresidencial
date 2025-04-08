@@ -151,11 +151,13 @@ export default function Preventivas() {
             category: item.category,
             title: item.title,
             description: item.description || null,
-            scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd')
+            scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd'),
+            completed: false
           }])
           .select();
 
         if (error) {
+          console.error('Detailed error:', error);
           throw error;
         }
 
@@ -172,6 +174,7 @@ export default function Preventivas() {
       resetForm();
     },
     onError: (error: any) => {
+      console.error('Full error object:', error);
       toast.error(`Erro ao adicionar item: ${error.message || 'Erro desconhecido'}`);
     }
   });
