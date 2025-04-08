@@ -53,9 +53,20 @@ export default function Preventivas() {
     scheduled_date: new Date(),
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [userMatricula, setUserMatricula] = useState<string | null>(localStorage.getItem('userMatricula'));
+  
+  const matriculaFromUser = user?.matricula || '';
+  
+  const [userMatricula, setUserMatricula] = useState<string | null>(
+    matriculaFromUser || localStorage.getItem('userMatricula')
+  );
 
   useEffect(() => {
+    if (matriculaFromUser) {
+      localStorage.setItem('userMatricula', matriculaFromUser);
+      setUserMatricula(matriculaFromUser);
+      return;
+    }
+    
     const loadUserMatricula = async () => {
       try {
         const storedMatricula = localStorage.getItem('userMatricula');
@@ -68,6 +79,9 @@ export default function Preventivas() {
         if (!error && data) {
           localStorage.setItem('userMatricula', data);
           setUserMatricula(data);
+        } else if (error) {
+          console.error('Error getting user matricula from RPC:', error);
+          toast.error('Não foi possível carregar sua matrícula. Tente recarregar a página.');
         }
       } catch (err) {
         console.error('Error loading user matricula:', err);
@@ -75,7 +89,7 @@ export default function Preventivas() {
     };
 
     loadUserMatricula();
-  }, []);
+  }, [matriculaFromUser]);
 
   const { data: maintenanceItems = [], isLoading, error, refetch } = useQuery({
     queryKey: ['preventiveMaintenanceItems'],
@@ -224,6 +238,12 @@ export default function Preventivas() {
       toast.error('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
+    
+    if (!userMatricula) {
+      toast.error('Matrícula do usuário não encontrada. Tente recarregar a página.');
+      return;
+    }
+    
     addMutation.mutate(newItem);
   };
 
