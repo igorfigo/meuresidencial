@@ -1173,6 +1173,16 @@ export type Database = {
         }
         Returns: string
       }
+      add_preventive_maintenance_with_matricula: {
+        Args: {
+          p_matricula: string
+          p_category: string
+          p_title: string
+          p_description: string
+          p_scheduled_date: string
+        }
+        Returns: string
+      }
       delete_preventive_maintenance: {
         Args: { p_id: string }
         Returns: boolean

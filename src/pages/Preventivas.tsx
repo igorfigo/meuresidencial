@@ -129,13 +129,16 @@ export default function Preventivas() {
 
         console.log('Adding maintenance with matricula:', userMatricula);
         
-        const { data, error } = await supabase.rpc('add_preventive_maintenance_with_matricula', {
-          p_matricula: userMatricula,
-          p_category: item.category,
-          p_title: item.title,
-          p_description: item.description || null,
-          p_scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd')
-        });
+        const { data, error } = await supabase
+          .from('preventive_maintenance')
+          .insert([{
+            matricula: userMatricula,
+            category: item.category,
+            title: item.title,
+            description: item.description || null,
+            scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd')
+          }])
+          .select();
 
         if (error) {
           throw error;
