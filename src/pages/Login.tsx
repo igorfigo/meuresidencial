@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,14 +32,12 @@ const Login = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('manager');
   
-  // Password recovery states
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoverySending, setRecoverySending] = useState(false);
   const [recoverySuccess, setRecoverySuccess] = useState(false);
   const [recoveryError, setRecoveryError] = useState('');
 
-  // Load remembered email on component mount
   useEffect(() => {
     const savedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
     if (savedEmail) {
@@ -56,7 +53,6 @@ const Login = () => {
       return;
     }
     
-    // Save or remove email from local storage based on remember choice
     if (rememberEmail) {
       localStorage.setItem(EMAIL_STORAGE_KEY, identifier);
     } else {
@@ -75,7 +71,7 @@ const Login = () => {
     
     setLoading(false);
   };
-  
+
   const handleRecoverySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!recoveryEmail.trim()) {
@@ -105,10 +101,8 @@ const Login = () => {
       setRecoverySuccess(true);
       toast.success('Email de recuperação enviado com sucesso!');
       
-      // Close dialog after success
       setTimeout(() => {
         setForgotPasswordOpen(false);
-        // Reset states after the dialog is closed
         setTimeout(() => {
           setRecoveryEmail('');
           setRecoverySuccess(false);
@@ -121,7 +115,7 @@ const Login = () => {
       setRecoverySending(false);
     }
   };
-  
+
   const resetRecoveryState = () => {
     setRecoveryEmail('');
     setRecoveryError('');
@@ -230,7 +224,6 @@ const Login = () => {
               </div>
             </div>
             
-            {/* Remember Email Checkbox */}
             <div className="flex items-center mt-4">
               <Checkbox 
                 id="rememberEmail" 
@@ -249,6 +242,15 @@ const Login = () => {
             >
               {loading ? 'Carregando...' : 'Entrar'}
             </Button>
+            
+            <div className="text-center mt-4">
+              <p className="text-white text-sm">
+                Não tem uma conta? {" "}
+                <Link to="/" className="text-blue-200 hover:text-white hover:underline">
+                  Criar Conta
+                </Link>
+              </p>
+            </div>
           </form>
         </div>
       </div>
