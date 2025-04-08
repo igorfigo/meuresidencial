@@ -62,8 +62,11 @@ export default function Preventivas() {
     queryKey: ['preventiveMaintenanceItems'],
     queryFn: async () => {
       try {
+        // Use a direct query instead of rpc function
         const { data, error } = await supabase
-          .rpc('get_preventive_maintenance');
+          .from('preventive_maintenance')
+          .select('*')
+          .order('scheduled_date', { ascending: true });
         
         if (error) {
           throw error;
@@ -82,12 +85,15 @@ export default function Preventivas() {
     mutationFn: async (item: typeof newItem) => {
       try {
         const { data, error } = await supabase
-          .rpc('add_preventive_maintenance', {
-            p_category: item.category,
-            p_title: item.title,
-            p_description: item.description,
-            p_scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd'),
-          });
+          .from('preventive_maintenance')
+          .insert({
+            category: item.category,
+            title: item.title,
+            description: item.description,
+            scheduled_date: format(item.scheduled_date, 'yyyy-MM-dd'),
+            matricula: await getUserMatricula(),
+          })
+          .select();
 
         if (error) {
           throw error;
@@ -114,10 +120,24 @@ export default function Preventivas() {
   const toggleStatusMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
+        // Get the current item to toggle its status
+        const { data: currentItem } = await supabase
+          .from('preventive_maintenance')
+          .select('completed')
+          .eq('id', id)
+          .single();
+
+        if (!currentItem) throw new Error('Item não encontrado');
+
+        // Update the status
         const { data, error } = await supabase
-          .rpc('toggle_preventive_maintenance_status', {
-            p_id: id
-          });
+          .from('preventive_maintenance')
+          .update({
+            completed: !currentItem.completed,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id)
+          .select();
 
         if (error) {
           throw error;
@@ -142,16 +162,16 @@ export default function Preventivas() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        const { data, error } = await supabase
-          .rpc('delete_preventive_maintenance', {
-            p_id: id
-          });
+        const { error } = await supabase
+          .from('preventive_maintenance')
+          .delete()
+          .eq('id', id);
 
         if (error) {
           throw error;
         }
 
-        return data;
+        return true;
       } catch (error) {
         console.error('Error deleting maintenance item:', error);
         throw error;
@@ -165,6 +185,19 @@ export default function Preventivas() {
       toast.error(`Erro ao excluir item: ${error.message || 'Erro desconhecido'}`);
     }
   });
+
+  // Helper function to get the user's matricula
+  const getUserMatricula = async (): Promise<string> => {
+    const { data, error } = await supabase
+      .rpc('get_user_matricula');
+    
+    if (error) {
+      console.error('Error getting user matricula:', error);
+      throw error;
+    }
+    
+    return data;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
