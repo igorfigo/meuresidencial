@@ -77,10 +77,16 @@ export default function Preventivas() {
       
       setIsLoadingMatricula(true);
       try {
+        if (!user || !user.email) {
+          toast.error('Usuário não identificado. Tente fazer login novamente.');
+          setIsLoadingMatricula(false);
+          return;
+        }
+        
         const { data: userRoleData, error: userRoleError } = await supabase
           .from('user_roles')
           .select('matricula')
-          .eq('user_id', user?.id)
+          .eq('user_id', user.email)
           .maybeSingle();
         
         if (userRoleError) {
@@ -104,7 +110,7 @@ export default function Preventivas() {
     };
 
     fetchUserMatricula();
-  }, [matriculaFromUser, user?.id]);
+  }, [matriculaFromUser, user]);
 
   const { data: maintenanceItems = [], isLoading, error, refetch } = useQuery({
     queryKey: ['preventiveMaintenanceItems'],
