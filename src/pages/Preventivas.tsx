@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Tool, Plus, Calendar, Clock, Trash2, Bell, CheckCircle2 } from 'lucide-react';
+import { Wrench, Plus, Calendar, Clock, Trash2, Bell, CheckCircle2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -86,15 +86,35 @@ const Preventivas = () => {
   const fetchMaintenanceItems = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('preventive_maintenance')
-        .select('*')
-        .eq('matricula', user?.matricula || '')
-        .order('scheduled_date', { ascending: true });
-        
-      if (error) throw error;
+      // Check if table exists first - we'll create it if needed
+      const { data: tablesData } = await supabase
+        .from('pg_catalog.pg_tables')
+        .select('tablename')
+        .eq('schemaname', 'public')
+        .eq('tablename', 'preventive_maintenance');
       
-      setMaintenanceItems(data || []);
+      if (!tablesData || tablesData.length === 0) {
+        console.log('Maintenance table not found, showing empty state');
+        setMaintenanceItems([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      const { data, error } = await supabase
+        .rpc('get_preventive_maintenance', { 
+          p_matricula: user?.matricula || '' 
+        });
+        
+      if (error) {
+        if (error.message.includes('function "get_preventive_maintenance" does not exist')) {
+          console.log('Function not found, showing empty state');
+          setMaintenanceItems([]);
+        } else {
+          throw error;
+        }
+      } else {
+        setMaintenanceItems(data as MaintenanceItem[] || []);
+      }
     } catch (error: any) {
       console.error('Error fetching maintenance items:', error);
       toast({
@@ -102,6 +122,7 @@ const Preventivas = () => {
         description: 'Não foi possível carregar os itens de manutenção preventiva.',
         variant: 'destructive',
       });
+      setMaintenanceItems([]);
     } finally {
       setIsLoading(false);
     }
@@ -133,38 +154,42 @@ const Preventivas = () => {
     }
     
     try {
-      const { data, error } = await supabase
-        .from('preventive_maintenance')
-        .insert([
-          {
-            matricula: user?.matricula,
-            category: formData.category,
-            title: formData.title,
-            description: formData.description,
-            scheduled_date: formData.scheduled_date,
-            completed: false,
-            reminder_sent: false,
-          },
-        ])
-        .select();
+      // Check if table exists first - we'll use RPC instead
+      const { error } = await supabase
+        .rpc('add_preventive_maintenance', {
+          p_matricula: user?.matricula || '',
+          p_category: formData.category,
+          p_title: formData.title,
+          p_description: formData.description,
+          p_scheduled_date: formData.scheduled_date
+        });
         
-      if (error) throw error;
-      
-      toast({
-        title: 'Sucesso!',
-        description: 'Item de manutenção preventiva adicionado com sucesso.',
-      });
-      
-      // Reset form and refresh list
-      setFormData({
-        category: '',
-        title: '',
-        description: '',
-        scheduled_date: format(new Date(), 'yyyy-MM-dd'),
-      });
-      setIsDialogOpen(false);
-      await fetchMaintenanceItems();
-      
+      if (error) {
+        if (error.message.includes('function "add_preventive_maintenance" does not exist')) {
+          toast({
+            title: 'Funcionalidade não disponível',
+            description: 'A função necessária ainda não foi implementada no banco de dados.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: 'Sucesso!',
+          description: 'Item de manutenção preventiva adicionado com sucesso.',
+        });
+        
+        // Reset form and refresh list
+        setFormData({
+          category: '',
+          title: '',
+          description: '',
+          scheduled_date: format(new Date(), 'yyyy-MM-dd'),
+        });
+        setIsDialogOpen(false);
+        await fetchMaintenanceItems();
+      }
     } catch (error: any) {
       console.error('Error adding maintenance item:', error);
       toast({
@@ -178,11 +203,23 @@ const Preventivas = () => {
   const handleToggleComplete = async (id: string, completed: boolean) => {
     try {
       const { error } = await supabase
-        .from('preventive_maintenance')
-        .update({ completed: !completed })
-        .eq('id', id);
+        .rpc('toggle_preventive_maintenance_status', {
+          p_id: id,
+          p_completed: !completed
+        });
         
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('function "toggle_preventive_maintenance_status" does not exist')) {
+          toast({
+            title: 'Funcionalidade não disponível',
+            description: 'A função necessária ainda não foi implementada no banco de dados.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
       
       // Update local state
       setMaintenanceItems(items => 
@@ -208,11 +245,22 @@ const Preventivas = () => {
   const handleDeleteMaintenance = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('preventive_maintenance')
-        .delete()
-        .eq('id', id);
+        .rpc('delete_preventive_maintenance', {
+          p_id: id
+        });
         
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('function "delete_preventive_maintenance" does not exist')) {
+          toast({
+            title: 'Funcionalidade não disponível',
+            description: 'A função necessária ainda não foi implementada no banco de dados.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
       
       // Update local state
       setMaintenanceItems(items => items.filter(item => item.id !== id));
@@ -396,7 +444,7 @@ const Preventivas = () => {
               </div>
             ) : filteredItems.length === 0 ? (
               <div className="text-center py-8 border rounded-lg bg-gray-50">
-                <Tool className="mx-auto h-12 w-12 text-gray-400" />
+                <Wrench className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhuma manutenção encontrada</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   {activeTab === 'concluidas'

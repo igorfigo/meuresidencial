@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from "@/components/ui/theme-provider"
+import { ThemeProvider } from "./components/ui/theme-provider"
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Servicos from './pages/Servicos';
@@ -34,14 +34,14 @@ import BusinessCost from './pages/BusinessCost';
 import VpsOverview from './pages/VpsOverview';
 import NotFound from './pages/NotFound';
 import { AppProvider } from './contexts/AppContext';
-import { AuthRequired } from './components/AuthRequired';
-import { AdminOnly } from './components/AdminOnly';
+import AuthRequired from './components/AuthRequired';
+import AdminOnly from './components/AdminOnly';
 import { Toaster } from "@/components/ui/toaster"
 import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
-import { Preventivas } from './pages';
+import Preventivas from './pages/Preventivas';
 
 const queryClient = new QueryClient()
 
@@ -58,7 +58,6 @@ function App() {
                 <Route path="/servicos" element={<Servicos />} />
                 <Route path="/fale-conosco" element={<FaleConosco />} />
                 
-                {/* Protected Routes */}
                 <Route element={<AuthRequired />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/perfil" element={<UserProfile />} />
@@ -76,13 +75,11 @@ function App() {
                   <Route path="/minhas-cobrancas" element={<MinhasCobrancas />} />
                   <Route path="/garagem-livre" element={<GaragemLivre />} />
                   
-                  {/* Finance Routes */}
                   <Route path="/financeiro/dashboard" element={<FinanceiroDashboard />} />
                   <Route path="/financeiro/receitas-despesas" element={<FinanceiroReceitasDespesas />} />
                   <Route path="/financeiro/recebimento-pix" element={<FinanceiroRecebimentoPix />} />
                   <Route path="/financeiro/prestacao-contas" element={<FinanceiroPrestacaoContas />} />
                   
-                  {/* Admin Only Routes */}
                   <Route element={<AdminOnly />}>
                     <Route path="/cadastro-gestor" element={<CadastroGestor />} />
                     <Route path="/cadastro-planos" element={<CadastroPlanos />} />

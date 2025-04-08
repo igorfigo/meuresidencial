@@ -1,3 +1,4 @@
+
 export { default as LandingPage } from './LandingPage';
 export { default as Login } from './Login';
 export { default as Dashboard } from './Dashboard';
@@ -24,8 +25,6 @@ export { default as GerenciarAvisos } from './GerenciarAvisos';
 export { default as NotFound } from './NotFound';
 export { default as Servicos } from './Servicos';
 export { default as FaleConosco } from './FaleConosco';
-export { default as AuthRequired } from './AuthRequired';
-export { default as AdminOnly } from './AdminOnly';
 export { default as BusinessManagement } from './BusinessManagement';
 export { default as BusinessContratos } from './BusinessContratos';
 export { default as BusinessDocuments } from './BusinessDocuments';
