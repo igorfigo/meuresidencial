@@ -1,11 +1,12 @@
 # Ambiente Docker para Meu Residencial
 
-Este repositório inclui configuração Docker para executar o projeto localmente.
+Este repositório inclui configuração Docker para executar o frontend do projeto localmente.
 
 ## Requisitos
 
 - Docker
 - Docker Compose
+- Acesso a um projeto Supabase na web
 
 ## Configuração
 
@@ -15,11 +16,13 @@ Este repositório inclui configuração Docker para executar o projeto localment
 cp .env.example .env
 ```
 
-2. (Opcional) Edite o arquivo `.env` se necessário para personalizar as configurações.
+2. Edite o arquivo `.env` para incluir as credenciais corretas do seu projeto Supabase:
+   - `VITE_SUPABASE_URL`: URL do seu projeto Supabase (ex: https://abcdefghijklm.supabase.co)
+   - `VITE_SUPABASE_ANON_KEY`: Chave anônima do seu projeto Supabase
 
 ## Iniciar o ambiente
 
-Execute o seguinte comando para iniciar todos os serviços:
+Execute o seguinte comando para iniciar o frontend:
 
 ```bash
 docker-compose up -d
@@ -27,18 +30,11 @@ docker-compose up -d
 
 Isso iniciará:
 - Frontend React em http://localhost:5173
-- Supabase em http://localhost:54321 (Studio: http://localhost:54321)
 
 ## Parar o ambiente
 
 ```bash
 docker-compose down
-```
-
-Para remover volumes também (isso apagará o banco de dados):
-
-```bash
-docker-compose down -v
 ```
 
 ## Serviços
@@ -47,19 +43,7 @@ docker-compose down -v
 
 O frontend está configurado para usar hot-reloading para desenvolvimento, o que significa que as alterações que você fizer no código serão automaticamente refletidas no navegador.
 
-### Supabase
-
-O Supabase está configurado com valores padrão e inclui:
-- Banco de dados PostgreSQL
-- API RESTful
-- Autenticação e autorização
-- Supabase Studio (UI de administração)
-
-Acesse o Supabase Studio em: http://localhost:54321
-
-Credenciais padrão para o Supabase Studio:
-- Email: admin@example.com
-- Senha: postgres
+O frontend se conecta ao seu projeto Supabase hospedado na web usando as variáveis de ambiente configuradas no arquivo `.env`.
 
 ## Solução de problemas
 
@@ -73,4 +57,5 @@ Se encontrar erros ao iniciar os serviços:
 3. Verifique os logs:
    ```bash
    docker-compose logs -f
-   ``` 
+   ```
+4. Certifique-se de que as credenciais do Supabase estão corretas no arquivo `.env` 
