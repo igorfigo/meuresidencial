@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Frontend React application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_SUPABASE_URL=${SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+    depends_on:
+      - supabase
+    networks:
+      - app-network
+
+  # Supabase setup
+  supabase:
+    image: supabase/supabase-local
+    ports:
+      - "54321:54321"  # API e Supabase Studio
+      - "54322:54322"  # Auth
+    environment:
+      POSTGRES_PASSWORD: postgres
+      JWT_SECRET: "${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}"
+      ANON_KEY: "${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0}"
+      SERVICE_ROLE_KEY: "${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU}"
+    volumes:
+      - supabase-data:/var/lib/postgresql/data
+      - ./supabase:/app/supabase
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  supabase-data:
+    driver: local 
