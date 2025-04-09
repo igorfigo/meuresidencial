@@ -58,4 +58,33 @@ Se encontrar erros ao iniciar os serviços:
    ```bash
    docker-compose logs -f
    ```
-4. Certifique-se de que as credenciais do Supabase estão corretas no arquivo `.env` 
+4. Certifique-se de que as credenciais do Supabase estão corretas no arquivo `.env`
+
+### Erros comuns
+
+#### Erro com npm ci durante a construção
+
+Se encontrar erros como:
+```
+ERROR: process "/bin/sh -c npm ci" did not complete successfully: exit code: 1
+```
+
+Tente as seguintes soluções:
+
+1. Limpe os contêineres e imagens Docker existentes:
+   ```bash
+   docker-compose down
+   docker system prune -a
+   ```
+
+2. Remova a pasta node_modules local (se existir) e deixe o Docker gerenciar as dependências:
+   ```bash
+   rm -rf node_modules
+   ```
+
+3. Verifique se há problemas de compatibilidade no seu package.json entre as versões das dependências.
+
+4. Caso continue com problemas, tente usar uma versão específica do Node.js no Dockerfile, alterando a primeira linha para:
+   ```
+   FROM node:16-alpine
+   ``` 
