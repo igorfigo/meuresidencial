@@ -87,4 +87,27 @@ Tente as seguintes soluções:
 4. Caso continue com problemas, tente usar uma versão específica do Node.js no Dockerfile, alterando a primeira linha para:
    ```
    FROM node:16-alpine
-   ``` 
+   ```
+
+#### ✅ Compatibilidade entre date-fns e react-day-picker
+
+Este projeto tinha inicialmente um conflito entre:
+- `date-fns@4.1.0` 
+- `react-day-picker@8.10.1` (que exige `date-fns` nas versões 2.x ou 3.x)
+
+**Status:** ✅ Resolvido
+
+O problema foi resolvido fazendo downgrade do `date-fns` para a versão 3.6.0, que é compatível com o `react-day-picker@8.10.1`.
+
+#### ✅ Sincronização entre package.json e package-lock.json
+
+**Problema:** Quando alteramos a versão de uma dependência no `package.json`, pode ocorrer um erro com o comando `npm ci`, que requer que os arquivos `package.json` e `package-lock.json` estejam sincronizados:
+
+```
+npm error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync.
+npm error Invalid: lock file's date-fns@4.1.0 does not satisfy date-fns@3.6.0
+```
+
+**Status:** ✅ Resolvido
+
+A solução foi utilizar o comando `npm install` no Dockerfile em vez de `npm ci`, permitindo que o npm atualize o package-lock.json automaticamente durante a construção da imagem Docker. 

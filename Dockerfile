@@ -17,8 +17,8 @@ COPY index.html ./
 COPY components.json ./
 COPY .eslintrc* ./
 
-# Instalar dependências com configurações extras para melhorar estabilidade
-RUN npm ci --no-audit --no-update-notifier --prefer-offline --legacy-peer-deps
+# Instalar dependências com npm install em vez de npm ci para atualizar o package-lock.json
+RUN npm install --no-audit --no-update-notifier --prefer-offline
 
 # Copiar código fonte
 COPY src/ ./src/
