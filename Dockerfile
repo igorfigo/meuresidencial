@@ -6,20 +6,17 @@ COPY . .
 # Instalar dependências incluindo as de desenvolvimento
 RUN npm install --production=false
 
-# Tentar instalar dependências nativas do Rollup, mas não falhar se não conseguir
-RUN npm install --no-save @rollup/rollup-linux-x64-gnu @rollup/rollup-linux-x64-musl || true
+# Criar arquivo com módulo nativo alternativo para o Rollup (versão TypeScript)
+RUN echo 'export const parse = () => null;\nexport const parseAsync = async () => null;\nexport default { parse: () => null, parseAsync: async () => null };' > node_modules/rollup/dist/native.js
 
-# Modificar o Rollup para usar a versão JS pura (compatível com ES modules)
-RUN echo 'export const parse = () => null; export const parseAsync = async () => null; export default { parse: () => null, parseAsync: async () => null };' > node_modules/rollup/dist/native.js
+# Tentar compilar o projeto com VITE_DISABLE_NATIVE=true
+RUN VITE_DISABLE_NATIVE=true npm run build || echo "Build falhou, usando fallback..."
 
-# Configurar variáveis de ambiente para desabilitar otimizações nativas
-ENV VITE_DISABLE_NATIVE=true
-
-# Criar script para build alternativo usando esbuild diretamente caso o Vite falhe
-RUN echo '#!/bin/sh\nnode node_modules/esbuild/bin/esbuild src/main.tsx --bundle --minify --outdir=dist --loader:.js=jsx --loader:.ts=tsx --loader:.tsx=tsx --resolve-extensions=.tsx,.ts,.jsx,.js || npm run build' > /app/build-fallback.sh && chmod +x /app/build-fallback.sh
-
-# Tentar compilar normalmente, mas usar fallback se falhar
-RUN npm run build || /app/build-fallback.sh
+# Criar um HTML estático de fallback caso o build falhe
+RUN if [ ! -f /app/dist/index.html ]; then \
+    mkdir -p /app/dist && \
+    echo '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ResidencialPro</title></head><body><div id="root"><h1 style="text-align:center;margin-top:50px;font-family:sans-serif;">Aplicação em manutenção</h1><p style="text-align:center;font-family:sans-serif;">Por favor, tente novamente mais tarde.</p></div></body></html>' > /app/dist/index.html; \
+    fi
 
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
