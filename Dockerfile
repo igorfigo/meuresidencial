@@ -2,8 +2,11 @@ FROM node:16 as build
 
 WORKDIR /app
 COPY . .
-ENV NODE_ENV=production
-RUN npm install
+
+# Usar --production=false para garantir que devDependencies sejam instaladas
+RUN npm install --production=false
+
+# Agora compilar a aplicação
 RUN npm run build
 
 FROM nginx:alpine
