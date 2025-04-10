@@ -10,7 +10,10 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react(),
+    react({
+      // Desabilitar SWC
+      swcOptions: undefined
+    }),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
@@ -19,4 +22,13 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Desabilitar otimizações nativas
+  optimizeDeps: {
+    disabled: process.env.VITE_DISABLE_NATIVE === 'true',
+  },
+  build: {
+    // Desabilitar otimizações nativas para build
+    minify: process.env.VITE_DISABLE_NATIVE === 'true' ? false : 'esbuild',
+    sourcemap: mode === 'development',
+  }
 }));

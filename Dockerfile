@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18 AS builder
 
 WORKDIR /app
 
@@ -17,15 +17,31 @@ COPY index.html ./
 COPY components.json ./
 COPY .eslintrc* ./
 
-# Instalar dependências com npm install em vez de npm ci para atualizar o package-lock.json
-RUN npm install --no-audit --no-update-notifier --prefer-offline
+# Instalar dependências e fix para o Rollup
+RUN npm install --no-audit --no-update-notifier --force && \
+    npm install @rollup/rollup-linux-x64-gnu @swc/core-linux-x64-gnu
+
+# Patch para desabilitar dependências nativas
+RUN echo 'process.env.ROLLUP_NATIVE = false;' > ./rollup-patch.js && \
+    echo "module.exports = {};" > ./node_modules/@swc/core/binding.js
 
 # Copiar código fonte
 COPY src/ ./src/
 COPY public/ ./public/
 
-# Expor a porta que o Vite usa
-EXPOSE 5173
+# Usar um servidor web simples
+FROM node:18-slim
 
-# Comando para iniciar o servidor de desenvolvimento
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"] 
+WORKDIR /app
+
+# Instalar servidor HTTP simples
+RUN npm install -g http-server
+
+# Copiar arquivos do projeto
+COPY --from=builder /app /app
+
+# Expor a porta 8080
+EXPOSE 8080
+
+# Iniciar servidor HTTP
+CMD ["npx", "http-server", "-p", "8080"] 
