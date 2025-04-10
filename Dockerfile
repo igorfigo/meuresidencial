@@ -9,13 +9,18 @@ COPY package*.json ./
 # Instalar dependências com suporte completo para binários nativos
 RUN npm ci
 
-# Instalar explicitamente as dependências nativas para o Rollup
-RUN npm install --no-save @rollup/rollup-linux-x64-gnu @rollup/rollup-linux-x64-musl
+# Instalar explicitamente as dependências nativas para o Rollup e SWC
+RUN npm install --no-save @rollup/rollup-linux-x64-gnu @rollup/rollup-linux-x64-musl \
+    && npm install --no-save @swc/core-linux-x64-gnu @swc/core-linux-x64-musl
 
 # Copiar o resto dos arquivos
 COPY . .
 
-# Construir o app
+# Configurar variáveis de ambiente para desabilitar otimizações nativas
+ENV NODE_ENV=production
+ENV VITE_DISABLE_NATIVE=true
+
+# Construir o app com otimizações nativas desabilitadas
 RUN npm run build
 
 # Estágio de produção
