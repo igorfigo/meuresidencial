@@ -1,5 +1,6 @@
 FROM nginx:alpine
 
+RUN npm run build
 # Copiar os arquivos de build do projeto
 COPY ./dist /usr/share/nginx/html
 
