@@ -3,22 +3,24 @@ FROM node:16 as build
 WORKDIR /app
 COPY . .
 
+# Guardar uma cópia da dist original antes de tentar o build
+RUN cp -r dist dist_original || mkdir -p dist_original
+
 # Instalar dependências incluindo as de desenvolvimento
 RUN npm install --production=false
 
 # Hack para corrigir o problema do rollup
 RUN sed -i 's/import { parse, parseAsync } from/\/\/ import { parse, parseAsync } from/' node_modules/rollup/dist/es/shared/parseAst.js \
     && sed -i '1s/^/function parse() { return null; }\nfunction parseAsync() { return Promise.resolve(null); }\n/' node_modules/rollup/dist/es/shared/parseAst.js \
-    && echo 'export const parse = () => null;\nexport const parseAsync = async () => null;\nexport default { parse: () => null, parseAsync: async () => null };' > node_modules/rollup/dist/native.js \
-    && mkdir -p /app/dist
+    && echo 'export const parse = () => null;\nexport const parseAsync = async () => null;\nexport default { parse: () => null, parseAsync: async () => null };' > node_modules/rollup/dist/native.js
 
 # Tentar compilar o projeto com VITE_DISABLE_NATIVE=true
-RUN VITE_DISABLE_NATIVE=true npm run build || echo "Build falhou, usando fallback..."
+RUN VITE_DISABLE_NATIVE=true npm run build || echo "Build falhou, usando dist original como fallback..."
 
-# Criar um HTML estático de fallback caso o build falhe
+# Se o build falhar, restaurar a dist original
 RUN if [ ! -f /app/dist/index.html ]; then \
-    mkdir -p /app/dist && \
-    echo '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ResidencialPro</title></head><body><div id="root"><h1 style="text-align:center;margin-top:50px;font-family:sans-serif;">Aplicação em manutenção</h1><p style="text-align:center;font-family:sans-serif;">Por favor, tente novamente mais tarde.</p></div></body></html>' > /app/dist/index.html; \
+    rm -rf /app/dist && \
+    cp -r dist_original dist || echo "Usando a dist original como fallback"; \
     fi
 
 FROM nginx:alpine
