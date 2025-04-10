@@ -9,18 +9,21 @@ COPY package*.json ./
 # Instalar dependências com suporte completo para binários nativos
 RUN npm ci
 
-# Instalar explicitamente as dependências nativas para o Rollup e SWC
-RUN npm install --no-save @rollup/rollup-linux-x64-gnu @rollup/rollup-linux-x64-musl \
-    && npm install --no-save @swc/core-linux-x64-gnu @swc/core-linux-x64-musl
+# Configurar para forçar o uso de versões JS puras dos pacotes
+ENV ROLLUP_SKIP_NODEJS=true
+ENV SWC_SKIP_NODEJS=true
+ENV NODE_ENV=production
+ENV VITE_DISABLE_NATIVE=true
 
 # Copiar o resto dos arquivos
 COPY . .
 
-# Configurar variáveis de ambiente para desabilitar otimizações nativas
-ENV NODE_ENV=production
-ENV VITE_DISABLE_NATIVE=true
+# Modificar o rollup para forçar uso da versão JavaScript pura
+RUN sed -i 's/require(\x27\.\/native\.js\x27)/null/g' node_modules/rollup/dist/es/rollup.js || true \
+    && sed -i 's/requireWithFriendlyError/\/\/requireWithFriendlyError/g' node_modules/rollup/dist/native.js || true \
+    && echo 'module.exports = null;' > node_modules/rollup/dist/native.js || true
 
-# Construir o app com otimizações nativas desabilitadas
+# Construir o app 
 RUN npm run build
 
 # Estágio de produção

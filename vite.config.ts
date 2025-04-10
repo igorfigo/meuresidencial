@@ -10,7 +10,9 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react(),
+    react({
+      jsxImportSource: "@emotion/react",
+    }),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
@@ -19,13 +21,19 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Desabilitar otimizações nativas
+  // Desabilitar otimizações nativas sempre para evitar problemas no Docker
   optimizeDeps: {
-    disabled: process.env.VITE_DISABLE_NATIVE === 'true',
+    disabled: true,
   },
   build: {
-    // Desabilitar otimizações nativas para build
+    // Desabilitar otimizações nativas para build sempre no Docker
     minify: process.env.VITE_DISABLE_NATIVE === 'true' ? false : 'esbuild',
     sourcemap: mode === 'development',
+    // Forçar uso do Rollup JS
+    rollupOptions: {
+      treeshake: {
+        moduleSideEffects: true,
+      },
+    }
   }
 }));
