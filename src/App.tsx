@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -37,6 +38,7 @@ import VagaGaragem from './pages/VagaGaragem';
 import DuvidasFrequentes from './pages/DuvidasFrequentes';
 import LandingPage from './pages/LandingPage';
 import VpsOverview from './pages/VpsOverview';
+import AdminTools from './pages/AdminTools';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
@@ -69,6 +71,7 @@ function App() {
               <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
               <Route path="/business-documents" element={<AdminOnly><BusinessDocuments /></AdminOnly>} />
               <Route path="/despesas-empresariais" element={<AdminOnly><BusinessCost /></AdminOnly>} />
+              <Route path="/admin-tools" element={<AdminOnly><AdminTools /></AdminOnly>} />
               
               {/* Manager Routes */}
               <Route path="/moradores" element={<AuthRequired><Moradores /></AuthRequired>} />

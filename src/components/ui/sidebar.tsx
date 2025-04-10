@@ -35,6 +35,7 @@ import {
   HelpCircle,
   Monitor,
   Server,
+  Tool,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -107,6 +108,7 @@ export function Sidebar() {
     { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
+    { path: '/admin-tools', label: 'Ferramentas Admin', icon: <Tool className="h-5 w-5" /> },
     { isSeparator: true, path: '', label: '', icon: null },
     { 
       path: '/business-management', 
