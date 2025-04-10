@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -36,7 +37,6 @@ import DadosHistoricos from './pages/DadosHistoricos';
 import VagaGaragem from './pages/VagaGaragem';
 import DuvidasFrequentes from './pages/DuvidasFrequentes';
 import LandingPage from './pages/LandingPage';
-import VpsOverview from './pages/VpsOverview';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
@@ -96,12 +96,6 @@ function App() {
                   <VagaGaragem />
                 </AuthRequired>
               } />
-              
-              {/* VPS Overview Route */}
-              <Route 
-                path="/vps-overview" 
-                element={<AuthRequired><AdminOnly><VpsOverview /></AdminOnly></AuthRequired>} 
-              />
             </Routes>
             <Toaster />
           </div>
