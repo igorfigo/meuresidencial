@@ -67,3 +67,16 @@ Simply open [Lovable](https://lovable.dev/projects/4f962b0d-63d0-4fff-ac2b-71188
 ## I want to use a custom domain - is that possible?
 
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+
+## Configuração Git Hooks
+
+Para garantir que a pasta `dist` esteja sempre atualizada antes de cada push, configure o hook pre-push:
+
+```bash
+# Copie o hook pre-push para a pasta .git/hooks
+cp .git-hooks/pre-push .git/hooks/
+# Torne o hook executável
+chmod +x .git/hooks/pre-push
+```
+
+Este hook executará automaticamente `npm run build` antes de cada push e adicionará a pasta `dist` ao commit se houver alterações.
