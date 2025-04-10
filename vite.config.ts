@@ -25,5 +25,10 @@ export default defineConfig(({ mode }) => ({
   build: {
     minify: process.env.VITE_DISABLE_NATIVE === 'true' ? false : 'esbuild',
     sourcemap: mode === 'development',
+    rollupOptions: {
+      treeshake: {
+        moduleSideEffects: true,
+      },
+    }
   }
 }));

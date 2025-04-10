@@ -3,8 +3,19 @@ FROM node:16 as build
 WORKDIR /app
 COPY . .
 
-# Usar --production=false para garantir que devDependencies sejam instaladas
+# Instalar dependências incluindo as de desenvolvimento
 RUN npm install --production=false
+
+# Tentar instalar dependências nativas do Rollup, mas não falhar se não conseguir
+RUN npm install --no-save @rollup/rollup-linux-x64-gnu @rollup/rollup-linux-x64-musl || true
+
+# Modificar o Rollup para usar a versão JS pura
+RUN sed -i 's/require(\x27\.\/native\.js\x27)/null/g' node_modules/rollup/dist/es/rollup.js || true \
+    && sed -i 's/requireWithFriendlyError/\/\/requireWithFriendlyError/g' node_modules/rollup/dist/native.js || true \
+    && echo 'module.exports = null;' > node_modules/rollup/dist/native.js || true
+
+# Configurar variáveis de ambiente para desabilitar otimizações nativas
+ENV VITE_DISABLE_NATIVE=true
 
 # Agora compilar a aplicação
 RUN npm run build
