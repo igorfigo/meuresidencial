@@ -1,21 +1,21 @@
 
-TERMOS DE USO E CONDIÇÕES - RESIDENCIAL PRO
+TERMOS DE USO E CONDIÇÕES - MEU RESIDENCIAL
 
 Última atualização: 10/04/2025
 
 1. ACEITAÇÃO DOS TERMOS
 
-Ao acessar ou utilizar o sistema ResidencialPro ("Sistema"), você concorda em cumprir e ficar vinculado aos seguintes Termos de Uso e Condições ("Termos"). Se você não concordar com algum destes Termos, não deverá utilizar o Sistema.
+Ao acessar ou utilizar o sistema Meu Residencial ("Sistema"), você concorda em cumprir e ficar vinculado aos seguintes Termos de Uso e Condições ("Termos"). Se você não concordar com algum destes Termos, não deverá utilizar o Sistema.
 
 2. DESCRIÇÃO DO SERVIÇO
 
-O ResidencialPro é uma plataforma de gestão de condomínios que oferece ferramentas para administradores, síndicos e moradores gerenciarem diversos aspectos relacionados à vida em condomínio, incluindo comunicados, documentos, áreas comuns, finanças e outras funcionalidades.
+O Meu Residencial é uma plataforma de gestão de condomínios que oferece ferramentas para administradores, síndicos e moradores gerenciarem diversos aspectos relacionados à vida em condomínio, incluindo comunicados, documentos, áreas comuns, finanças e outras funcionalidades.
 
 3. CADASTRO E CONTA DE USUÁRIO
 
 3.1. Para utilizar o Sistema, é necessário criar uma conta com informações precisas e completas.
 3.2. Você é responsável por manter a confidencialidade de sua senha e por todas as atividades realizadas em sua conta.
-3.3. Você concorda em notificar imediatamente o ResidencialPro sobre qualquer uso não autorizado de sua conta.
+3.3. Você concorda em notificar imediatamente o Meu Residencial sobre qualquer uso não autorizado de sua conta.
 
 4. RESPONSABILIDADES DO USUÁRIO
 
@@ -30,7 +30,7 @@ O ResidencialPro é uma plataforma de gestão de condomínios que oferece ferram
 5. CONTEÚDO DO USUÁRIO
 
 5.1. O Sistema permite que você publique, envie ou armazene conteúdo, incluindo textos, imagens e documentos ("Conteúdo do Usuário").
-5.2. Você retém todos os direitos sobre seu Conteúdo do Usuário, mas concede ao ResidencialPro uma licença não exclusiva, mundial e isenta de royalties para usar, exibir e armazenar tal conteúdo para os fins do Sistema.
+5.2. Você retém todos os direitos sobre seu Conteúdo do Usuário, mas concede ao Meu Residencial uma licença não exclusiva, mundial e isenta de royalties para usar, exibir e armazenar tal conteúdo para os fins do Sistema.
 5.3. Você declara e garante que possui todos os direitos necessários para conceder as licenças descritas acima.
 
 6. PRIVACIDADE
@@ -47,28 +47,28 @@ O ResidencialPro é uma plataforma de gestão de condomínios que oferece ferram
 
 8. MODIFICAÇÕES DO SISTEMA E DOS TERMOS
 
-8.1. O ResidencialPro reserva-se o direito de modificar ou descontinuar, temporária ou permanentemente, o Sistema ou qualquer recurso, com ou sem aviso prévio.
+8.1. O Meu Residencial reserva-se o direito de modificar ou descontinuar, temporária ou permanentemente, o Sistema ou qualquer recurso, com ou sem aviso prévio.
 8.2. Estes Termos podem ser alterados a qualquer momento, e o uso continuado do Sistema após tais alterações constitui sua aceitação dos novos Termos.
 
 9. LIMITAÇÃO DE RESPONSABILIDADE
 
 9.1. O Sistema é fornecido "como está" e "conforme disponível", sem garantias de qualquer tipo.
-9.2. O ResidencialPro não será responsável por danos indiretos, incidentais, especiais, consequenciais ou punitivos, incluindo perda de dados, lucros, receitas ou outras perdas resultantes de seu uso ou incapacidade de usar o Sistema.
-9.3. Nossa responsabilidade total para com você por qualquer reclamação relacionada ao Sistema não excederá o valor que você pagou ao ResidencialPro nos 12 meses anteriores à reclamação.
+9.2. O Meu Residencial não será responsável por danos indiretos, incidentais, especiais, consequenciais ou punitivos, incluindo perda de dados, lucros, receitas ou outras perdas resultantes de seu uso ou incapacidade de usar o Sistema.
+9.3. Nossa responsabilidade total para com você por qualquer reclamação relacionada ao Sistema não excederá o valor que você pagou ao Meu Residencial nos 12 meses anteriores à reclamação.
 
 10. INDENIZAÇÃO
 
-Você concorda em indenizar e isentar o ResidencialPro, seus diretores, funcionários e afiliados de qualquer reclamação, demanda, responsabilidade, danos ou custos (incluindo honorários advocatícios razoáveis) decorrentes de: (a) seu uso do Sistema; (b) violação destes Termos; (c) violação de direitos de terceiros; ou (d) seu Conteúdo do Usuário.
+Você concorda em indenizar e isentar o Meu Residencial, seus diretores, funcionários e afiliados de qualquer reclamação, demanda, responsabilidade, danos ou custos (incluindo honorários advocatícios razoáveis) decorrentes de: (a) seu uso do Sistema; (b) violação destes Termos; (c) violação de direitos de terceiros; ou (d) seu Conteúdo do Usuário.
 
 11. PROPRIEDADE INTELECTUAL
 
-11.1. O Sistema e seu conteúdo original, recursos e funcionalidades são e permanecerão propriedade exclusiva do ResidencialPro e de seus licenciadores.
+11.1. O Sistema e seu conteúdo original, recursos e funcionalidades são e permanecerão propriedade exclusiva do Meu Residencial e de seus licenciadores.
 11.2. O Sistema é protegido por direitos autorais, marcas registradas e outras leis de propriedade intelectual do Brasil e de outros países.
 
 12. RESCISÃO
 
 12.1. Você pode encerrar sua conta a qualquer momento seguindo as instruções disponíveis no Sistema.
-12.2. O ResidencialPro pode, a seu critério exclusivo, suspender ou encerrar seu acesso ao Sistema por violação destes Termos ou por qualquer outro motivo.
+12.2. O Meu Residencial pode, a seu critério exclusivo, suspender ou encerrar seu acesso ao Sistema por violação destes Termos ou por qualquer outro motivo.
 12.3. Após a rescisão, seu direito de usar o Sistema cessará imediatamente.
 
 13. LEI APLICÁVEL
@@ -81,12 +81,12 @@ Qualquer disputa decorrente ou relacionada a estes Termos ou ao Sistema será su
 
 15. DISPOSIÇÕES GERAIS
 
-15.1. Estes Termos constituem o acordo integral entre você e o ResidencialPro em relação ao Sistema.
+15.1. Estes Termos constituem o acordo integral entre você e o Meu Residencial em relação ao Sistema.
 15.2. Se qualquer disposição destes Termos for considerada inválida ou inexequível, as disposições restantes permanecerão em pleno vigor e efeito.
-15.3. A falha do ResidencialPro em fazer valer qualquer direito ou disposição destes Termos não constituirá renúncia a tal direito ou disposição.
+15.3. A falha do Meu Residencial em fazer valer qualquer direito ou disposição destes Termos não constituirá renúncia a tal direito ou disposição.
 
 16. CONTATO
 
 Se você tiver dúvidas sobre estes Termos, entre em contato conosco pelo e-mail: [INSERIR EMAIL DE CONTATO].
 
-Ao utilizar o Sistema ResidencialPro, você reconhece que leu, entendeu e concorda com estes Termos de Uso e Condições.
+Ao utilizar o Sistema Meu Residencial, você reconhece que leu, entendeu e concorda com estes Termos de Uso e Condições.
