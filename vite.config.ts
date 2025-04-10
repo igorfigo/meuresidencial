@@ -10,10 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react({
-      // Desabilitar SWC
-      swcOptions: undefined
-    }),
+    react(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),

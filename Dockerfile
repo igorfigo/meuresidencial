@@ -1,47 +1,39 @@
-FROM node:18 AS builder
+FROM node:16-alpine as build
 
+# Diretório de trabalho
 WORKDIR /app
 
-# Configurar o npm para não atualizar
-RUN npm config set update-notifier false && \
-    npm config set fund false
-
-# Copiar arquivos de configuração
+# Copiar package.json e package-lock.json
 COPY package*.json ./
-COPY bun.lockb ./
-COPY tsconfig*.json ./
-COPY vite.config.ts ./
-COPY tailwind.config.ts ./
-COPY postcss.config.js ./
-COPY index.html ./
-COPY components.json ./
-COPY .eslintrc* ./
 
-# Instalar dependências e fix para o Rollup
-RUN npm install --no-audit --no-update-notifier --force && \
-    npm install @rollup/rollup-linux-x64-gnu @swc/core-linux-x64-gnu
+# Instalar dependências
+RUN npm ci
 
-# Patch para desabilitar dependências nativas
-RUN echo 'process.env.ROLLUP_NATIVE = false;' > ./rollup-patch.js && \
-    echo "module.exports = {};" > ./node_modules/@swc/core/binding.js
+# Copiar o resto dos arquivos
+COPY . .
 
-# Copiar código fonte
-COPY src/ ./src/
-COPY public/ ./public/
+# Construir o app
+RUN npm run build
 
-# Usar um servidor web simples
-FROM node:18-slim
+# Estágio de produção
+FROM nginx:alpine
 
-WORKDIR /app
+# Copiar os arquivos de build do projeto
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Instalar servidor HTTP simples
-RUN npm install -g http-server
+# Configuração do Nginx para SPA
+RUN echo 'server { \
+  listen 80; \
+  server_name localhost; \
+  location / { \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    try_files $uri $uri/ /index.html; \
+  } \
+}' > /etc/nginx/conf.d/default.conf
 
-# Copiar arquivos do projeto
-COPY --from=builder /app /app
+# Expor a porta 80
+EXPOSE 80
 
-# Expor a porta 8080
-EXPOSE 8080
-
-# Iniciar servidor HTTP
-CMD ["npx", "http-server", "-p", "8080"] 
+# Iniciar o Nginx
+CMD ["nginx", "-g", "daemon off;"] 
