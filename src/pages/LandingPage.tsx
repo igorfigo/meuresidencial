@@ -581,7 +581,7 @@ const LandingPage = () => {
                 <div className="text-5xl font-bold text-white mb-2">350+</div>
                 <div className="text-xl text-white font-medium">Condomínios já utilizam nossa plataforma</div>
                 <div className="mt-3 text-white/90">
-                  Junte-se a uma comunidade crescente de síndicos satisfeitos
+                  Junte-se a uma comunidade crescente de síndicos satisfeitos.
                 </div>
               </div>
             </div>
