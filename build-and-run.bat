@@ -1,3 +1,4 @@
+
 @echo off
 echo Construindo a aplicacao...
 call npm run build
@@ -13,7 +14,7 @@ if not exist "dist" (
 )
 
 echo Construindo a imagem Docker de producao...
-docker build -t meu-residencial-prod -f Dockerfile.prod .
+docker build -t meu-residencial-prod .
 
 echo Iniciando o container...
 docker run -d -p 80:80 --name meu-residencial-container meu-residencial-prod

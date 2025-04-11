@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Construir a aplicação localmente
@@ -18,7 +19,7 @@ fi
 
 # Construir a imagem Docker de produção
 echo "Construindo a imagem Docker de produção..."
-docker build -t meu-residencial-prod -f Dockerfile.prod .
+docker build -t meu-residencial-prod .
 
 # Iniciar o contêiner
 echo "Iniciando o contêiner..."

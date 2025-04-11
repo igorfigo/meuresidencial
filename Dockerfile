@@ -3,24 +3,27 @@
 FROM node:16-alpine AS build
 
 WORKDIR /app
+
+# Copy package files first for better caching
 COPY package*.json ./
+COPY .npmrc ./
 
-# Instalar dependências
-RUN npm ci
+# Install dependencies with better error handling
+RUN npm ci --quiet || npm install --no-fund --no-audit
 
-# Copiar o resto do código
+# Copy the rest of the code
 COPY . .
 
-# Construir a aplicação
-RUN npm run build
+# Build the application with fallback to production mode if needed
+RUN npm run build || npm run build -- --mode production
 
 # Production stage
 FROM nginx:alpine
 
-# Copiar os arquivos estáticos do build
+# Copy static files from build
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copiar configuração personalizada do Nginx
+# Copy custom Nginx configuration with increased timeouts
 RUN echo 'server { \
   listen 80; \
   server_name _; \
@@ -29,15 +32,15 @@ RUN echo 'server { \
     index index.html; \
     try_files $uri $uri/ /index.html; \
   } \
-  # Aumentar timeout para evitar Gateway Timeout \
+  # Increased timeouts to prevent Gateway Timeout \
   proxy_connect_timeout 300; \
   proxy_send_timeout 300; \
   proxy_read_timeout 300; \
   send_timeout 300; \
 }' > /etc/nginx/conf.d/default.conf
 
-# Expor porta 80
+# Expose port 80
 EXPOSE 80
 
-# Iniciar Nginx
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

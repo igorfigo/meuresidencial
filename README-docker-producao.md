@@ -1,3 +1,4 @@
+
 # Docker para Produção - Meu Residencial
 
 Este documento explica como utilizar o Docker para implantar a aplicação em produção.
@@ -41,7 +42,7 @@ chmod +x build-and-run.sh
 
 3. Construa a imagem Docker:
    ```
-   docker build -t meu-residencial-prod -f Dockerfile.prod .
+   docker build -t meu-residencial-prod .
    ```
 
 4. Execute o contêiner:
