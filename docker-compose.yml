@@ -2,26 +2,33 @@
 version: '3.8'
 
 services:
-  # Frontend React application para produção
+  # Frontend React application
   frontend:
-    container_name: meu-residencial-frontend-prod
+    container_name: meu-residencial-frontend
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
     ports:
       - "80:80"
     restart: always
     environment:
+      - NODE_ENV=production
       - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
       - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:80"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 40s
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
 networks:
   app-network:
