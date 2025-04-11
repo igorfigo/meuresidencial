@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -11,10 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react({
-      // Disable SWC optimization when native modules are disabled
-      plugins: process.env.VITE_DISABLE_NATIVE === 'true' ? [] : undefined
-    }),
+    react(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
@@ -30,14 +26,9 @@ export default defineConfig(({ mode }) => ({
     minify: process.env.VITE_DISABLE_NATIVE === 'true' ? false : 'esbuild',
     sourcemap: mode === 'development',
     rollupOptions: {
-      // Use inline options to avoid native dependencies
-      treeshake: process.env.VITE_DISABLE_NATIVE === 'true' ? {
-        moduleSideEffects: 'no-external',
-        propertyReadSideEffects: false,
-        tryCatchDeoptimization: false
-      } : {
+      treeshake: {
         moduleSideEffects: true,
-      }
+      },
     }
   }
 }));
