@@ -15,10 +15,11 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
+      - VITE_DISABLE_NATIVE=true
       - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
       - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      test: ["CMD", "/healthcheck.sh"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -29,6 +30,8 @@ services:
       resources:
         limits:
           memory: 1G
+        reservations:
+          memory: 512M
 
 networks:
   app-network:
