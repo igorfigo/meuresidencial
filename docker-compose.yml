@@ -1,0 +1,19 @@
+services:
+  # Frontend React application para produção
+  frontend:
+    container_name: meu-residencial-frontend-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8282:80"
+    restart: always
+    environment:
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge 
