@@ -12,8 +12,8 @@ RUN npm install --production=false
 # Hack para corrigir o problema do rollup
 RUN sed -i 's/import { parse, parseAsync } from/\/\/ import { parse, parseAsync } from/' node_modules/rollup/dist/es/shared/parseAst.js \
     && sed -i '1s/^/function parse() { return null; }\nfunction parseAsync() { return Promise.resolve(null); }\n/' node_modules/rollup/dist/es/shared/parseAst.js \
-    && echo $'// Usando sintaxe compatível com ES modules\nexport const parse = () => null;\nexport const parseAsync = async () => null;\nexport default { parse: () => null, parseAsync: async () => null };' > node_modules/rollup/dist/native.mjs \
-    && echo $'// Versão CommonJS para compatibilidade\nmodule.exports = { parse: () => null, parseAsync: async () => null };' > node_modules/rollup/dist/native.js
+    && echo "// Usando sintaxe compatível com ES modules\nexport const parse = () => null;\nexport const parseAsync = async () => null;\nexport default { parse: () => null, parseAsync: async () => null };" > node_modules/rollup/dist/native.mjs \
+    && echo "// Versão CommonJS para compatibilidade\nmodule.exports = { parse: () => null, parseAsync: async () => null };" > node_modules/rollup/dist/native.js
 
 # Tentar compilar o projeto com configurações ajustadas
 RUN NODE_OPTIONS="--experimental-modules" VITE_DISABLE_NATIVE=true npm run build || echo "Build falhou, usando dist original como fallback..."
