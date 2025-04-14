@@ -33,8 +33,6 @@ import {
   History,
   Files,
   HelpCircle,
-  Monitor,
-  Server,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -87,8 +85,7 @@ export function Sidebar() {
 
     if (location.pathname === '/business-management' || 
         location.pathname === '/contratos' || 
-        location.pathname === '/despesas-empresariais' ||
-        location.pathname === '/vps-overview') {
+        location.pathname === '/despesas-empresariais') {
       setExpandedSubmenu('Business Management');
     }
   }, [location.pathname, markAsViewed]);
@@ -117,7 +114,6 @@ export function Sidebar() {
         { path: '/contratos', label: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" /> },
         { path: '/business-documents', label: 'Business Documents', icon: <Files className="h-5 w-5 text-blue-500" /> },
         { path: '/despesas-empresariais', label: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" /> },
-        { path: '/vps-overview', label: 'VPS Overview', icon: <Server className="h-5 w-5 text-blue-500" /> }
       ]
     },
   ];
