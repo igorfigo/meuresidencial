@@ -21,8 +21,8 @@ RUN if [ -d "dist" ]; then cp -r dist dist_backup; fi
 # Instalar esbuild para substituir o SWC
 RUN npm install --save-dev esbuild
 
-# Criar uma configuração alternativa do Vite que não depende do SWC
-RUN echo "import { defineConfig } from 'vite';\nexport default defineConfig({\n  build: {\n    commonjsOptions: {\n      transformMixedEsModules: true\n    }\n  }\n});" > vite.simple.config.js
+# Criar uma configuração alternativa do Vite que não depende do SWC e inclui aliases de caminho
+RUN echo "import { defineConfig } from 'vite';\nimport path from 'path';\nexport default defineConfig({\n  resolve: {\n    alias: {\n      '@': path.resolve(__dirname, './src')\n    }\n  },\n  build: {\n    commonjsOptions: {\n      transformMixedEsModules: true\n    }\n  }\n});" > vite.simple.config.js
 
 # Tentar fazer o build com diferentes estratégias e contornar problemas com bindings nativos
 RUN NODE_ENV=production npm run build || \
