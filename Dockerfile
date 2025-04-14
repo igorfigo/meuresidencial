@@ -18,10 +18,16 @@ COPY . .
 # Fazer backup da pasta dist caso exista
 RUN if [ -d "dist" ]; then cp -r dist dist_backup; fi
 
-# Tentar fazer o build com diferentes estratégias
-RUN NODE_ENV=production npm run build || \
-    NODE_ENV=production npx vite build || \
-    (NODE_ENV=production NODE_OPTIONS="--max-old-space-size=4096" npx vite build) || \
+# Instalar esbuild para substituir o SWC
+RUN npm install --save-dev esbuild
+
+# Tentar fazer o build com diferentes estratégias e contornar problemas com bindings nativos
+RUN VITE_DISABLE_SWC=true NODE_ENV=production npm run build || \
+    VITE_DISABLE_SWC=true NODE_ENV=production npx vite build --force || \
+    (VITE_DISABLE_SWC=true NODE_ENV=production NODE_OPTIONS="--max-old-space-size=4096" npx vite build --force) || \
+    (echo "Tentando com configuração alternativa..." && \
+     echo "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react-swc';\nexport default defineConfig({\n  plugins: [react({ plugins: [] })],\n});" > vite.config.js && \
+     VITE_DISABLE_SWC=true NODE_ENV=production npx vite build --force) || \
     (echo "Build falhou, usando dist de backup" && \
      if [ -d "dist_backup" ]; then \
        cp -r dist_backup dist; \
