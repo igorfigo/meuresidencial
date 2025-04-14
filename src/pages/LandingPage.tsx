@@ -425,7 +425,7 @@ const LandingPage = () => {
             <div className="lg:w-1/2 mb-12 lg:mb-0">
               <FadeInSection delay={0}>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-custom-white leading-tight mb-6">
-                  Gestão Eficiente do seu Condomínio ALTERADO
+                  Gestão Eficiente do seu Condomínio
                 </h1>
               </FadeInSection>
               
