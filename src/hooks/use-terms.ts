@@ -5,7 +5,7 @@ import { defaultTermsConditions } from '@/utils/defaultTermsConditions';
 import { toast } from 'sonner';
 import { Tables } from '@/integrations/supabase/types';
 
-export type TermsConditions = Tables<'terms_conditions'>;
+export type TermsConditions = Tables<'terms_conditions'>['Row'];
 
 export function useTerms() {
   const queryClient = useQueryClient();
