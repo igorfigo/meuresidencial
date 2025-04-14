@@ -25,6 +25,9 @@ const TermosCondicoes = () => {
   const handleSave = () => {
     if (termsContent.trim()) {
       updateTerms.mutate(termsContent);
+      if (!updateTerms.isPending) {
+        setEditMode(false);
+      }
     } else {
       toast.error('O conteúdo dos termos não pode estar vazio.');
     }
