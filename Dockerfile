@@ -4,7 +4,7 @@ FROM node:latest AS builder
 WORKDIR /app
 
 # Instalar dependências do sistema necessárias para compilar pacotes nativos
-RUN apk add --no-cache python3 make g++ git
+RUN apt-get update && apt-get install -y python3 make g++ git
 
 # Copiar arquivos de configuração de dependências
 COPY package*.json ./
