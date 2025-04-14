@@ -15,8 +15,16 @@ COPY . .
 # Fazer backup da pasta dist caso exista
 RUN if [ -d "dist" ]; then cp -r dist dist_backup; fi
 
-# Tentar fazer o build
-RUN npm run build || (echo "Build falhou, usando dist de backup" && if [ -d "dist_backup" ]; then cp -r dist_backup dist; else echo "Nenhum backup disponível"; exit 1; fi)
+# Tentar fazer o build usando npx
+RUN npx vite build || (echo "Build falhou, tentando com NODE_OPTIONS" && \
+    NODE_OPTIONS="--max-old-space-size=4096" npx vite build) || \
+    (echo "Build falhou, usando dist de backup" && \
+     if [ -d "dist_backup" ]; then \
+       cp -r dist_backup dist; \
+     else \
+       echo "Nenhum backup disponível"; \
+       exit 1; \
+     fi)
 
 # Estágio de produção
 FROM nginx:alpine
