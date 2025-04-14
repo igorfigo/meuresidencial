@@ -45,8 +45,9 @@ const TermosCondicoes = () => {
     mutationFn: async (content: string) => {
       const { data, error } = await supabase
         .from('terms_conditions')
-        .insert([{ content }])
-        .select();
+        .insert({ content })
+        .select()
+        .single();
         
       if (error) {
         throw new Error('Erro ao atualizar os termos e condições');
