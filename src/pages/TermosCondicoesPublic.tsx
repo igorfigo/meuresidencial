@@ -1,29 +1,11 @@
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTerms } from '@/hooks/use-terms';
 
 const TermosCondicoesPublic = () => {
-  const { data: terms, isLoading } = useQuery({
-    queryKey: ['terms-conditions-public'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('terms_conditions')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-        
-      if (error) {
-        console.error('Error fetching terms:', error);
-        return { content: 'Termos e condições não encontrados.' };
-      }
-      
-      return data;
-    }
-  });
+  const { terms, isLoading } = useTerms();
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
