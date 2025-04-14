@@ -9,9 +9,8 @@ RUN apt-get update && apt-get install -y python3 make g++ git
 # Copiar arquivos de configuração de dependências
 COPY package*.json ./
 
-# Instalar dependências com retry e skip de dependências opcionais
-RUN npm config set unsafe-perm true && \
-    npm install --no-optional --omit=dev || npm install --no-optional --omit=dev --force
+# Instalar todas as dependências, incluindo as de desenvolvimento
+RUN npm install || npm install --force
 
 # Copiar código fonte
 COPY . .
