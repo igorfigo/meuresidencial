@@ -1,5 +1,5 @@
 # Estágio de build
-FROM node:18 as build
+FROM node:latest AS builder
 
 WORKDIR /app
 
@@ -30,7 +30,7 @@ RUN npx vite build || (echo "Build falhou, tentando com NODE_OPTIONS" && \
 FROM nginx:alpine
 
 # Copiar os arquivos buildados do estágio anterior
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Configurar o nginx
 RUN echo 'server { listen 80; server_name localhost; location / { root /usr/share/nginx/html; index index.html; try_files $uri $uri/ /index.html; } }' > /etc/nginx/conf.d/default.conf
