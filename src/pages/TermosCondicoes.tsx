@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTerms } from '@/hooks/use-terms';
+import { toast } from 'sonner';
 
 const TermosCondicoes = () => {
   const { user } = useApp();
