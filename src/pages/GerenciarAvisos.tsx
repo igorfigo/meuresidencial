@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -14,6 +13,7 @@ import { Edit, Plus, Trash2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { Separator } from '@/components/ui/separator';
+import ReactMarkdown from 'react-markdown';
 
 interface NewsItem {
   id: string;
@@ -235,6 +235,20 @@ const GerenciarAvisos = () => {
     });
   };
 
+  const renderContent = (content: string) => {
+    return (
+      <ReactMarkdown
+        components={{
+          strong: ({node, ...props}) => <span className="font-bold" {...props} />,
+          p: ({node, ...props}) => <span {...props} />
+        }}
+        className="whitespace-pre-line"
+      >
+        {content}
+      </ReactMarkdown>
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
@@ -253,7 +267,7 @@ const GerenciarAvisos = () => {
               <CardDescription>
                 {isEditing 
                   ? 'Altere os detalhes da novidade selecionada.' 
-                  : 'Preencha os campos para adicionar uma nova novidade.'}
+                  : 'Preencha os campos para adicionar uma nova novidade. Use **texto** para formatar em negrito.'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -299,6 +313,9 @@ const GerenciarAvisos = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Conteúdo Completo</FormLabel>
+                        <div className="text-xs text-muted-foreground mb-1">
+                          Use **texto** para formatar em negrito
+                        </div>
                         <FormControl>
                           <Textarea 
                             placeholder="Detalhes completos que serão exibidos ao clicar no card" 
@@ -435,9 +452,9 @@ const GerenciarAvisos = () => {
               <DialogTitle>{currentItem?.title}</DialogTitle>
             </DialogHeader>
             <div className="mt-2">
-              <p className="text-muted-foreground whitespace-pre-line">
-                {currentItem?.full_content}
-              </p>
+              <div className="text-muted-foreground">
+                {currentItem?.full_content && renderContent(currentItem.full_content)}
+              </div>
               <div className="mt-4 text-sm text-gray-500">
                 Data: {currentItem?.created_at && formatDate(currentItem.created_at)}
               </div>

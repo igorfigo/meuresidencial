@@ -2,7 +2,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Copy, Send } from 'lucide-react';
+import { Copy, Send, Bold } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ANNOUNCEMENT_TEMPLATES } from './AnnouncementTemplates';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface FormErrors {
   title?: string;
@@ -82,6 +83,37 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
     onContentChange(e);
   };
 
+  const insertBold = () => {
+    const textarea = document.getElementById('content') as HTMLTextAreaElement;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    
+    const beforeText = content.substring(0, start);
+    const afterText = content.substring(end);
+    
+    const newValue = selectedText 
+      ? `${beforeText}**${selectedText}**${afterText}` 
+      : `${beforeText}**texto em negrito**${afterText}`;
+    
+    const e = {
+      target: { value: newValue }
+    } as React.ChangeEvent<HTMLTextAreaElement>;
+    
+    onContentChange(e);
+    
+    // Set cursor position after formatting
+    setTimeout(() => {
+      textarea.focus();
+      const newPosition = selectedText 
+        ? start + 2 + selectedText.length + 2 
+        : start + 2 + "texto em negrito".length;
+      textarea.setSelectionRange(newPosition, newPosition);
+    }, 0);
+  };
+
   // Get sorted template titles
   const sortedTemplateTitles = Object.keys(ANNOUNCEMENT_TEMPLATES).sort();
 
@@ -128,9 +160,32 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="content" className="font-medium" required>Conteúdo</Label>
-          <div className="text-sm text-muted-foreground mb-1">
-            Máximo de 80 caracteres por linha
+          <div className="flex items-center justify-between">
+            <Label htmlFor="content" className="font-medium" required>Conteúdo</Label>
+            <div className="flex items-center space-x-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      type="button"
+                      onClick={insertBold}
+                      className="h-8 px-2"
+                    >
+                      <Bold className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Formatar em negrito</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+          <div className="text-sm text-muted-foreground mb-1 flex items-center space-x-2">
+            <span>Máximo de 80 caracteres por linha.</span>
+            <span className="text-xs bg-gray-100 px-1 rounded">Use **texto** para formatar em negrito</span>
           </div>
           <Textarea
             id="content"
