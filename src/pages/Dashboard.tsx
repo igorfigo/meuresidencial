@@ -926,7 +926,7 @@ const Dashboard = () => {
               <DialogTitle>{latestNews.title}</DialogTitle>
             </DialogHeader>
             <div className="mt-4 space-y-4">
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground whitespace-pre-line">
                 {latestNews.full_content}
               </p>
               <div className="text-sm text-gray-500">

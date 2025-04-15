@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -9,7 +10,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Edit, Plus, Trash2 } from 'lucide-react';
+import { Edit, Plus, Trash2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { Separator } from '@/components/ui/separator';
@@ -31,6 +32,7 @@ const GerenciarAvisos = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -206,6 +208,11 @@ const GerenciarAvisos = () => {
     setCurrentItem(item);
     setIsEditing(true);
   };
+  
+  const handleView = (item: NewsItem) => {
+    setCurrentItem(item);
+    setViewDialogOpen(true);
+  };
 
   const handleCancel = () => {
     setIsEditing(false);
@@ -355,6 +362,14 @@ const GerenciarAvisos = () => {
                             <Button 
                               variant="ghost" 
                               size="sm" 
+                              onClick={() => handleView(item)}
+                              disabled={isEditing}
+                            >
+                              <Eye size={16} />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
                               onClick={() => handleEdit(item)}
                               disabled={isEditing}
                             >
@@ -409,6 +424,27 @@ const GerenciarAvisos = () => {
                 disabled={isDeleting}
               >
                 {isDeleting ? 'Excluindo...' : 'Excluir'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{currentItem?.title}</DialogTitle>
+            </DialogHeader>
+            <div className="mt-2">
+              <p className="text-muted-foreground whitespace-pre-line">
+                {currentItem?.full_content}
+              </p>
+              <div className="mt-4 text-sm text-gray-500">
+                Data: {currentItem?.created_at && formatDate(currentItem.created_at)}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setViewDialogOpen(false)}>
+                Fechar
               </Button>
             </DialogFooter>
           </DialogContent>
