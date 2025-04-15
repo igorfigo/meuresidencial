@@ -26,9 +26,19 @@ export function useTerms() {
           console.error("Error fetching terms:", error);
           
           // If no terms exist, create default terms
-          // This won't work if RLS policies prevent insertion
-          const defaultTerms = { content: defaultTermsConditions, id: 'default', created_at: new Date().toISOString() };
-          return defaultTerms as TermsConditions;
+          const { data: insertedData, error: insertError } = await supabase
+            .from('terms_conditions')
+            .insert({ content: defaultTermsConditions })
+            .select()
+            .single();
+            
+          if (insertError) {
+            console.error("Error creating default terms:", insertError);
+            // Return fallback if insertion fails
+            return { content: defaultTermsConditions, id: 'default', created_at: new Date().toISOString() } as TermsConditions;
+          }
+          
+          return insertedData;
         }
 
         return data;
