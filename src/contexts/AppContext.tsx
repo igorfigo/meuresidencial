@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -75,18 +76,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const login = async (emailOrMatricula: string, password: string): Promise<LoginResult> => {
     setIsLoading(true);
     try {
-      // Verificar as credenciais do administrador
-      if (emailOrMatricula.toLowerCase() === 'meuresidencialcom@gmail.com' && password === 'Bigdream@2025') {
-        const adminUser = {
-          nome: 'IGOR COSTA ALVES',
+      // Lista de administradores fixos
+      const adminUsers = [
+        {
           email: 'meuresidencialcom@gmail.com',
+          password: 'Bigdream@2025',
+          nome: 'IGOR COSTA ALVES'
+        },
+        {
+          email: 'eugenio.coimbra@meuresidencial.com',
+          password: 'Neno2104',
+          nome: 'EUGÊNIO COIMBRA'
+        },
+        {
+          email: 'igor.alves@meuresidencial.com',
+          password: 'Olivia1963',
+          nome: 'IGOR ALVES'
+        }
+      ];
+      
+      // Verificar as credenciais dos administradores
+      const adminUser = adminUsers.find(
+        admin => admin.email.toLowerCase() === emailOrMatricula.toLowerCase() && admin.password === password
+      );
+      
+      if (adminUser) {
+        const adminUserData = {
+          nome: adminUser.nome,
+          email: adminUser.email,
           isAdmin: true,
           isResident: false
         };
         
-        console.log("Admin user created:", adminUser);
-        setUser(adminUser);
-        localStorage.setItem('condoUser', JSON.stringify(adminUser));
+        console.log("Admin user created:", adminUserData);
+        setUser(adminUserData);
+        localStorage.setItem('condoUser', JSON.stringify(adminUserData));
         toast.success("Login realizado com sucesso!");
         return { success: true };
       }
