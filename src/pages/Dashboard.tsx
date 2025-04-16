@@ -477,7 +477,7 @@ const Dashboard = () => {
       <ReactMarkdown
         components={{
           strong: ({node, ...props}) => <span className="font-bold" {...props} />,
-          p: ({node, ...props}) => <span {...props} />
+          p: ({node, ...props}) => <span className="whitespace-pre-line" {...props} />
         }}
         className="whitespace-pre-line"
       >
@@ -940,21 +940,30 @@ const Dashboard = () => {
 
       {latestNews && (
         <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
-          <DialogContent className="sm:max-w-[525px]">
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>{latestNews.title}</DialogTitle>
+              <DialogTitle>{latestNews?.title}</DialogTitle>
             </DialogHeader>
-            <div className="mt-4 space-y-4">
-              <div className="text-muted-foreground whitespace-pre-line">
-                {latestNews.full_content && renderContent(latestNews.full_content)}
+            
+            {latestNews && (
+              <div className="space-y-4 mt-2">
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Data</h4>
+                  <p>{latestNews.created_at ? formatDate(latestNews.created_at) : '-'}</p>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Conteúdo</h4>
+                  <div className="text-sm whitespace-pre-line">
+                    {renderContent(latestNews.full_content || '')}
+                  </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button onClick={() => setNewsDialogOpen(false)}>Fechar</Button>
+                </div>
               </div>
-              <div className="text-sm text-gray-500">
-                Publicado em: {formatDate(latestNews.created_at)}
-              </div>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <Button onClick={() => setNewsDialogOpen(false)}>Fechar</Button>
-            </div>
+            )}
           </DialogContent>
         </Dialog>
       )}
