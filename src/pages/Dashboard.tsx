@@ -479,6 +479,7 @@ const Dashboard = () => {
           strong: ({node, ...props}) => <span className="font-bold" {...props} />,
           p: ({node, ...props}) => <span {...props} />
         }}
+        className="whitespace-pre-line"
       >
         {content}
       </ReactMarkdown>
