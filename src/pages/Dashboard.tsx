@@ -477,7 +477,7 @@ const Dashboard = () => {
       <ReactMarkdown
         components={{
           strong: ({node, ...props}) => <span className="font-bold" {...props} />,
-          p: ({node, ...props}) => <span className="whitespace-pre-line" {...props} />
+          p: ({node, ...props}) => <div className="whitespace-pre-line mb-3" {...props} />
         }}
         className="whitespace-pre-line"
       >
@@ -955,7 +955,7 @@ const Dashboard = () => {
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground">Conteúdo</h4>
                   <div className="text-sm whitespace-pre-line">
-                    {renderContent(latestNews.full_content || '')}
+                    {latestNews.full_content && renderContent(latestNews.full_content)}
                   </div>
                 </div>
                 
