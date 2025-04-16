@@ -240,7 +240,7 @@ const GerenciarAvisos = () => {
       <ReactMarkdown
         components={{
           strong: ({node, ...props}) => <span className="font-bold" {...props} />,
-          p: ({node, ...props}) => <span {...props} />
+          p: ({node, ...props}) => <span className="whitespace-pre-line" {...props} />
         }}
         className="whitespace-pre-line"
       >
@@ -447,12 +447,12 @@ const GerenciarAvisos = () => {
         </Dialog>
 
         <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>{currentItem?.title}</DialogTitle>
             </DialogHeader>
             <div className="mt-2">
-              <div className="text-muted-foreground">
+              <div className="text-muted-foreground whitespace-pre-line">
                 {currentItem?.full_content && renderContent(currentItem.full_content)}
               </div>
               <div className="mt-4 text-sm text-gray-500">
