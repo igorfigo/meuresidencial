@@ -599,9 +599,9 @@ const Dashboard = () => {
               <BellRing className="h-4 w-4 text-brand-600" />
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
+              <div className="text-muted-foreground">
                 {latestNews.short_description && renderContent(latestNews.short_description)}
-              </p>
+              </div>
               <div className="mt-2 text-xs text-gray-500">
                 Publicado em: {formatDate(latestNews.created_at)}
               </div>
@@ -675,9 +675,9 @@ const Dashboard = () => {
               <BellRing className="h-4 w-4 text-brand-600" />
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
+              <div className="text-muted-foreground">
                 {latestNews.short_description && renderContent(latestNews.short_description)}
-              </p>
+              </div>
               <div className="mt-2 text-xs text-gray-500">
                 Publicado em: {formatDate(latestNews.created_at)}
               </div>
