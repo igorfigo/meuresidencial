@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,6 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from '@/components/ui/input';
 import { FinancialChartCard } from '@/components/financials/FinancialChartCard';
-import { generateHandbook } from '@/utils/handbook-generator';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -115,8 +113,12 @@ const Documentos = () => {
   };
 
   const handleDownloadHandbook = () => {
-    const doc = generateHandbook();
-    doc.save('cartilha-morador.pdf');
+    const link = document.createElement('a');
+    link.href = '/cartilha-morador.pdf';
+    link.download = 'cartilha-morador.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
