@@ -24,6 +24,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { usePlans } from '@/hooks/use-plans';
 import PlanDistributionChart from '@/components/dashboard/PlanDistributionChart';
+import ReactMarkdown from 'react-markdown';
 
 interface LocationStats {
   states: [string, number][];
@@ -471,6 +472,20 @@ const Dashboard = () => {
     return categoryMap[category] || category;
   };
 
+  const renderContent = (content: string) => {
+    return (
+      <ReactMarkdown
+        components={{
+          strong: ({node, ...props}) => <span className="font-bold" {...props} />,
+          p: ({node, ...props}) => <div className="whitespace-pre-line mb-3" {...props} />
+        }}
+        className="whitespace-pre-line"
+      >
+        {content}
+      </ReactMarkdown>
+    );
+  };
+
   const renderAdminDashboard = () => (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -584,7 +599,9 @@ const Dashboard = () => {
               <BellRing className="h-4 w-4 text-brand-600" />
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">{latestNews.short_description}</p>
+              <div className="text-muted-foreground">
+                {latestNews.short_description && renderContent(latestNews.short_description)}
+              </div>
               <div className="mt-2 text-xs text-gray-500">
                 Publicado em: {formatDate(latestNews.created_at)}
               </div>
@@ -658,7 +675,9 @@ const Dashboard = () => {
               <BellRing className="h-4 w-4 text-brand-600" />
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">{latestNews.short_description}</p>
+              <div className="text-muted-foreground">
+                {latestNews.short_description && renderContent(latestNews.short_description)}
+              </div>
               <div className="mt-2 text-xs text-gray-500">
                 Publicado em: {formatDate(latestNews.created_at)}
               </div>
@@ -921,21 +940,30 @@ const Dashboard = () => {
 
       {latestNews && (
         <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
-          <DialogContent className="sm:max-w-[525px]">
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>{latestNews.title}</DialogTitle>
+              <DialogTitle>{latestNews?.title}</DialogTitle>
             </DialogHeader>
-            <div className="mt-4 space-y-4">
-              <p className="text-muted-foreground">
-                {latestNews.full_content}
-              </p>
-              <div className="text-sm text-gray-500">
-                Publicado em: {formatDate(latestNews.created_at)}
+            
+            {latestNews && (
+              <div className="space-y-4 mt-2">
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Data</h4>
+                  <p>{latestNews.created_at ? formatDate(latestNews.created_at) : '-'}</p>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Conteúdo</h4>
+                  <div className="text-sm whitespace-pre-line">
+                    {latestNews.full_content && renderContent(latestNews.full_content)}
+                  </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button onClick={() => setNewsDialogOpen(false)}>Fechar</Button>
+                </div>
               </div>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <Button onClick={() => setNewsDialogOpen(false)}>Fechar</Button>
-            </div>
+            )}
           </DialogContent>
         </Dialog>
       )}

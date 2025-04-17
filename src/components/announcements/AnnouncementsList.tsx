@@ -36,6 +36,7 @@ import {
 import { jsPDF } from 'jspdf';
 import { useApp } from '@/contexts/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import ReactMarkdown from 'react-markdown';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -262,6 +263,20 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
     setCurrentPage(page);
   };
   
+  const renderContent = (content: string) => {
+    return (
+      <ReactMarkdown
+        components={{
+          strong: ({node, ...props}) => <span className="font-bold" {...props} />,
+          p: ({node, ...props}) => <span {...props} />
+        }}
+        className="whitespace-pre-line"
+      >
+        {content}
+      </ReactMarkdown>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -438,7 +453,9 @@ const AnnouncementsList: React.FC<AnnouncementsListProps> = ({ onEdit, isResiden
               
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">Conteúdo</h4>
-                <p className="text-sm whitespace-pre-line">{detailView.content}</p>
+                <div className="text-sm">
+                  {renderContent(detailView.content)}
+                </div>
               </div>
               
               <div>

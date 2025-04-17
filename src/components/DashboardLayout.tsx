@@ -37,7 +37,8 @@ import {
   PieChart,
   History,
   Files,
-  HelpCircle
+  HelpCircle,
+  FileTerminal
 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
@@ -119,6 +120,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
+    { name: 'Termos e Condições', icon: <FileTerminal className="h-5 w-5" />, path: '/termos-condicoes' },
     { isSeparator: true, name: '', icon: null, path: '' },
     { 
       name: 'Business Management', 

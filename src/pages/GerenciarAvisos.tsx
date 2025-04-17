@@ -9,10 +9,11 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Edit, Plus, Trash2 } from 'lucide-react';
+import { Edit, Plus, Trash2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { Separator } from '@/components/ui/separator';
+import ReactMarkdown from 'react-markdown';
 
 interface NewsItem {
   id: string;
@@ -31,6 +32,7 @@ const GerenciarAvisos = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -206,6 +208,11 @@ const GerenciarAvisos = () => {
     setCurrentItem(item);
     setIsEditing(true);
   };
+  
+  const handleView = (item: NewsItem) => {
+    setCurrentItem(item);
+    setViewDialogOpen(true);
+  };
 
   const handleCancel = () => {
     setIsEditing(false);
@@ -228,6 +235,20 @@ const GerenciarAvisos = () => {
     });
   };
 
+  const renderContent = (content: string) => {
+    return (
+      <ReactMarkdown
+        components={{
+          strong: ({node, ...props}) => <span className="font-bold" {...props} />,
+          p: ({node, ...props}) => <span className="whitespace-pre-line" {...props} />
+        }}
+        className="whitespace-pre-line"
+      >
+        {content}
+      </ReactMarkdown>
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
@@ -246,7 +267,7 @@ const GerenciarAvisos = () => {
               <CardDescription>
                 {isEditing 
                   ? 'Altere os detalhes da novidade selecionada.' 
-                  : 'Preencha os campos para adicionar uma nova novidade.'}
+                  : 'Preencha os campos para adicionar uma nova novidade. Use **texto** para formatar em negrito.'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -292,6 +313,9 @@ const GerenciarAvisos = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Conteúdo Completo</FormLabel>
+                        <div className="text-xs text-muted-foreground mb-1">
+                          Use **texto** para formatar em negrito
+                        </div>
                         <FormControl>
                           <Textarea 
                             placeholder="Detalhes completos que serão exibidos ao clicar no card" 
@@ -355,6 +379,14 @@ const GerenciarAvisos = () => {
                             <Button 
                               variant="ghost" 
                               size="sm" 
+                              onClick={() => handleView(item)}
+                              disabled={isEditing}
+                            >
+                              <Eye size={16} />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
                               onClick={() => handleEdit(item)}
                               disabled={isEditing}
                             >
@@ -409,6 +441,27 @@ const GerenciarAvisos = () => {
                 disabled={isDeleting}
               >
                 {isDeleting ? 'Excluindo...' : 'Excluir'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{currentItem?.title}</DialogTitle>
+            </DialogHeader>
+            <div className="mt-2">
+              <div className="text-muted-foreground whitespace-pre-line">
+                {currentItem?.full_content && renderContent(currentItem.full_content)}
+              </div>
+              <div className="mt-4 text-sm text-gray-500">
+                Data: {currentItem?.created_at && formatDate(currentItem.created_at)}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setViewDialogOpen(false)}>
+                Fechar
               </Button>
             </DialogFooter>
           </DialogContent>

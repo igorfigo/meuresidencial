@@ -1132,6 +1132,24 @@ export type Database = {
           },
         ]
       }
+      terms_conditions: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

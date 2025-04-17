@@ -11,12 +11,12 @@ const FinanceiroPrestacaoContas = () => {
     <DashboardLayout>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-start mb-4">
-          <div>
+          <div className="w-full">
             <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold mb-2`}>Prestação de Contas</h1>
-            <Separator className="mb-2" />
             <p className={`text-gray-600 mt-1 ${isMobile ? 'text-sm' : ''}`}>
               Relatório mensal de receitas e despesas do condomínio por data de pagamento
             </p>
+            <Separator className="mt-2 mb-2 w-full" />
           </div>
         </div>
         
