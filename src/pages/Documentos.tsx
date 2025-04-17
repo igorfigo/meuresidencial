@@ -113,12 +113,8 @@ const Documentos = () => {
   };
 
   const handleDownloadHandbook = () => {
-    const link = document.createElement('a');
-    link.href = '/cartilha-morador.pdf';
-    link.download = 'cartilha-morador.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const doc = generateHandbook();
+    doc.save('cartilha-morador.pdf');
   };
 
   return (
