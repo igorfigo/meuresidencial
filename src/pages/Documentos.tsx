@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2, Search, Info } from 'lucide-react';
+import { Plus, Loader2, Search, Info, Download } from 'lucide-react';
 import { useDocuments } from '@/hooks/use-documents';
 import { DocumentForm } from '@/components/documents/DocumentForm';
 import { DocumentsList } from '@/components/documents/DocumentsList';
@@ -113,6 +112,15 @@ const Documentos = () => {
     }
   };
 
+  const handleDownloadHandbook = () => {
+    const link = document.createElement('a');
+    link.href = '/cartilha-morador.pdf';
+    link.download = 'cartilha-morador.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-4 px-0 sm:px-0">
@@ -127,13 +135,24 @@ const Documentos = () => {
             </p>
           </div>
           {!showForm && !isResident && (
-            <Button 
-              onClick={handleNewDocument} 
-              className="bg-brand-600 hover:bg-brand-700 w-full sm:w-auto"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              {isMobile ? "Novo Documento" : "Novo Documento"}
-            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button 
+                onClick={handleNewDocument} 
+                className="bg-brand-600 hover:bg-brand-700 flex-1 sm:flex-none"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Documento
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={handleDownloadHandbook}
+                className="flex-1 sm:flex-none border-brand-200 hover:bg-brand-50 hover:border-brand-300"
+              >
+                <Download className="mr-2 h-4 w-4 text-brand-600" />
+                Baixar Cartilha
+              </Button>
+            </div>
           )}
         </div>
 
