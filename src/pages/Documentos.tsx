@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from '@/components/ui/input';
 import { FinancialChartCard } from '@/components/financials/FinancialChartCard';
+import { generateHandbook } from '@/utils/handbook-generator';
 
 const ITEMS_PER_PAGE = 6;
 
