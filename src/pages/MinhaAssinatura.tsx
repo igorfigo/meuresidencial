@@ -74,7 +74,7 @@ const MinhaAssinatura = () => {
       <DashboardLayout>
         <div className="container mx-auto py-6 px-4 w-full max-w-none">
           <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
-          <Separator className="mb-2" />
+          <Separator className="mb-2 w-full" />
           <p className="text-gray-600 mb-6">
             Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
           </p>
@@ -89,7 +89,7 @@ const MinhaAssinatura = () => {
       <DashboardLayout>
         <div className="container mx-auto py-6 px-4 w-full max-w-none">
           <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
-          <Separator className="mb-2 w-full -ml-4" />
+          <Separator className="mb-2 w-full" />
           <p className="text-gray-600 mb-6">
             Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
           </p>
@@ -104,7 +104,7 @@ const MinhaAssinatura = () => {
       <DashboardLayout>
         <div className="container mx-auto py-6 px-4 w-full max-w-none">
           <h1 className="text-2xl font-bold mb-2">Minha Assinatura</h1>
-          <Separator className="mb-2 w-full -ml-4" />
+          <Separator className="mb-2 w-full" />
           <p className="text-gray-600 mb-6">
             Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
           </p>
@@ -123,7 +123,7 @@ const MinhaAssinatura = () => {
             <p className="text-gray-600 mb-2">
               Gerencie os detalhes da sua assinatura, plano contratado e informações de pagamento.
             </p>
-            <Separator className="mt-2 mb-2 w-full -ml-4" />
+            <Separator className="mt-2 mb-2 w-full" />
           </div>
         </div>
         

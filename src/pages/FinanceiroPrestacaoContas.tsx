@@ -16,7 +16,7 @@ const FinanceiroPrestacaoContas = () => {
             <p className={`text-gray-600 mt-1 ${isMobile ? 'text-sm' : ''}`}>
               Relatório mensal de receitas e despesas do condomínio por data de pagamento
             </p>
-            <Separator className="mt-2 mb-2 w-full -ml-4" />
+            <Separator className="mt-2 mb-2 w-full" />
           </div>
         </div>
         
