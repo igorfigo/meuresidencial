@@ -1,9 +1,8 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import AnnouncementsList from '@/components/announcements/AnnouncementsList';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Search, Info } from 'lucide-react';
+import { PlusCircle, Search, Info, Download } from 'lucide-react';
 import { useAnnouncements, Announcement } from '@/hooks/use-announcements';
 import AnnouncementForm from '@/components/announcements/AnnouncementForm';
 import { useApp } from '@/contexts/AppContext';
@@ -162,6 +161,15 @@ const Comunicados: React.FC = () => {
     setDate(e.target.value);
   };
 
+  const handleDownloadHandbook = () => {
+    const link = document.createElement('a');
+    link.href = '/cartilha-morador.pdf';
+    link.download = 'cartilha-morador.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <DashboardLayout>
       <div className="w-full p-0 sm:p-6">
@@ -176,13 +184,24 @@ const Comunicados: React.FC = () => {
             </p>
           </div>
           {!isResident && !showForm && (
-            <Button 
-              onClick={handleNewAnnouncement} 
-              className="bg-brand-600 hover:bg-brand-700 w-full md:w-auto"
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Novo Comunicado
-            </Button>
+            <div className="flex gap-2 w-full md:w-auto">
+              <Button 
+                onClick={handleNewAnnouncement} 
+                className="bg-brand-600 hover:bg-brand-700 flex-1 md:flex-none"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Novo Comunicado
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={handleDownloadHandbook}
+                className="flex-1 md:flex-none border-brand-200 hover:bg-brand-50 hover:border-brand-300"
+              >
+                <Download className="mr-2 h-4 w-4 text-brand-600" />
+                Baixar Cartilha
+              </Button>
+            </div>
           )}
         </div>
 
