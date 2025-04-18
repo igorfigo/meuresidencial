@@ -1,7 +1,7 @@
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Users, FileText, MapPin, Wallet, Home, Bug, BellRing, FileCheck, Receipt, PiggyBank, ArrowDownCircle, ArrowUpCircle, Clock, UserX, UserCheck, FileText as FileTextIcon, BarChart3, PieChart } from 'lucide-react';
+import { Users, FileText, MapPin, Wallet, Home, Bug, BellRing, FileCheck, Receipt, PiggyBank, ArrowDownCircle, ArrowUpCircle, Clock, UserX, UserCheck, FileText as FileTextIcon, BarChart3, PieChart, AlertCircle } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { usePlans } from '@/hooks/use-plans';
 import PlanDistributionChart from '@/components/dashboard/PlanDistributionChart';
 import ReactMarkdown from 'react-markdown';
+import { useManagerStats } from '@/hooks/use-manager-stats';
 
 interface LocationStats {
   states: [string, number][];
@@ -486,33 +487,48 @@ const Dashboard = () => {
     );
   };
 
-  const renderAdminDashboard = () => (
-    <>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Status dos Gestores</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <span className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
-                  <UserCheck className="h-4 w-4 text-green-600" /> 
-                  Ativos
-                </span>
-                <div className="text-xl font-bold">{statsDetails.activeManagers}</div>
+  const renderAdminDashboard = () => {
+    const { stats, isLoading } = useManagerStats();
+    
+    return (
+      <>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Status dos Gestores</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <span className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+                    <UserCheck className="h-4 w-4 text-green-600" /> 
+                    Ativos
+                  </span>
+                  <div className="text-xl font-bold">{stats.activeCount}</div>
+                </div>
+                <div className="text-center">
+                  <span className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+                    <UserX className="h-4 w-4 text-red-600" /> 
+                    Inativos
+                  </span>
+                  <div className="text-xl font-bold">{stats.inactiveCount}</div>
+                </div>
               </div>
-              <div className="text-center">
-                <span className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
-                  <UserX className="h-4 w-4 text-red-600" /> 
-                  Inativos
-                </span>
-                <div className="text-xl font-bold">{statsDetails.inactiveManagers}</div>
+              <div className="mt-4 pt-4 border-t">
+                <div className="text-center">
+                  <span className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    Sem login há 10+ dias
+                  </span>
+                  <div className="text-xl font-bold text-amber-600">
+                    {stats.inactiveLoginCount}
+                  </div>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
+            </CardContent>
+          </Card>
+
+          
         <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Preferência de Pagamento</CardTitle>
@@ -576,7 +592,8 @@ const Dashboard = () => {
         </Card>
       </div>
     </>
-  );
+    );
+  };
 
   const renderResidentDashboard = () => (
     <>
@@ -780,195 +797,4 @@ const Dashboard = () => {
               </div>
               <div>
                 {!isFinancesLoading && balance ? (
-                  <div className={`text-2xl font-bold ${BRLToNumber(balance.balance) > 0 ? 'text-green-600' : BRLToNumber(balance.balance) < 0 ? 'text-red-600' : 'text-gray-800'}`}>
-                    {balance.is_manual ? 'R$ ' + balance.balance : 'R$ ' + balance.balance}
-                  </div>
-                ) : (
-                  <div className="text-2xl font-bold text-gray-400">Carregando...</div>
-                )}
-              </div>
-            </div>
-            
-            <Separator className="my-1 bg-blue-300" />
-            
-            <div>
-              <div className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Dados do Condomínio</CardTitle>
-                <Home className="h-4 w-4 text-brand-600" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Users className="h-4 w-4" /> Moradores
-                  </span>
-                  <span className="font-medium">{residentCount}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Home className="h-4 w-4" /> Áreas Comuns
-                  </span>
-                  <span className="font-medium">{commonAreasCount}</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Movimentações Financeiras</CardTitle>
-            <div className="flex gap-1">
-              <ArrowUpCircle className="h-4 w-4 text-green-500" />
-              <ArrowDownCircle className="h-4 w-4 text-red-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {recentTransactions && recentTransactions.length > 0 ? (
-                recentTransactions
-                  .slice(0, 5)
-                  .map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between py-1 border-b last:border-b-0">
-                      <div className="flex flex-col">
-                        <div className="flex items-center">
-                          {transaction.type === 'income' ? (
-                            <ArrowUpCircle className="h-3 w-3 text-green-500 mr-1 flex-shrink-0" />
-                          ) : (
-                            <ArrowDownCircle className="h-3 w-3 text-red-500 mr-1 flex-shrink-0" />
-                          )}
-                          <span className="text-sm font-medium truncate max-w-[120px]">
-                            {getCategoryLabel(transaction.category)}
-                          </span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {transaction.unit ? `Unidade: ${transaction.unit}` : 'Geral'}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className={`text-sm font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                          {transaction.amount}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {transaction.payment_date 
-                            ? formatDate(transaction.payment_date) 
-                            : (transaction.due_date 
-                                ? formatDate(transaction.due_date) 
-                                : '-')}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-              ) : (
-                <div className="text-sm text-muted-foreground">Nenhuma movimentação registrada</div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md h-full flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Últimos Cadastros</CardTitle>
-            <FileCheck className="h-4 w-4 text-brand-600" />
-          </CardHeader>
-          <CardContent className="flex-grow overflow-auto p-3">
-            <div className="space-y-0.5 h-full flex flex-col">
-              {recentItems.length > 0 ? (
-                recentItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between py-1.5 border-b last:border-b-0">
-                    <div className="flex items-center gap-1.5">
-                      {item.type === 'announcement' && <BellRing className="h-3.5 w-3.5 text-blue-500" />}
-                      {item.type === 'document' && <FileText className="h-3.5 w-3.5 text-green-500" />}
-                      {item.type === 'pest-control' && <Bug className="h-3.5 w-3.5 text-red-500" />}
-                      <span className="text-sm truncate max-w-[180px]">{item.title}</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
-                  </div>
-                ))
-              ) : (
-                <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
-                  Nenhum cadastro recente
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-    </>
-  );
-
-  return (
-    <DashboardLayout>
-      <div className="flex flex-col space-y-6 pb-6 animate-fade-in">
-        <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center rounded-lg bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800 mb-2">
-              <span className="mr-2">👋</span>
-              <span>Bem-vindo de volta</span>
-            </div>
-            {getGreeting()}
-          </div>
-        </header>
-
-        <Separator className="mb-6" />
-
-        {user?.isAdmin ? renderAdminDashboard() : (
-          user?.isResident ? renderResidentDashboard() : renderManagerDashboard()
-        )}
-      </div>
-
-      <Sheet open={isStateDetailOpen} onOpenChange={setIsStateDetailOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Cidades em {selectedState}</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            {selectedState && stats.locationStats.cities[selectedState] ? (
-              <ul className="space-y-2">
-                {stats.locationStats.cities[selectedState].map(([city, count]) => (
-                  <li key={city} className="flex justify-between items-center py-2 border-b">
-                    <span>{city}</span>
-                    <span className="font-medium">{count}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">Sem dados de cidades para este estado.</p>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {latestNews && (
-        <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>{latestNews?.title}</DialogTitle>
-            </DialogHeader>
-            
-            {latestNews && (
-              <div className="space-y-4 mt-2">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Data</h4>
-                  <p>{latestNews.created_at ? formatDate(latestNews.created_at) : '-'}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Conteúdo</h4>
-                  <div className="text-sm whitespace-pre-line">
-                    {latestNews.full_content && renderContent(latestNews.full_content)}
-                  </div>
-                </div>
-                
-                <div className="flex justify-end">
-                  <Button onClick={() => setNewsDialogOpen(false)}>Fechar</Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-      )}
-    </DashboardLayout>
-  );
-};
-
-export default Dashboard;
+                  <div className={`text-2xl font-bold ${BRLToNumber(balance.balance) > 0
