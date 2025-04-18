@@ -1,3 +1,4 @@
+
 import {
   Home,
   LayoutDashboard,
@@ -177,8 +178,9 @@ export function Sidebar() {
 
   const renderMenuItems = () => {
     console.log("User in sidebar:", user);
-    console.log("Is user admin?", user?.isAdmin);
-    console.log("Is user resident?", user?.isResident);
+    
+    // No longer check isAdmin based on admin_users table
+    // Instead rely on the isAdmin flag already set in the user object
     
     let menuItems = [];
     if (user?.isAdmin) {

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useApp } from '@/contexts/AppContext';
 
 export interface BusinessIncome {
   id: string;
@@ -20,13 +21,15 @@ export interface BusinessIncome {
 export const useBusinessIncomes = () => {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useApp();
 
   const { data: incomesData = [], isLoading: isLoadingIncomes, error } = useQuery({
     queryKey: ['business-incomes'],
     queryFn: async () => {
-      // Check if user is logged in
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("User not authenticated");
+      if (!user) {
+        console.log("User not authenticated in useBusinessIncomes");
+        return [];
+      }
       
       const { data, error } = await supabase
         .from('business_incomes')
@@ -52,9 +55,11 @@ export const useBusinessIncomes = () => {
     mutationFn: async (income: Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>) => {
       setIsLoading(true);
       
-      // Check if user is logged in
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("User not authenticated");
+      if (!user) {
+        console.log("User not authenticated in createIncomeMutation");
+        toast.error("Você precisa estar autenticado para cadastrar receitas");
+        throw new Error("User not authenticated");
+      }
       
       console.log("Creating income with data:", income);
       
@@ -86,9 +91,11 @@ export const useBusinessIncomes = () => {
     mutationFn: async ({ id, ...data }: { id: string } & Partial<Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>>) => {
       setIsLoading(true);
       
-      // Check if user is logged in
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("User not authenticated");
+      if (!user) {
+        console.log("User not authenticated in updateIncomeMutation");
+        toast.error("Você precisa estar autenticado para atualizar receitas");
+        throw new Error("User not authenticated");
+      }
       
       const { data: updatedData, error } = await supabase
         .from('business_incomes')
@@ -116,9 +123,11 @@ export const useBusinessIncomes = () => {
     mutationFn: async (id: string) => {
       setIsLoading(true);
       
-      // Check if user is logged in
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("User not authenticated");
+      if (!user) {
+        console.log("User not authenticated in deleteIncomeMutation");
+        toast.error("Você precisa estar autenticado para excluir receitas");
+        throw new Error("User not authenticated");
+      }
       
       const { error } = await supabase
         .from('business_incomes')

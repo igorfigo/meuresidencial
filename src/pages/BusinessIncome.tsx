@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Eye, Receipt, Search, Trash } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/utils/currency';
@@ -46,7 +45,6 @@ export default function BusinessIncome() {
     const dateValue = formData.get('date');
     const date = dateValue ? String(dateValue) : '';
     
-    // Process the identifier
     const system_code = identifier.substring(0, 2);
     const manager_code = identifier.substring(2, 13);
     const revenue_type = identifier.substring(13, 16);
@@ -74,7 +72,7 @@ export default function BusinessIncome() {
       <div className="container max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <div className="w-full">
-            <h1 className="text-3xl font-bold tracking-tight">Receitas Empresariais</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Business Income</h1>
             <p className="text-muted-foreground mt-1">
               Gerencie todas as receitas da empresa
             </p>
