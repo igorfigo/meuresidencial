@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Building, Eye, EyeOff, Lock, Mail, Users, Wallet, Calendar, Bell, AlertCircle } from 'lucide-react';
+import { Building, Eye, EyeOff, Lock, Mail, Users, Wallet, Calendar, Bell, AlertCircle, Download } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +18,7 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
+import { registerServiceWorker, setupInstallPrompt, isAppInstalled, checkForUpdates } from '@/utils/pwa';
 
 const SUPABASE_URL = "https://kcbvdcacgbwigefwacrk.supabase.co";
 const EMAIL_STORAGE_KEY = "meuResidencial_remembered_email";
@@ -30,14 +32,92 @@ const Login = () => {
   const [rememberEmail, setRememberEmail] = useState(false);
   const { login } = useApp();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('manager');
+  
+  // Get the tab from URL query params if available
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam === 'resident' ? 'resident' : 'manager');
   
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoverySending, setRecoverySending] = useState(false);
   const [recoverySuccess, setRecoverySuccess] = useState(false);
   const [recoveryError, setRecoveryError] = useState('');
+  
+  // PWA states
+  const [canInstall, setCanInstall] = useState(false);
+  const [promptInstall, setPromptInstall] = useState<(() => Promise<boolean>) | null>(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [isAppInstalledState, setIsAppInstalledState] = useState(false);
+  const [pwaUpdateAvailable, setPwaUpdateAvailable] = useState(false);
 
+  // Initialize PWA functionality
+  useEffect(() => {
+    // Register service worker
+    const setupPwa = async () => {
+      const registration = await registerServiceWorker();
+      
+      // Check if there's an update available
+      if (registration) {
+        registration.addEventListener('updatefound', () => {
+          const installingWorker = registration.installing;
+          if (installingWorker) {
+            installingWorker.addEventListener('statechange', () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                setPwaUpdateAvailable(true);
+              }
+            });
+          }
+        });
+      }
+
+      // Setup install prompt
+      const installFunc = setupInstallPrompt();
+      setPromptInstall(() => installFunc);
+      
+      // Check if app is already installed
+      setIsAppInstalledState(isAppInstalled());
+    };
+
+    setupPwa();
+
+    // Update URL with active tab
+    if (activeTab) {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set('tab', activeTab);
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+
+    // Listen for online/offline events
+    const handleOnlineStatusChange = () => {
+      setIsOffline(!navigator.onLine);
+      if (navigator.onLine) {
+        toast.success('Conexão restaurada');
+        checkForUpdates();
+      } else {
+        toast.warning('Modo offline ativado');
+      }
+    };
+
+    window.addEventListener('online', handleOnlineStatusChange);
+    window.addEventListener('offline', handleOnlineStatusChange);
+    
+    // Check for app installed status changes
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    const handleDisplayModeChange = (e: MediaQueryListEvent) => {
+      setIsAppInstalledState(e.matches);
+    };
+    
+    mediaQuery.addEventListener('change', handleDisplayModeChange);
+
+    return () => {
+      window.removeEventListener('online', handleOnlineStatusChange);
+      window.removeEventListener('offline', handleOnlineStatusChange);
+      mediaQuery.removeEventListener('change', handleDisplayModeChange);
+    };
+  }, [activeTab]);
+
+  // Load saved email if available
   useEffect(() => {
     const savedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
     if (savedEmail) {
@@ -61,6 +141,14 @@ const Login = () => {
     
     setLoading(true);
     setInactiveAccount(false);
+    
+    if (isOffline) {
+      toast.warning('Você está offline. Verificação de login limitada.');
+      // In a real implementation, we would check cached credentials here
+      setLoading(false);
+      return;
+    }
+    
     const result = await login(identifier, password);
     
     if (result.success) {
@@ -76,6 +164,11 @@ const Login = () => {
     e.preventDefault();
     if (!recoveryEmail.trim()) {
       setRecoveryError('Por favor, insira seu email ou matrícula');
+      return;
+    }
+    
+    if (isOffline) {
+      toast.error('Esta função requer conexão com internet');
       return;
     }
     
@@ -121,6 +214,27 @@ const Login = () => {
     setRecoveryError('');
     setRecoverySuccess(false);
   };
+  
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('tab', value);
+    window.history.replaceState({}, '', newUrl.toString());
+  };
+  
+  const handleInstallClick = async () => {
+    if (promptInstall) {
+      const installed = await promptInstall();
+      if (installed) {
+        toast.success('Aplicativo instalado com sucesso!');
+        setCanInstall(false);
+      }
+    }
+  };
+  
+  const handleUpdateClick = () => {
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen flex flex-col sm:flex-row bg-gradient-to-br from-blue-50 to-indigo-100 h-screen w-screen">
@@ -134,7 +248,30 @@ const Login = () => {
             <h2 className="text-2xl font-semibold text-white mb-1">Seja bem-vindo!</h2>
           </div>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
+          {isOffline && (
+            <Alert variant="warning" className="mb-4 bg-amber-400/20 text-amber-50">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Modo Offline</AlertTitle>
+              <AlertDescription>
+                Você está navegando no modo offline. Algumas funcionalidades podem estar limitadas.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {pwaUpdateAvailable && (
+            <Alert variant="default" className="mb-4 bg-blue-500/20 text-blue-50">
+              <Download className="h-4 w-4" />
+              <AlertTitle>Atualização disponível</AlertTitle>
+              <AlertDescription className="flex justify-between items-center">
+                <span>Uma nova versão está disponível.</span>
+                <Button size="sm" variant="outline" className="ml-2 text-white border-white" onClick={handleUpdateClick}>
+                  Atualizar
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mb-6">
             <TabsList className="grid w-full grid-cols-2 bg-brand-800/40">
               <TabsTrigger value="manager" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Síndico</TabsTrigger>
               <TabsTrigger value="resident" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Morador</TabsTrigger>
@@ -153,7 +290,7 @@ const Login = () => {
             </TabsContent>
             
             <TabsContent value="resident">
-              {/* Alert removed as requested */}
+              {/* Alert removed as per the codebase */}
             </TabsContent>
           </Tabs>
           
@@ -252,6 +389,23 @@ const Login = () => {
               </p>
             </div>
           </form>
+          
+          {!isAppInstalledState && (
+            <div className="mt-6 text-center">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="text-white border-white hover:bg-white/10"
+                onClick={handleInstallClick}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Instalar Aplicativo
+              </Button>
+              <p className="text-xs mt-2 text-white/80">
+                Instale para acesso rápido e uso offline
+              </p>
+            </div>
+          )}
         </div>
       </div>
       

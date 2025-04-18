@@ -9,6 +9,14 @@
     <meta name="author" content="Meu Residencial" />
     <meta property="og:image" content="/og-image.png" />
     <link rel="icon" type="image/png" href="/lovable-uploads/e14c91d4-7977-4bf3-b197-04e6f56dfed2.png" />
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1e40af" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MeuResidencial" />
+    <link rel="apple-touch-icon" href="/lovable-uploads/e14c91d4-7977-4bf3-b197-04e6f56dfed2.png" />
   </head>
 
   <body>
@@ -16,5 +24,15 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Register the service worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => console.log('ServiceWorker registration successful'))
+            .catch(err => console.log('ServiceWorker registration failed: ', err));
+        });
+      }
+    </script>
   </body>
 </html>
