@@ -87,7 +87,9 @@ export function Sidebar() {
 
     if (location.pathname === '/business-management' || 
         location.pathname === '/contratos' || 
-        location.pathname === '/despesas-empresariais') {
+        location.pathname === '/business-documents' ||
+        location.pathname === '/despesas-empresariais' ||
+        location.pathname === '/business-incomes') {
       setExpandedSubmenu('Business Management');
     }
   }, [location.pathname, markAsViewed]);

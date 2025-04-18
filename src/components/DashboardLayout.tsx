@@ -88,7 +88,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       setExpandedSubmenu('Financeiro');
     }
     
-    if (isBusinessPath && user?.isAdmin) {
+    if (isBusinessPath || 
+        location.pathname === '/despesas-empresariais' || 
+        location.pathname === '/business-incomes') {
       setExpandedSubmenu('Business Management');
     }
     
