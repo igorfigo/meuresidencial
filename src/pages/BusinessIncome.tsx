@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Eye, Receipt, Search, Trash, Plus } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -34,10 +33,7 @@ export default function BusinessIncome() {
     if (!dateString) return '';
     
     try {
-      // Parse the date string properly
       const parts = dateString.split('-');
-      // Format directly as MM/YYYY without creating a Date object
-      // This avoids the zero-based month issue in JavaScript's Date
       if (parts.length >= 2) {
         const year = parts[0];
         const month = parts[1];
@@ -72,7 +68,6 @@ export default function BusinessIncome() {
     const revenue_type = identifier.substring(13, 16);
     
     try {
-      // We no longer extract competency from identifier as it's now a proper date field
       await updateIncome(selectedIncome.id, {
         revenue_date: date,
         full_identifier: identifier,
