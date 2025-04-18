@@ -65,8 +65,8 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
       // Extrair a competência dos últimos 6 dígitos (MMAAAA)
       const competencyStr = identifier.substring(identifier.length - 6);
       // Converter para o formato AAAA-MM
-      const year = competencyStr.substring(2);
       const month = competencyStr.substring(0, 2);
+      const year = competencyStr.substring(2);
       const formattedCompetency = `20${year}-${month}-01`;
       
       // Converter a data para string no formato ISO para compatibilidade com o Supabase
