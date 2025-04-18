@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Building, Users, UsersRound } from 'lucide-react';
+import { Building, Eye, EyeOff, Lock, Mail, Users, Wallet, Calendar, Bell, AlertCircle, Download } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -257,21 +257,9 @@ const Login = () => {
           )}
           
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mb-6">
-            <TabsList className="grid w-full grid-cols-2 bg-brand-800/40 border border-white/20">
-              <TabsTrigger 
-                value="manager" 
-                className="data-[state=active]:bg-[#2151B9] data-[state=active]:text-white flex items-center space-x-2"
-              >
-                <UsersRound className="h-4 w-4" />
-                <span>Síndico</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="resident" 
-                className="data-[state=active]:bg-[#2151B9] data-[state=active]:text-white flex items-center space-x-2"
-              >
-                <Users className="h-4 w-4" />
-                <span>Morador</span>
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-brand-800/40">
+              <TabsTrigger value="manager" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Síndico</TabsTrigger>
+              <TabsTrigger value="resident" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Morador</TabsTrigger>
             </TabsList>
             
             <TabsContent value="manager">
@@ -386,6 +374,23 @@ const Login = () => {
               </p>
             </div>
           </form>
+          
+          {!isAppInstalledState && (
+            <div className="mt-6 text-center">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="text-white border-white hover:bg-white/10"
+                onClick={handleInstallClick}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Instalar Aplicativo
+              </Button>
+              <p className="text-xs mt-2 text-white/80">
+                Instale para acesso rápido e uso offline
+              </p>
+            </div>
+          )}
         </div>
       </div>
       
