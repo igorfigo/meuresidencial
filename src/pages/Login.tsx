@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -33,7 +32,6 @@ const Login = () => {
   const { login } = useApp();
   const navigate = useNavigate();
   
-  // Get the tab from URL query params if available
   const urlParams = new URLSearchParams(window.location.search);
   const tabParam = urlParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabParam === 'resident' ? 'resident' : 'manager');
@@ -44,20 +42,16 @@ const Login = () => {
   const [recoverySuccess, setRecoverySuccess] = useState(false);
   const [recoveryError, setRecoveryError] = useState('');
   
-  // PWA states
   const [canInstall, setCanInstall] = useState(false);
   const [promptInstall, setPromptInstall] = useState<(() => Promise<boolean>) | null>(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [isAppInstalledState, setIsAppInstalledState] = useState(false);
   const [pwaUpdateAvailable, setPwaUpdateAvailable] = useState(false);
 
-  // Initialize PWA functionality
   useEffect(() => {
-    // Register service worker
     const setupPwa = async () => {
       const registration = await registerServiceWorker();
       
-      // Check if there's an update available
       if (registration) {
         registration.addEventListener('updatefound', () => {
           const installingWorker = registration.installing;
@@ -71,24 +65,20 @@ const Login = () => {
         });
       }
 
-      // Setup install prompt
       const installFunc = setupInstallPrompt();
       setPromptInstall(() => installFunc);
       
-      // Check if app is already installed
       setIsAppInstalledState(isAppInstalled());
     };
 
     setupPwa();
 
-    // Update URL with active tab
     if (activeTab) {
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.set('tab', activeTab);
       window.history.replaceState({}, '', newUrl.toString());
     }
 
-    // Listen for online/offline events
     const handleOnlineStatusChange = () => {
       setIsOffline(!navigator.onLine);
       if (navigator.onLine) {
@@ -102,7 +92,6 @@ const Login = () => {
     window.addEventListener('online', handleOnlineStatusChange);
     window.addEventListener('offline', handleOnlineStatusChange);
     
-    // Check for app installed status changes
     const mediaQuery = window.matchMedia('(display-mode: standalone)');
     const handleDisplayModeChange = (e: MediaQueryListEvent) => {
       setIsAppInstalledState(e.matches);
@@ -117,7 +106,6 @@ const Login = () => {
     };
   }, [activeTab]);
 
-  // Load saved email if available
   useEffect(() => {
     const savedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
     if (savedEmail) {
@@ -144,8 +132,6 @@ const Login = () => {
     
     if (isOffline) {
       toast.warning('Você está offline. Verificação de login limitada.');
-      // In a real implementation, we would check cached credentials here
-      setLoading(false);
       return;
     }
     
@@ -249,7 +235,7 @@ const Login = () => {
           </div>
           
           {isOffline && (
-            <Alert variant="warning" className="mb-4 bg-amber-400/20 text-amber-50">
+            <Alert variant="default" className="mb-4 bg-amber-400/20 text-amber-50">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Modo Offline</AlertTitle>
               <AlertDescription>
