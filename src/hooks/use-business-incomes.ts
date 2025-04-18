@@ -40,6 +40,30 @@ export const useBusinessIncomes = () => {
     revenue_date: new Date(item.revenue_date).toISOString().split('T')[0]
   }));
 
+  // Mutation to create a new income
+  const createIncomeMutation = useMutation({
+    mutationFn: async (income: Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>) => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('business_incomes')
+        .insert(income)
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-incomes'] });
+      toast.success("Receita cadastrada com sucesso");
+      setIsLoading(false);
+    },
+    onError: (error) => {
+      console.error("Erro ao cadastrar receita:", error);
+      toast.error("Erro ao cadastrar receita. Tente novamente.");
+      setIsLoading(false);
+    }
+  });
+
   // Mutation to delete an income
   const deleteIncomeMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -67,6 +91,8 @@ export const useBusinessIncomes = () => {
     incomes,
     isLoading: isLoading || isLoadingIncomes,
     error,
+    createIncome: (income: Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>) => 
+      createIncomeMutation.mutate(income),
     deleteIncome: (id: string) => deleteIncomeMutation.mutate(id)
   };
 };

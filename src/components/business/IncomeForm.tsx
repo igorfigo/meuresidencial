@@ -23,7 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { supabase } from '@/integrations/supabase/client';
+import { useBusinessIncomes } from '@/hooks/use-business-incomes';
 
 const formSchema = z.object({
   revenue_date: z.date({
@@ -38,12 +38,20 @@ const formSchema = z.object({
 });
 
 export function IncomeForm() {
+  const { createIncome } = useBusinessIncomes();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      identifier: '',
+      amount: '',
+    }
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      setIsSubmitting(true);
       // Processar o identificador
       const identifier = values.identifier;
       const system_code = identifier.substring(0, 2);
@@ -54,25 +62,21 @@ export function IncomeForm() {
       // Converter a data para string no formato ISO para compatibilidade com o Supabase
       const formattedDate = format(values.revenue_date, 'yyyy-MM-dd');
 
-      const { error } = await supabase
-        .from('business_incomes')
-        .insert({
-          revenue_date: formattedDate,
-          full_identifier: identifier,
-          system_code,
-          manager_code,
-          revenue_type,
-          competency,
-          amount: parseFloat(values.amount)
-        });
+      await createIncome({
+        revenue_date: formattedDate,
+        full_identifier: identifier,
+        system_code,
+        manager_code,
+        revenue_type,
+        competency,
+        amount: parseFloat(values.amount)
+      });
 
-      if (error) throw error;
-
-      toast.success('Receita cadastrada com sucesso!');
       form.reset();
     } catch (error) {
       console.error('Erro ao cadastrar receita:', error);
-      toast.error('Erro ao cadastrar receita. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -157,8 +161,8 @@ export function IncomeForm() {
             )}
           />
 
-          <Button type="submit" className="w-full">
-            Cadastrar Receita
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Cadastrando..." : "Cadastrar Receita"}
           </Button>
         </form>
       </Form>
