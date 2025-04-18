@@ -354,7 +354,7 @@ const Login = () => {
                   onClick={() => setForgotPasswordOpen(true)} 
                   className="text-blue-200 hover:text-white hover:underline mr-2"
                 >
-                  Esqueci minha senha
+                  Esqueci a senha
                 </button>
                 | 
                 <Link 
