@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -36,6 +37,7 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from '@/components/ui/tooltip';
+import { useApp } from '@/contexts/AppContext';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
@@ -55,6 +57,7 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
 const BusinessManagement: React.FC = () => {
   const { expenses } = useBusinessExpenses();
   const isMobile = useIsMobile();
+  const { user } = useApp();
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
