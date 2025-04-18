@@ -395,7 +395,7 @@ const Login = () => {
         </div>
       </div>
       
-      <div className="hidden sm:flex sm:w-1/2 bg-[#103381] text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
+      <div className="hidden sm:flex sm:w-1/2 bg-white text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
         <div className="relative z-10 max-w-lg text-center">
           <h2 className="text-4xl font-bold mb-6 font-display text-brand-800">Gerencie seu condomínio com facilidade</h2>
           <p className="text-lg text-brand-700 mb-8">
