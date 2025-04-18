@@ -134,20 +134,22 @@ export default function BusinessIncome() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Identificador</TableHead>
-                  <TableHead>Tipo de Receita</TableHead>
+                  <TableHead className="text-center">Identificador</TableHead>
+                  <TableHead className="text-center">Tipo de Receita</TableHead>
+                  <TableHead className="text-center">Competência</TableHead>
                   <TableHead className="text-center">Data</TableHead>
-                  <TableHead>Valor</TableHead>
+                  <TableHead className="text-center">Valor</TableHead>
                   <TableHead className="text-center">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredIncomes.map((income) => (
                   <TableRow key={income.id}>
-                    <TableCell className="font-medium">{income.full_identifier}</TableCell>
-                    <TableCell>{income.revenue_type}</TableCell>
+                    <TableCell className="font-medium text-center">{income.full_identifier}</TableCell>
+                    <TableCell className="text-center">{income.revenue_type}</TableCell>
+                    <TableCell className="text-center">{income.competency}</TableCell>
                     <TableCell className="text-center">{formatDate(income.revenue_date)}</TableCell>
-                    <TableCell>{formatCurrency(income.amount)}</TableCell>
+                    <TableCell className="text-center">{formatCurrency(income.amount)}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex justify-center gap-2">
                         <Button 
