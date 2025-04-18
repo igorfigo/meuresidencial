@@ -44,31 +44,26 @@ export function FormattedRevenueForm() {
       
       const { matricula, revenueType, competency } = parseIdentifier(data.identifier);
       
-      console.log('Submitting revenue with admin client...', {
+      const payload = {
         date_created: data.date_created,
         raw_identifier: data.identifier,
         amount: parseFloat(data.amount.replace(',', '.')),
         matricula,
         revenue_type: revenueType,
         competency
-      });
+      };
+      
+      console.log('Submitting revenue with admin client:', payload);
       
       // Use admin client to bypass RLS
       const { data: insertedData, error } = await adminClient
         .from('formatted_revenues')
-        .insert({
-          date_created: data.date_created,
-          raw_identifier: data.identifier,
-          amount: parseFloat(data.amount.replace(',', '.')),
-          matricula,
-          revenue_type: revenueType,
-          competency
-        })
+        .insert(payload)
         .select();
 
       if (error) {
         console.error('Error submitting revenue:', error);
-        throw error;
+        throw new Error(`Database error: ${error.message || 'Unknown error'}`);
       }
 
       console.log('Revenue inserted successfully:', insertedData);
@@ -138,7 +133,7 @@ export function FormattedRevenueForm() {
           )}
         </div>
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
+        <Button type="submit" disabled={isSubmitting} className="w-full mt-4 py-2">
           {isSubmitting ? 'Cadastrando...' : 'Cadastrar Receita'}
         </Button>
       </form>
