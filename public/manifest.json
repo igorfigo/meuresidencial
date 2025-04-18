@@ -6,7 +6,7 @@
   "start_url": "/login",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#1e40af",
+  "theme_color": "#103381",
   "icons": [
     {
       "src": "/lovable-uploads/e14c91d4-7977-4bf3-b197-04e6f56dfed2.png",
