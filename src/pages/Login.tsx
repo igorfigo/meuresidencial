@@ -223,7 +223,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col sm:flex-row bg-[#103381] h-screen w-screen">
+    <div className="min-h-screen flex flex-col sm:flex-row h-screen w-screen">
       <div className="sm:w-1/2 flex flex-col justify-center items-center p-8 sm:p-16 animate-fade-in bg-[#103381] text-white h-full">
         <div className="max-w-md w-full">
           <div className="mb-8 text-center sm:text-left">
@@ -231,7 +231,6 @@ const Login = () => {
               <Building className="h-8 w-8 text-white" />
               <h1 className="text-3xl font-bold text-white ml-2 font-display">MeuResidencial</h1>
             </div>
-            <h2 className="text-2xl font-semibold text-white mb-1">Seja bem-vindo!</h2>
           </div>
           
           {isOffline && (
@@ -395,48 +394,48 @@ const Login = () => {
         </div>
       </div>
       
-      <div className="hidden sm:flex sm:w-1/2 bg-[#103381] text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
+      <div className="hidden sm:flex sm:w-1/2 bg-white text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
         <div className="relative z-10 max-w-lg text-center">
-          <h2 className="text-4xl font-bold mb-6 font-display text-brand-800">Gerencie seu condomínio com facilidade</h2>
-          <p className="text-lg text-brand-700 mb-8">
+          <h2 className="text-4xl font-bold mb-6 font-display text-[#2151B9]">Gerencie seu condomínio com facilidade</h2>
+          <p className="text-lg text-[#295AC3] mb-8">
             Uma plataforma completa para síndicos profissionais administrarem 
             condomínios de forma eficiente e moderna.
           </p>
           <div className="grid grid-cols-2 gap-4 text-left">
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
-                <Users className="h-4 w-4 text-brand-700" />
+              <div className="mt-1 rounded-full bg-[#2151B9]/20 p-1">
+                <Users className="h-4 w-4 text-[#2151B9]" />
               </div>
               <div>
-                <h3 className="font-medium text-brand-800">Gestão de moradores</h3>
-                <p className="text-sm text-brand-600">Cadastro e comunicação eficiente</p>
+                <h3 className="font-medium text-[#103381]">Gestão de moradores</h3>
+                <p className="text-sm text-[#295AC3]">Cadastro e comunicação eficiente</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
-                <Wallet className="h-4 w-4 text-brand-700" />
+              <div className="mt-1 rounded-full bg-[#2151B9]/20 p-1">
+                <Wallet className="h-4 w-4 text-[#2151B9]" />
               </div>
               <div>
-                <h3 className="font-medium text-brand-800">Controle financeiro</h3>
-                <p className="text-sm text-brand-600">Gestão de despesas e receitas</p>
+                <h3 className="font-medium text-[#103381]">Controle financeiro</h3>
+                <p className="text-sm text-[#295AC3]">Gestão de despesas e receitas</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
-                <Calendar className="h-4 w-4 text-brand-700" />
+              <div className="mt-1 rounded-full bg-[#2151B9]/20 p-1">
+                <Calendar className="h-4 w-4 text-[#2151B9]" />
               </div>
               <div>
-                <h3 className="font-medium text-brand-800">Agendamentos</h3>
-                <p className="text-sm text-brand-600">Áreas comuns e manutenções</p>
+                <h3 className="font-medium text-[#103381]">Agendamentos</h3>
+                <p className="text-sm text-[#295AC3]">Áreas comuns e manutenções</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
-                <Bell className="h-4 w-4 text-brand-700" />
+              <div className="mt-1 rounded-full bg-[#2151B9]/20 p-1">
+                <Bell className="h-4 w-4 text-[#2151B9]" />
               </div>
               <div>
-                <h3 className="font-medium text-brand-800">Notificações</h3>
-                <p className="text-sm text-brand-600">Avisos e comunicados</p>
+                <h3 className="font-medium text-[#103381]">Notificações</h3>
+                <p className="text-sm text-[#295AC3]">Avisos e comunicados</p>
               </div>
             </div>
           </div>
