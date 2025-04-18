@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -39,8 +38,7 @@ import DuvidasFrequentes from './pages/DuvidasFrequentes';
 import LandingPage from './pages/LandingPage';
 import TermosCondicoes from './pages/TermosCondicoes';
 import TermosCondicoesPublic from './pages/TermosCondicoesPublic';
-
-const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
+import CadastrarReceita from '@/pages/CadastrarReceita';
 
 function App() {
   return (
@@ -100,6 +98,7 @@ function App() {
                   <VagaGaragem />
                 </AuthRequired>
               } />
+              <Route path="/cadastrar-receita" element={<AdminOnly><CadastrarReceita /></AdminOnly>} />
             </Routes>
             <Toaster />
           </div>

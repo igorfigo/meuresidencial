@@ -118,6 +118,11 @@ export function Sidebar() {
         { path: '/despesas-empresariais', label: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" /> },
       ]
     },
+    { 
+      path: '/cadastrar-receita', 
+      label: 'Cadastrar Receita', 
+      icon: <ReceiptText className="h-5 w-5" /> 
+    },
   ];
   
   const managerMenuItems: MenuItem[] = [
