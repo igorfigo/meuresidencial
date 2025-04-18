@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -55,15 +54,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already logged in from localStorage
     const storedUser = localStorage.getItem('condoUser');
     if (storedUser) {
       try {
-        // Add debugging to check the stored user
         const parsedUser = JSON.parse(storedUser);
-        console.log("Stored user from localStorage:", parsedUser);
-        console.log("Is stored user admin?", parsedUser.isAdmin);
-        console.log("Is stored user resident?", parsedUser.isResident);
         setUser(parsedUser);
       } catch (e) {
         console.error("Error parsing stored user:", e);
@@ -76,6 +70,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const login = async (emailOrMatricula: string, password: string): Promise<LoginResult> => {
     setIsLoading(true);
     try {
+      // Check if user is an admin using the database function
+      const { data: isAdmin, error: adminCheckError } = await supabase
+        .rpc('is_admin_user', { user_email: emailOrMatricula.toLowerCase() });
+
+      if (adminCheckError) {
+        console.error("Error checking admin status:", adminCheckError);
+        return { success: false };
+      }
+
+      if (isAdmin) {
+        // Get admin user details from admin_users table
+        const { data: adminData, error: adminError } = await supabase
+          .from('admin_users')
+          .select('nome, email')
+          .eq('email', emailOrMatricula.toLowerCase())
+          .single();
+
+        if (adminError || !adminData) {
+          console.error("Error fetching admin data:", adminError);
+          return { success: false };
+        }
+
+        if (adminData) {
+          const adminUserData = {
+            nome: adminData.nome,
+            email: adminData.email,
+            isAdmin: true,
+            isResident: false
+          };
+
+          console.log("Admin user authenticated:", adminUserData);
+          setUser(adminUserData);
+          localStorage.setItem('condoUser', JSON.stringify(adminUserData));
+          toast.success("Login realizado com sucesso!");
+          return { success: true };
+        }
+      }
+
+      // If not an admin, continue with existing manager/resident login logic
       // Lista de administradores fixos
       const adminUsers = [
         {
@@ -279,6 +312,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Simulação de falha no login
       toast.error("Credenciais inválidas ou usuário inativo. Tente novamente.");
       return { success: false };
+
     } catch (error) {
       console.error("Erro ao realizar login:", error);
       toast.error("Erro ao realizar login. Tente novamente.");

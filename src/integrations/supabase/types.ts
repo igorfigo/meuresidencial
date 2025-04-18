@@ -39,6 +39,30 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          nome: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           content: string
@@ -1270,6 +1294,10 @@ export type Database = {
       get_user_role_safe: {
         Args: { user_uuid: string }
         Returns: string
+      }
+      is_admin_user: {
+        Args: { user_email: string }
+        Returns: boolean
       }
       toggle_preventive_maintenance_status: {
         Args: { p_id: string }
