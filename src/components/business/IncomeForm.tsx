@@ -51,10 +51,13 @@ export function IncomeForm() {
       const revenue_type = identifier.substring(13, 16);
       const competency = identifier.substring(16, 22);
 
+      // Converter a data para string no formato ISO para compatibilidade com o Supabase
+      const formattedDate = format(values.revenue_date, 'yyyy-MM-dd');
+
       const { error } = await supabase
         .from('business_incomes')
         .insert({
-          revenue_date: values.revenue_date,
+          revenue_date: formattedDate,
           full_identifier: identifier,
           system_code,
           manager_code,
