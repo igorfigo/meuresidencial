@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useApp } from '@/contexts/AppContext';
 
 const formSchema = z.object({
   identifier: z.string().min(1, 'Identificador é obrigatório'),
@@ -28,6 +29,8 @@ const formSchema = z.object({
 });
 
 export const FormattedRevenueForm = () => {
+  const { user } = useApp();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,7 +73,10 @@ export const FormattedRevenueForm = () => {
           revenue_date: formattedDate, // Use the formatted string date
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting formatted revenue:', error);
+        throw error;
+      }
 
       toast.success('Receita cadastrada com sucesso!');
       form.reset();
