@@ -39,7 +39,8 @@ import DuvidasFrequentes from './pages/DuvidasFrequentes';
 import LandingPage from './pages/LandingPage';
 import TermosCondicoes from './pages/TermosCondicoes';
 import TermosCondicoesPublic from './pages/TermosCondicoesPublic';
-import CadastrarReceita from '@/pages/CadastrarReceita';
+
+const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
 function App() {
   return (
@@ -65,6 +66,7 @@ function App() {
               <Route path="/cadastro-gestor" element={<AdminOnly><CadastroGestor /></AdminOnly>} />
               <Route path="/cadastro-planos" element={<AdminOnly><CadastroPlanos /></AdminOnly>} />
               <Route path="/cadastro-chave-pix" element={<AdminOnly><CadastroChavePix /></AdminOnly>} />
+              <Route path="/gerar-faturas" element={<AuthRequired><GerarFaturas /></AuthRequired>} />
               <Route path="/gerenciar-avisos" element={<AuthRequired><GerenciarAvisos /></AuthRequired>} />
               <Route path="/business-management" element={<AdminOnly><BusinessManagement /></AdminOnly>} />
               <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
@@ -98,7 +100,6 @@ function App() {
                   <VagaGaragem />
                 </AuthRequired>
               } />
-              <Route path="/cadastrar-receita" element={<AdminOnly><CadastrarReceita /></AdminOnly>} />
             </Routes>
             <Toaster />
           </div>

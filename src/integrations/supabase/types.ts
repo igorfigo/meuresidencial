@@ -39,24 +39,6 @@ export type Database = {
         }
         Relationships: []
       }
-      admin_users: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-        }
-        Relationships: []
-      }
       announcements: {
         Row: {
           content: string
@@ -744,45 +726,6 @@ export type Database = {
           },
         ]
       }
-      formatted_revenues: {
-        Row: {
-          amount: string
-          competency: string
-          created_at: string
-          full_identifier: string
-          id: string
-          matricula: string
-          revenue_date: string
-          revenue_type: string
-          system_code: string
-          updated_at: string
-        }
-        Insert: {
-          amount: string
-          competency: string
-          created_at?: string
-          full_identifier: string
-          id?: string
-          matricula: string
-          revenue_date: string
-          revenue_type: string
-          system_code: string
-          updated_at?: string
-        }
-        Update: {
-          amount?: string
-          competency?: string
-          created_at?: string
-          full_identifier?: string
-          id?: string
-          matricula?: string
-          revenue_date?: string
-          revenue_type?: string
-          system_code?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       garage_listings: {
         Row: {
           created_at: string
@@ -1258,14 +1201,6 @@ export type Database = {
         }
         Returns: string
       }
-      check_admin_access: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      check_admin_access_safe: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
       delete_preventive_maintenance: {
         Args: { p_id: string }
         Returns: boolean
@@ -1295,18 +1230,6 @@ export type Database = {
       get_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
-      }
-      get_user_role_safe: {
-        Args: Record<PropertyKey, never> | { user_uuid: string }
-        Returns: string
-      }
-      is_admin_user: {
-        Args: { user_email: string }
-        Returns: boolean
-      }
-      is_admin_user_safe: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
       }
       toggle_preventive_maintenance_status: {
         Args: { p_id: string }
