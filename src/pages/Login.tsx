@@ -223,8 +223,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col sm:flex-row bg-gradient-to-br from-blue-50 to-indigo-100 h-screen w-screen">
-      <div className="sm:w-1/2 flex flex-col justify-center items-center p-8 sm:p-16 animate-fade-in bg-brand-700 text-white h-full">
+    <div className="min-h-screen flex flex-col sm:flex-row bg-[#103381] h-screen w-screen">
+      <div className="sm:w-1/2 flex flex-col justify-center items-center p-8 sm:p-16 animate-fade-in bg-[#103381] text-white h-full">
         <div className="max-w-md w-full">
           <div className="mb-8 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start mb-4">
@@ -395,7 +395,7 @@ const Login = () => {
         </div>
       </div>
       
-      <div className="hidden sm:flex sm:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
+      <div className="hidden sm:flex sm:w-1/2 bg-[#103381] text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
         <div className="relative z-10 max-w-lg text-center">
           <h2 className="text-4xl font-bold mb-6 font-display text-brand-800">Gerencie seu condomínio com facilidade</h2>
           <p className="text-lg text-brand-700 mb-8">
