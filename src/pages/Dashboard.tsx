@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -796,4 +797,38 @@ const Dashboard = () => {
               </div>
               <div>
                 {!isFinancesLoading && balance ? (
-                  <div className={`text-2xl font-bold ${BRLToNumber(balance.balance) > 0
+                  <div className={`text-2xl font-bold ${BRLToNumber(balance.balance) > 0 
+                    ? "text-green-600" : "text-red-600"}`}>
+                    {balance.balance}
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-gray-500">Saldo insuficiente</div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    </>
+  );
+
+  return (
+    <DashboardLayout>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <div className="flex items-start justify-between">
+          {getGreeting()}
+        </div>
+
+        {user?.isAdmin ? (
+          renderAdminDashboard()
+        ) : user?.isResident ? (
+          renderResidentDashboard()
+        ) : (
+          renderManagerDashboard()
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default Dashboard;
