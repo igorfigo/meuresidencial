@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -120,6 +121,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: 'Cadastro Planos', icon: <Package className="h-5 w-5" />, path: '/cadastro-planos' },
     { name: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" />, path: '/cadastro-chave-pix' },
     { name: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" />, path: '/gerenciar-avisos' },
+    { name: 'Cadastrar Receita', icon: <ReceiptText className="h-5 w-5" />, path: '/cadastrar-receita' },
     { name: 'Termos e Condições', icon: <FileTerminal className="h-5 w-5" />, path: '/termos-condicoes' },
     { isSeparator: true, name: '', icon: null, path: '' },
     { 
@@ -131,6 +133,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
         { name: 'Business Documents', icon: <Files className="h-5 w-5 text-blue-500" />, path: '/business-documents' },
         { name: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" />, path: '/despesas-empresariais' },
+        { name: 'Business Income', icon: <ReceiptText className="h-5 w-5 text-blue-500" />, path: '/cadastrar-receita' },
       ]
     },
   ];

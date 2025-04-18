@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -39,8 +38,7 @@ import DuvidasFrequentes from './pages/DuvidasFrequentes';
 import LandingPage from './pages/LandingPage';
 import TermosCondicoes from './pages/TermosCondicoes';
 import TermosCondicoesPublic from './pages/TermosCondicoesPublic';
-// Import BusinessIncome page
-import BusinessIncome from '@/pages/BusinessIncome';
+import BusinessIncome from './pages/BusinessIncome';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
