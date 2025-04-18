@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Building, Eye, EyeOff, Lock, Mail, Users, AlertCircle } from 'lucide-react';
+import { Building, Eye, EyeOff, Lock, Mail, Users, AlertCircle, Wallet, Calendar, Bell } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +17,7 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
+import { registerServiceWorker, setupInstallPrompt, isAppInstalled, checkForUpdates } from '@/utils/pwa';
 
 const SUPABASE_URL = "https://kcbvdcacgbwigefwacrk.supabase.co";
 const EMAIL_STORAGE_KEY = "meuResidencial_remembered_email";
