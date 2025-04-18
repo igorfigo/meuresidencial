@@ -61,6 +61,10 @@ export const FormattedRevenueForm = () => {
       // Format the date as YYYY-MM-DD string for the database
       const formattedDate = format(values.revenue_date, 'yyyy-MM-dd');
       
+      // Get the current user's authentication token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Set up the insertion with proper authentication
       const { error } = await supabase
         .from('formatted_revenues')
         .insert({
@@ -70,7 +74,7 @@ export const FormattedRevenueForm = () => {
           competency: parsedIdentifier.competency,
           full_identifier: values.identifier,
           amount: values.amount,
-          revenue_date: formattedDate, // Use the formatted string date
+          revenue_date: formattedDate,
         });
 
       if (error) {
