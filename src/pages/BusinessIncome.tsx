@@ -33,11 +33,21 @@ export default function BusinessIncome() {
   const formatCompetency = (dateString: string) => {
     if (!dateString) return '';
     
-    // Create a new date object from the input string
-    const date = new Date(dateString);
-    
-    // Format as MM/YYYY without any timezone adjustments
-    return `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    try {
+      // Parse the date string properly
+      const parts = dateString.split('-');
+      // Format directly as MM/YYYY without creating a Date object
+      // This avoids the zero-based month issue in JavaScript's Date
+      if (parts.length >= 2) {
+        const year = parts[0];
+        const month = parts[1];
+        return `${month}/${year}`;
+      }
+      return '';
+    } catch (error) {
+      console.error("Error formatting competency date:", error, dateString);
+      return '';
+    }
   };
 
   const handleEditIncome = (income: BusinessIncome) => {
