@@ -16,6 +16,7 @@ const AdminOnly = ({ children }: AdminOnlyProps) => {
     const verifyAdminStatus = async () => {
       if (!user?.email) return false;
       
+      // Use the updated RPC function that avoids recursion
       const { data: isAdmin, error } = await supabase
         .rpc('is_admin_user', { user_email: user.email });
         
@@ -29,6 +30,8 @@ const AdminOnly = ({ children }: AdminOnlyProps) => {
     
     if (user) {
       verifyAdminStatus();
+    } else {
+      setIsVerifiedAdmin(false);
     }
   }, [user]);
   
