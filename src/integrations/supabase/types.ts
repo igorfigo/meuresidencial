@@ -1262,6 +1262,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      check_admin_access_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       delete_preventive_maintenance: {
         Args: { p_id: string }
         Returns: boolean

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +33,7 @@ const formSchema = z.object({
 
 export const FormattedRevenueForm = () => {
   const { user } = useApp();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,15 +47,15 @@ export const FormattedRevenueForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user?.isAdmin) {
+      toast.error('Apenas administradores podem cadastrar receitas');
+      return;
+    }
+    
     try {
+      setIsSubmitting(true);
       const formattedDate = format(values.revenue_date, 'yyyy-MM-dd');
       const fullIdentifier = `${values.systemCode}${values.matricula}${values.revenueType}${values.competency}`;
-      
-      // Check if user is admin
-      if (!user?.isAdmin) {
-        toast.error('Apenas administradores podem cadastrar receitas');
-        return;
-      }
       
       const { error } = await supabase
         .from('formatted_revenues')
@@ -71,7 +72,7 @@ export const FormattedRevenueForm = () => {
       if (error) {
         console.error('Error inserting formatted revenue:', error);
         
-        if (error.code === '42P17') {
+        if (error.code === '42501') {
           toast.error('Erro de permissão ao cadastrar receita. Por favor, contacte o suporte.');
         } else {
           toast.error(`Erro ao cadastrar receita: ${error.message}`);
@@ -80,10 +81,18 @@ export const FormattedRevenueForm = () => {
       }
 
       toast.success('Receita cadastrada com sucesso!');
-      form.reset();
+      form.reset({
+        systemCode: 'MR',
+        matricula: '',
+        revenueType: 'MES',
+        competency: '',
+        amount: '',
+      });
     } catch (error: any) {
       console.error('Error:', error);
       toast.error('Erro ao cadastrar receita. Por favor, tente novamente.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -225,8 +234,8 @@ export const FormattedRevenueForm = () => {
           )}
         />
 
-        <Button type="submit" className="w-full">
-          Cadastrar Receita
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Cadastrando...' : 'Cadastrar Receita'}
         </Button>
       </form>
     </Form>
