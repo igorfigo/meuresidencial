@@ -1,12 +1,11 @@
-
 import React, { useState } from 'react';
-import { Eye, Receipt, Search, Trash } from 'lucide-react';
+import { Eye, Receipt, Search, Trash, Plus } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/utils/currency';
@@ -14,6 +13,7 @@ import { useBusinessIncomes, type BusinessIncome } from '@/hooks/use-business-in
 import { IncomeForm } from '@/components/business/IncomeForm';
 
 export default function BusinessIncome() {
+  const [openNewIncomeDialog, setOpenNewIncomeDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [openEditIncomeDialog, setOpenEditIncomeDialog] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState<BusinessIncome | null>(null);
@@ -77,6 +77,26 @@ export default function BusinessIncome() {
             <p className="text-muted-foreground mt-1">
               Gerencie todas as receitas da empresa
             </p>
+          </div>
+          
+          <div className="flex mt-4 md:mt-0 space-x-2">
+            <Dialog open={openNewIncomeDialog} onOpenChange={setOpenNewIncomeDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nova Receita
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[525px]">
+                <DialogHeader>
+                  <DialogTitle>Nova Receita</DialogTitle>
+                  <DialogDescription>
+                    Preencha os dados da receita abaixo
+                  </DialogDescription>
+                </DialogHeader>
+                <IncomeForm onSuccess={() => setOpenNewIncomeDialog(false)} />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 

@@ -1,10 +1,8 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
-import { toast } from 'sonner';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -37,7 +35,11 @@ const formSchema = z.object({
   }),
 });
 
-export function IncomeForm() {
+interface IncomeFormProps {
+  onSuccess?: () => void;
+}
+
+export function IncomeForm({ onSuccess }: IncomeFormProps) {
   const { createIncome } = useBusinessIncomes();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -73,6 +75,7 @@ export function IncomeForm() {
       });
 
       form.reset();
+      onSuccess?.();
     } catch (error) {
       console.error('Erro ao cadastrar receita:', error);
     } finally {
