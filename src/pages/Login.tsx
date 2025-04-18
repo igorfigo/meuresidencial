@@ -299,18 +299,6 @@ const Login = () => {
                 <Label htmlFor="password" className="text-white">
                   {activeTab === 'manager' ? 'Senha' : 'CPF (Senha)'}
                 </Label>
-                {activeTab === 'manager' && (
-                  <button 
-                    type="button"
-                    className="text-xs text-blue-200 hover:text-white hover:underline"
-                    onClick={() => {
-                      resetRecoveryState();
-                      setForgotPasswordOpen(true);
-                    }}
-                  >
-                    Esqueceu a senha?
-                  </button>
-                )}
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-brand-800" />
