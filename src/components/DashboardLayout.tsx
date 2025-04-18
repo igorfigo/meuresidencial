@@ -131,7 +131,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         { name: 'Business Contracts', icon: <Briefcase className="h-5 w-5 text-blue-500" />, path: '/contratos' },
         { name: 'Business Documents', icon: <Files className="h-5 w-5 text-blue-500" />, path: '/business-documents' },
         { name: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" />, path: '/despesas-empresariais' },
-        { name: 'Business Income', icon: <ReceiptText className="h-5 w-5 text-blue-500" />, path: '/cadastrar-receita' },
+        { name: 'Business Incomes', icon: <ReceiptText className="h-5 w-5 text-blue-500" />, path: '/business-incomes' },
       ]
     },
   ];

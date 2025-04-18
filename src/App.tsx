@@ -72,7 +72,7 @@ function App() {
               <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
               <Route path="/business-documents" element={<AdminOnly><BusinessDocuments /></AdminOnly>} />
               <Route path="/despesas-empresariais" element={<AdminOnly><BusinessCost /></AdminOnly>} />
-              <Route path="/cadastrar-receita" element={<AdminOnly><BusinessIncomes /></AdminOnly>} />
+              <Route path="/business-incomes" element={<AdminOnly><BusinessIncomes /></AdminOnly>} />
               <Route path="/termos-condicoes" element={<AdminOnly><TermosCondicoes /></AdminOnly>} />
               
               {/* Manager Routes */}

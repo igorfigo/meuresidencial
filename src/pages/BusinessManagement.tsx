@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -8,6 +7,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
+import { ExpenseEvolutionChart } from '@/components/financials/ExpenseEvolutionChart';
 import { 
   BarChart, 
   Bar, 
@@ -39,7 +39,6 @@ import {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
-// Category display names mapping
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   'aluguel': 'Aluguel',
   'servicos-contabeis': 'Serviços Contábeis',
@@ -57,20 +56,16 @@ const BusinessManagement: React.FC = () => {
   const { expenses } = useBusinessExpenses();
   const isMobile = useIsMobile();
 
-  // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-  // Generate monthly expenses data for the last 12 months
   const getLast12MonthsData = () => {
     const today = new Date();
     const monthlyData = [];
     
-    // Create an array with the last 12 months
     for (let i = 11; i >= 0; i--) {
       const monthDate = subMonths(today, i);
       const monthStr = format(monthDate, 'MMM/yy', { locale: ptBR });
       
-      // Filter expenses for this month
       const monthlyExpenses = expenses.filter(expense => {
         const expenseDate = new Date(expense.date);
         const expenseMonth = startOfMonth(expenseDate);
@@ -89,7 +84,6 @@ const BusinessManagement: React.FC = () => {
     return monthlyData;
   };
 
-  // Generate category data
   const getCategoryData = () => {
     const categoryTotals: Record<string, number> = {};
     
@@ -130,9 +124,8 @@ const BusinessManagement: React.FC = () => {
         <Separator className="my-2 md:my-4" />
         
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid grid-cols-2 w-full mb-4">
-            <TabsTrigger value="overview" className="text-xs md:text-sm">Visão Geral</TabsTrigger>
-            <TabsTrigger value="details" className="text-xs md:text-sm">Detalhamento</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-1">
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
@@ -239,60 +232,8 @@ const BusinessManagement: React.FC = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-          
-          <TabsContent value="details">
-            <Card className="border-t-4 border-t-brand-600 shadow-md">
-              <CardHeader className="pb-2">
-                <div className="flex items-center">
-                  <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
-                  <CardTitle className="text-lg md:text-xl">Evolução de Despesas</CardTitle>
-                </div>
-                <CardDescription className="text-xs md:text-sm">
-                  Acompanhe a evolução mensal das despesas empresariais
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className={isMobile ? "h-64" : "h-80"}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={monthlyData}
-                      margin={{ 
-                        top: 20, 
-                        right: isMobile ? 10 : 30, 
-                        left: isMobile ? 0 : 20, 
-                        bottom: isMobile ? 30 : 5 
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="month" 
-                        tick={{ fontSize: isMobile ? 10 : 12 }}
-                        angle={isMobile ? -45 : 0}
-                        textAnchor={isMobile ? "end" : "middle"}
-                        height={isMobile ? 60 : 30}
-                      />
-                      <YAxis 
-                        tickFormatter={formatTooltipValue} 
-                        tick={{ fontSize: isMobile ? 10 : 12 }}
-                        width={isMobile ? 60 : undefined}
-                      />
-                      <Tooltip 
-                        formatter={(value: number) => [formatToBRL(value), 'Total']} 
-                        labelFormatter={(label) => `Mês: ${label}`}
-                      />
-                      <Legend />
-                      <Bar 
-                        dataKey="total" 
-                        name="Despesas" 
-                        fill="#6366f1" 
-                        radius={[4, 4, 0, 0]} 
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
+
+            <ExpenseEvolutionChart matricula={user?.matricula || ''} />
           </TabsContent>
         </Tabs>
       </div>
