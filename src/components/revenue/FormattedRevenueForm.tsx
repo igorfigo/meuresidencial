@@ -46,6 +46,9 @@ export function FormattedRevenueForm() {
       
       const { matricula, revenueType, competency } = parseIdentifier(data.identifier);
       
+      // Ensure user email exists, fallback to 'system' if not
+      const createdBy = user?.email || 'system';
+      
       const payload = {
         date_created: data.date_created,
         raw_identifier: data.identifier,
@@ -53,12 +56,11 @@ export function FormattedRevenueForm() {
         matricula,
         revenue_type: revenueType,
         competency,
-        created_by: user?.email // Adding this field to track who created the record
+        created_by: createdBy
       };
       
       console.log('Submitting formatted revenue with payload:', payload);
       
-      // Using the standard Supabase client that respects RLS policies
       const { data: insertedData, error } = await supabase
         .from('formatted_revenues')
         .insert(payload)

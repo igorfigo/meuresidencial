@@ -755,6 +755,7 @@ export type Database = {
           amount: number
           competency: string
           created_at: string | null
+          created_by: string | null
           date_created: string
           id: string
           matricula: string
@@ -766,6 +767,7 @@ export type Database = {
           amount: number
           competency: string
           created_at?: string | null
+          created_by?: string | null
           date_created: string
           id?: string
           matricula: string
@@ -777,6 +779,7 @@ export type Database = {
           amount?: number
           competency?: string
           created_at?: string | null
+          created_by?: string | null
           date_created?: string
           id?: string
           matricula?: string
