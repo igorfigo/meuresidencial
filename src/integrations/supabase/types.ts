@@ -1205,6 +1205,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_login: string | null
           matricula: string | null
           role: string
           updated_at: string
@@ -1213,6 +1214,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          last_login?: string | null
           matricula?: string | null
           role: string
           updated_at?: string
@@ -1221,6 +1223,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          last_login?: string | null
           matricula?: string | null
           role?: string
           updated_at?: string

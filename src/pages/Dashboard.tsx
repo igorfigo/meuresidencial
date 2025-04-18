@@ -528,70 +528,69 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Preferência de Pagamento</CardTitle>
-            <FileTextIcon className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <span className="text-sm text-muted-foreground">Recibo</span>
-                <div className="text-xl font-bold">{statsDetails.bankSlipPreference}</div>
-              </div>
-              <div className="text-center">
-                <span className="text-sm text-muted-foreground">Nota Fiscal</span>
-                <div className="text-xl font-bold">{statsDetails.invoicePreference}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Distribuição Regional</CardTitle>
-            <MapPin className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {statsDetails.regionData.map(([region, count], index) => (
-                <div key={region} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`h-3 w-3 rounded-full ${
-                      index === 0 ? "bg-green-500" :
-                      index === 1 ? "bg-blue-500" :
-                      index === 2 ? "bg-purple-500" :
-                      index === 3 ? "bg-amber-500" :
-                      "bg-gray-500"
-                    }`}></div>
-                    <span className="text-sm">{region}</span>
-                  </div>
-                  <span className="font-medium">{count}</span>
+          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Preferência de Pagamento</CardTitle>
+              <FileTextIcon className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <span className="text-sm text-muted-foreground">Recibo</span>
+                  <div className="text-xl font-bold">{statsDetails.bankSlipPreference}</div>
                 </div>
-              ))}
-              {statsDetails.regionData.length === 0 && (
-                <div className="text-sm text-gray-500">Sem dados regionais</div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="text-center">
+                  <span className="text-sm text-muted-foreground">Nota Fiscal</span>
+                  <div className="text-xl font-bold">{statsDetails.invoicePreference}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Distribuição Regional</CardTitle>
+              <MapPin className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {statsDetails.regionData.map(([region, count], index) => (
+                  <div key={region} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`h-3 w-3 rounded-full ${
+                        index === 0 ? "bg-green-500" :
+                        index === 1 ? "bg-blue-500" :
+                        index === 2 ? "bg-purple-500" :
+                        index === 3 ? "bg-amber-500" :
+                        "bg-gray-500"
+                      }`}></div>
+                      <span className="text-sm">{region}</span>
+                    </div>
+                    <span className="font-medium">{count}</span>
+                  </div>
+                ))}
+                {statsDetails.regionData.length === 0 && (
+                  <div className="text-sm text-gray-500">Sem dados regionais</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Tipo de Plano</CardTitle>
-            <PieChart className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <PlanDistributionChart 
-              data={planDistribution} 
-              isLoading={isLoadingPlanData}
-              viewMode="list"
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </>
+          <Card className="card-hover border-t-4 border-t-brand-600 shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Tipo de Plano</CardTitle>
+              <PieChart className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <PlanDistributionChart 
+                data={planDistribution} 
+                isLoading={isLoadingPlanData}
+                viewMode="list"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </>
     );
   };
 
@@ -798,3 +797,34 @@ const Dashboard = () => {
               <div>
                 {!isFinancesLoading && balance ? (
                   <div className={`text-2xl font-bold ${BRLToNumber(balance.balance) > 0
+                ) : (
+                  <div className="text-2xl font-bold text-gray-500">Saldo insuficiente</div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    </>
+  );
+
+  return (
+    <DashboardLayout>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <div className="flex items-start justify-between">
+          {getGreeting()}
+        </div>
+
+        {user?.isAdmin ? (
+          renderAdminDashboard()
+        ) : user?.isResident ? (
+          renderResidentDashboard()
+        ) : (
+          renderManagerDashboard()
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default Dashboard;
