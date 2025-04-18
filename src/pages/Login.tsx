@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Building, Eye, EyeOff, Lock, Mail, Users, Wallet, Calendar, Bell, AlertCircle, Download } from 'lucide-react';
+import { Building, Eye, EyeOff, Lock, Mail, Users, AlertCircle } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,7 +17,6 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
-import { registerServiceWorker, setupInstallPrompt, isAppInstalled, checkForUpdates } from '@/utils/pwa';
 
 const SUPABASE_URL = "https://kcbvdcacgbwigefwacrk.supabase.co";
 const EMAIL_STORAGE_KEY = "meuResidencial_remembered_email";
@@ -243,23 +242,22 @@ const Login = () => {
             </Alert>
           )}
           
-          {pwaUpdateAvailable && (
-            <Alert variant="default" className="mb-4 bg-blue-500/20 text-blue-50">
-              <Download className="h-4 w-4" />
-              <AlertTitle>Atualização disponível</AlertTitle>
-              <AlertDescription className="flex justify-between items-center">
-                <span>Uma nova versão está disponível.</span>
-                <Button size="sm" variant="outline" className="ml-2 text-white border-white" onClick={handleUpdateClick}>
-                  Atualizar
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
-          
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mb-6">
             <TabsList className="grid w-full grid-cols-2 bg-brand-800/40">
-              <TabsTrigger value="manager" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Síndico</TabsTrigger>
-              <TabsTrigger value="resident" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Morador</TabsTrigger>
+              <TabsTrigger 
+                value="manager" 
+                className="flex items-center gap-2 data-[state=active]:bg-brand-600 data-[state=active]:text-white"
+              >
+                <Users className="h-4 w-4" />
+                Síndico
+              </TabsTrigger>
+              <TabsTrigger 
+                value="resident" 
+                className="flex items-center gap-2 data-[state=active]:bg-brand-600 data-[state=active]:text-white"
+              >
+                <Building className="h-4 w-4" />
+                Morador
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="manager">
@@ -272,10 +270,6 @@ const Login = () => {
                   </AlertDescription>
                 </Alert>
               )}
-            </TabsContent>
-            
-            <TabsContent value="resident">
-              {/* Alert removed as per the codebase */}
             </TabsContent>
           </Tabs>
           
@@ -374,23 +368,6 @@ const Login = () => {
               </p>
             </div>
           </form>
-          
-          {!isAppInstalledState && (
-            <div className="mt-6 text-center">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="text-white border-white hover:bg-white/10"
-                onClick={handleInstallClick}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Instalar Aplicativo
-              </Button>
-              <p className="text-xs mt-2 text-white/80">
-                Instale para acesso rápido e uso offline
-              </p>
-            </div>
-          )}
         </div>
       </div>
       
