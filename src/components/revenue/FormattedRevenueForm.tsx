@@ -53,9 +53,9 @@ export function FormattedRevenueForm() {
         competency
       };
       
-      console.log('Submitting revenue with admin client:', payload);
+      console.log('Submitting formatted revenue with payload:', payload);
       
-      // Use admin client to bypass RLS
+      // Use admin client with service role key
       const { data: insertedData, error } = await adminClient
         .from('formatted_revenues')
         .insert(payload)
@@ -133,7 +133,11 @@ export function FormattedRevenueForm() {
           )}
         </div>
 
-        <Button type="submit" disabled={isSubmitting} className="w-full mt-4 py-2">
+        <Button 
+          type="submit" 
+          disabled={isSubmitting} 
+          className="w-full mt-4 py-2 text-base"
+        >
           {isSubmitting ? 'Cadastrando...' : 'Cadastrar Receita'}
         </Button>
       </form>

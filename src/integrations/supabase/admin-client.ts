@@ -9,21 +9,22 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Using import.meta.env instead of process.env for browser compatibility
 const SUPABASE_SERVICE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
 
-export const adminClient = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'admin-bypass-rls',
-      // Supabase-specific header to bypass RLS policies
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-      'X-Supabase-Auth-Override': 'service_role', 
+// Create client with service role key to bypass RLS
+export const adminClient = createClient<Database>(
+  SUPABASE_URL, 
+  SUPABASE_SERVICE_KEY,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
     },
-  },
-});
+    global: {
+      headers: {
+        'X-Client-Info': 'admin-client-bypass-rls',
+      },
+    },
+  }
+);
 
 // For debugging purposes
-console.log('Admin client initialized with RLS bypass');
+console.log('Admin client initialized with service role key');
