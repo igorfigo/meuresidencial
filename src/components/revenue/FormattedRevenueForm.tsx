@@ -61,16 +61,24 @@ export function FormattedRevenueForm() {
       
       console.log('Submitting formatted revenue with payload:', payload);
       
-      // Check if user is admin using the fixed safe function
-      // which avoids recursion issues in RLS policies
-      const { data: isAdmin, error: adminCheckError } = await supabase
-        .rpc('is_admin_user_safe');
+      // Check if user is admin by directly querying the admin_users table
+      // This approach avoids potential RLS recursion issues
+      if (!user?.email) {
+        throw new Error('Email do usuário não disponível');
+      }
+      
+      const { data: adminUsers, error: adminCheckError } = await supabase
+        .from('admin_users')
+        .select('email')
+        .eq('email', user.email.toLowerCase());
       
       if (adminCheckError) {
         console.error('Error checking admin status:', adminCheckError);
         throw new Error(`Erro ao verificar permissões: ${adminCheckError.message}`);
       }
-        
+      
+      const isAdmin = adminUsers && adminUsers.length > 0;
+      
       if (!isAdmin) {
         throw new Error('Permissão negada: apenas administradores podem cadastrar receitas');
       }
