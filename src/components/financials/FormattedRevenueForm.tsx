@@ -61,10 +61,8 @@ export const FormattedRevenueForm = () => {
       // Format the date as YYYY-MM-DD string for the database
       const formattedDate = format(values.revenue_date, 'yyyy-MM-dd');
       
-      // Get the current user's authentication token
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Set up the insertion with proper authentication
+      // Insert data with proper authentication using the user's session
+      // The RLS policy will verify if the user is an admin via the user_roles table
       const { error } = await supabase
         .from('formatted_revenues')
         .insert({
