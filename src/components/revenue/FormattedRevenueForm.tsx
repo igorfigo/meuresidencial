@@ -44,10 +44,17 @@ export function FormattedRevenueForm() {
       
       const { matricula, revenueType, competency } = parseIdentifier(data.identifier);
       
-      console.log('Submitting revenue with admin client...');
+      console.log('Submitting revenue with admin client...', {
+        date_created: data.date_created,
+        raw_identifier: data.identifier,
+        amount: parseFloat(data.amount.replace(',', '.')),
+        matricula,
+        revenue_type: revenueType,
+        competency
+      });
       
       // Use admin client to bypass RLS
-      const { error } = await adminClient
+      const { data: insertedData, error } = await adminClient
         .from('formatted_revenues')
         .insert({
           date_created: data.date_created,
@@ -56,13 +63,15 @@ export function FormattedRevenueForm() {
           matricula,
           revenue_type: revenueType,
           competency
-        });
+        })
+        .select();
 
       if (error) {
         console.error('Error submitting revenue:', error);
         throw error;
       }
 
+      console.log('Revenue inserted successfully:', insertedData);
       toast.success('Receita cadastrada com sucesso!');
       reset();
     } catch (error: any) {
