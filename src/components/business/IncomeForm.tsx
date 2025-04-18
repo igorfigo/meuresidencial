@@ -67,7 +67,8 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
       // Converter para o formato AAAA-MM
       const month = competencyStr.substring(0, 2);
       const year = competencyStr.substring(2);
-      const formattedCompetency = `20${year}-${month}-01`;
+      // Remover o "20" adicional para evitar a data 202025-04-01
+      const formattedCompetency = `${year}-${month}-01`;
       
       // Converter a data para string no formato ISO para compatibilidade com o Supabase
       const formattedDate = format(values.revenue_date, 'yyyy-MM-dd');
