@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -61,21 +60,15 @@ export function FormattedRevenueForm() {
       
       console.log('Submitting formatted revenue with payload:', payload);
       
-      // Use o cliente supabase diretamente, sem depender de políticas RLS
-      // para operações de administrador
-      if (user?.email) {
-        // Verifica se o usuário é admin antes de inserir
-        const { data: isAdmin } = await supabase
-          .rpc('is_admin_user', { user_email: user.email });
-          
-        if (!isAdmin) {
-          throw new Error('Permissão negada: apenas administradores podem cadastrar receitas');
-        }
-      } else {
-        throw new Error('Usuário não autenticado');
+      // Verifica se o usuário é admin usando a nova função segura
+      const { data: isAdmin } = await supabase
+        .rpc('is_admin_user_safe');
+        
+      if (!isAdmin) {
+        throw new Error('Permissão negada: apenas administradores podem cadastrar receitas');
       }
       
-      // Insere os dados diretamente na tabela
+      // Insere os dados na tabela
       const { data: insertedData, error } = await supabase
         .from('formatted_revenues')
         .insert(payload)

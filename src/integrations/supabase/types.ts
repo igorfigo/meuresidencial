@@ -1295,11 +1295,15 @@ export type Database = {
         Returns: string
       }
       get_user_role_safe: {
-        Args: { user_uuid: string }
+        Args: Record<PropertyKey, never> | { user_uuid: string }
         Returns: string
       }
       is_admin_user: {
         Args: { user_email: string }
+        Returns: boolean
+      }
+      is_admin_user_safe: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       toggle_preventive_maintenance_status: {
