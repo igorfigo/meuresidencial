@@ -106,6 +106,7 @@ export function Sidebar() {
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
     { path: '/termos-condicoes', label: 'Termos e Condições', icon: <FileTerminal className="h-5 w-5" /> },
+    { path: '/cadastrar-receita', label: 'Cadastrar Receita', icon: <ReceiptText className="h-5 w-5" /> },
     { isSeparator: true, path: '', label: '', icon: null },
     { 
       path: '/business-management', 
@@ -117,11 +118,6 @@ export function Sidebar() {
         { path: '/business-documents', label: 'Business Documents', icon: <Files className="h-5 w-5 text-blue-500" /> },
         { path: '/despesas-empresariais', label: 'Business Expenses', icon: <DollarSign className="h-5 w-5 text-blue-500" /> },
       ]
-    },
-    { 
-      path: '/cadastrar-receita', 
-      label: 'Cadastrar Receita', 
-      icon: <ReceiptText className="h-5 w-5" /> 
     },
   ];
   
