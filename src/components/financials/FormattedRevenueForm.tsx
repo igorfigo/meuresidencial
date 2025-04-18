@@ -47,10 +47,8 @@ export const FormattedRevenueForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!user?.isAdmin) {
-      toast.error('Apenas administradores podem cadastrar receitas');
-      return;
-    }
+    // Skip admin check in component to avoid recursion issue
+    // We'll rely on the RLS policy with check_admin_access_safe() function
     
     try {
       setIsSubmitting(true);
@@ -74,6 +72,8 @@ export const FormattedRevenueForm = () => {
         
         if (error.code === '42501') {
           toast.error('Erro de permissão ao cadastrar receita. Por favor, contacte o suporte.');
+        } else if (error.message.includes('infinite recursion')) {
+          toast.error('Erro de recursão infinita. Por favor, contacte o suporte técnico.');
         } else {
           toast.error(`Erro ao cadastrar receita: ${error.message}`);
         }
