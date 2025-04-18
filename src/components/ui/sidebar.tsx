@@ -34,8 +34,6 @@ import {
   Files,
   HelpCircle,
   FileTerminal,
-  Building,
-  Package,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
@@ -103,10 +101,9 @@ export function Sidebar() {
 
   const adminMenuItems: MenuItem[] = [
     { path: '/dashboard', label: 'Visão Geral', icon: <Home className="h-5 w-5" /> },
-    { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <Building className="h-5 w-5" /> },
-    { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <Package className="h-5 w-5" /> },
+    { path: '/cadastro-gestor', label: 'Cadastro Gestor', icon: <UserPlus className="h-5 w-5" /> },
+    { path: '/cadastro-planos', label: 'Cadastro Planos', icon: <ClipboardCheck className="h-5 w-5" /> },
     { path: '/cadastro-chave-pix', label: 'Chave PIX / Juros', icon: <KeyRound className="h-5 w-5" /> },
-    { path: '/cadastrar-receita', label: 'Cadastrar Receita', icon: <Receipt className="h-5 w-5" /> },
     { path: '/gerenciar-avisos', label: 'Gerenciar Avisos', icon: <Megaphone className="h-5 w-5" /> },
     { path: '/termos-condicoes', label: 'Termos e Condições', icon: <FileTerminal className="h-5 w-5" /> },
     { isSeparator: true, path: '', label: '', icon: null },

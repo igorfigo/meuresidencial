@@ -1,8 +1,6 @@
 
 import { Navigate } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
-import { supabase } from '@/integrations/supabase/client';
-import { useEffect, useState } from 'react';
 
 interface AdminOnlyProps {
   children: React.ReactNode;
@@ -10,32 +8,8 @@ interface AdminOnlyProps {
 
 const AdminOnly = ({ children }: AdminOnlyProps) => {
   const { user, isAuthenticated, isLoading } = useApp();
-  const [isVerifiedAdmin, setIsVerifiedAdmin] = useState<boolean | null>(null);
   
-  useEffect(() => {
-    const verifyAdminStatus = async () => {
-      if (!user?.email) return false;
-      
-      // Use the updated RPC function that avoids recursion
-      const { data: isAdmin, error } = await supabase
-        .rpc('is_admin_user', { user_email: user.email });
-        
-      if (error) {
-        console.error('Error verifying admin status:', error);
-        return false;
-      }
-      
-      setIsVerifiedAdmin(isAdmin);
-    };
-    
-    if (user) {
-      verifyAdminStatus();
-    } else {
-      setIsVerifiedAdmin(false);
-    }
-  }, [user]);
-  
-  if (isLoading || isVerifiedAdmin === null) {
+  if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
   }
   
@@ -43,7 +17,10 @@ const AdminOnly = ({ children }: AdminOnlyProps) => {
     return <Navigate to="/" replace />;
   }
   
-  if (!isVerifiedAdmin) {
+  // Verificar se o usuário é admin (ajuste de acordo com a estrutura do seu user)
+  const isAdmin = user?.isAdmin === true;
+  
+  if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
   

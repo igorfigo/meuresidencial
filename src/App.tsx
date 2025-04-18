@@ -18,7 +18,6 @@ import FinanceiroPrestacaoContas from '@/pages/FinanceiroPrestacaoContas';
 import CadastroGestor from '@/pages/CadastroGestor';
 import CadastroPlanos from '@/pages/CadastroPlanos';
 import CadastroChavePix from '@/pages/CadastroChavePix';
-import CadastrarReceita from '@/pages/CadastrarReceita';
 import Moradores from '@/pages/Moradores';
 import Comunicados from '@/pages/Comunicados';
 import Documentos from '@/pages/Documentos';
@@ -67,7 +66,6 @@ function App() {
               <Route path="/cadastro-gestor" element={<AdminOnly><CadastroGestor /></AdminOnly>} />
               <Route path="/cadastro-planos" element={<AdminOnly><CadastroPlanos /></AdminOnly>} />
               <Route path="/cadastro-chave-pix" element={<AdminOnly><CadastroChavePix /></AdminOnly>} />
-              <Route path="/cadastrar-receita" element={<AdminOnly><CadastrarReceita /></AdminOnly>} />
               <Route path="/gerar-faturas" element={<AuthRequired><GerarFaturas /></AuthRequired>} />
               <Route path="/gerenciar-avisos" element={<AuthRequired><GerenciarAvisos /></AuthRequired>} />
               <Route path="/business-management" element={<AdminOnly><BusinessManagement /></AdminOnly>} />
