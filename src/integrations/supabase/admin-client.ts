@@ -19,9 +19,6 @@ export const adminClient = createClient<Database>(
       autoRefreshToken: false,
       detectSessionInUrl: false,
     },
-    db: {
-      schema: 'public',
-    },
     global: {
       headers: {
         'X-Client-Info': 'admin-client-bypass-rls',
@@ -31,4 +28,4 @@ export const adminClient = createClient<Database>(
 );
 
 // For debugging purposes
-console.log('Admin client initialized with service role key');
+console.log('Admin client initialized with service role key:', SUPABASE_SERVICE_KEY === SUPABASE_ANON_KEY ? 'Using ANON KEY (fallback)' : 'Using SERVICE KEY');
