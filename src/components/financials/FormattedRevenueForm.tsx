@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useApp } from '@/contexts/AppContext';
 
 const formSchema = z.object({
   systemCode: z.string().length(2, 'Código do sistema deve ter 2 caracteres'),
@@ -31,6 +32,8 @@ const formSchema = z.object({
 });
 
 export const FormattedRevenueForm = () => {
+  const { user } = useApp();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,6 +50,12 @@ export const FormattedRevenueForm = () => {
       const formattedDate = format(values.revenue_date, 'yyyy-MM-dd');
       const fullIdentifier = `${values.systemCode}${values.matricula}${values.revenueType}${values.competency}`;
       
+      // Check if user is admin
+      if (!user?.isAdmin) {
+        toast.error('Apenas administradores podem cadastrar receitas');
+        return;
+      }
+      
       const { error } = await supabase
         .from('formatted_revenues')
         .insert({
@@ -61,12 +70,18 @@ export const FormattedRevenueForm = () => {
 
       if (error) {
         console.error('Error inserting formatted revenue:', error);
-        throw error;
+        
+        if (error.code === '42P17') {
+          toast.error('Erro de permissão ao cadastrar receita. Por favor, contacte o suporte.');
+        } else {
+          toast.error(`Erro ao cadastrar receita: ${error.message}`);
+        }
+        return;
       }
 
       toast.success('Receita cadastrada com sucesso!');
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
       toast.error('Erro ao cadastrar receita. Por favor, tente novamente.');
     }
@@ -158,6 +173,7 @@ export const FormattedRevenueForm = () => {
               <FormControl>
                 <Input 
                   placeholder="R$ 0,00" 
+                  isCurrency
                   {...field}
                 />
               </FormControl>
