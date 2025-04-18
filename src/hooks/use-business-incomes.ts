@@ -26,10 +26,7 @@ export const useBusinessIncomes = () => {
   const { data: incomesData = [], isLoading: isLoadingIncomes, error } = useQuery({
     queryKey: ['business-incomes'],
     queryFn: async () => {
-      if (!user) {
-        console.log("User not authenticated in useBusinessIncomes");
-        return [];
-      }
+      console.log("Fetching business incomes, authenticated user:", !!user);
       
       const { data, error } = await supabase
         .from('business_incomes')
@@ -54,12 +51,6 @@ export const useBusinessIncomes = () => {
   const createIncomeMutation = useMutation({
     mutationFn: async (income: Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>) => {
       setIsLoading(true);
-      
-      if (!user) {
-        console.log("User not authenticated in createIncomeMutation");
-        toast.error("Você precisa estar autenticado para cadastrar receitas");
-        throw new Error("User not authenticated");
-      }
       
       console.log("Creating income with data:", income);
       
@@ -91,12 +82,6 @@ export const useBusinessIncomes = () => {
     mutationFn: async ({ id, ...data }: { id: string } & Partial<Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>>) => {
       setIsLoading(true);
       
-      if (!user) {
-        console.log("User not authenticated in updateIncomeMutation");
-        toast.error("Você precisa estar autenticado para atualizar receitas");
-        throw new Error("User not authenticated");
-      }
-      
       const { data: updatedData, error } = await supabase
         .from('business_incomes')
         .update(data)
@@ -122,12 +107,6 @@ export const useBusinessIncomes = () => {
   const deleteIncomeMutation = useMutation({
     mutationFn: async (id: string) => {
       setIsLoading(true);
-      
-      if (!user) {
-        console.log("User not authenticated in deleteIncomeMutation");
-        toast.error("Você precisa estar autenticado para excluir receitas");
-        throw new Error("User not authenticated");
-      }
       
       const { error } = await supabase
         .from('business_incomes')
