@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { adminClient } from '@/integrations/supabase/admin-client';
 import { useForm } from 'react-hook-form';
 
 interface FormData {
@@ -44,8 +44,8 @@ export function FormattedRevenueForm() {
       
       const { matricula, revenueType, competency } = parseIdentifier(data.identifier);
       
-      // Direct insertion without RLS checks
-      const { error } = await supabase
+      // Use admin client to bypass RLS
+      const { error } = await adminClient
         .from('formatted_revenues')
         .insert({
           date_created: data.date_created,
