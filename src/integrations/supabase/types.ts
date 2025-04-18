@@ -726,6 +726,42 @@ export type Database = {
           },
         ]
       }
+      formatted_revenues: {
+        Row: {
+          amount: number
+          competency: string
+          created_at: string | null
+          date_created: string
+          id: string
+          matricula: string
+          raw_identifier: string
+          revenue_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          competency: string
+          created_at?: string | null
+          date_created: string
+          id?: string
+          matricula: string
+          raw_identifier: string
+          revenue_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          competency?: string
+          created_at?: string | null
+          date_created?: string
+          id?: string
+          matricula?: string
+          raw_identifier?: string
+          revenue_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       garage_listings: {
         Row: {
           created_at: string
