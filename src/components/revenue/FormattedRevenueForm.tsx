@@ -44,6 +44,7 @@ export function FormattedRevenueForm() {
       
       const { matricula, revenueType, competency } = parseIdentifier(data.identifier);
       
+      // Direct insertion without RLS checks
       const { error } = await supabase
         .from('formatted_revenues')
         .insert({
@@ -55,13 +56,16 @@ export function FormattedRevenueForm() {
           competency
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error submitting revenue:', error);
+        throw error;
+      }
 
       toast.success('Receita cadastrada com sucesso!');
       reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting revenue:', error);
-      toast.error('Erro ao cadastrar receita');
+      toast.error(`Erro ao cadastrar receita: ${error.message || 'Erro desconhecido'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -99,6 +103,9 @@ export function FormattedRevenueForm() {
           {errors.identifier && (
             <p className="text-sm text-red-500">{errors.identifier.message}</p>
           )}
+          <p className="text-xs text-gray-500">
+            Formato: MR + matrícula (11 dígitos) + tipo (3 letras) + competência (042025)
+          </p>
         </div>
 
         <div className="space-y-2">
