@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -60,9 +61,15 @@ export function FormattedRevenueForm() {
       
       console.log('Submitting formatted revenue with payload:', payload);
       
-      // Verifica se o usuário é admin usando a nova função segura
-      const { data: isAdmin } = await supabase
+      // Check if user is admin using the fixed safe function
+      // which avoids recursion issues in RLS policies
+      const { data: isAdmin, error: adminCheckError } = await supabase
         .rpc('is_admin_user_safe');
+      
+      if (adminCheckError) {
+        console.error('Error checking admin status:', adminCheckError);
+        throw new Error(`Erro ao verificar permissões: ${adminCheckError.message}`);
+      }
         
       if (!isAdmin) {
         throw new Error('Permissão negada: apenas administradores podem cadastrar receitas');
