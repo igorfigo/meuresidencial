@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
@@ -236,7 +235,7 @@ const BusinessManagement: React.FC = () => {
               </CardContent>
             </Card>
 
-            <ExpenseEvolutionChart matricula={user?.matricula || ''} />
+            <ExpenseEvolutionChart />
           </TabsContent>
         </Tabs>
       </div>

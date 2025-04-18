@@ -690,7 +690,7 @@ const FinanceiroDashboard = () => {
         </div>
         
         <div className="mb-8">
-          <ExpenseEvolutionChart matricula={user?.selectedCondominium || ''} />
+          <ExpenseEvolutionChart />
         </div>
         
         <Card className="overflow-hidden border-blue-300 shadow-md mb-8 w-full border-t-4 border-t-brand-600">

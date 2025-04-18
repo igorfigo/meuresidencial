@@ -15,7 +15,12 @@ interface ExpenseData {
   value: number;
 }
 
-export const ExpenseEvolutionChart = () => {
+interface ExpenseEvolutionChartProps {
+  // Make the matricula prop optional
+  matricula?: string;
+}
+
+export const ExpenseEvolutionChart: React.FC<ExpenseEvolutionChartProps> = () => {
   const [chartData, setChartData] = useState<ExpenseData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
@@ -43,33 +48,35 @@ export const ExpenseEvolutionChart = () => {
         const { data: expenses, error } = await supabase
           .from('business_expenses')
           .select('amount, date')
-          .in('date', months.map(month => {
-            const [year, monthNum] = month.split('-');
-            const lastDayOfMonth = new Date(parseInt(year), parseInt(monthNum), 0).getDate();
-            return Array.from({ length: lastDayOfMonth }, (_, i) => 
-              `${year}-${monthNum}-${String(i + 1).padStart(2, '0')}`
-            );
-          }).flat());
+          .gte('date', sixMonthsAgo.toISOString().split('T')[0])
+          .lte('date', today.toISOString().split('T')[0]);
 
         if (error) throw error;
 
         console.log('Expense data received:', expenses);
 
-        // Process data for chart
+        // Process data for chart - group by month
         const monthlyData = months.map(monthStr => {
           const [year, monthNum] = monthStr.split('-');
+          const yearNum = parseInt(year);
+          const monthNumber = parseInt(monthNum);
+          
           const monthExpenses = expenses.filter(expense => {
             const expenseDate = new Date(expense.date);
-            return expenseDate.getFullYear() === parseInt(year) && 
-                   expenseDate.getMonth() === parseInt(monthNum) - 1;
+            return expenseDate.getFullYear() === yearNum && 
+                   expenseDate.getMonth() === monthNumber - 1;
           });
           
           const totalExpense = monthExpenses.reduce((sum, expense) => {
-            return sum + parseFloat(expense.amount);
+            // Convert amount to number if it's a string
+            const amount = typeof expense.amount === 'string' 
+              ? BRLToNumber(expense.amount)
+              : parseFloat(expense.amount);
+            return sum + amount;
           }, 0);
           
           const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-          const monthName = monthNames[parseInt(monthNum) - 1];
+          const monthName = monthNames[monthNumber - 1];
           
           console.log(`Month ${monthStr} total: ${totalExpense}`);
           
