@@ -5,8 +5,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { adminClient } from '@/integrations/supabase/admin-client';
+import { supabase } from '@/integrations/supabase/client';
 import { useForm } from 'react-hook-form';
+import { useApp } from '@/contexts/AppContext';
 
 interface FormData {
   date_created: string;
@@ -17,6 +18,7 @@ interface FormData {
 export function FormattedRevenueForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
+  const { user } = useApp();
 
   const parseIdentifier = (identifier: string) => {
     // Ignore first two characters (MR)
@@ -55,8 +57,8 @@ export function FormattedRevenueForm() {
       
       console.log('Submitting formatted revenue with payload:', payload);
       
-      // Force using the adminClient with service role authorization to bypass RLS completely
-      const { data: insertedData, error } = await adminClient
+      // Usar o cliente Supabase normal que respeita as RLS policies
+      const { data: insertedData, error } = await supabase
         .from('formatted_revenues')
         .insert(payload)
         .select();
