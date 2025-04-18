@@ -12,7 +12,8 @@ import {
   PieChart,
   Pie,
   Cell,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip
 } from 'recharts';
 import { ChartContainer } from '@/components/ui/chart';
 import { useBusinessExpenses } from '@/hooks/use-business-expenses';
@@ -182,7 +183,7 @@ const BusinessManagement: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <RechartsTooltip 
                     formatter={(value: number) => formatToBRL(value)}
                     labelFormatter={(name) => {
                       const item = categoryData.find(c => c.name === name);
