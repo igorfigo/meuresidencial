@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/utils/currency';
-import { useBusinessIncomes, BusinessIncome } from '@/hooks/use-business-incomes';
+import { useBusinessIncomes, type BusinessIncome } from '@/hooks/use-business-incomes';
 import { IncomeForm } from '@/components/business/IncomeForm';
 
 export default function BusinessIncome() {
