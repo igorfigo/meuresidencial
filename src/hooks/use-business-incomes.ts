@@ -44,7 +44,9 @@ export const useBusinessIncomes = () => {
   // Filter and format the data
   const incomes = incomesData.map(item => ({
     ...item,
-    revenue_date: new Date(item.revenue_date).toISOString().split('T')[0]
+    revenue_date: new Date(item.revenue_date).toISOString().split('T')[0],
+    // Format the competency date properly
+    competency: item.competency ? new Date(item.competency).toISOString().split('T')[0] : ''
   }));
 
   // Mutation to create a new income

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,6 +27,9 @@ import { useBusinessIncomes } from '@/hooks/use-business-incomes';
 const formSchema = z.object({
   revenue_date: z.date({
     required_error: "A data é obrigatória",
+  }),
+  competency_date: z.date({
+    required_error: "A competência é obrigatória",
   }),
   identifier: z.string().min(20, {
     message: "O identificador deve ter pelo menos 20 caracteres",
@@ -59,10 +63,10 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
       const system_code = identifier.substring(0, 2);
       const manager_code = identifier.substring(2, 13);
       const revenue_type = identifier.substring(13, 16);
-      const competency = identifier.substring(16, 22);
-
-      // Converter a data para string no formato ISO para compatibilidade com o Supabase
+      
+      // Converter as datas para string no formato ISO para compatibilidade com o Supabase
       const formattedDate = format(values.revenue_date, 'yyyy-MM-dd');
+      const formattedCompetency = format(values.competency_date, 'yyyy-MM-dd');
 
       await createIncome({
         revenue_date: formattedDate,
@@ -70,7 +74,7 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
         system_code,
         manager_code,
         revenue_type,
-        competency,
+        competency: formattedCompetency,
         amount: parseFloat(values.amount)
       });
 
@@ -109,6 +113,48 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Selecione uma data</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="competency_date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Competência (Mês/Ano)</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "MM/yyyy")
+                        ) : (
+                          <span>Selecione a competência</span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>

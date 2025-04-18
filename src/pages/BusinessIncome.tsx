@@ -30,6 +30,12 @@ export default function BusinessIncome() {
     return date.toLocaleDateString('pt-BR');
   };
 
+  const formatCompetency = (dateString: string) => {
+    const date = new Date(dateString);
+    // Format as MM/YYYY
+    return new Intl.DateTimeFormat('pt-BR', { month: '2-digit', year: 'numeric' }).format(date);
+  };
+
   const handleEditIncome = (income: BusinessIncome) => {
     setSelectedIncome(income);
     setOpenEditIncomeDialog(true);
@@ -50,16 +56,15 @@ export default function BusinessIncome() {
     const system_code = identifier.substring(0, 2);
     const manager_code = identifier.substring(2, 13);
     const revenue_type = identifier.substring(13, 16);
-    const competency = identifier.substring(16, 22);
     
     try {
+      // We no longer extract competency from identifier as it's now a proper date field
       await updateIncome(selectedIncome.id, {
         revenue_date: date,
         full_identifier: identifier,
         system_code,
         manager_code,
         revenue_type,
-        competency,
         amount
       });
       
@@ -147,7 +152,7 @@ export default function BusinessIncome() {
                   <TableRow key={income.id}>
                     <TableCell className="font-medium text-center">{income.full_identifier}</TableCell>
                     <TableCell className="text-center">{income.revenue_type}</TableCell>
-                    <TableCell className="text-center">{income.competency}</TableCell>
+                    <TableCell className="text-center">{formatCompetency(income.competency)}</TableCell>
                     <TableCell className="text-center">{formatDate(income.revenue_date)}</TableCell>
                     <TableCell className="text-center">{formatCurrency(income.amount)}</TableCell>
                     <TableCell className="text-center">
