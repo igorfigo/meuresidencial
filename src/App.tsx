@@ -38,7 +38,7 @@ import DuvidasFrequentes from './pages/DuvidasFrequentes';
 import LandingPage from './pages/LandingPage';
 import TermosCondicoes from './pages/TermosCondicoes';
 import TermosCondicoesPublic from './pages/TermosCondicoesPublic';
-import BusinessIncome from './pages/BusinessIncome';
+import BusinessIncomes from './pages/BusinessIncomes';
 
 const GerarFaturas = () => <div>Gerar Faturas (Em Desenvolvimento)</div>;
 
@@ -72,7 +72,7 @@ function App() {
               <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
               <Route path="/business-documents" element={<AdminOnly><BusinessDocuments /></AdminOnly>} />
               <Route path="/despesas-empresariais" element={<AdminOnly><BusinessCost /></AdminOnly>} />
-              <Route path="/cadastrar-receita" element={<AdminOnly><BusinessIncome /></AdminOnly>} />
+              <Route path="/cadastrar-receita" element={<AdminOnly><BusinessIncomes /></AdminOnly>} />
               <Route path="/termos-condicoes" element={<AdminOnly><TermosCondicoes /></AdminOnly>} />
               
               {/* Manager Routes */}

@@ -13,6 +13,9 @@ import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/utils/currency';
 import { toast } from 'sonner';
 import { useBusinessExpenses, BusinessExpense } from '@/hooks/use-business-expenses';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+
+const ITEMS_PER_PAGE = 10;
 
 const expenseCategories = [
   { id: 'rent', label: 'Aluguel' },
@@ -35,7 +38,8 @@ const BusinessCost = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedExpense, setSelectedExpense] = useState<BusinessExpense | null>(null);
-  
+  const [currentPage, setCurrentPage] = useState(1);
+
   const { 
     expenses, 
     isLoading, 
@@ -47,9 +51,13 @@ const BusinessCost = () => {
   const filteredExpenses = expenses?.filter(expense => {
     const matchesSearch = expense.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || expense.category === selectedCategory;
-    
     return matchesSearch && matchesCategory;
   });
+
+  const totalPages = filteredExpenses ? Math.ceil(filteredExpenses.length / ITEMS_PER_PAGE) : 0;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentExpenses = filteredExpenses?.slice(startIndex, endIndex);
 
   const handleSubmitNewExpense = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -229,72 +237,119 @@ const BusinessCost = () => {
               </Card>
             ))}
           </div>
-        ) : filteredExpenses?.length ? (
-          <div className="overflow-x-auto border-t-4 border-t-brand-500 rounded-md bg-white">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead className="text-center">Data</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead className="text-center">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredExpenses.map((expense: BusinessExpense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell className="font-medium">{expense.description}</TableCell>
-                    <TableCell>
-                      {expenseCategories.find(cat => cat.id === expense.category)?.label || expense.category}
-                    </TableCell>
-                    <TableCell className="text-center">{formatDate(expense.date)}</TableCell>
-                    <TableCell>{formatCurrency(expense.amount)}</TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex justify-center gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleEditExpense(expense)}
-                          title="Editar"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="text-red-600"
-                              title="Excluir"
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Excluir despesa</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Tem certeza que deseja excluir esta despesa? Esta ação não pode ser desfeita.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction 
-                                className="bg-red-600 hover:bg-red-700"
-                                onClick={() => handleDeleteExpense(expense.id)}
-                              >
-                                Excluir
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
+        ) : currentExpenses?.length ? (
+          <div className="space-y-4">
+            <div className="overflow-x-auto border-t-4 border-t-brand-500 rounded-md bg-white">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead className="text-center">Data</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead className="text-center">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {currentExpenses.map((expense: BusinessExpense) => (
+                    <TableRow key={expense.id}>
+                      <TableCell className="font-medium">{expense.description}</TableCell>
+                      <TableCell>
+                        {expenseCategories.find(cat => cat.id === expense.category)?.label || expense.category}
+                      </TableCell>
+                      <TableCell className="text-center">{formatDate(expense.date)}</TableCell>
+                      <TableCell>{formatCurrency(expense.amount)}</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleEditExpense(expense)}
+                            title="Editar"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="text-red-600"
+                                title="Excluir"
+                              >
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir despesa</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir esta despesa? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  className="bg-red-600 hover:bg-red-700"
+                                  onClick={() => handleDeleteExpense(expense.id)}
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {totalPages > 1 && (
+              <Pagination className="justify-center">
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(prev => prev - 1);
+                        }} 
+                      />
+                    </PaginationItem>
+                  )}
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(page);
+                        }}
+                        isActive={currentPage === page}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(prev => prev + 1);
+                        }} 
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            )}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center border-t-4 border-t-brand-500 rounded-md bg-white dark:bg-gray-900 p-6">
