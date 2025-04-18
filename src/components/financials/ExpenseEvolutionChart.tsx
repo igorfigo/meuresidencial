@@ -10,28 +10,22 @@ import { TrendingUp, Loader2 } from 'lucide-react';
 import { formatToBRL, BRLToNumber } from '@/utils/currency';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-interface ExpenseData {
+interface ChartData {
   month: string;
-  value: number;
+  expenses: number;
+  incomes: number;
 }
 
-interface ExpenseEvolutionChartProps {
-  // Make the matricula prop optional
-  matricula?: string;
-}
-
-export const ExpenseEvolutionChart: React.FC<ExpenseEvolutionChartProps> = () => {
-  const [chartData, setChartData] = useState<ExpenseData[]>([]);
+export const ExpenseEvolutionChart: React.FC = () => {
+  const [chartData, setChartData] = useState<ChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
 
-  // Fetch expense data for the last 6 months
   useEffect(() => {
-    const fetchExpenseData = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
 
       try {
-        // Calculate the date range for the last 6 months
         const today = new Date();
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(today.getMonth() - 5);
@@ -43,24 +37,28 @@ export const ExpenseEvolutionChart: React.FC<ExpenseEvolutionChartProps> = () =>
           months.push(format(month, 'yyyy-MM', { locale: ptBR }));
         }
 
-        console.log('Fetching expenses for months:', months);
+        // Fetch both expenses and incomes
+        const [{ data: expenses }, { data: incomes }] = await Promise.all([
+          supabase
+            .from('business_expenses')
+            .select('amount, date')
+            .gte('date', sixMonthsAgo.toISOString().split('T')[0])
+            .lte('date', today.toISOString().split('T')[0]),
+          supabase
+            .from('business_incomes')
+            .select('amount, revenue_date')
+            .gte('revenue_date', sixMonthsAgo.toISOString().split('T')[0])
+            .lte('revenue_date', today.toISOString().split('T')[0])
+        ]);
 
-        const { data: expenses, error } = await supabase
-          .from('business_expenses')
-          .select('amount, date')
-          .gte('date', sixMonthsAgo.toISOString().split('T')[0])
-          .lte('date', today.toISOString().split('T')[0]);
+        if (!expenses || !incomes) throw new Error('Failed to fetch data');
 
-        if (error) throw error;
-
-        console.log('Expense data received:', expenses);
-
-        // Process data for chart - group by month
         const monthlyData = months.map(monthStr => {
           const [year, monthNum] = monthStr.split('-');
           const yearNum = parseInt(year);
           const monthNumber = parseInt(monthNum);
           
+          // Calculate monthly expenses
           const monthExpenses = expenses.filter(expense => {
             const expenseDate = new Date(expense.date);
             return expenseDate.getFullYear() === yearNum && 
@@ -68,34 +66,45 @@ export const ExpenseEvolutionChart: React.FC<ExpenseEvolutionChartProps> = () =>
           });
           
           const totalExpense = monthExpenses.reduce((sum, expense) => {
-            // Convert amount to number if it's a string
             const amount = typeof expense.amount === 'string' 
               ? BRLToNumber(expense.amount)
               : parseFloat(expense.amount.toString());
+            return sum + amount;
+          }, 0);
+
+          // Calculate monthly incomes
+          const monthIncomes = incomes.filter(income => {
+            const incomeDate = new Date(income.revenue_date);
+            return incomeDate.getFullYear() === yearNum && 
+                   incomeDate.getMonth() === monthNumber - 1;
+          });
+          
+          const totalIncome = monthIncomes.reduce((sum, income) => {
+            const amount = typeof income.amount === 'string' 
+              ? BRLToNumber(income.amount)
+              : parseFloat(income.amount.toString());
             return sum + amount;
           }, 0);
           
           const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
           const monthName = monthNames[monthNumber - 1];
           
-          console.log(`Month ${monthStr} total: ${totalExpense}`);
-          
           return {
             month: `${monthName}/${year.substring(2)}`,
-            value: totalExpense
+            expenses: totalExpense,
+            incomes: totalIncome
           };
         });
 
-        console.log('Processed chart data:', monthlyData);
         setChartData(monthlyData);
       } catch (error) {
-        console.error('Error fetching expense data:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchExpenseData();
+    fetchData();
   }, []);
 
   const formatTooltipValue = (value: number) => {
@@ -107,7 +116,7 @@ export const ExpenseEvolutionChart: React.FC<ExpenseEvolutionChartProps> = () =>
       <CardContent className="p-3 md:p-4">
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="h-5 w-5 text-blue-500" />
-          <h3 className="font-semibold text-gray-800 text-sm md:text-base">Evolução de Despesas</h3>
+          <h3 className="font-semibold text-gray-800 text-sm md:text-base">Evolução Financeira</h3>
         </div>
         
         <div className={isMobile ? "h-52" : "h-64"}>
@@ -152,20 +161,30 @@ export const ExpenseEvolutionChart: React.FC<ExpenseEvolutionChartProps> = () =>
                       return (
                         <div className="bg-white p-2 border border-gray-200 shadow-md rounded text-xs md:text-sm">
                           <p className="font-medium">{payload[0].payload.month}</p>
-                          <p style={{ color: '#f97150' }}>
-                            Total: {formatToBRL(payload[0].value as number)}
-                          </p>
+                          {payload.map((entry, index) => (
+                            <p key={index} style={{ color: entry.color }}>
+                              {entry.name === 'expenses' ? 'Despesas: ' : 'Receitas: '}
+                              {formatToBRL(entry.value as number)}
+                            </p>
+                          ))}
                         </div>
                       );
                     }
                     return null;
                   }}
                 />
-                <Legend formatter={() => 'Total de Despesas'} />
+                <Legend />
                 <Bar 
-                  dataKey="value" 
+                  dataKey="expenses" 
                   fill="#f97150" 
-                  name="Total de Despesas"
+                  name="Despesas"
+                  barSize={isMobile ? 20 : 30}
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar 
+                  dataKey="incomes" 
+                  fill="#4ade80" 
+                  name="Receitas"
                   barSize={isMobile ? 20 : 30}
                   radius={[4, 4, 0, 0]}
                 />
@@ -173,7 +192,7 @@ export const ExpenseEvolutionChart: React.FC<ExpenseEvolutionChartProps> = () =>
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500 text-sm">Nenhuma despesa registrada nos últimos 6 meses.</p>
+              <p className="text-gray-500 text-sm">Nenhum dado registrado nos últimos 6 meses.</p>
             </div>
           )}
         </div>
@@ -181,3 +200,4 @@ export const ExpenseEvolutionChart: React.FC<ExpenseEvolutionChartProps> = () =>
     </Card>
   );
 };
+
