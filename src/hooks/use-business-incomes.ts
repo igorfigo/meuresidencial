@@ -41,12 +41,12 @@ export const useBusinessIncomes = () => {
     },
   });
 
-  // Filter and format the data
+  // Filter and format the data - using the raw date from the database without any adjustments
   const incomes = incomesData.map(item => ({
     ...item,
     revenue_date: new Date(item.revenue_date).toISOString().split('T')[0],
-    // Format the competency date properly
-    competency: item.competency ? new Date(item.competency).toISOString().split('T')[0] : ''
+    // Preserve the original competency date without any timezone adjustments
+    competency: item.competency || ''
   }));
 
   // Mutation to create a new income

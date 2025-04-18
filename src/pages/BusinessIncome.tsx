@@ -31,9 +31,13 @@ export default function BusinessIncome() {
   };
 
   const formatCompetency = (dateString: string) => {
+    if (!dateString) return '';
+    
+    // Create a new date object from the input string
     const date = new Date(dateString);
-    // Format as MM/YYYY
-    return new Intl.DateTimeFormat('pt-BR', { month: '2-digit', year: 'numeric' }).format(date);
+    
+    // Format as MM/YYYY without any timezone adjustments
+    return `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
   };
 
   const handleEditIncome = (income: BusinessIncome) => {
