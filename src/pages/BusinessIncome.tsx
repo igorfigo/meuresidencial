@@ -1,21 +1,23 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Eye, Receipt, Search, Trash } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/utils/currency';
-import { useState } from 'react';
-import { useBusinessIncomes } from '@/hooks/use-business-incomes';
+import { useBusinessIncomes, BusinessIncome } from '@/hooks/use-business-incomes';
 import { IncomeForm } from '@/components/business/IncomeForm';
 
 export default function BusinessIncome() {
   const [searchQuery, setSearchQuery] = useState('');
-  const { incomes, isLoading, deleteIncome } = useBusinessIncomes();
+  const [openEditIncomeDialog, setOpenEditIncomeDialog] = useState(false);
+  const [selectedIncome, setSelectedIncome] = useState<BusinessIncome | null>(null);
+  const { incomes, isLoading, updateIncome, deleteIncome } = useBusinessIncomes();
 
   const filteredIncomes = incomes?.filter(income => {
     return income.full_identifier.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -25,6 +27,46 @@ export default function BusinessIncome() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
+  };
+
+  const handleEditIncome = (income: BusinessIncome) => {
+    setSelectedIncome(income);
+    setOpenEditIncomeDialog(true);
+  };
+
+  const handleUpdateIncome = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (!selectedIncome?.id) return;
+    
+    const formData = new FormData(e.currentTarget);
+    const identifier = String(formData.get('identifier') || '');
+    const amountValue = formData.get('amount');
+    const amount = amountValue ? parseFloat(String(amountValue).replace(/[^\d,.-]/g, '').replace(',', '.')) : 0;
+    const dateValue = formData.get('date');
+    const date = dateValue ? String(dateValue) : '';
+    
+    // Process the identifier
+    const system_code = identifier.substring(0, 2);
+    const manager_code = identifier.substring(2, 13);
+    const revenue_type = identifier.substring(13, 16);
+    const competency = identifier.substring(16, 22);
+    
+    try {
+      await updateIncome(selectedIncome.id, {
+        revenue_date: date,
+        full_identifier: identifier,
+        system_code,
+        manager_code,
+        revenue_type,
+        competency,
+        amount
+      });
+      
+      setOpenEditIncomeDialog(false);
+    } catch (error) {
+      console.error("Erro ao atualizar receita:", error);
+    }
   };
 
   return (
@@ -88,6 +130,14 @@ export default function BusinessIncome() {
                     <TableCell>{formatCurrency(income.amount)}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex justify-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEditIncome(income)}
+                          title="Editar"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button 
@@ -142,6 +192,58 @@ export default function BusinessIncome() {
       <div className="mt-6">
         <IncomeForm />
       </div>
+
+      <Dialog open={openEditIncomeDialog} onOpenChange={setOpenEditIncomeDialog}>
+        <DialogContent className="sm:max-w-[525px]">
+          <form onSubmit={handleUpdateIncome}>
+            <DialogHeader>
+              <DialogTitle>Editar Receita</DialogTitle>
+              <DialogDescription>
+                Altere os dados da receita abaixo
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <label htmlFor="edit-identifier" className="text-sm font-medium">Identificador</label>
+                <Input 
+                  id="edit-identifier" 
+                  name="identifier" 
+                  required 
+                  defaultValue={selectedIncome?.full_identifier}
+                  maxLength={22}
+                />
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="edit-amount" className="text-sm font-medium">Valor (R$)</label>
+                <Input 
+                  id="edit-amount" 
+                  name="amount" 
+                  type="number" 
+                  step="0.01" 
+                  required 
+                  defaultValue={selectedIncome?.amount}
+                />
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="edit-date" className="text-sm font-medium">Data</label>
+                <Input 
+                  id="edit-date" 
+                  name="date" 
+                  type="date" 
+                  required 
+                  defaultValue={selectedIncome?.revenue_date}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpenEditIncomeDialog(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">Salvar Alterações</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

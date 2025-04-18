@@ -64,6 +64,31 @@ export const useBusinessIncomes = () => {
     }
   });
 
+  // Mutation to update an existing income
+  const updateIncomeMutation = useMutation({
+    mutationFn: async ({ id, ...data }: { id: string } & Partial<Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>>) => {
+      setIsLoading(true);
+      const { data: updatedData, error } = await supabase
+        .from('business_incomes')
+        .update(data)
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return updatedData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-incomes'] });
+      toast.success("Receita atualizada com sucesso");
+      setIsLoading(false);
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar receita:", error);
+      toast.error("Erro ao atualizar receita");
+      setIsLoading(false);
+    }
+  });
+
   // Mutation to delete an income
   const deleteIncomeMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -93,6 +118,8 @@ export const useBusinessIncomes = () => {
     error,
     createIncome: (income: Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>) => 
       createIncomeMutation.mutate(income),
+    updateIncome: (id: string, data: Partial<Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>>) => 
+      updateIncomeMutation.mutate({ id, ...data }),
     deleteIncome: (id: string) => deleteIncomeMutation.mutate(id)
   };
 };
