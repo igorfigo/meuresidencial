@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -64,7 +65,6 @@ function App() {
               <Route path="/cadastro-gestor" element={<AdminOnly><CadastroGestor /></AdminOnly>} />
               <Route path="/cadastro-planos" element={<AdminOnly><CadastroPlanos /></AdminOnly>} />
               <Route path="/cadastro-chave-pix" element={<AdminOnly><CadastroChavePix /></AdminOnly>} />
-              <Route path="/gerar-faturas" element={<AuthRequired><GerarFaturas /></AuthRequired>} />
               <Route path="/gerenciar-avisos" element={<AuthRequired><GerenciarAvisos /></AuthRequired>} />
               <Route path="/business-management" element={<AdminOnly><BusinessManagement /></AdminOnly>} />
               <Route path="/contratos" element={<AdminOnly><BusinessContratos /></AdminOnly>} />
