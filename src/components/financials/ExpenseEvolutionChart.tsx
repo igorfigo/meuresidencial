@@ -71,7 +71,7 @@ export const ExpenseEvolutionChart: React.FC<ExpenseEvolutionChartProps> = () =>
             // Convert amount to number if it's a string
             const amount = typeof expense.amount === 'string' 
               ? BRLToNumber(expense.amount)
-              : parseFloat(expense.amount);
+              : parseFloat(expense.amount.toString());
             return sum + amount;
           }, 0);
           
