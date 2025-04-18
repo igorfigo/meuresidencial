@@ -52,12 +52,13 @@ export function FormattedRevenueForm() {
         amount: parseFloat(data.amount.replace(',', '.')),
         matricula,
         revenue_type: revenueType,
-        competency
+        competency,
+        created_by: user?.email // Adding this field to track who created the record
       };
       
       console.log('Submitting formatted revenue with payload:', payload);
       
-      // Usar o cliente Supabase normal que respeita as RLS policies
+      // Using the standard Supabase client that respects RLS policies
       const { data: insertedData, error } = await supabase
         .from('formatted_revenues')
         .insert(payload)
