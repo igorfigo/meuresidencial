@@ -15,13 +15,14 @@ export const adminClient = createClient<Database>(
   SUPABASE_SERVICE_KEY,
   {
     auth: {
-      persistSession: false,
       autoRefreshToken: false,
+      persistSession: false,
       detectSessionInUrl: false,
     },
     global: {
       headers: {
         'X-Client-Info': 'admin-client-bypass-rls',
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`, // Explicitly add the Authorization header
       },
     },
   }
