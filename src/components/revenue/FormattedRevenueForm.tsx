@@ -55,7 +55,7 @@ export function FormattedRevenueForm() {
       
       console.log('Submitting formatted revenue with payload:', payload);
       
-      // Use admin client with service role key
+      // Explicitly use adminClient with service role key to bypass RLS completely
       const { data: insertedData, error } = await adminClient
         .from('formatted_revenues')
         .insert(payload)

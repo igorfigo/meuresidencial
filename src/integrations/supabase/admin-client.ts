@@ -17,6 +17,10 @@ export const adminClient = createClient<Database>(
     auth: {
       persistSession: false,
       autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+    db: {
+      schema: 'public',
     },
     global: {
       headers: {
