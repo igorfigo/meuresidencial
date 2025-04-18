@@ -44,6 +44,8 @@ export function FormattedRevenueForm() {
       
       const { matricula, revenueType, competency } = parseIdentifier(data.identifier);
       
+      console.log('Submitting revenue with admin client...');
+      
       // Use admin client to bypass RLS
       const { error } = await adminClient
         .from('formatted_revenues')
@@ -127,7 +129,7 @@ export function FormattedRevenueForm() {
           )}
         </div>
 
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? 'Cadastrando...' : 'Cadastrar Receita'}
         </Button>
       </form>
