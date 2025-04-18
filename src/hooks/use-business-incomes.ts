@@ -24,13 +24,20 @@ export const useBusinessIncomes = () => {
   const { data: incomesData = [], isLoading: isLoadingIncomes, error } = useQuery({
     queryKey: ['business-incomes'],
     queryFn: async () => {
+      // Check if user is logged in
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("User not authenticated");
+      
       const { data, error } = await supabase
         .from('business_incomes')
         .select('*')
         .order('revenue_date', { ascending: false });
       
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Error fetching incomes:", error);
+        throw error;
+      }
+      return data || [];
     },
   });
 
@@ -44,12 +51,22 @@ export const useBusinessIncomes = () => {
   const createIncomeMutation = useMutation({
     mutationFn: async (income: Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>) => {
       setIsLoading(true);
+      
+      // Check if user is logged in
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("User not authenticated");
+      
+      console.log("Creating income with data:", income);
+      
       const { data, error } = await supabase
         .from('business_incomes')
         .insert(income)
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating income:", error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -68,6 +85,11 @@ export const useBusinessIncomes = () => {
   const updateIncomeMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: string } & Partial<Omit<BusinessIncome, 'id' | 'created_at' | 'updated_at'>>) => {
       setIsLoading(true);
+      
+      // Check if user is logged in
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("User not authenticated");
+      
       const { data: updatedData, error } = await supabase
         .from('business_incomes')
         .update(data)
@@ -93,6 +115,11 @@ export const useBusinessIncomes = () => {
   const deleteIncomeMutation = useMutation({
     mutationFn: async (id: string) => {
       setIsLoading(true);
+      
+      // Check if user is logged in
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("User not authenticated");
+      
       const { error } = await supabase
         .from('business_incomes')
         .delete()
