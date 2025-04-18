@@ -39,6 +39,24 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           content: string
@@ -271,6 +289,45 @@ export type Database = {
           description?: string
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      business_incomes: {
+        Row: {
+          amount: number
+          competency: string
+          created_at: string | null
+          full_identifier: string
+          id: string
+          manager_code: string
+          revenue_date: string
+          revenue_type: string
+          system_code: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          competency: string
+          created_at?: string | null
+          full_identifier: string
+          id?: string
+          manager_code: string
+          revenue_date: string
+          revenue_type: string
+          system_code: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          competency?: string
+          created_at?: string | null
+          full_identifier?: string
+          id?: string
+          manager_code?: string
+          revenue_date?: string
+          revenue_type?: string
+          system_code?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -726,6 +783,45 @@ export type Database = {
           },
         ]
       }
+      formatted_revenues: {
+        Row: {
+          amount: string
+          competency: string
+          created_at: string
+          full_identifier: string
+          id: string
+          matricula: string
+          revenue_date: string
+          revenue_type: string
+          system_code: string
+          updated_at: string
+        }
+        Insert: {
+          amount: string
+          competency: string
+          created_at?: string
+          full_identifier: string
+          id?: string
+          matricula: string
+          revenue_date: string
+          revenue_type: string
+          system_code: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: string
+          competency?: string
+          created_at?: string
+          full_identifier?: string
+          id?: string
+          matricula?: string
+          revenue_date?: string
+          revenue_type?: string
+          system_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       garage_listings: {
         Row: {
           created_at: string
@@ -1034,51 +1130,6 @@ export type Database = {
         }
         Relationships: []
       }
-      resident_charges: {
-        Row: {
-          amount: string
-          created_at: string
-          due_date: string
-          id: string
-          matricula: string
-          month: string
-          payment_date: string | null
-          resident_id: string
-          status: string
-          unit: string
-          updated_at: string
-          year: string
-        }
-        Insert: {
-          amount: string
-          created_at?: string
-          due_date: string
-          id?: string
-          matricula: string
-          month: string
-          payment_date?: string | null
-          resident_id: string
-          status?: string
-          unit: string
-          updated_at?: string
-          year: string
-        }
-        Update: {
-          amount?: string
-          created_at?: string
-          due_date?: string
-          id?: string
-          matricula?: string
-          month?: string
-          payment_date?: string | null
-          resident_id?: string
-          status?: string
-          unit?: string
-          updated_at?: string
-          year?: string
-        }
-        Relationships: []
-      }
       residents: {
         Row: {
           active: boolean
@@ -1201,6 +1252,14 @@ export type Database = {
         }
         Returns: string
       }
+      check_admin_access: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      check_admin_access_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       delete_preventive_maintenance: {
         Args: { p_id: string }
         Returns: boolean
@@ -1230,6 +1289,18 @@ export type Database = {
       get_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_user_role_safe: {
+        Args: Record<PropertyKey, never> | { user_uuid: string }
+        Returns: string
+      }
+      is_admin_user: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
+      is_admin_user_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       toggle_preventive_maintenance_status: {
         Args: { p_id: string }
