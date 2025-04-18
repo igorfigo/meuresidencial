@@ -362,7 +362,6 @@ const Login = () => {
             
             <div className="text-center mt-4">
               <p className="text-white text-sm">
-                Não tem uma conta? {" "}
                 <button 
                   onClick={() => setForgotPasswordOpen(true)} 
                   className="text-blue-200 hover:text-white hover:underline mr-2"
