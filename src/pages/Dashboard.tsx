@@ -430,10 +430,10 @@ const Dashboard = () => {
     } else {
       return (
         <>
-          <h1 className={`text-3xl font-bold tracking-tight ${isMobile ? "text-xl" : ""}`}>
+          <h1 className={`text-2xl font-bold tracking-tight ${isMobile ? "text-xl" : ""}`}>
             Olá {user?.nome || 'Representante'}
           </h1>
-          <p className={`text-muted-foreground ${isMobile ? "text-sm" : ""}`}>
+          <p className={`text-muted-foreground text-sm ${isMobile ? "mt-1" : ""}`}>
             {isMobile ? (
               <>Gerenciando: {user?.nomeCondominio || 'Condomínio'}</>
             ) : (
