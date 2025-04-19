@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
@@ -246,7 +245,7 @@ const LandingPage = () => {
   
   useEffect(() => {
     if (!isLoading) {
-      if (plans && plans.length > 0) {
+      if (plans.length > 0) {
         setActivePlans(plans);
       } else {
         setActivePlans([

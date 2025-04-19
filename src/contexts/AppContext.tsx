@@ -49,8 +49,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Ensure that we're exporting the AppProvider as a React component
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -289,6 +288,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Check if manager exists but is inactive
   const checkInactiveManager = async (emailOrMatricula: string, password: string) => {
     try {
       // Check by email
@@ -368,9 +368,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AppContext.Provider>
   );
-}
+};
 
-// Make sure useApp is defined correctly
 export const useApp = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
