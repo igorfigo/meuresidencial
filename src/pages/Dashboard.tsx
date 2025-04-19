@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { formatToBRL, BRLToNumber } from '@/utils/currency';
 import { useFinances } from '@/hooks/use-finances';
@@ -850,6 +851,7 @@ const Dashboard = () => {
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle className="text-xl">{latestNews.title}</DialogTitle>
+              <DialogDescription className="sr-only">Detalhes da notícia</DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-3">
               {latestNews.full_content && renderContent(latestNews.full_content)}
