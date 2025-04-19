@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -48,7 +49,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -287,6 +288,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Check if manager exists but is inactive
   const checkInactiveManager = async (emailOrMatricula: string, password: string) => {
     try {
       // Check by email
@@ -366,7 +368,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AppContext.Provider>
   );
-}
+};
 
 export const useApp = () => {
   const context = useContext(AppContext);
