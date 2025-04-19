@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -74,7 +73,7 @@ const FaleConosco = () => {
   };
 
   // Custom top bar content for mobile
-  const mobileTopBarContent = (
+  const mobileTopBarContent = isMobile ? (
     <div className="flex items-center">
       <Button
         variant="ghost"
@@ -86,10 +85,10 @@ const FaleConosco = () => {
       </Button>
       <h1 className="text-xl font-semibold truncate">Fale Conosco</h1>
     </div>
-  );
+  ) : undefined;
   
   return (
-    <DashboardLayout mobileTopBarContent={isMobile ? mobileTopBarContent : undefined}>
+    <DashboardLayout mobileTopBarContent={mobileTopBarContent}>
       <div className={`container mx-auto py-${isMobile ? '4' : '6'} ${isMobile ? 'px-2' : 'max-w-3xl'}`}>
         {!isMobile && (
           <>

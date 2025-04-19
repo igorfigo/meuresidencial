@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { SwitchCondominium } from './ui/switch-condominium';
@@ -5,10 +6,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { LogOut, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
-import { Sidebar } from './Sidebar';
+import { Sidebar } from './ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+const DashboardLayout = ({ children, mobileTopBarContent }: { 
+  children: React.ReactNode;
+  mobileTopBarContent?: React.ReactNode;
+}) => {
   const { user, logout, switchCondominium } = useApp();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -54,6 +58,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <div>
             {/* Mobile menu button already handled above */}
+            {mobileTopBarContent && (
+              <div>{mobileTopBarContent}</div>
+            )}
           </div>
           <div className="flex items-center">
             <Button variant="ghost" size="icon" onClick={logout}>
