@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -48,6 +49,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// Ensure that we're exporting the AppProvider as a React component
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -368,6 +370,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Make sure useApp is defined correctly
 export const useApp = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
