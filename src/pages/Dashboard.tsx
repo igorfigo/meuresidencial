@@ -845,7 +845,7 @@ const Dashboard = () => {
         )}
       </div>
       
-      {user?.isAdmin && newsDialogOpen && latestNews && (
+      {newsDialogOpen && latestNews && (
         <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
