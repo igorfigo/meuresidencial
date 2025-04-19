@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -411,8 +410,12 @@ const Dashboard = () => {
     if (user?.isAdmin) {
       return (
         <>
-          <h1 className="text-3xl font-bold tracking-tight">Olá, {user.nome}</h1>
-          <p className="text-muted-foreground">Aqui está seu Dashboard Gerencial.</p>
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold tracking-tight">Olá, {user.nome}</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Você está no Dashboard Gerencial
+            </p>
+          </div>
         </>
       );
     } else if (user?.isResident) {
