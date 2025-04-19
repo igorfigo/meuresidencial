@@ -1,0 +1,49 @@
+
+{
+  "name": "Meu Residencial - Gestão de Condomínios",
+  "short_name": "MeuResidencial",
+  "description": "Sistema para Gestão de Condomínios - Gestão Financeira, Comunicados, Reservas, etc...",
+  "start_url": "/login",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#103381",
+  "icons": [
+    {
+      "src": "/lovable-uploads/e14c91d4-7977-4bf3-b197-04e6f56dfed2.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/lovable-uploads/e14c91d4-7977-4bf3-b197-04e6f56dfed2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Login Síndico",
+      "short_name": "Síndico",
+      "description": "Acesse como síndico",
+      "url": "/login?tab=manager",
+      "icons": [
+        {
+          "src": "/lovable-uploads/e14c91d4-7977-4bf3-b197-04e6f56dfed2.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Login Morador",
+      "short_name": "Morador",
+      "description": "Acesse como morador",
+      "url": "/login?tab=resident",
+      "icons": [
+        {
+          "src": "/lovable-uploads/e14c91d4-7977-4bf3-b197-04e6f56dfed2.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}
