@@ -26,6 +26,7 @@ import { usePlans } from '@/hooks/use-plans';
 import PlanDistributionChart from '@/components/dashboard/PlanDistributionChart';
 import ReactMarkdown from 'react-markdown';
 import { useManagerStats } from '@/hooks/use-manager-stats';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LocationStats {
   states: [string, number][];
@@ -67,6 +68,7 @@ const Dashboard = () => {
   const { balance, recentTransactions, isLoading: isFinancesLoading } = useFinances();
   const [unitStatusData, setUnitStatusData] = useState<any[]>([]);
   const { plans } = usePlans();
+  const isMobile = useIsMobile();
   
   const [stats, setStats] = useState<DashboardStats>({
     activeManagers: 0,
@@ -410,12 +412,8 @@ const Dashboard = () => {
     if (user?.isAdmin) {
       return (
         <>
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-bold tracking-tight">Olá, {user.nome}</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Você está no Dashboard Gerencial
-            </p>
-          </div>
+          <h1 className="text-3xl font-bold tracking-tight">Olá, {user.nome}</h1>
+          <p className="text-muted-foreground">Aqui está seu Dashboard Gerencial.</p>
         </>
       );
     } else if (user?.isResident) {
@@ -432,11 +430,15 @@ const Dashboard = () => {
     } else {
       return (
         <>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className={`text-3xl font-bold tracking-tight ${isMobile ? "text-xl" : ""}`}>
             Olá {user?.nome || 'Representante'}
           </h1>
-          <p className="text-muted-foreground">
-            Você está gerenciando o {user?.nomeCondominio || 'Condomínio'}
+          <p className={`text-muted-foreground ${isMobile ? "text-sm" : ""}`}>
+            {isMobile ? (
+              <>Gerenciando: {user?.nomeCondominio || 'Condomínio'}</>
+            ) : (
+              <>Você está gerenciando o {user?.nomeCondominio || 'Condomínio'}</>
+            )}
           </p>
         </>
       );
@@ -671,6 +673,22 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {newsDialogOpen && latestNews && (
+        <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-xl">{latestNews.title}</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4 space-y-3">
+              {latestNews.full_content && renderContent(latestNews.full_content)}
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              Publicado em: {formatDate(latestNews.created_at)}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 
@@ -830,6 +848,22 @@ const Dashboard = () => {
           renderManagerDashboard()
         )}
       </div>
+      
+      {user?.isAdmin && newsDialogOpen && latestNews && (
+        <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-xl">{latestNews.title}</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4 space-y-3">
+              {latestNews.full_content && renderContent(latestNews.full_content)}
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              Publicado em: {formatDate(latestNews.created_at)}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </DashboardLayout>
   );
 };
