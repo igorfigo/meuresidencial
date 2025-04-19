@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -110,24 +111,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return { success: true };
       }
       
-      const { data: emailData, error: emailError } = await supabase
+      // Fix for TypeScript errors - properly handle the responses and check data existence
+      const emailResponse = await supabase
         .from('condominiums')
         .select('*')
         .eq('emaillegal', emailOrMatricula.toLowerCase())
         .eq('senha', password);
       
-      if (emailError) {
-        console.error("Erro ao verificar credenciais por email:", emailError);
+      if (emailResponse.error) {
+        console.error("Erro ao verificar credenciais por email:", emailResponse.error);
       }
       
-      const { data: matriculaData, error: matriculaError } = await supabase
+      const matriculaResponse = await supabase
         .from('condominiums')
         .select('*')
         .eq('matricula', emailOrMatricula)
         .eq('senha', password);
       
-      if (matriculaError) {
-        console.error("Erro ao verificar credenciais por matrícula:", matriculaError);
+      if (matriculaResponse.error) {
+        console.error("Erro ao verificar credenciais por matrícula:", matriculaResponse.error);
       }
       
       const inactiveCheck = await checkInactiveManager(emailOrMatricula, password);
@@ -136,8 +138,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return { success: false, inactive: true };
       }
       
-      const emailDataArray = emailData || [];
-      const matriculaDataArray = matriculaData || [];
+      const emailDataArray = emailResponse.data || [];
+      const matriculaDataArray = matriculaResponse.data || [];
       const allCondominiums = [...emailDataArray, ...matriculaDataArray];
       
       const typedCondominiums = allCondominiums as Array<{
@@ -190,36 +192,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return { success: true };
       }
       
-      const { data: residents, error: residentError } = await supabase
+      // Fix for TypeScript errors - properly handle the response and check data existence
+      const residentResponse = await supabase
         .from('residents')
         .select('*')
         .eq('email', emailOrMatricula.toLowerCase())
         .eq('cpf', password);
       
-      if (residentError) {
-        console.error("Erro ao verificar credenciais de morador:", residentError);
+      if (residentResponse.error) {
+        console.error("Erro ao verificar credenciais de morador:", residentResponse.error);
       }
       
-      if (residents && residents.length > 0) {
-        const resident = residents[0];
+      if (residentResponse.data && residentResponse.data.length > 0) {
+        const resident = residentResponse.data[0];
         
-        const { data: condoData, error: condoError } = await supabase
+        // Fix for TypeScript errors - properly handle the response and check data existence
+        const condoResponse = await supabase
           .from('condominiums')
           .select('*')
           .eq('matricula', resident.matricula)
           .eq('ativo', true)
           .single();
         
-        if (condoError) {
-          console.error("Erro ao obter dados do condomínio do morador:", condoError);
+        if (condoResponse.error) {
+          console.error("Erro ao obter dados do condomínio do morador:", condoResponse.error);
           toast.error("Não foi possível obter os dados do condomínio associado a este morador.");
           return { success: false };
         }
         
-        if (!condoData) {
+        if (!condoResponse.data) {
           toast.error("Condomínio não encontrado ou inativo.");
           return { success: false };
         }
+        
+        const condoData = condoResponse.data;
         
         const residentUser = {
           nome: resident.nome_completo,
@@ -267,14 +273,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const checkInactiveManager = async (emailOrMatricula: string, password: string) => {
     try {
-      const inactiveEmailData = await supabase
+      const inactiveEmailResponse = await supabase
         .from('condominiums')
         .select('*')
         .eq('emaillegal', emailOrMatricula.toLowerCase())
         .eq('senha', password)
         .eq('ativo', false);
         
-      const inactiveMatriculaData = await supabase
+      const inactiveMatriculaResponse = await supabase
         .from('condominiums')
         .select('*')
         .eq('matricula', emailOrMatricula)
@@ -282,8 +288,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .eq('ativo', false);
         
       const hasInactiveAccount = 
-        (inactiveEmailData && inactiveEmailData.length > 0) || 
-        (inactiveMatriculaData && inactiveMatriculaData.length > 0);
+        (inactiveEmailResponse.data && inactiveEmailResponse.data.length > 0) || 
+        (inactiveMatriculaResponse.data && inactiveMatriculaResponse.data.length > 0);
         
       return { inactive: hasInactiveAccount };
     } catch (error) {
