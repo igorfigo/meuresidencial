@@ -28,5 +28,24 @@ registerServiceWorker().then((registration) => {
   }
 });
 
-// Render the app
-createRoot(document.getElementById("root")!).render(<App />);
+// Create a stable DOM node
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Root element not found');
+
+const root = createRoot(rootElement);
+
+// Render with error boundary
+try {
+  root.render(<App />);
+} catch (error) {
+  console.error('Error rendering application:', error);
+  root.render(
+    <div className="p-4 text-red-600">
+      <h1 className="text-xl font-bold">Error Loading Application</h1>
+      <p>Something went wrong while loading the app. Please refresh the page and try again.</p>
+      <pre className="mt-4 bg-gray-100 p-2 rounded text-sm overflow-auto">
+        {error instanceof Error ? error.message : String(error)}
+      </pre>
+    </div>
+  );
+}

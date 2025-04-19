@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
@@ -288,7 +287,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Check if manager exists but is inactive
   const checkInactiveManager = async (emailOrMatricula: string, password: string) => {
     try {
       // Check by email
