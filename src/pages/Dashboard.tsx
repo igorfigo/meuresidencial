@@ -471,7 +471,7 @@ const Dashboard = () => {
       'produtos': 'Produtos',
       'imposto': 'Imposto',
       'seguranca': 'Segurança',
-      'sistema_condominio': 'Sistema Condomínio',
+      'sistema_condominio': 'Sistema Condom��nio',
       'outros_despesa': 'Outros (Despesa)'
     };
     
