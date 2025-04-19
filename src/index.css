@@ -5,10 +5,6 @@
 @tailwind utilities;
 
 @layer base {
-  html, body {
-    background-color: #103381;
-  }
-
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 0%;
