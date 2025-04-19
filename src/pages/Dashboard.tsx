@@ -434,7 +434,7 @@ const Dashboard = () => {
             Olá {user?.nome || 'Representante'}
           </h1>
           <p className={`text-muted-foreground text-sm ${isMobile ? "mt-1 text-sm" : ""}`}>
-            {isMobile ? user?.nomeCondominio || 'Condomínio' : `Você está gerenciando o ${user?.nomeCondominio || 'Condomínio'}`}
+            {user?.nomeCondominio || 'Condomínio'}
           </p>
         </div>
       );
