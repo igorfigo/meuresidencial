@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Building, Eye, EyeOff, Lock, Mail, Users, AlertCircle, Wallet, Calendar, Bell } from 'lucide-react';
+import { Building, Eye, EyeOff, Lock, Mail, Users, Wallet, Calendar, Bell, AlertCircle } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,7 +17,6 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
-import { registerServiceWorker, setupInstallPrompt, isAppInstalled, checkForUpdates } from '@/utils/pwa';
 
 const SUPABASE_URL = "https://kcbvdcacgbwigefwacrk.supabase.co";
 const EMAIL_STORAGE_KEY = "meuResidencial_remembered_email";
@@ -31,80 +30,13 @@ const Login = () => {
   const [rememberEmail, setRememberEmail] = useState(false);
   const { login } = useApp();
   const navigate = useNavigate();
-  
-  const urlParams = new URLSearchParams(window.location.search);
-  const tabParam = urlParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tabParam === 'resident' ? 'resident' : 'manager');
+  const [activeTab, setActiveTab] = useState('manager');
   
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoverySending, setRecoverySending] = useState(false);
   const [recoverySuccess, setRecoverySuccess] = useState(false);
   const [recoveryError, setRecoveryError] = useState('');
-  
-  const [canInstall, setCanInstall] = useState(false);
-  const [promptInstall, setPromptInstall] = useState<(() => Promise<boolean>) | null>(null);
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [isAppInstalledState, setIsAppInstalledState] = useState(false);
-  const [pwaUpdateAvailable, setPwaUpdateAvailable] = useState(false);
-
-  useEffect(() => {
-    const setupPwa = async () => {
-      const registration = await registerServiceWorker();
-      
-      if (registration) {
-        registration.addEventListener('updatefound', () => {
-          const installingWorker = registration.installing;
-          if (installingWorker) {
-            installingWorker.addEventListener('statechange', () => {
-              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                setPwaUpdateAvailable(true);
-              }
-            });
-          }
-        });
-      }
-
-      const installFunc = setupInstallPrompt();
-      setPromptInstall(() => installFunc);
-      
-      setIsAppInstalledState(isAppInstalled());
-    };
-
-    setupPwa();
-
-    if (activeTab) {
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.set('tab', activeTab);
-      window.history.replaceState({}, '', newUrl.toString());
-    }
-
-    const handleOnlineStatusChange = () => {
-      setIsOffline(!navigator.onLine);
-      if (navigator.onLine) {
-        toast.success('Conexão restaurada');
-        checkForUpdates();
-      } else {
-        toast.warning('Modo offline ativado');
-      }
-    };
-
-    window.addEventListener('online', handleOnlineStatusChange);
-    window.addEventListener('offline', handleOnlineStatusChange);
-    
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-    const handleDisplayModeChange = (e: MediaQueryListEvent) => {
-      setIsAppInstalledState(e.matches);
-    };
-    
-    mediaQuery.addEventListener('change', handleDisplayModeChange);
-
-    return () => {
-      window.removeEventListener('online', handleOnlineStatusChange);
-      window.removeEventListener('offline', handleOnlineStatusChange);
-      mediaQuery.removeEventListener('change', handleDisplayModeChange);
-    };
-  }, [activeTab]);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
@@ -129,12 +61,6 @@ const Login = () => {
     
     setLoading(true);
     setInactiveAccount(false);
-    
-    if (isOffline) {
-      toast.warning('Você está offline. Verificação de login limitada.');
-      return;
-    }
-    
     const result = await login(identifier, password);
     
     if (result.success) {
@@ -150,11 +76,6 @@ const Login = () => {
     e.preventDefault();
     if (!recoveryEmail.trim()) {
       setRecoveryError('Por favor, insira seu email ou matrícula');
-      return;
-    }
-    
-    if (isOffline) {
-      toast.error('Esta função requer conexão com internet');
       return;
     }
     
@@ -200,65 +121,23 @@ const Login = () => {
     setRecoveryError('');
     setRecoverySuccess(false);
   };
-  
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    const newUrl = new URL(window.location.href);
-    newUrl.searchParams.set('tab', value);
-    window.history.replaceState({}, '', newUrl.toString());
-  };
-  
-  const handleInstallClick = async () => {
-    if (promptInstall) {
-      const installed = await promptInstall();
-      if (installed) {
-        toast.success('Aplicativo instalado com sucesso!');
-        setCanInstall(false);
-      }
-    }
-  };
-  
-  const handleUpdateClick = () => {
-    window.location.reload();
-  };
 
   return (
-    <div className="min-h-screen flex flex-col sm:flex-row h-screen w-screen">
-      <div className="sm:w-1/2 flex flex-col justify-center items-center p-8 sm:p-16 animate-fade-in bg-[#103381] text-white h-full">
+    <div className="min-h-screen flex flex-col sm:flex-row bg-gradient-to-br from-blue-50 to-indigo-100 h-screen w-screen">
+      <div className="sm:w-1/2 flex flex-col justify-center items-center p-8 sm:p-16 animate-fade-in bg-brand-700 text-white h-full">
         <div className="max-w-md w-full">
           <div className="mb-8 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start mb-4">
               <Building className="h-8 w-8 text-white" />
               <h1 className="text-3xl font-bold text-white ml-2 font-display">MeuResidencial</h1>
             </div>
+            <h2 className="text-2xl font-semibold text-white mb-1">Seja bem-vindo!</h2>
           </div>
           
-          {isOffline && (
-            <Alert variant="default" className="mb-4 bg-amber-400/20 text-amber-50">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Modo Offline</AlertTitle>
-              <AlertDescription>
-                Você está navegando no modo offline. Algumas funcionalidades podem estar limitadas.
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mb-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
             <TabsList className="grid w-full grid-cols-2 bg-brand-800/40">
-              <TabsTrigger 
-                value="manager" 
-                className="flex items-center gap-2 data-[state=active]:bg-brand-600 data-[state=active]:text-white"
-              >
-                <Users className="h-4 w-4" />
-                Síndico
-              </TabsTrigger>
-              <TabsTrigger 
-                value="resident" 
-                className="flex items-center gap-2 data-[state=active]:bg-brand-600 data-[state=active]:text-white"
-              >
-                <Building className="h-4 w-4" />
-                Morador
-              </TabsTrigger>
+              <TabsTrigger value="manager" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Síndico</TabsTrigger>
+              <TabsTrigger value="resident" className="data-[state=active]:bg-brand-600 data-[state=active]:text-white">Morador</TabsTrigger>
             </TabsList>
             
             <TabsContent value="manager">
@@ -271,6 +150,10 @@ const Login = () => {
                   </AlertDescription>
                 </Alert>
               )}
+            </TabsContent>
+            
+            <TabsContent value="resident">
+              {/* Alert removed as requested */}
             </TabsContent>
           </Tabs>
           
@@ -299,6 +182,18 @@ const Login = () => {
                 <Label htmlFor="password" className="text-white">
                   {activeTab === 'manager' ? 'Senha' : 'CPF (Senha)'}
                 </Label>
+                {activeTab === 'manager' && (
+                  <button 
+                    type="button"
+                    className="text-xs text-blue-200 hover:text-white hover:underline"
+                    onClick={() => {
+                      resetRecoveryState();
+                      setForgotPasswordOpen(true);
+                    }}
+                  >
+                    Esqueceu a senha?
+                  </button>
+                )}
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-brand-800" />
@@ -350,17 +245,8 @@ const Login = () => {
             
             <div className="text-center mt-4">
               <p className="text-white text-sm">
-                <button 
-                  onClick={() => setForgotPasswordOpen(true)} 
-                  className="text-blue-200 hover:text-white hover:underline mr-2"
-                >
-                  Esqueci a senha
-                </button>
-                | 
-                <Link 
-                  to="/" 
-                  className="text-blue-200 hover:text-white hover:underline ml-2"
-                >
+                Não tem uma conta? {" "}
+                <Link to="/" className="text-blue-200 hover:text-white hover:underline">
                   Criar Conta
                 </Link>
               </p>
@@ -369,48 +255,48 @@ const Login = () => {
         </div>
       </div>
       
-      <div className="hidden sm:flex sm:w-1/2 bg-white text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
+      <div className="hidden sm:flex sm:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800 flex-col justify-center items-center p-16 relative overflow-hidden h-full">
         <div className="relative z-10 max-w-lg text-center">
-          <h2 className="text-4xl font-bold mb-6 font-display text-[#2151B9]">Gerencie seu condomínio com facilidade</h2>
-          <p className="text-lg text-[#295AC3] mb-8">
+          <h2 className="text-4xl font-bold mb-6 font-display text-brand-800">Gerencie seu condomínio com facilidade</h2>
+          <p className="text-lg text-brand-700 mb-8">
             Uma plataforma completa para síndicos profissionais administrarem 
             condomínios de forma eficiente e moderna.
           </p>
           <div className="grid grid-cols-2 gap-4 text-left">
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-[#2151B9]/20 p-1">
-                <Users className="h-4 w-4 text-[#2151B9]" />
+              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
+                <Users className="h-4 w-4 text-brand-700" />
               </div>
               <div>
-                <h3 className="font-medium text-[#103381]">Gestão de moradores</h3>
-                <p className="text-sm text-[#295AC3]">Cadastro e comunicação eficiente</p>
+                <h3 className="font-medium text-brand-800">Gestão de moradores</h3>
+                <p className="text-sm text-brand-600">Cadastro e comunicação eficiente</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-[#2151B9]/20 p-1">
-                <Wallet className="h-4 w-4 text-[#2151B9]" />
+              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
+                <Wallet className="h-4 w-4 text-brand-700" />
               </div>
               <div>
-                <h3 className="font-medium text-[#103381]">Controle financeiro</h3>
-                <p className="text-sm text-[#295AC3]">Gestão de despesas e receitas</p>
+                <h3 className="font-medium text-brand-800">Controle financeiro</h3>
+                <p className="text-sm text-brand-600">Gestão de despesas e receitas</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-[#2151B9]/20 p-1">
-                <Calendar className="h-4 w-4 text-[#2151B9]" />
+              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
+                <Calendar className="h-4 w-4 text-brand-700" />
               </div>
               <div>
-                <h3 className="font-medium text-[#103381]">Agendamentos</h3>
-                <p className="text-sm text-[#295AC3]">Áreas comuns e manutenções</p>
+                <h3 className="font-medium text-brand-800">Agendamentos</h3>
+                <p className="text-sm text-brand-600">Áreas comuns e manutenções</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">
-              <div className="mt-1 rounded-full bg-[#2151B9]/20 p-1">
-                <Bell className="h-4 w-4 text-[#2151B9]" />
+              <div className="mt-1 rounded-full bg-brand-600/20 p-1">
+                <Bell className="h-4 w-4 text-brand-700" />
               </div>
               <div>
-                <h3 className="font-medium text-[#103381]">Notificações</h3>
-                <p className="text-sm text-[#295AC3]">Avisos e comunicados</p>
+                <h3 className="font-medium text-brand-800">Notificações</h3>
+                <p className="text-sm text-brand-600">Avisos e comunicados</p>
               </div>
             </div>
           </div>

@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -70,18 +71,19 @@ export default {
 					400: '#8a9ff9',
 					500: '#6a7ef2',
 					600: '#4d5edf',
-					700: '#2151B9',
-					800: '#103381',
+					700: '#2151B9', // Main brand color
+					800: '#103381', // Darker shade
 					900: '#0c256b',
 					950: '#040c31',
 				},
+				// Updated custom palette colors
 				custom: {
-					primary: '#103381',
-					secondary: '#103381',
-					accent: '#295AC3',
-					light: '#EFEFEF',
-					white: '#FFFFFF',
-					black: '#000000'
+					primary: '#2151B9',    // Cor Primária - para cabeçalho, rodapé e CTAs
+					secondary: '#103381',  // Cor Secundária - para elementos de destaque
+					accent: '#295AC3',     // Cor de Destaque - para hover effects
+					light: '#EFEFEF',      // Cor de Fundo - para fundo da página
+					white: '#FFFFFF',      // Cor de Contraste - para textos e seções
+					black: '#000000'       // Cor de Texto - para texto principal
 				}
 			},
 			borderRadius: {
