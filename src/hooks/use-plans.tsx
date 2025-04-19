@@ -19,7 +19,7 @@ export const usePlans = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -43,7 +43,7 @@ export const usePlans = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const getPlanValue = useCallback((codigo: string): string => {
     const plan = plans.find(p => p.codigo === codigo);
@@ -65,7 +65,7 @@ export const usePlans = () => {
 
   useEffect(() => {
     fetchPlans();
-  }, []);
+  }, [fetchPlans]);
 
   return {
     plans,
