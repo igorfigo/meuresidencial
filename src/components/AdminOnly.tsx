@@ -10,14 +10,14 @@ const AdminOnly = ({ children }: AdminOnlyProps) => {
   const { user, isAuthenticated, isLoading } = useApp();
   
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
   
-  // Verificar se o usuário é admin (ajuste de acordo com a estrutura do seu user)
+  // Check if the user is admin based on the isAdmin property
   const isAdmin = user?.isAdmin === true;
   
   if (!isAdmin) {
