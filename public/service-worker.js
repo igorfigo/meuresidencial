@@ -13,30 +13,35 @@ const INITIAL_CACHED_RESOURCES = [
 
 // Install event - pre-cache essential resources
 self.addEventListener('install', (event) => {
+  // Skip waiting to force the new service worker to activate immediately
+  self.skipWaiting();
+  
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('Service worker installing cache:', CACHE_NAME);
       return cache.addAll(INITIAL_CACHED_RESOURCES);
     })
   );
-  // Activate new service worker immediately
-  self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and take control
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(keyList.map((key) => {
-        if (key !== CACHE_NAME) {
-          console.log('Service worker removing old cache:', key);
-          return caches.delete(key);
-        }
-      }));
-    })
-  );
   // Take control of all clients immediately
-  self.clients.claim();
+  event.waitUntil(
+    Promise.all([
+      // Clean up old caches
+      caches.keys().then((keyList) => {
+        return Promise.all(keyList.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log('Service worker removing old cache:', key);
+            return caches.delete(key);
+          }
+        }));
+      }),
+      // Take control of all clients
+      self.clients.claim()
+    ])
+  );
 });
 
 // Fetch event - implement cache-first strategy with network fallback
