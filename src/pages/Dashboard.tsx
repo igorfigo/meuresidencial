@@ -429,18 +429,14 @@ const Dashboard = () => {
       );
     } else {
       return (
-        <>
+        <div className="flex flex-col">
           <h1 className={`text-2xl font-bold tracking-tight ${isMobile ? "text-xl" : ""}`}>
             Olá {user?.nome || 'Representante'}
           </h1>
-          <p className={`text-muted-foreground text-sm ${isMobile ? "mt-1" : ""}`}>
-            {isMobile ? (
-              <>Gerenciando: {user?.nomeCondominio || 'Condomínio'}</>
-            ) : (
-              <>Você está gerenciando o {user?.nomeCondominio || 'Condomínio'}</>
-            )}
+          <p className={`text-muted-foreground text-sm ${isMobile ? "mt-1 text-sm" : ""}`}>
+            {isMobile ? user?.nomeCondominio || 'Condomínio' : `Você está gerenciando o ${user?.nomeCondominio || 'Condomínio'}`}
           </p>
-        </>
+        </div>
       );
     }
   };
