@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -415,6 +414,7 @@ const Dashboard = () => {
         <>
           <h1 className="text-3xl font-bold tracking-tight">Olá, {user.nome}</h1>
           <p className="text-muted-foreground">Aqui está seu Dashboard Gerencial.</p>
+          <Separator className="my-3" />
         </>
       );
     } else if (user?.isResident) {
@@ -426,6 +426,7 @@ const Dashboard = () => {
           <p className="text-muted-foreground">
             Bem-vindo(a) ao {user?.nomeCondominio || 'Condomínio'} - Unidade {user?.unit || ''}
           </p>
+          <Separator className="my-3" />
         </>
       );
     } else {
@@ -437,6 +438,7 @@ const Dashboard = () => {
           <p className={`text-muted-foreground text-sm ${isMobile ? "mt-1 text-sm" : ""}`}>
             {isMobile ? user?.nomeCondominio || 'Condomínio' : `Você está gerenciando o ${user?.nomeCondominio || 'Condomínio'}`}
           </p>
+          <Separator className="my-3" />
         </div>
       );
     }
@@ -676,6 +678,7 @@ const Dashboard = () => {
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle className="text-xl">{latestNews.title}</DialogTitle>
+              <DialogDescription className="sr-only">Detalhes da notícia</DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-3">
               {latestNews.full_content && renderContent(latestNews.full_content)}
@@ -846,22 +849,20 @@ const Dashboard = () => {
         )}
       </div>
       
-      {newsDialogOpen && latestNews && (
-        <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="text-xl">{latestNews.title}</DialogTitle>
-              <DialogDescription className="sr-only">Detalhes da notícia</DialogDescription>
-            </DialogHeader>
-            <div className="mt-4 space-y-3">
-              {latestNews.full_content && renderContent(latestNews.full_content)}
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              Publicado em: {formatDate(latestNews.created_at)}
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <Dialog open={newsDialogOpen} onOpenChange={setNewsDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl">{latestNews?.title}</DialogTitle>
+            <DialogDescription className="sr-only">Detalhes da notícia</DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-3">
+            {latestNews?.full_content && renderContent(latestNews.full_content)}
+          </div>
+          <div className="mt-4 text-xs text-gray-500">
+            Publicado em: {latestNews ? formatDate(latestNews.created_at) : ''}
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
